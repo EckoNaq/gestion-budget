@@ -1,0 +1,2681 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Budget</title>
+<style>
+:root{
+  --bg:#F6F7F9; --surface:#FFFFFF; --surface-2:#FAFBFC; --raised:#FFFFFF;
+  --ink:#131722; --ink-2:#4A5263;
+  --ink-soft:#5A6272; --ink-mute:#8A92A3;
+  --line:#E3E6EC; --line-2:#EEF0F4;
+  --accent:#3B5BDB; --accent-soft:#EDF0FD; --accent-ink:#2A45B0;
+  --pos:#0F7A55; --pos-soft:#E6F4EE;
+  --neg:#C1272D; --neg-soft:#FBECEC;
+  --warn:#9A6700; --warn-soft:#FFF6E0;
+  --focus:#3B5BDB;
+  --radius:10px; --radius-sm:7px;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#0E1116; --surface:#161A22; --surface-2:#1B2029; --raised:#1E242E;
+  --ink:#E7EAF0; --ink-2:#B7BECD; --ink-soft:#98A1B2; --ink-mute:#78808F;
+  --line:#272D38; --line-2:#20262F;
+  --accent:#7C93F5; --accent-soft:#1C2440; --accent-ink:#A8B8FF;
+  --pos:#3FBF8F; --pos-soft:#12301F;
+  --neg:#F4726F; --neg-soft:#331A1C;
+  --warn:#E0B04A; --warn-soft:#2E2611;
+  --focus:#7C93F5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--sans);
+  font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:4px}
+::selection{background:var(--accent-soft)}
+
+/* ---------- typography utilities ---------- */
+.eyebrow{font-size:10.5px;font-weight:650;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-mute)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.01em}
+h1{font-size:19px}
+h2{font-size:14.5px}
+h3{font-size:13px}
+.muted{color:var(--ink-soft)}
+.tiny{font-size:12px}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:212px minmax(0,1fr);min-height:100vh}
+.rail{
+  border-right:1px solid var(--line); background:var(--surface);
+  padding:18px 14px; position:sticky; top:0; height:100vh; overflow:auto;
+  display:flex; flex-direction:column; gap:18px;
+}
+.brand{display:flex;align-items:baseline;gap:8px;padding:0 6px 2px}
+.brand b{font-size:17px;font-weight:660;letter-spacing:-.02em}
+.brand span{font-size:11px;color:var(--ink-mute)}
+.navgroup{display:flex;flex-direction:column;gap:1px}
+.navbtn{
+  display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+  background:none;border:0;padding:7px 8px;border-radius:var(--radius-sm);
+  color:var(--ink-2);cursor:pointer;font-size:13.5px;font-weight:500;
+}
+.navbtn:hover{background:var(--surface-2);color:var(--ink)}
+.navbtn.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.navbtn .badge{margin-left:auto;font-size:11px;font-weight:700;background:var(--warn-soft);color:var(--warn);padding:1px 6px;border-radius:20px}
+.navbtn svg{flex:none;opacity:.85}
+.railfoot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+
+.main{padding:22px 26px 60px;max-width:1220px;width:100%}
+.topbar{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.periodnav{display:flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:2px}
+.periodnav button{background:none;border:0;padding:5px 9px;border-radius:5px;cursor:pointer;color:var(--ink-2);display:flex;align-items:center}
+.periodnav button:hover{background:var(--surface-2);color:var(--ink)}
+.periodnav .label{padding:4px 10px;font-weight:620;min-width:132px;text-align:center;font-size:13.5px}
+.spacer{flex:1}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:var(--radius-sm);
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
+  font-size:13px;font-weight:550;transition:background .12s,border-color .12s;
+}
+.btn:hover{background:var(--surface-2);border-color:var(--ink-mute)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.sm{padding:4px 9px;font-size:12.5px;gap:5px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--surface-2);border-color:var(--line)}
+.btn.danger{color:var(--neg);border-color:var(--line)}
+.btn.danger:hover{background:var(--neg-soft);border-color:var(--neg)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn svg{flex:none}
+
+/* ---------- cards / layout ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+.card>.chead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.card>.chead .spacer{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1080px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.kpis.k5{grid-template-columns:repeat(5,1fr)}
+.kpi{background:var(--surface);padding:14px 16px;min-width:0}
+.kpi .v{font-size:22px;font-weight:600;margin-top:5px;letter-spacing:-.02em}
+.kpis.k5 .kpi .v{font-size:20px}
+.kpi .s{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kpi .s{font-size:12px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:5px}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+
+/* ---------- comparison strip (signature) ---------- */
+.cmp{display:flex;flex-direction:column}
+.cmprow{display:grid;grid-template-columns:172px 96px 84px 1fr 130px;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line-2)}
+.cmprow:first-child{border-top:0}
+.cmpname{display:flex;align-items:center;gap:8px;min-width:0}
+.cmpname .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:520}
+.cmpdelta{display:flex;align-items:center;gap:5px;font-weight:620;font-size:13px}
+.track{position:relative;height:22px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line-2);overflow:hidden}
+.track .band{position:absolute;top:0;bottom:0;background:var(--line);opacity:.75}
+.track .zero{position:absolute;top:0;bottom:0;width:1px;background:var(--ink-mute);opacity:.5}
+.track .fill{position:absolute;top:4px;bottom:4px;border-radius:2px}
+.track .fill.over{background:var(--neg)}
+.track .fill.under{background:var(--pos)}
+.track .fill.flat{background:var(--ink-mute)}
+.cmpprev{text-align:right;font-size:12px;color:var(--ink-soft)}
+.legendline{display:flex;gap:16px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-soft);flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px}
+.chip .sw{width:11px;height:11px;border-radius:3px;flex:none}
+
+/* ---------- category rows ---------- */
+.catrow{display:grid;grid-template-columns:26px 1fr 108px 74px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line-2);cursor:pointer}
+.catrow:first-of-type{border-top:0}
+.catrow:hover{background:var(--surface-2)}
+.catrow .bar{height:6px;border-radius:3px;background:var(--line-2);overflow:hidden;margin-top:4px}
+.catrow .bar>i{display:block;height:100%;border-radius:3px}
+.icon-badge{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;flex:none}
+.icon-badge svg{width:14px;height:14px}
+.subrow{display:grid;grid-template-columns:1fr 100px 70px;gap:10px;padding:4px 0 4px 36px;font-size:13px;color:var(--ink-2);border-top:1px solid var(--line-2)}
+
+/* ---------- operations table ---------- */
+.ops{width:100%;border-collapse:collapse}
+.ops th{
+  text-align:left;font-size:10.5px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-mute);padding:0 8px 7px;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+.ops td{padding:6px 8px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.ops tr:hover td{background:var(--surface-2)}
+.ops tr.is-dup td{opacity:.62}
+.ops tr.is-ign td{opacity:.62}
+.ops .c-date{width:66px;color:var(--ink-soft);font-size:12.5px}
+.ops .c-amt{width:108px;text-align:right;font-weight:600;white-space:nowrap}
+.ops .c-cat{width:200px}
+.ops .c-imp{width:104px}
+.ops .c-act{width:96px;text-align:right;white-space:nowrap}
+.merchant{font-weight:550}
+.rawlabel{font-size:11.5px;color:var(--ink-mute);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px;display:block}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface-2);white-space:nowrap}
+.tag.dup{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.tag.ign{background:var(--accent-soft);color:var(--accent-ink);border-color:transparent}
+.tag.todo{background:var(--neg-soft);color:var(--neg);border-color:transparent}
+.selcat{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 6px;font-size:12.5px;max-width:100%}
+.catbtn{border:1px solid transparent;background:var(--surface-2);border-radius:6px;padding:3px 8px;font-size:12.5px;cursor:pointer;color:var(--ink-2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.catbtn:hover{border-color:var(--line);color:var(--ink)}
+.catbtn.none{color:var(--neg);background:var(--neg-soft)}
+.kpi .v.warn{color:var(--warn)}
+.iconbtn{border:1px solid transparent;background:none;border-radius:6px;padding:3px;cursor:pointer;color:var(--ink-mute);display:inline-flex}
+.iconbtn:hover{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.iconbtn.danger:hover{color:var(--neg);border-color:var(--neg)}
+
+/* ---------- controls ---------- */
+.controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.check{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.check input{accent-color:var(--accent);width:14px;height:14px;margin:0}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11.5px;font-weight:600;color:var(--ink-soft)}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  border:1px solid var(--line);background:var(--surface);border-radius:var(--radius-sm);
+  padding:6px 9px;color:var(--ink);
+}
+input[type=number]{font-family:var(--mono);text-align:right}
+textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:12px}
+
+/* ---------- misc ---------- */
+.empty{padding:34px 16px;text-align:center;color:var(--ink-soft);border:1px dashed var(--line);border-radius:var(--radius)}
+.empty b{display:block;color:var(--ink);margin-bottom:5px;font-size:14px}
+.note{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:9px 12px;font-size:12.5px;color:var(--ink-2)}
+.note.warn{border-left-color:var(--warn)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:8px}
+.barcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;cursor:pointer;min-width:0}
+.barcol .stack{width:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:120px}
+.barcol i{display:block;border-radius:3px 3px 0 0;min-height:2px}
+.barcol .lb{font-size:10.5px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.05em}
+.barcol.on .lb{color:var(--accent-ink);font-weight:700}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:13px;font-weight:550;z-index:90;box-shadow:0 6px 24px -8px rgba(0,0,0,.4)}
+.modal-back{position:fixed;inset:0;background:rgba(15,18,24,.42);display:grid;place-items:start center;padding:36px 16px;overflow:auto;z-index:80}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;width:100%;max-width:760px;padding:22px 24px;box-shadow:0 24px 60px -20px rgba(0,0,0,.35)}
+.modal.wide{max-width:1000px}
+.modal .mhead{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.modal .mhead .spacer{flex:1}
+.steps{display:flex;gap:6px;margin-bottom:16px}
+.step{flex:1;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--line);font-size:12px;color:var(--ink-mute);background:var(--surface-2)}
+.step.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:620}
+.step.done{color:var(--pos);border-color:var(--line)}
+.drop{border:1.5px dashed var(--line);border-radius:var(--radius);padding:28px;text-align:center;color:var(--ink-soft);background:var(--surface-2)}
+.drop.hot{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.maptable{width:100%;border-collapse:collapse;font-size:13px}
+.maptable th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);padding:0 8px 6px;border-bottom:1px solid var(--line)}
+.maptable td{padding:5px 8px;border-bottom:1px solid var(--line-2)}
+.scroll{max-height:400px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius-sm)}
+.hbar{height:9px;border-radius:5px;background:var(--line-2);overflow:hidden;display:flex}
+.hbar i{display:block;height:100%}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--ink-2)}
+.pill.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.incgrid{width:100%;border-collapse:collapse;font-size:13px}
+.incgrid th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-mute);padding:0 6px 6px;text-align:right}
+.incgrid th:first-child{text-align:left}
+.incgrid td{padding:3px 6px;border-top:1px solid var(--line-2)}
+.incgrid input{width:104px;padding:4px 7px}
+
+/* ---------- category tag ---------- */
+.tag-cat{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:560;padding:2px 8px 2px 5px;border-radius:20px;
+  border:1px solid transparent;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
+.tag-cat svg{flex:none;opacity:.9}
+.tag-cat:hover{filter:brightness(.96);border-color:currentColor}
+.tag-cat.none{background:var(--neg-soft);color:var(--neg);font-style:italic}
+
+/* ---------- goals ---------- */
+.goalgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:14px}
+.goal{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:var(--surface-2)}
+.goal .gh{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.goal .gh .nm{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.goal .gv{display:flex;align-items:baseline;gap:6px;margin-bottom:7px}
+.goal .gv b{font-size:19px;font-weight:640;letter-spacing:-.02em}
+.gbar{position:relative;height:10px;border-radius:5px;background:var(--line-2);overflow:hidden}
+.gbar>i{display:block;height:100%;border-radius:5px}
+.gpace{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.45;border-radius:2px}
+.gfoot{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11.5px}
+.state-ok{color:var(--pos)} .state-watch{color:var(--warn)} .state-over{color:var(--neg)}
+.bg-ok{background:var(--pos)} .bg-watch{background:var(--warn)} .bg-over{background:var(--neg)}
+
+/* ---------- comparison ---------- */
+.cmprow{display:grid;grid-template-columns:210px 104px 92px 1fr 132px;gap:12px;align-items:center;padding:8px 10px;border-top:1px solid var(--line-2);border-radius:7px}
+.cmprow.over{background:linear-gradient(90deg,var(--neg-soft),transparent 62%)}
+.cmprow.under{background:linear-gradient(90deg,var(--pos-soft),transparent 62%)}
+.cmprow.over .nm{color:var(--neg);font-weight:640}
+.cmprow.under .nm{color:var(--pos);font-weight:640}
+
+/* ---------- drill-down ---------- */
+.merchrow{display:grid;grid-template-columns:1fr 62px 104px;gap:10px;padding:4px 0 4px 52px;font-size:12.5px;border-top:1px dashed var(--line-2);color:var(--ink-2)}
+.warn-txt{color:var(--warn)}
+.basegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.basegrid>div{background:var(--surface-2);padding:12px 14px}
+.basegrid .v{font-size:20px;font-weight:600;margin:4px 0 2px;letter-spacing:-.02em}
+.fixlist{display:flex;flex-direction:column}
+.fixrow{display:grid;grid-template-columns:26px 1fr 190px 150px 96px 78px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line-2);font-size:13px}
+.fixrow:first-child{border-top:0}
+.fixrow:hover{background:var(--surface-2)}
+.fixrow .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:560}
+.fixrow.off{opacity:.62}
+.fixrow.off .nm{text-decoration:line-through;text-decoration-thickness:1px}
+.subrow.open{background:var(--surface-2)}
+.subrow{cursor:pointer}
+.subrow:hover{background:var(--surface-2)}
+
+/* ---------- review (tri des opérations) ---------- */
+.rev{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--surface-2);transition:transform .28s ease,opacity .28s ease}
+.rev.out-right{transform:translateX(90px) rotate(2.5deg);opacity:0}
+.rev.out-left{transform:translateX(-90px) rotate(-2.5deg);opacity:0}
+.rev .rdate{font-size:12px;color:var(--ink-mute);letter-spacing:.02em}
+.rev .rmerch{font-size:21px;font-weight:640;letter-spacing:-.02em;margin:3px 0 2px;text-transform:capitalize}
+.rev .rlabel{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);word-break:break-all}
+.rev .ramt{font-size:30px;font-weight:640;letter-spacing:-.03em;margin:10px 0 4px}
+.progress{height:5px;border-radius:3px;background:var(--line-2);overflow:hidden;margin-bottom:6px}
+.progress>i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .25s}
+.catgrid{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.catchip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:3px 10px;font-size:12.5px;cursor:pointer;color:var(--ink-2);display:inline-flex;align-items:center;gap:5px}
+.catchip:hover{border-color:var(--ink-mute)}
+.catchip.on{color:#fff;border-color:transparent;font-weight:600}
+.catchip.sugg{border-style:dashed;border-color:var(--accent)}
+.grouplab{font-size:10.5px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin:9px 0 2px}
+.kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;color:var(--ink-mute)}
+
+/* ---------- review, second pass ---------- */
+.revhead{display:flex;gap:14px;align-items:center}
+.avatar{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;font-weight:700;font-size:19px;letter-spacing:-.03em;flex:none}
+.avatar svg{width:24px;height:24px}
+.revwho{min-width:0;flex:1}
+.revamt{font-size:34px;font-weight:660;letter-spacing:-.035em;text-align:right;white-space:nowrap}
+.revwhy{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-mute);margin-top:3px}
+.revwhy svg{width:12px;height:12px}
+.pickrow{display:flex;flex-wrap:wrap;gap:6px}
+.pick{border:1.5px solid var(--line);background:var(--surface);border-radius:11px;padding:7px 11px;font-size:13px;cursor:pointer;
+  color:var(--ink);display:inline-flex;align-items:center;gap:7px;font-weight:520;transition:border-color .12s,transform .08s}
+.pick:hover{border-color:var(--ink-mute)}
+.pick:active{transform:scale(.97)}
+.pick.on{border-width:1.5px;font-weight:640}
+.pick .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.moreline{display:flex;align-items:center;gap:8px;margin:14px 0 6px}
+.moreline .hr{flex:1;height:1px;background:var(--line)}
+.moreline button{background:none;border:0;color:var(--accent-ink);font-size:12px;cursor:pointer;font-weight:600;padding:2px 6px;border-radius:5px}
+.moreline button:hover{background:var(--accent-soft)}
+.segbar{display:flex;gap:3px;margin-bottom:14px}
+.segbar i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.segbar i.done{background:var(--pos)}
+.segbar i.now{background:var(--accent)}
+.revfoot{display:flex;gap:10px;margin-top:16px;align-items:center}
+.btn.big{padding:11px 18px;font-size:14px;border-radius:10px;font-weight:620}
+.memo{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);cursor:pointer;user-select:none;
+  border:1px solid var(--line);border-radius:20px;padding:4px 11px;background:var(--surface)}
+.memo input{accent-color:var(--accent);margin:0;width:13px;height:13px}
+.memo.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.doneburst{width:64px;height:64px;border-radius:50%;background:var(--pos-soft);color:var(--pos);display:grid;place-items:center;margin:0 auto 14px}
+.doneburst svg{width:30px;height:30px}
+.similar{font-size:11.5px;color:var(--ink-mute);margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ---------- segmented switch ---------- */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--surface)}
+.seg button{padding:3px 11px;background:none;border:0;cursor:pointer;font-size:12px;color:var(--ink-2);font-family:var(--mono)}
+.seg button:hover{background:var(--surface-2)}
+.seg button.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+.cmpprev{opacity:0;transition:opacity .12s}
+.cmprow:hover .cmpprev,.cmprow:focus-within .cmpprev{opacity:1}
+
+/* ---------- misc ---------- */
+.ops thead th{position:sticky;top:0;background:var(--surface);z-index:2}
+.suggestrow td{color:var(--ink-soft)}
+.dupbox{border:1px solid var(--warn);background:var(--warn-soft);border-radius:var(--radius-sm);padding:10px 12px;margin-top:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =========================================================================
+   Budget — single-file expense tracker. All data stays in this browser.
+   ========================================================================= */
+/* ==== PURE START ==== */
+
+const STORE_KEY = "budget.app.v1";          // distinct from any other local app
+const SCHEMA_VERSION = 1;
+
+const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const MONTHS_SHORT = ["jan","fév","mar","avr","mai","jun","jui","aoû","sep","oct","nov","déc"];
+
+/* Operation status */
+const ST_OK = 0, ST_DUP = 1, ST_DUP_MAYBE = 2, ST_IGNORED = 3;
+
+/* Category kinds: how a group takes part in the numbers */
+const KIND_EXPENSE = "expense", KIND_INCOME = "income", KIND_NEUTRAL = "neutral";
+
+/* -------------------------------------------------------------------------
+   Taxonomy: groups carry the analysis, subcategories carry the detail.
+   `legacy` subcategories are kept so imported history stays exactly as it was
+   recorded, but they are never offered when categorising something new.
+   ------------------------------------------------------------------------- */
+const GROUPS = [
+  { id:"g_home",    name:"Logement",              kind:KIND_EXPENSE, color:"#3B5BDB", icon:"home"     },
+  { id:"g_car",     name:"Véhicule & transports", kind:KIND_EXPENSE, color:"#0E7C86", icon:"car"      },
+  { id:"g_food",    name:"Alimentation",          kind:KIND_EXPENSE, color:"#B0520E", icon:"cart"     },
+  { id:"g_subs",    name:"Abonnements & télécom", kind:KIND_EXPENSE, color:"#7048B6", icon:"signal"   },
+  { id:"g_health",  name:"Santé & soins",         kind:KIND_EXPENSE, color:"#1F8A4C", icon:"heart"    },
+  { id:"g_shop",    name:"Achats & équipement",   kind:KIND_EXPENSE, color:"#C2255C", icon:"bag"      },
+  { id:"g_leisure", name:"Sorties & vacances",    kind:KIND_EXPENSE, color:"#946200", icon:"ticket"   },
+  { id:"g_fees",    name:"Frais & obligations",   kind:KIND_EXPENSE, color:"#5C6270", icon:"receipt"  },
+  { id:"g_legacy",  name:"Divers (historique)",   kind:KIND_EXPENSE, color:"#8A6E5D", icon:"dots"     },
+  { id:"g_income",  name:"Revenus",               kind:KIND_INCOME,  color:"#0F7A55", icon:"income"   },
+  { id:"g_neutral", name:"Épargne & transferts",  kind:KIND_NEUTRAL, color:"#6B7280", icon:"vault"    },
+];
+
+const CATS = [
+  ["c_rent",       "g_home",    "Loyer"],
+  ["c_power",      "g_home",    "Électricité & gaz"],
+  ["c_water",      "g_home",    "Eau"],
+  ["c_homeins",    "g_home",    "Assurance habitation"],
+  ["c_homegear",   "g_home",    "Équipement & déco"],
+  ["c_works",      "g_home",    "Travaux & entretien"],
+  ["c_homemisc",   "g_home",    "Divers logement", true],
+
+  ["c_carins",     "g_car",     "Assurance auto"],
+  ["c_fuel",       "g_car",     "Carburant"],
+  ["c_carfix",     "g_car",     "Entretien & réparation"],
+  ["c_parking",    "g_car",     "Parking & péages"],
+  ["c_transit",    "g_car",     "Transports"],
+  ["c_carmisc",    "g_car",     "Divers véhicule", true],
+
+  ["c_grocery",    "g_food",    "Courses"],
+  ["c_delivery",   "g_food",    "Livraison de repas"],
+  ["c_resto",      "g_food",    "Restaurants & bars"],
+
+  ["c_internet",   "g_subs",    "Internet"],
+  ["c_mobile",     "g_subs",    "Mobile"],
+  ["c_subs",       "g_subs",    "Abonnements"],
+
+  ["c_doctor",     "g_health",  "Médecin & soins"],
+  ["c_pharmacy",   "g_health",  "Pharmacie"],
+  ["c_hair",       "g_health",  "Coiffeur & beauté"],
+  ["c_sport",      "g_health",  "Sport"],
+
+  ["c_clothes",    "g_shop",    "Vêtements"],
+  ["c_games",      "g_shop",    "Jeux & objets"],
+  ["c_tech",       "g_shop",    "High-tech"],
+  ["c_gifts",      "g_shop",    "Cadeaux"],
+
+  ["c_outings",    "g_leisure", "Sorties"],
+  ["c_holidays",   "g_leisure", "Vacances & voyages"],
+  ["c_leisuremisc","g_leisure", "Divers loisirs", true],
+
+  ["c_bankfees",   "g_fees",    "Frais bancaires"],
+  ["c_tax",        "g_fees",    "Impôts & taxes"],
+  ["c_fines",      "g_fees",    "Amendes"],
+  ["c_otherins",   "g_fees",    "Assurances diverses"],
+
+  ["c_dailymisc",  "g_legacy",  "Divers vie quotidienne", true],
+  ["c_unknown",    "g_legacy",  "Inconnu", true],
+
+  ["c_salary",     "g_income",  "Salaire"],
+  ["c_bonus",      "g_income",  "Bonus"],
+  ["c_incmisc",    "g_income",  "Revenus divers"],
+  ["c_refund",     "g_income",  "Remboursements"],
+
+  ["c_savings",    "g_neutral", "Épargne & investissement"],
+  ["c_transfer",   "g_neutral", "Virement interne"],
+].map(([id, group, name, legacy]) => ({ id, group, name, legacy: !!legacy }));
+
+const CAT_BY_ID = Object.fromEntries(CATS.map(c => [c.id, c]));
+const GROUP_BY_ID = Object.fromEntries(GROUPS.map(g => [g.id, g]));
+const catGroup = catId => (CAT_BY_ID[catId] ? GROUP_BY_ID[CAT_BY_ID[catId].group] : null);
+const catKind = catId => { const g = catGroup(catId); return g ? g.kind : null; };
+const catName = catId => (CAT_BY_ID[catId] ? CAT_BY_ID[catId].name : "—");
+
+/* -------------------------------------------------------------------------
+   Legacy spreadsheet values (column D) -> categories of this app.
+   `null` means "no safe guess, ask during the import".
+   ------------------------------------------------------------------------- */
+const LEGACY_MAP = {
+  // categories the user maintained himself
+  "loyer":"c_rent", "assurance maison":"c_homeins", "electricite gaz":"c_power", "eau":"c_water",
+  "divers logement":"c_homemisc", "assurance auto":"c_carins", "essence":"c_fuel",
+  "entretien":"c_carfix", "divers vehicule":"c_carmisc", "courses":"c_grocery",
+  "deliveroo":"c_delivery", "restaurants bars":"c_resto", "internet":"c_internet",
+  "mobile":"c_mobile", "abonnements":"c_subs", "vetements":"c_clothes", "coiffeur":"c_hair",
+  "sport":"c_sport", "vacances":"c_holidays", "sorties":"c_outings", "jeux objets":"c_games",
+  "divers loisirs":"c_leisuremisc", "divers vie quotidienne":"c_dailymisc", "inconnu":"c_unknown",
+  // categories left as the bank had labelled them
+  "restaurants bars discotheques":"c_resto", "restaurants":"c_resto", "alimentation":"c_grocery",
+  "mobilier electromenager decoration":"c_homegear", "club association sport hobby art":"c_sport",
+  "transports quotidiens metro bus":"c_transit", "transports longue distance avions trains":"c_transit",
+  "frais bancaires et de gestion dont agios":"c_bankfees",
+  "energie electricite gaz fuel chauffage":"c_power", "telephonie fixe et mobile":"c_mobile",
+  "telephone":"c_mobile", "multimedia a domicile tv internet telephonie":"c_internet",
+  "journaux magazines":"c_subs", "livres cd dvd bijoux jouets":"c_games",
+  "divertissement culture cine theatre concerts":"c_outings",
+  "equipements sportifs et artistiques":"c_sport", "vetements et accessoires":"c_clothes",
+  "electronique et informatique":"c_tech", "carburant":"c_fuel", "parking":"c_parking",
+  "peages":"c_parking", "bricolage et jardinage":"c_works",
+  "travaux reparation entretien amenagement":"c_works", "assurances auto moto":"c_carins",
+  "assurance habitation et rc":"c_homeins", "entretien reparation":"c_carfix",
+  "impots taxes":"c_tax", "contraventions":"c_fines", "medecins et frais medicaux":"c_doctor",
+  "pharmacie et laboratoire":"c_pharmacy", "hebergement hotels camping":"c_holidays",
+  "depenses jeux et paris":"c_outings", "loyers charges":"c_rent",
+  "cadeaux et solidarite":"c_gifts", "sante":"c_doctor",
+  // income
+  "salaire":"c_salary", "vir sepa ibm international treasury serv":"c_salary",
+  // money that never left the estate -> ignored, exactly like in the spreadsheet
+  "pea":"c_savings", "livret a":"c_savings", "livreta":"c_savings", "pel":"c_savings",
+  "av":"c_savings", "assurance vie":"c_savings", "crypto":"c_savings",
+  "epargne financiere retraite prevoyance pea assurance vie":"c_savings",
+  "depenses d epargne autres":"c_savings", "virements emis":"c_transfer",
+  "virements recus":"c_transfer", "virements emis de comptes a comptes":"c_transfer",
+  "virements recus de comptes a comptes":"c_transfer",
+  "vir virement depuis boursobank":"c_transfer", "vir virement depuis livret a":"c_transfer",
+  "mouvements internes debiteurs":"c_transfer", "mouvements internes crediteurs":"c_transfer",
+  "retraits cash":"c_transfer", "remboursement de frais offres boursorama":"c_transfer",
+  "autorisation paiement retrait en cours":"c_transfer", "doublon":"c_transfer",
+  // deliberately unresolved
+  "vie quotidienne autres":null, "non categorise":null, "loisirs autres":null,
+  "auto moto autres":null, "paypal":null, "fournitures autres":null, "imprimerie":null,
+};
+
+/* Merchant keywords, used when no rule exists yet. */
+const KEYWORDS = [
+  [/CARREFOUR|AUCHAN|LIDL|LECLERC|INTERMARCHE|INTERMACHE|CASINO|MONOPRIX|FRANPRIX|PICARD|GRAND FRAIS|BIOCOOP|SUPER U|\bMATCH\b|HELLOFRESH|MAXICOFFEE|BOULANGER|MARIE BLACHERE/, "c_grocery"],
+  [/DELIVEROO|UBER ?EATS|JUST ?EAT|FRICHTI/, "c_delivery"],
+  [/MCDONALD|MCDO|BURGER|\bKFC\b|RESTAURANT|BRASSERIE|PIZZ|SUSHI|\bBAR\b|CAFE|TACOS|SUBWAY|STARBUCKS|O TACOS|POKAWA/, "c_resto"],
+  [/ENGIE|\bEDF\b|TOTALENERGIE|ELECTRICITE|\bGAZ\b|ENI GAS/, "c_power"],
+  [/VEOLIA|SAUR|\bSUEZ\b|EAU DE LA METROPOLE|\bEMEL\b|NOREADE/, "c_water"],
+  [/ESSO|SHELL|\bBP\b|STATION|CARBURANT|AVIA|\bAGIP\b|TOTAL ACCESS/, "c_fuel"],
+  [/NORAUTO|FEU VERT|MIDAS|SPEEDY|CARROSSERIE|GARAGE|CONTROLE TECHNIQUE/, "c_carfix"],
+  [/HORODATEUR|INDIGO|\bPARKING\b|EFFIA|SANEF|APRR|VINCI AUTOROUTE/, "c_parking"],
+  [/\bSNCF\b|ILEVIA|VELOV|\bRATP\b|BLABLACAR|FLIXBUS|\bUBER\b(?! ?EATS)|\bTAXI\b|TRAINLINE/, "c_transit"],
+  [/\bSFR\b|ORANGE|BOUYGUES|\bFREE\b|SOSH|RED BY|TELECOM/, "c_mobile"],
+  [/NETFLIX|SPOTIFY|DEEZER|DISNEY|CANAL|PRIME VIDEO|ICLOUD|GOOGLE STORAGE|DROPBOX|MICROSOFT 365/, "c_subs"],
+  [/PHARMACIE|DOCTEUR|\bDR\b|MEDECIN|LABORATOIRE|DENTAIRE|OPTIC|MUTUELLE|\bKINE\b|HOPITAL|CPAM/, "c_doctor"],
+  [/BASIC ?FIT|FITNESS|KEEPCOOL|NEONESS|\bYOGA\b|SALLE DE SPORT|DECATHLON|CLUB ALPIN/, "c_sport"],
+  [/COIFF|SEPHORA|NOCIBE|MARIONNAUD|YVES ROCHER|\bNAIL\b|INSTITUT|BARBIER/, "c_hair"],
+  [/IKEA|LEROY MERLIN|CASTORAMA|CONFORAMA|MAISONS DU MONDE|\bGIFI\b|ZARA HOME|BUT\b/, "c_homegear"],
+  [/ZARA|\bH&M\b|KIABI|UNIQLO|PRIMARK|JULES|CELIO|VETEMENT|CHAUSSURE|SHEIN|VINTED|CACHE CACHE/, "c_clothes"],
+  [/BOARDGAMEARENA|PHILIBERT|LUDUM|FOLDED SPACE|NINTENDO|STEAM|PLAYSTATION|\bXBOX\b|CULTURA|\bFNAC\b|MICROMANIA/, "c_games"],
+  [/AMAZON|\bAMZ\b|LDLC|MATERIEL NET|BOULANGER ELEC|APPLE STORE|BACKMARKET/, "c_tech"],
+  [/CINEMA|\bUGC\b|PATHE|GAUMONT|KINEPOLIS|THEATRE|CONCERT|MUSEE|ZOO|PARC ASTERIX/, "c_outings"],
+  [/BOOKING|AIRBNB|EXPEDIA|RYANAIR|EASYJET|\bHOTEL\b|CAMPING|VOYAGE|CENTER PARCS|GITE/, "c_holidays"],
+  [/FRAIS|COTIS|AGIOS|COMMISSION|BOURSO PROTECT/, "c_bankfees"],
+  [/IMPOT|\bDGFIP\b|TRESOR PUBLIC|TAXE FONCIERE|URSSAF/, "c_tax"],
+  [/AMENDE|ANTAI|CONTRAVENTION/, "c_fines"],
+];
+
+/* Labels that hide a transfer between the user's own accounts or savings. */
+const NEUTRAL_PATTERNS = [
+  /\bPEA\b/, /LIVRET/, /\bLDDS?\b/, /\bLEP\b/, /\bPEL\b/, /ASSURANCE ?VIE/, /\bAV\b MENSUEL/,
+  /VIREMENT INTERNE/, /VIR INTERNE/, /DEPUIS BOURSOBANK/, /VERS BOURSOBANK/,
+  /VIREMENT ECONOMIE/, /ECONOMIE DU MOIS/, /EPARGNE/, /BINANCE|COINBASE|KRAKEN|BITSTAMP/,
+];
+
+/* Top-level labels the bank puts in place of a merchant since its 2026 export
+   change: they describe a category, not a shop. */
+const BANK_PARENTS = new Set([
+  "loisirs et sorties","vie quotidienne","non categorise","voyages transports","voyages et transports",
+  "virements recus","virements emis","auto moto","auto et moto","logement","abonnements telephonie",
+  "abonnements et telephonie","services financiers professionnels","services financiers et professionnels",
+  "sante","mouvements internes crediteurs","mouvements internes debiteurs","impots taxes","impots et taxes",
+  "revenus","epargne","depenses d epargne","scolarite enfants","retraits cash","divers",
+]);
+
+/* Merchant names that describe the rail, not the shop: never build a rule on them. */
+const OPAQUE_MERCHANTS = new Set([
+  "paypal","boursorama banque","boursobank","virement","retrait automate","retrait",
+  "sumup","zettle","stripe","lydia","lydia solutions","wero","sepa","carte",
+  "virements recus","virements emis","virements","virement interne","prelevement","prelevements",
+  "non categorise","inconnu","divers",
+]);
+/* Canonical merchant, or "" when the name only describes the payment rail. */
+function canonMerchant(row, merchantIndex) {
+  const k = merchantIndex && merchantIndex[row.merchantKey] ? merchantIndex[row.merchantKey] : (row.merchantKey || "");
+  return OPAQUE_MERCHANTS.has(k) ? "" : k;
+}
+
+/* ---------------- small helpers ---------------- */
+const pad2 = n => String(n).padStart(2, "0");
+const monthKey = iso => iso.slice(0, 7);
+const yearOf = iso => +iso.slice(0, 4);
+const dayOf = iso => +iso.slice(8, 10);
+const todayISO = () => { const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); };
+function monthLabel(key) { const [y, m] = key.split("-"); return MONTHS[+m - 1] + " " + y; }
+function addMonth(key, delta) {
+  const [y, m] = key.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return d.getFullYear() + "-" + pad2(d.getMonth() + 1);
+}
+function daysBetween(isoA, isoB) {
+  return Math.abs((Date.parse(isoA) - Date.parse(isoB)) / 86400000);
+}
+function normalize(s) {
+  return (s || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+function fmtEur(n, opts) {
+  const sign = n < 0 ? "-" : (opts && opts.plus && n > 0 ? "+" : "");
+  return sign + Math.abs(n).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+}
+function fmtEurShort(n) {
+  return (n < 0 ? "-" : "") + Math.round(Math.abs(n)).toLocaleString("fr-FR") + " €";
+}
+function fmtPct(n) { return (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n).toFixed(1).replace(".", ",") + " %"; }
+/* Plain rate, no leading sign except for a genuine negative. One decimal,
+   dropped when it says nothing: 20 % rather than 20,0 %. */
+function trim1(n) { return Math.abs(n).toFixed(1).replace(/\.0$/, "").replace(".", ","); }
+function fmtRate(n) { return (n < 0 ? "−" : "") + trim1(n) + " %"; }
+function fmtPts(n) { return trim1(n) + " pt" + (Math.abs(n) >= 2 ? "s" : ""); }
+
+/* ---------------- amount parsing ----------------
+   Handles 1 234,56 / 1,234.56 / -2,000.00 / (12.30) / 12.30 EUR         */
+function parseAmount(raw) {
+  let s = (raw == null ? "" : String(raw)).replace(/[\s\u00a0\u202f]/g, "").replace(/€|EUR/gi, "");
+  if (!s) return null;
+  let neg = false;
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+  if (s.indexOf("-") >= 0) { neg = true; s = s.replace(/-/g, ""); }
+  s = s.replace(/\+/g, "");
+  const hasComma = s.indexOf(",") >= 0, hasDot = s.indexOf(".") >= 0;
+  if (hasComma && hasDot) {
+    // the right-most separator is the decimal one
+    s = s.lastIndexOf(",") > s.lastIndexOf(".") ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
+  } else if (hasComma) {
+    s = /^\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g, "") : s.replace(",", ".");
+  }
+  const v = parseFloat(s);
+  if (isNaN(v)) return null;
+  return neg ? -Math.abs(v) : v;
+}
+
+/* ---------------- date parsing ---------------- */
+function parseDate(raw) {
+  const s = (raw == null ? "" : String(raw)).trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[1] + "-" + m[2] + "-" + m[3];
+  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);
+  if (!m) return null;
+  let d = +m[1], mo = +m[2], y = +m[3];
+  if (d > 12 && mo <= 12) { /* day first, fine */ }
+  else if (mo > 12 && d <= 12) { const t = d; d = mo; mo = t; }   // month-first export
+  if (y < 100) y += 2000;
+  if (d < 1 || d > 31 || mo < 1 || mo > 12) return null;
+  return y + "-" + pad2(mo) + "-" + pad2(d);
+}
+
+/* ---------------- CSV ---------------- */
+function detectSeparator(text) {
+  const line = text.split(/\r?\n/).find(l => l.trim()) || "";
+  const counts = [[",", 0], [";", 0], ["\t", 0]];
+  let inQuotes = false;
+  for (const ch of line) {
+    if (ch === '"') inQuotes = !inQuotes;
+    else if (!inQuotes) for (const c of counts) if (ch === c[0]) c[1]++;
+  }
+  counts.sort((a, b) => b[1] - a[1]);
+  return counts[0][1] > 0 ? counts[0][0] : ";";
+}
+function parseCSV(text, sep) {
+  sep = sep || detectSeparator(text);
+  const rows = []; let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
+      else field += ch;
+    } else if (ch === '"') inQuotes = true;
+    else if (ch === sep) { row.push(field); field = ""; }
+    else if (ch === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+    else if (ch !== "\r") field += ch;
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim() !== ""));
+}
+
+/* Column names are matched by header, never by position: the bank has already
+   shifted its columns once and would happily do it again. */
+const COLUMN_ALIASES = {
+  date:     ["dateop", "date operation", "date de l operation", "date", "date comptable"],
+  dateVal:  ["dateval", "date de valeur", "date valeur"],
+  label:    ["label", "libelle", "libelle operation", "libelle simplifie", "nature de l operation", "description"],
+  bankCat:  ["category", "categorie", "categorie operation"],
+  merchant: ["supplierfound", "supplier", "fournisseur", "vendeur", "commercant", "beneficiaire"],
+  bankParent: ["categoryparent", "categorie parente", "categorie parent"],
+  amount:   ["amount", "montant", "montant eur", "montant operation"],
+  debit:    ["debit", "montant debit"],
+  credit:   ["credit", "montant credit"],
+};
+function mapHeader(headerRow) {
+  const norm = headerRow.map(h => normalize(h));
+  const found = {};
+  for (const [key, aliases] of Object.entries(COLUMN_ALIASES)) {
+    let idx = -1;
+    for (const a of aliases) { idx = norm.indexOf(a); if (idx >= 0) break; }
+    if (idx < 0) for (const a of aliases) { idx = norm.findIndex(h => h && h.startsWith(a)); if (idx >= 0) break; }
+    if (idx >= 0) found[key] = idx;
+  }
+  return found;
+}
+
+function parseStatement(text) {
+  const rows = parseCSV(text);
+  if (!rows.length) return { rows: [], error: "Fichier vide." };
+  const cols = mapHeader(rows[0]);
+  if (cols.date == null || cols.label == null || (cols.amount == null && cols.debit == null))
+    return { rows: [], error: "Colonnes introuvables. Il faut au minimum une date, un libellé et un montant." };
+  const out = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const date = parseDate(r[cols.date]);
+    const label = (r[cols.label] || "").trim();
+    let amount = cols.amount != null ? parseAmount(r[cols.amount]) : null;
+    if (amount == null && cols.debit != null) {
+      const d = parseAmount(r[cols.debit]), c = cols.credit != null ? parseAmount(r[cols.credit]) : null;
+      amount = d != null && d !== 0 ? -Math.abs(d) : (c || null);
+    }
+    if (!date || !label || amount == null) continue;
+    out.push({
+      date, label, amount,
+      merchantRaw: cols.merchant != null ? (r[cols.merchant] || "").trim() : "",
+      bankCat: cols.bankCat != null ? (r[cols.bankCat] || "").trim() : "",
+      bankParent: cols.bankParent != null ? (r[cols.bankParent] || "").trim() : "",
+    });
+  }
+  /* Since mid-2026 the bank ships its own category where the merchant used to be.
+     When that is what the file holds, drop the column and read merchants off the label. */
+  const named = out.filter(r => r.merchantRaw);
+  const categoryLike = named.filter(r => BANK_PARENTS.has(normalize(r.merchantRaw))).length;
+  const merchantColumnIsCategory = named.length > 4 && categoryLike / named.length > 0.5;
+  if (merchantColumnIsCategory) out.forEach(r => { r.bankParent = r.bankParent || r.merchantRaw; r.merchantRaw = ""; });
+  return { rows: out, error: out.length ? null : "Aucune ligne exploitable dans ce fichier.", merchantColumnIsCategory };
+}
+
+/* ---------------- merchant ----------------
+   Column F when the bank fills it, the raw label otherwise. */
+const LABEL_NOISE = /\b(CARTE|CB|PAIEMENT|PRLV|PRELEVEMENT|PREL|VIR|VIREMENT|SEPA|INST|RECU|EMIS|ACHAT|FACTURE|RETRAIT|DAB|AVOIR|REMBT?)\b/g;
+const COMPANY_NOISE = /\b(SAS|SASU|SARL|SA|EURL|SNC|GMBH|LTD|LLC|INC|BV|NV|PLC|FRANCE|EUROPE|INTERNATIONAL|GROUP|GROUPE|SERVICES?|PAYMENTS?|LIMITED|IRELAND|COM|FR|EU)\b/g;
+
+function merchantFromLabel(label) {
+  let s = " " + (label || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") + " ";
+  s = s.replace(/\bCB\*?\d+\b/g, " ").replace(/\b\d{2}\/\d{2}\/\d{2,4}\b/g, " ");
+  if (s.indexOf("*") >= 0) s = s.split("*").pop();
+  s = s.replace(LABEL_NOISE, " ").replace(COMPANY_NOISE, " ");
+  const tokens = s.split(/[^A-Z0-9&']+/).filter(t => t.length >= 2 && !/^\d+$/.test(t));
+  return tokens.slice(0, 3).join(" ").trim();
+}
+function merchantKey(row) {
+  let raw = (row.merchantRaw || "").trim();
+  if (/^[\d\s.,]+$/.test(raw)) raw = "";       // some export batches slide a number into that column
+  if (BANK_PARENTS.has(normalize(raw))) raw = "";  // a category, not a shop: read the label instead
+  const base = raw || merchantFromLabel(row.label);
+  return normalize(base).replace(/\b(sas|sarl|sa|fr|com|france|ltd|inc|bv|gmbh|limited|ireland|europe)\b/g, " ")
+    .replace(/\s+/g, " ").trim();
+}
+function labelKey(row) {
+  return normalize(merchantFromLabel(row.label))
+    .replace(/\b(sas|sarl|sa|fr|com|france|ltd|inc|bv|gmbh|limited|ireland|europe)\b/g, " ")
+    .replace(/\s+/g, " ").trim();
+}
+/* "maxicoffee nord" and "maxicoffee com" both fold into "maxicoffee" as soon as
+   the shorter name exists somewhere in the data. */
+function buildMerchantIndex(keys) {
+  const uniq = Array.from(new Set(keys.filter(Boolean))).sort((a, b) => a.length - b.length);
+  const index = {};
+  for (const k of uniq) {
+    let canon = k;
+    for (const cand of uniq) {
+      if (cand.length >= 4 && cand.length < k.length && k.startsWith(cand + " ")) { canon = index[cand] || cand; break; }
+    }
+    index[k] = canon;
+  }
+  return index;
+}
+
+/* ---------------- categorisation ---------------- */
+function looksNeutral(row) {
+  const s = (row.label || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return NEUTRAL_PATTERNS.some(re => re.test(s));
+}
+/* Returns { cat, status, source } — status is ST_IGNORED for internal moves. */
+function categorise(row, rules, merchantIndex, legacyMap) {
+  const mk = canonMerchant(row, merchantIndex);
+  const lk = labelKey(row);
+  const hitKey = (mk && rules[mk]) ? mk : (lk.length > 2 && !OPAQUE_MERCHANTS.has(lk) && rules[lk]) ? lk : null;
+  if (hitKey) {
+    const cat = rules[hitKey];
+    return { cat, status: catKind(cat) === KIND_NEUTRAL ? ST_IGNORED : ST_OK, source: "rule" };
+  }
+  if (legacyMap && row.bankCat) {
+    const hit = legacyMap[normalize(row.bankCat)];
+    if (hit) return { cat: hit, status: catKind(hit) === KIND_NEUTRAL ? ST_IGNORED : ST_OK, source: "legacy" };
+  }
+  if (looksNeutral(row)) return { cat: "c_transfer", status: ST_IGNORED, source: "neutral" };
+  const up = (row.label || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const hay = up + " " + (row.merchantRaw || "").toUpperCase();
+  for (const [re, cat] of KEYWORDS) if (re.test(hay)) return { cat, status: ST_OK, source: "keyword" };
+  return { cat: null, status: ST_OK, source: "none" };
+}
+
+/* ---------------- duplicate detection ----------------
+   A bank never sends the same line twice inside one file, so duplicates can only
+   appear between two imports. Each stored operation may absorb at most one
+   incoming line: three identical coffees stay three coffees.                */
+function cardDate(label) {
+  const m = (label || "").match(/\b(\d{2})\/(\d{2})\/(\d{2,4})\b/);
+  if (!m) return null;
+  let y = +m[3]; if (y < 100) y += 2000;
+  return y + "-" + m[2] + "-" + m[1];
+}
+function dupAnchor(row) { return cardDate(row.label) || row.date; }
+
+function detectDuplicates(incoming, existing, opts) {
+  const windowDays = (opts && opts.windowDays) || 5;
+  const amountTol = (opts && opts.amountTol) || 0.05;
+  const byCents = new Map(), byMerchant = new Map();
+  existing.forEach(t => {
+    if (t.status === ST_DUP) return;            // an already-flagged copy cannot absorb another
+    const c = { t, taken: false, anchor: dupAnchor(t), mk: t.merchantKey || "", cents: Math.round(t.amount * 100) };
+    if (!byCents.has(c.cents)) byCents.set(c.cents, []);
+    byCents.get(c.cents).push(c);               // same objects in both indexes: "taken" is shared
+    if (c.mk) { if (!byMerchant.has(c.mk)) byMerchant.set(c.mk, []); byMerchant.get(c.mk).push(c); }
+  });
+  const results = [];
+  for (const row of incoming) {
+    const anchor = dupAnchor(row);
+    let hit = null;
+    for (const c of byCents.get(Math.round(row.amount * 100)) || []) {
+      if (c.taken || daysBetween(anchor, c.anchor) > windowDays) continue;
+      if (row.merchantKey && c.mk && row.merchantKey !== c.mk) continue;
+      hit = { cand: c, level: ST_DUP }; break;
+    }
+    if (!hit && row.merchantKey) {              // same shop, same week, amount adjusted after the fact
+      for (const c of byMerchant.get(row.merchantKey) || []) {
+        if (c.taken || daysBetween(anchor, c.anchor) > windowDays) continue;
+        if (Math.sign(c.t.amount) !== Math.sign(row.amount)) continue;
+        const ref = Math.max(Math.abs(c.t.amount), 0.01);
+        if (Math.abs(Math.abs(c.t.amount) - Math.abs(row.amount)) / ref > amountTol) continue;
+        hit = { cand: c, level: ST_DUP_MAYBE }; break;
+      }
+    }
+    if (hit) { hit.cand.taken = true; results.push({ row, status: hit.level, twin: hit.cand.t }); }
+    else results.push({ row, status: ST_OK, twin: null });
+  }
+  return results;
+}
+/* ==== PURE END ==== */
+
+/* =========================================================================
+   Storage — one localStorage key, rows stored as arrays to stay compact.
+   ========================================================================= */
+const DEFAULT_SETTINGS = { inflation: 1.9, band: 5, dupWindow: 5, dupTol: 5, theme: "auto", savingsGoal: 0 };
+
+function emptyDB() {
+  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS } };
+}
+function serialize(db) {
+  return JSON.stringify({
+    v: SCHEMA_VERSION,
+    t: db.tx.map(t => [t.date, t.label, t.merchantRaw || "", t.amount, t.cat || "", t.status, t.imp, t.bankCat || ""]),
+    r: db.rules, i: db.income, g: db.goals, m: db.imports, l: db.legacyMap, f: db.fixed, s: db.settings,
+  });
+}
+function deserialize(json) {
+  const raw = JSON.parse(json), db = emptyDB();
+  db.tx = (raw.t || []).map(a => ({ date: a[0], label: a[1], merchantRaw: a[2], amount: a[3], cat: a[4] || null, status: a[5], imp: a[6], bankCat: a[7] || "" }));
+  db.rules = raw.r || {}; db.income = raw.i || {}; db.goals = raw.g || {};
+  db.imports = raw.m || []; db.legacyMap = raw.l || {}; db.fixed = raw.f || {};
+  db.settings = Object.assign({}, DEFAULT_SETTINGS, raw.s || {});
+  return db;
+}
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return deserialize(raw);
+  } catch (e) { console.warn("Lecture du stockage impossible", e); }
+  return emptyDB();
+}
+let saveFailed = false;
+function saveDB() {
+  try { localStorage.setItem(STORE_KEY, serialize(DB)); saveFailed = false; }
+  catch (e) { saveFailed = true; toast("Sauvegarde impossible : le stockage du navigateur est plein ou bloqué."); }
+}
+function storageBytes() { try { return (localStorage.getItem(STORE_KEY) || "").length * 2; } catch (e) { return 0; } }
+
+/* =========================================================================
+   Derived indexes — rebuilt whenever the set of operations changes.
+   ========================================================================= */
+let DB = emptyDB();
+let MERCHANT_INDEX = {};
+const UI = {
+  view: "month", month: monthKey(todayISO()), year: yearOf(todayISO()),
+  showDup: false, showIgnored: false, showCand: false, batch: "all", openGroup: null, openCat: null, modal: null, small: null, cmpMode: "pct",
+};
+
+function reindex() {
+  DB.tx.forEach((t, i) => { t.id = i; t.merchantKey = merchantKey(t); });
+  MERCHANT_INDEX = buildMerchantIndex(DB.tx.map(t => t.merchantKey));
+}
+function canonOf(t) { return canonMerchant(t, MERCHANT_INDEX); }
+
+/* Majority vote per merchant over everything already categorised by hand. */
+function learnRulesFromHistory(minShare) {
+  const votes = {};
+  const vote = (k, cat) => {
+    if (!k || k.length < 3 || OPAQUE_MERCHANTS.has(k) || BANK_PARENTS.has(k)) return;
+    if (!/[a-z]{3}/.test(k)) return;                     // reference numbers are not merchants
+    (votes[k] = votes[k] || {})[cat] = (votes[k][cat] || 0) + 1;
+  };
+  DB.tx.forEach(t => {
+    /* a rule never points at a legacy "Divers" bucket: those exist to keep the past
+       intact, not to file anything new */
+    if (!t.cat || t.status === ST_DUP || (CAT_BY_ID[t.cat] && CAT_BY_ID[t.cat].legacy)) return;
+    vote(canonOf(t), t.cat);
+    vote(labelKey(t), t.cat);      // the label works even when the bank drops the merchant column
+  });
+  let added = 0;
+  for (const [k, v] of Object.entries(votes)) {
+    const ranked = Object.entries(v).sort((a, b) => b[1] - a[1]);
+    const total = ranked.reduce((s, x) => s + x[1], 0);
+    if (ranked[0][1] / total >= (minShare || 0.6)) { if (!DB.rules[k]) added++; DB.rules[k] = ranked[0][0]; }
+  }
+  return added;
+}
+
+/* =========================================================================
+   Numbers
+   ========================================================================= */
+const isCounted = t => t.status === ST_OK && !!t.cat;
+const isExpense = t => isCounted(t) && catKind(t.cat) === KIND_EXPENSE;
+const isIncomeOp = t => isCounted(t) && catKind(t.cat) === KIND_INCOME;
+const isTodo = t => t.status === ST_OK && !t.cat;
+
+function opsOfMonth(key) { return DB.tx.filter(t => monthKey(t.date) === key); }
+function manualIncome(key) { const a = DB.income[key]; return a ? (a[0] || 0) + (a[1] || 0) + (a[2] || 0) : 0; }
+function statementIncome(key) { return opsOfMonth(key).filter(isIncomeOp).reduce((s, t) => s + t.amount, 0); }
+
+/* Spending per group. Refunds (positive amounts on an expense category) lower it. */
+function groupTotals(ops) {
+  const out = {};
+  GROUPS.forEach(g => { if (g.kind === KIND_EXPENSE) out[g.id] = 0; });
+  ops.forEach(t => { if (isExpense(t)) out[catGroup(t.cat).id] -= t.amount; });
+  return out;
+}
+function catTotals(ops) {
+  const out = {};
+  ops.forEach(t => { if (isExpense(t)) out[t.cat] = (out[t.cat] || 0) - t.amount; });
+  return out;
+}
+function monthStats(key) {
+  const ops = opsOfMonth(key);
+  const expense = ops.filter(isExpense).reduce((s, t) => s - t.amount, 0);
+  const incomeOps = ops.filter(isIncomeOp).reduce((s, t) => s + t.amount, 0);
+  const income = manualIncome(key) + incomeOps;
+  const todo = ops.filter(isTodo);
+  return {
+    key, ops, expense, income, incomeOps, balance: income - expense,
+    todoCount: todo.length, todoAmount: todo.reduce((s, t) => s - Math.min(t.amount, 0), 0),
+    dupCount: ops.filter(t => t.status === ST_DUP || t.status === ST_DUP_MAYBE).length,
+    ignoredCount: ops.filter(t => t.status === ST_IGNORED).length,
+    groups: groupTotals(ops), cats: catTotals(ops),
+  };
+}
+
+/* Same month one year earlier, cut at the same day when the month is still running. */
+function comparisonRows(key) {
+  const prevKey = addMonth(key, -12);
+  const running = key === monthKey(todayISO());
+  const cutDay = running ? dayOf(todayISO()) : 31;
+  const cur = opsOfMonth(key);
+  const prev = opsOfMonth(prevKey).filter(t => dayOf(t.date) <= cutDay);
+  const a = groupTotals(cur), b = groupTotals(prev);
+  const infl = 1 + (DB.settings.inflation || 0) / 100;
+  const band = (DB.settings.band || 5) / 100;
+  return GROUPS.filter(g => g.kind === KIND_EXPENSE).map(g => {
+    const now = a[g.id] || 0, before = b[g.id] || 0, ref = before * infl;
+    const delta = now - ref;
+    const pct = ref > 0 ? delta / ref * 100 : (now > 0 ? 100 : 0);
+    let verdict = "flat";
+    if (ref === 0 && now === 0) verdict = "none";
+    else if (ref === 0) verdict = "over";
+    else if (delta > ref * band) verdict = "over";
+    else if (delta < -ref * band) verdict = "under";
+    return { group: g, now, before, ref, delta, pct, verdict };
+  }).filter(r => !(r.verdict === "none"));
+}
+
+function ytdTotals(year, cutISO) {
+  const cut = cutISO || (year < yearOf(todayISO()) ? year + "-12-31" : todayISO());
+  let expense = 0, income = 0;
+  const groups = {}; GROUPS.forEach(g => { if (g.kind === KIND_EXPENSE) groups[g.id] = 0; });
+  DB.tx.forEach(t => {
+    if (yearOf(t.date) !== year || t.date > cut) return;
+    if (isExpense(t)) { expense -= t.amount; groups[catGroup(t.cat).id] -= t.amount; }
+    else if (isIncomeOp(t)) income += t.amount;
+  });
+  const cutMonth = monthKey(cut);
+  for (let m = 1; m <= 12; m++) {
+    const key = year + "-" + pad2(m);
+    if (key <= cutMonth) income += manualIncome(key);
+  }
+  return { expense, income, balance: income - expense, groups };
+}
+
+/* Year-end estimate from the year-to-date average, as in the spreadsheet. */
+function yearProjection(year) {
+  const today = todayISO(), curYear = yearOf(today);
+  const done = ytdTotals(year);
+  if (year < curYear) return { ...done, projected: true, elapsed: 1, expenseYear: done.expense, incomeYear: done.income, balanceYear: done.balance, complete: true };
+  if (year > curYear) return { ...done, expenseYear: 0, incomeYear: 0, balanceYear: 0, elapsed: 0, complete: false };
+  const m = +today.slice(5, 7), d = dayOf(today);
+  const daysInMonth = new Date(curYear, m, 0).getDate();
+  const elapsed = Math.max(((m - 1) + d / daysInMonth) / 12, 0.02);
+  return {
+    ...done, complete: false, elapsed,
+    expenseYear: done.expense / elapsed, incomeYear: done.income / elapsed,
+    balanceYear: done.balance / elapsed,
+    monthlyExpense: done.expense / (elapsed * 12), monthlyIncome: done.income / (elapsed * 12),
+  };
+}
+function yearsWithData() {
+  const s = new Set(DB.tx.map(t => yearOf(t.date)));
+  Object.keys(DB.income).forEach(k => s.add(+k.slice(0, 4)));
+  return Array.from(s).sort();
+}
+/* -------------------------------------------------------------------------
+   Base cost — what comes back on its own. A merchant qualifies when it bills
+   at a steady rhythm for a steady amount over a long window; everything else
+   is discretionary, however regular the habit feels. The detector proposes,
+   the user decides, and the decision is stored per merchant.
+   ------------------------------------------------------------------------- */
+const FIXED_WINDOW = 36;                       // months of history examined
+const FIXED_PERIODS = [1, 2, 3, 6, 12];
+const PERIOD_NAME = { 1: "mensuelle", 2: "bimestrielle", 3: "trimestrielle", 6: "semestrielle", 12: "annuelle" };
+/* Groups where regularity proves a habit, never a commitment. */
+const DISCRETIONARY_GROUPS = new Set(["g_food", "g_shop", "g_leisure"]);
+
+function median(vals) {
+  if (!vals.length) return 0;
+  const a = vals.slice().sort((x, y) => x - y), h = a.length >> 1;
+  return a.length % 2 ? a[h] : (a[h - 1] + a[h]) / 2;
+}
+/* Median absolute deviation over the median: 0 for a perfectly steady amount. */
+function relSpread(vals) {
+  const m = median(vals);
+  if (!m) return 1;
+  return median(vals.map(v => Math.abs(v - m))) / m;
+}
+function monthDiff(a, b) { return (+b.slice(0, 4) - +a.slice(0, 4)) * 12 + (+b.slice(5, 7) - +a.slice(5, 7)); }
+
+function detectRecurring() {
+  const cur = monthKey(todayISO());
+  const from = addMonth(cur, -(FIXED_WINDOW - 1));
+  const by = {};
+  DB.tx.forEach(t => {
+    const mk = monthKey(t.date);
+    if (!isExpense(t) || mk < from || mk > cur) return;
+    const k = canonOf(t);                       // "" for opaque merchants: skipped
+    if (!k) return;
+    const e = (by[k] = by[k] || { key: k, name: t.merchantRaw || merchantFromLabel(t.label) || k, cat: t.cat, ops: 0, days: [], months: {} });
+    e.months[mk] = (e.months[mk] || 0) - t.amount;
+    e.ops++; e.days.push(dayOf(t.date)); e.cat = t.cat;
+  });
+  const out = [];
+  Object.values(by).forEach(e => {
+    const keys = Object.keys(e.months).sort(), n = keys.length;
+    if (n < 3) return;                          // no rhythm can be read from two points
+    if (e.ops / n > 1.35) return;               // several bills a month: variable spending
+    const amounts = keys.map(k => e.months[k]);
+    const gaps = [];
+    for (let i = 1; i < n; i++) gaps.push(monthDiff(keys[i - 1], keys[i]));
+    /* Median gap, not span ÷ count: one missed month must not shift the rhythm,
+       and a yearly charge seen three times has to read as yearly, not half-yearly. */
+    const raw = median(gaps);
+    const period = FIXED_PERIODS.reduce((best, p) => Math.abs(p - raw) < Math.abs(best - raw) ? p : best, 1);
+    const slack = period === 1 ? 0 : 1;         // monthly must land every month
+    const regular = gaps.filter(g => Math.abs(g - period) <= slack).length / gaps.length;
+    /* Amount read on the recent occurrences only: a tariff raised last year is
+       a fact about today's base cost, not a sign of an unstable charge. */
+    const recent = amounts.slice(-Math.min(n, period === 1 ? 6 : 3));
+    const amount = median(recent);
+    const spread = relSpread(recent);
+    if (amount <= 0) return;                    // net refunds
+    const since = monthDiff(keys[n - 1], cur);
+    if (since > Math.max(period * 1.6, period + 1)) return;   // stopped: no longer a charge
+    /* Comfort spending can be perfectly regular — a monthly restaurant is not a
+       committed charge. Steady numbers are never enough to enrol it on their own. */
+    const soft = DISCRETIONARY_GROUPS.has((catGroup(e.cat) || {}).id);
+    const steady = spread <= 0.12 && relSpread(amounts) <= 0.35;
+    const sure = regular >= 0.7 && steady && !soft;
+    const maybe = regular >= 0.5 && spread <= 0.3;
+    if (!sure && !maybe) return;
+    const why = sure ? "" : soft ? "dépense de confort : régulière, mais vous pouvez l\u2019arrêter demain"
+      : !steady ? "montant trop variable d\u2019une fois sur l\u2019autre pour un socle"
+      : "rythme irrégulier : les prélèvements ne tombent pas à intervalle fixe";
+    const flag = sure ? "" : soft ? "confort" : !steady ? "variable" : "irrégulier";
+    out.push({
+      key: e.key, name: e.name, cat: e.cat, count: n, period, amount, spread, regular, why, flag,
+      monthly: amount / period, day: Math.round(median(e.days)),
+      lastMonth: keys[n - 1], firstMonth: keys[0], months: e.months,
+      tier: sure ? "sure" : "maybe",
+    });
+  });
+  return out;
+}
+/* Detection plus the user's own calls, which always win. */
+function fixedCharges() {
+  const dec = DB.fixed || {};
+  return detectRecurring().map(r => {
+    r.manual = dec[r.key] != null;
+    r.on = r.manual ? !!dec[r.key] : r.tier === "sure";
+    return r;
+  }).sort((a, b) => b.monthly - a.monthly);
+}
+function baseCost() {
+  const list = fixedCharges(), kept = list.filter(r => r.on);
+  return { list, kept, monthly: kept.reduce((s, r) => s + r.monthly, 0), out: list.filter(r => !r.on) };
+}
+/* Monthly charges that have not shown up in the month being looked at.
+   In the running month, a charge is only late once its usual date is behind us. */
+function missingFixed(kept, key) {
+  const cur = monthKey(todayISO()), today = dayOf(todayISO());
+  return kept.filter(r => {
+    if (r.period !== 1 || key < r.firstMonth || key > cur) return false;
+    if (r.months[key] != null) return false;
+    return !(key === cur && today <= r.day + 3);
+  });
+}
+
+function goalOf(id) { return DB.goals[id] || { m: 0, y: 0 }; }
+
+/* -------------------------------------------------------------------------
+   Savings rate — (income − spending) / income. Money moved to a savings
+   account is an internal transfer, so it is never spending: it stays inside
+   the saved share, which is exactly what the ratio is meant to measure.
+   ------------------------------------------------------------------------- */
+function savingsRate(income, expense) {
+  if (!income || income <= 0) return null;
+  return (income - expense) / income * 100;
+}
+/* ok = target reached, watch = within 5 points, under = further below. */
+function savingsState(rate, goal) {
+  if (rate == null || !goal) return "none";
+  if (rate >= goal) return "ok";
+  if (rate >= goal - 5) return "watch";
+  return "under";
+}
+const SAVINGS_CLASS = { ok: "pos", watch: "warn", under: "neg", none: "" };
+/* Symbol + words, so the verdict never rests on colour alone. */
+function savingsVerdict(rate, goal) {
+  const st = savingsState(rate, goal);
+  if (st === "none") return "";
+  const gap = goal - rate;
+  if (st === "ok") return "✓ objectif de " + fmtRate(goal) + " tenu";
+  return (st === "watch" ? "● " : "▼ ") + fmtPts(gap) + " sous l\u2019objectif de " + fmtRate(goal);
+}
+/* Weighted rate over the last n complete months carrying an income:
+   totals are summed before the ratio, so a small month cannot skew it. */
+function savingsRateWindow(n) {
+  const cur = monthKey(todayISO());
+  const keys = new Set(DB.tx.map(t => monthKey(t.date)));
+  Object.keys(DB.income).forEach(k => keys.add(k));
+  const list = Array.from(keys).filter(k => k < cur).sort().reverse();
+  let income = 0, expense = 0, months = 0;
+  for (const k of list) {
+    const s = monthStats(k);
+    if (s.income <= 0) continue;
+    income += s.income; expense += s.expense; months++;
+    if (months === n) break;
+  }
+  return { rate: savingsRate(income, expense), months, income, expense };
+}
+/* Rule of thumb: 10 % floor, 20 % target, 25 % and above builds fast.
+   Anchored on what is already achieved, so a target is never a downgrade. */
+const SAVINGS_STEPS = [
+  { v: 10, name: "Plancher", help: "de quoi encaisser les imprévus sans emprunter" },
+  { v: 20, name: "Cible", help: "cohérent avec la règle 50/30/20 des objectifs" },
+  { v: 25, name: "Ambitieux", help: "constitution de patrimoine rapide" },
+];
+function suggestedSavingsGoal() {
+  const w = savingsRateWindow(12);
+  if (w.rate == null) return { value: 20, why: "Pas encore de mois complet avec des revenus saisis : 20 % est la cible de référence." };
+  if (w.rate < 10) return { value: 10, why: "Vous êtes à " + fmtRate(w.rate) + " sur 12 mois : 10 % est la marche suivante, franchissable." };
+  const held = Math.floor(w.rate / 5) * 5;
+  if (held >= 25) return { value: held, why: "Vous tenez déjà " + fmtRate(w.rate) + " sur 12 mois : l\u2019objectif sert alors à ne pas redescendre." };
+  return { value: 20, why: "Vous êtes à " + fmtRate(w.rate) + " sur 12 mois : 20 % est la marche suivante." };
+}
+
+/* -------------------------------------------------------------------------
+   Suggested budgets. Frame: 50/30/20 (Elizabeth Warren) applied to net income,
+   share per group loosely calibrated on the INSEE consumption structure
+   (housing ~28 % of spending, food ~12 % excluding restaurants).
+   Everything is a starting point the user overwrites.
+   ------------------------------------------------------------------------- */
+const GROUP_SHARE = {            // % of net monthly income
+  g_home: 25, g_food: 15, g_car: 10, g_subs: 3, g_health: 3,
+  g_shop: 10, g_leisure: 12, g_fees: 2,          // 80 % spent, 20 % saved
+};
+const SUB_SHARE = {              // % inside the group
+  g_home: { c_rent: 70, c_power: 12, c_water: 4, c_homeins: 5, c_homegear: 6, c_works: 3 },
+  g_car: { c_carins: 20, c_fuel: 40, c_carfix: 20, c_parking: 8, c_transit: 12 },
+  g_food: { c_grocery: 60, c_resto: 25, c_delivery: 15 },
+  g_subs: { c_internet: 35, c_mobile: 25, c_subs: 40 },
+  g_health: { c_doctor: 35, c_pharmacy: 20, c_hair: 20, c_sport: 25 },
+  g_shop: { c_clothes: 35, c_games: 25, c_tech: 25, c_gifts: 15 },
+  g_leisure: { c_outings: 40, c_holidays: 60 },
+  g_fees: { c_bankfees: 20, c_tax: 60, c_fines: 5, c_otherins: 15 },
+};
+/* Average net income over the last 12 months that carry a figure. */
+function avgIncome12() {
+  const keys = Object.keys(DB.income).sort().reverse();
+  const seen = [];
+  for (const k of keys) { const v = manualIncome(k); if (v > 0) seen.push(v); if (seen.length === 12) break; }
+  if (!seen.length) {                              // nothing typed in: fall back on the statement
+    const byMonth = {};
+    DB.tx.forEach(t => { if (isIncomeOp(t)) byMonth[monthKey(t.date)] = (byMonth[monthKey(t.date)] || 0) + t.amount; });
+    const vals = Object.keys(byMonth).sort().reverse().slice(0, 12).map(k => byMonth[k]);
+    if (!vals.length) return 0;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }
+  return seen.reduce((a, b) => a + b, 0) / seen.length;
+}
+function suggestedGoals() {
+  const income = avgIncome12();
+  if (!income) return { income: 0, byId: {} };
+  const byId = {};
+  Object.entries(GROUP_SHARE).forEach(([gid, share]) => {
+    const amount = income * share / 100;
+    byId[gid] = Math.round(amount / 5) * 5;
+    const subs = SUB_SHARE[gid] || {};
+    Object.entries(subs).forEach(([cid, s]) => { byId[cid] = Math.round(amount * s / 100 / 5) * 5; });
+  });
+  return { income, byId };
+}
+
+/* Spending grouped by merchant inside one category — "which restaurants exactly". */
+function merchantsOfCat(ops, catId) {
+  const agg = {};
+  ops.forEach(t => {
+    if (!isExpense(t) || t.cat !== catId) return;
+    const k = canonOf(t) || normalize(t.merchantRaw || merchantFromLabel(t.label)) || "divers";
+    (agg[k] = agg[k] || { name: t.merchantRaw || merchantFromLabel(t.label) || "—", n: 0, v: 0 });
+    agg[k].n++; agg[k].v -= t.amount;
+  });
+  return Object.values(agg).sort((a, b) => b.v - a.v);
+}
+function spentOn(id, ops) {
+  const g = GROUP_BY_ID[id];
+  return ops.reduce((s, t) => {
+    if (!isExpense(t)) return s;
+    return (g ? catGroup(t.cat).id === id : t.cat === id) ? s - t.amount : s;
+  }, 0);
+}
+
+/* =========================================================================
+   Rendering helpers
+   ========================================================================= */
+const $ = sel => document.querySelector(sel);
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+const ICONS = {
+  home:'<path d="M2 6.5 8 2l6 4.5V14H2z"/><path d="M6.2 14V9.5h3.6V14"/>',
+  car:'<path d="M2 10h12M3.5 10 4.8 5.6A1.5 1.5 0 0 1 6.2 4.5h3.6a1.5 1.5 0 0 1 1.4 1.1L12.5 10M3 10v2.5M13 10v2.5"/><circle cx="5" cy="10.2" r=".9"/><circle cx="11" cy="10.2" r=".9"/>',
+  cart:'<path d="M1.6 2.5h1.9l1.6 7.2h6.6l1.5-5.2H4.3"/><circle cx="6.2" cy="12.6" r="1"/><circle cx="11" cy="12.6" r="1"/>',
+  signal:'<path d="M8 13.2v.1M4.6 10a4.8 4.8 0 0 1 6.8 0M2.2 7.4a8.2 8.2 0 0 1 11.6 0"/>',
+  heart:'<path d="M8 13.2S2.4 9.9 2.4 6.3A2.9 2.9 0 0 1 8 5a2.9 2.9 0 0 1 5.6 1.3c0 3.6-5.6 6.9-5.6 6.9z"/>',
+  bag:'<path d="M3 5.2h10l-.8 8.3H3.8zM5.6 5.2V4a2.4 2.4 0 0 1 4.8 0v1.2"/>',
+  ticket:'<path d="M2 6.2V4h12v2.2a1.6 1.6 0 0 0 0 3.2V12H2V9.4a1.6 1.6 0 0 0 0-3.2z"/><path d="M8 5.4v1.2M8 9.4v1.2"/>',
+  receipt:'<path d="M3.5 2h9v12l-1.8-1.1L9 14l-1.7-1.1L5.5 14l-2-1.1z"/><path d="M6 5.5h4M6 8.2h4"/>',
+  dots:'<circle cx="4" cy="8" r="1.1"/><circle cx="8" cy="8" r="1.1"/><circle cx="12" cy="8" r="1.1"/>',
+  income:'<path d="M8 2.8v9M4.6 8.4 8 11.8l3.4-3.4M3 13.5h10"/>',
+  vault:'<rect x="2.2" y="3" width="11.6" height="10" rx="1.4"/><circle cx="8" cy="8" r="2.3"/><path d="M8 3v1.4M8 11.6V13"/>',
+  cal:'<rect x="2.2" y="3.2" width="11.6" height="10.6" rx="1.4"/><path d="M2.2 6.4h11.6M5.4 2v2.4M10.6 2v2.4"/>',
+  chart:'<path d="M2.5 13.5V8M6.2 13.5V3.5M9.8 13.5V6.4M13.5 13.5v-4"/>',
+  inbox:'<path d="M2.2 8.6h3l1 2h3.6l1-2h3M2.2 8.6 4 3.2h8l1.8 5.4v4.2H2.2z"/>',
+  gear:'<circle cx="8" cy="8" r="2.1"/><path d="M8 1.8v1.6M8 12.6v1.6M14.2 8h-1.6M3.4 8H1.8M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7 3.6 3.6"/>',
+  down:'<path d="M8 3v8.5M4.4 8.2 8 11.8l3.6-3.6"/>',
+  up:'<path d="M8 13V4.5M4.4 7.8 8 4.2l3.6 3.6"/>',
+  left:'<path d="M10 3.2 5.4 8l4.6 4.8"/>',
+  right:'<path d="M6 3.2 10.6 8 6 12.8"/>',
+  plus:'<path d="M8 3.4v9.2M3.4 8h9.2"/>',
+  check:'<path d="M3 8.4 6.4 12 13 4.6"/>',
+  x:'<path d="M4 4l8 8M12 4l-8 8"/>',
+  trash:'<path d="M3 4.4h10M6.4 4.4V2.8h3.2v1.6M4.5 4.4l.7 8.8h5.6l.7-8.8"/>',
+  undo:'<path d="M3 7.6h6.4a3.2 3.2 0 1 1 0 6.4H6M3 7.6l2.8-2.8M3 7.6l2.8 2.8"/>',
+  warn:'<path d="M8 2.6 14.4 13H1.6z"/><path d="M8 6.6v3M8 11.1v.1"/>',
+  file:'<path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3.2h3"/>',
+  eye:'<path d="M1.6 8S3.9 4 8 4s6.4 4 6.4 4-2.3 4-6.4 4S1.6 8 1.6 8z"/><circle cx="8" cy="8" r="1.6"/>',
+};
+function icon(name, size) {
+  const s = size || 16;
+  return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || "") + "</svg>";
+}
+function groupBadge(g, size) {
+  return '<span class="icon-badge" style="background:' + g.color + '1F;color:' + g.color + '">' + icon(g.icon, size || 14) + "</span>";
+}
+function money(n, cls) { return '<span class="num ' + (cls || "") + '">' + esc(fmtEur(n)) + "</span>"; }
+
+let toastTimer = null;
+function toast(msg) {
+  const old = $(".toast"); if (old) old.remove();
+  const d = document.createElement("div"); d.className = "toast"; d.textContent = msg;
+  document.body.appendChild(d);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => d.remove(), 3200);
+}
+
+/* Category <select>, legacy entries hidden unless already in use. */
+function catSelect(value, attrs) {
+  let html = '<select class="selcat" ' + (attrs || "") + '><option value="">— à catégoriser —</option>';
+  GROUPS.forEach(g => {
+    const opts = CATS.filter(c => c.group === g.id && (!c.legacy || c.id === value));
+    if (!opts.length) return;
+    html += '<optgroup label="' + esc(g.name) + '">';
+    opts.forEach(c => { html += '<option value="' + c.id + '"' + (c.id === value ? " selected" : "") + ">" + esc(c.name) + (c.legacy ? " (historique)" : "") + "</option>"; });
+    html += "</optgroup>";
+  });
+  return html + "</select>";
+}
+
+/* =========================================================================
+   Shell
+   ========================================================================= */
+function render() {
+  const todo = DB.tx.filter(isTodo).length;
+  const nav = [
+    ["month", "cal", "Mois"], ["year", "chart", "Année"],
+    ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
+  ].map(([id, ic, label, badge]) =>
+    '<button class="navbtn ' + (UI.view === id ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>").join("");
+
+  const body = UI.view === "month" ? viewMonth()
+    : UI.view === "year" ? viewYear()
+    : UI.view === "todo" ? viewTodo() : viewSettings();
+
+  $("#app").innerHTML =
+    '<div class="shell"><aside class="rail">' +
+      '<div class="brand"><b>Budget</b><span>' + (DB.tx.length ? DB.tx.length + " op." : "") + "</span></div>" +
+      '<div class="navgroup">' + nav + "</div>" +
+      '<div class="railfoot">' +
+        '<button class="btn primary" data-act="import" style="justify-content:center">' + icon("down") + "Importer</button>" +
+        '<button class="btn" data-act="theme" style="justify-content:center">' + icon("eye") + "Thème</button>" +
+      "</div></aside>" +
+    '<main class="main">' + body + "</main></div>" +
+    (UI.modal ? UI.modal() : "");
+}
+
+function periodBar(label, unit) {
+  return '<div class="topbar"><div class="periodnav">' +
+    '<button data-act="prev" aria-label="Précédent">' + icon("left") + '</button>' +
+    '<span class="label">' + esc(label) + '</span>' +
+    '<button data-act="next" aria-label="Suivant">' + icon("right") + '</button>' +
+    '</div>' +
+    '<button class="btn sm ghost" data-act="today">' + (unit === "year" ? "Année en cours" : "Mois en cours") + '</button>' +
+    '<div class="spacer"></div></div>';
+}
+
+/* =========================================================================
+   Month view
+   ========================================================================= */
+function viewMonth() {
+  const s = monthStats(UI.month);
+  const prev = monthStats(addMonth(UI.month, -1));
+  const cmp = comparisonRows(UI.month);
+
+  let html = periodBar(monthLabel(UI.month), "month");
+
+  const dm = s.expense - prev.expense;
+  const rate = savingsRate(s.income, s.expense);
+  const sgoal = DB.settings.savingsGoal || 0;
+  const running = UI.month === monthKey(todayISO());
+  const w12 = savingsRateWindow(12);
+  html += '<div class="kpis k5">' +
+    kpi("Revenus", fmtEur(s.income), s.incomeOps ? fmtEur(s.incomeOps) + " depuis le relevé" : (manualIncome(UI.month) ? "saisis à la main" : "aucun revenu saisi"), s.income ? "" : "warn") +
+    kpi("Dépenses", fmtEur(s.expense), (dm >= 0 ? "▲ " : "▼ ") + fmtEur(Math.abs(dm)) + " vs " + MONTHS[+addMonth(UI.month, -1).slice(5) - 1]) +
+    kpi("Balance", fmtEur(s.balance), s.balance >= 0 ? "épargne du mois" : "déficit du mois", s.balance >= 0 ? "pos" : "neg") +
+    kpi("Taux d\u2019épargne",
+        rate == null ? "—" : fmtRate(rate),
+        rate == null ? "revenus du mois non saisis"
+          : sgoal ? savingsVerdict(rate, sgoal)
+          : w12.months ? "moyenne 12 mois : " + fmtRate(w12.rate) : "aucun objectif défini",
+        rate == null ? "warn" : sgoal ? SAVINGS_CLASS[savingsState(rate, sgoal)] : (rate >= 0 ? "" : "neg"),
+        rateTooltip(s, rate, running)) +
+    kpi("À catégoriser", String(s.todoCount), s.todoCount ? fmtEur(s.todoAmount) + " hors calcul" : "tout est classé", s.todoCount ? "warn" : "") +
+    "</div>";
+
+  if (s.incomeOps > 0 && manualIncome(UI.month) > 0)
+    html += '<div class="note warn" style="margin-bottom:16px">' + icon("warn") +
+      " Ce mois compte " + esc(fmtEur(manualIncome(UI.month))) + " de revenus saisis à la main <b>et</b> " +
+      esc(fmtEur(s.incomeOps)) + " de revenus repérés dans le relevé. Si c\u2019est le même salaire, il est compté deux fois : " +
+      '<button class="btn sm" data-act="view" data-view="settings" style="margin-left:6px">ajuster la saisie</button></div>';
+  if (s.todoCount) html += '<div class="note warn" style="margin-bottom:16px">' + icon("warn") + " " + s.todoCount +
+    " opération" + (s.todoCount > 1 ? "s" : "") + " de ce mois " + (s.todoCount > 1 ? "ne sont" : "n'est") + " pas comptée" + (s.todoCount > 1 ? "s" : "") +
+    ' dans les totaux, faute de catégorie. <button class="btn sm" data-act="view" data-view="todo" style="margin-left:8px">Les classer</button></div>';
+
+  html += goalCard(s.ops, "m", monthPace(UI.month));
+  html += fixedCard(s);
+  html += catCard(s);
+  html += comparisonCard(UI.month, cmp);
+  html += opsCard(s);
+  return html;
+}
+
+function monthPace(key) {
+  if (key !== monthKey(todayISO())) return 1;
+  const [y, m] = key.split("-").map(Number);
+  return dayOf(todayISO()) / new Date(y, m, 0).getDate();
+}
+
+function comparisonCard(key, cmp) {
+  const pct = UI.cmpMode !== "eur";
+  let html = '<div class="card"><div class="chead"><h2>Écart avec ' + monthLabel(addMonth(key, -12)) + "</h2>" +
+    '<div class="spacer"></div><span class="tiny muted" style="margin-right:10px">' +
+    (key === monthKey(todayISO()) ? "arrêté au " + dayOf(todayISO()) + " des deux mois" : "mois complets") + "</span>" +
+    '<span class="seg"><button class="' + (pct ? "on" : "") + '" data-act="cmpmode" data-mode="pct">%</button>' +
+    '<button class="' + (pct ? "" : "on") + '" data-act="cmpmode" data-mode="eur">€</button></span></div>';
+  if (!cmp.length) return html + '<div class="empty">Pas encore de dépenses sur ce mois ni sur le même mois un an plus tôt.</div></div>';
+  html += '<div class="cmp">' + cmp.map(r => {
+    const scale = 60, pp = Math.max(-scale, Math.min(scale, r.pct));
+    const half = 50, w = Math.abs(pp) / scale * half;
+    const bandW = DB.settings.band / scale * half;
+    const arrow = r.verdict === "over" ? "▲" : r.verdict === "under" ? "▼" : "＝";
+    const cls = r.verdict === "over" ? "neg" : r.verdict === "under" ? "pos" : "muted";
+    const fillCls = r.verdict === "over" ? "over" : r.verdict === "under" ? "under" : "flat";
+    return '<div class="cmprow ' + r.verdict + '">' +
+      '<div class="cmpname">' + groupBadge(r.group) + '<span class="nm">' + esc(r.group.name) + "</span></div>" +
+      '<div class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(r.now)) + "</div>" +
+      '<div class="cmpdelta ' + cls + '" title="' + esc("référence " + fmtEur(r.ref) + " · " + monthLabel(addMonth(key, -12)) + " revalorisé") + '"><span>' + arrow +
+        '</span><span class="num">' + esc(pct ? (r.ref >= 20 ? fmtPct(r.pct) : "n.s.") : fmtEur(r.delta, { plus: true })) + "</span></div>" +
+      '<div class="track">' +
+        '<div class="band" style="left:' + (half - bandW) + "%;width:" + (bandW * 2) + '%"></div>' +
+        '<div class="zero" style="left:' + half + '%"></div>' +
+        '<div class="fill ' + fillCls + '" style="' + (pp >= 0 ? "left:" + half + "%;" : "left:" + (half - w) + "%;") + "width:" + Math.max(w, 0.6) + '%"></div>' +
+      "</div>" +
+      '<div class="cmpprev">réf. ' + esc(fmtEur(r.ref)) + "</div>" +
+      "</div>";
+  }).join("") + "</div>";
+  return html + '<div class="legendline"><span class="chip"><span class="sw" style="background:var(--pos)"></span>▼ moins dépensé</span>' +
+    '<span class="chip"><span class="sw" style="background:var(--neg)"></span>▲ plus dépensé</span>' +
+    '<span class="chip"><span class="sw" style="background:var(--line)"></span>＝ zone neutre ±' + DB.settings.band + " %</span>" +
+    '<span class="muted">survolez une ligne pour voir la référence : ' + esc(monthLabel(addMonth(key, -12))) +
+    " revalorisé de " + String(DB.settings.inflation).replace(".", ",") + " % d'inflation</span></div></div>";
+}
+
+function kpi(label, value, sub, cls, title) {
+  return '<div class="kpi"' + (title ? ' title="' + esc(title) + '"' : "") + '><div class="eyebrow">' + esc(label) + "</div>" +
+    '<div class="v num ' + (cls === "pos" || cls === "neg" || cls === "warn" ? cls : "") + '">' + esc(value) + "</div>" +
+    '<div class="s ' + (cls === "warn" ? "" : "") + '">' + esc(sub) + "</div></div>";
+}
+
+/* The rate is honest only if the month is closed and everything is classified. */
+function rateTooltip(s, rate, running) {
+  if (rate == null) return "Le taux se calcule sur les revenus : saisissez-les dans Réglages.";
+  let t = "(revenus − dépenses) ÷ revenus = (" + fmtEur(s.income) + " − " + fmtEur(s.expense) + ") ÷ " + fmtEur(s.income) +
+    ". Les virements vers l\u2019épargne ne sont pas des dépenses : ils restent dans la part épargnée.";
+  if (running) t += " Mois en cours : le salaire est saisi en entier alors que les dépenses ne le sont pas encore, le taux paraît donc plus élevé qu\u2019il ne finira.";
+  if (s.todoCount) t += " " + s.todoCount + " opération(s) sans catégorie ne sont pas comptées dans les dépenses : le taux est optimiste tant qu\u2019elles ne sont pas classées.";
+  return t;
+}
+
+function goalState(spent, target, pace) {
+  if (spent > target) return "over";
+  if (target > 0 && pace > 0.08 && spent > target * pace * 1.15) return "watch";
+  if (spent > target * 0.9) return "watch";
+  return "ok";
+}
+function goalCard(ops, mode, pace) {
+  const ids = Object.keys(DB.goals).filter(id => (DB.goals[id][mode] || 0) > 0);
+  const label = mode === "m" ? "Objectifs du mois" : "Objectifs de l\u2019année";
+  let html = '<div class="card"><div class="chead"><h2>' + label + "</h2><div class=\"spacer\"></div>" +
+    '<button class="btn sm ghost" data-act="view" data-view="settings">Régler</button></div>';
+  if (!ids.length) {
+    const sg = suggestedGoals();
+    return html + '<div class="empty"><b>Aucun objectif défini</b>' +
+      (sg.income ? "Sur la base de " + esc(fmtEur(sg.income)) + " de revenu mensuel moyen, l\u2019application peut proposer une répartition de départ."
+                 : "Saisissez d\u2019abord vos revenus : les montants proposés en dépendent.") +
+      '<div style="margin-top:12px"><button class="btn ' + (sg.income ? "primary" : "") + '" data-act="' + (sg.income ? "suggest" : "view") + '" data-view="settings">' +
+      (sg.income ? "Proposer des objectifs" : "Saisir mes revenus") + "</button></div></div></div>";
+  }
+  const cards = ids.map(id => {
+    const target = DB.goals[id][mode], spent = spentOn(id, ops);
+    const st = goalState(spent, target, pace || 1);
+    const pct = Math.min(spent / target * 100, 100);
+    const g = GROUP_BY_ID[id], c = CAT_BY_ID[id];
+    const name = g ? g.name : (c ? c.name : id);
+    const grp = g || (c ? GROUP_BY_ID[c.group] : null);
+    const paceLeft = Math.min((pace || 1) * 100, 100);
+    return '<div class="goal">' +
+      '<div class="gh">' + (grp ? groupBadge(grp) : "") + '<span class="nm">' + esc(name) + "</span></div>" +
+      '<div class="gv"><b class="num state-' + st + '">' + esc(fmtEur(spent)) + '</b><span class="tiny muted num">/ ' + esc(fmtEur(target)) + "</span></div>" +
+      '<div class="gbar"><i class="bg-' + st + '" style="width:' + pct.toFixed(1) + '%"></i>' +
+        (mode === "m" && pace < 1 ? '<span class="gpace" style="left:' + paceLeft.toFixed(1) + '%" title="rythme attendu à ce jour du mois"></span>' : "") +
+      "</div>" +
+      '<div class="gfoot state-' + st + '">' + (st === "over" ? "▲ dépassé de " + fmtEur(spent - target)
+        : st === "watch" ? "● reste " + fmtEur(target - spent) : "✓ reste " + fmtEur(target - spent)) + "</div></div>";
+  }).join("");
+  return html + '<div class="goalgrid">' + cards + "</div>" +
+    (mode === "m" && (pace || 1) < 1 ? '<div class="tiny muted" style="margin-top:10px">Le repère vertical marque le rythme attendu au ' + dayOf(todayISO()) + " du mois.</div>" : "") + "</div>";
+}
+
+/* Group breakdown, drilling down to subcategories then to merchants. */
+function fixedTag(catId) {
+  const c = CAT_BY_ID[catId], g = catGroup(catId);
+  if (!g) return "";
+  return '<span class="tag-cat" style="background:' + g.color + '1A;color:' + g.color + ';cursor:default">' +
+    icon(g.icon, 12) + esc(c ? c.name : g.name) + "</span>";
+}
+function fixedRow(r, key) {
+  const seen = r.months[key] != null;
+  const rhythm = PERIOD_NAME[r.period] + (r.period === 1 ? " · vers le " + r.day : " · " + fmtEurShort(r.amount));
+  const status = r.on
+    ? (seen ? '<span class="tiny muted">passée</span>' : r.period === 1 ? '<span class="tiny warn-txt">▲ absente</span>' : '<span class="tiny muted">—</span>')
+    : '<span class="tiny muted" title="' + esc(r.manual ? "vous l\u2019avez écartée du socle" : r.why) + '">' +
+      esc(r.manual ? "écartée" : r.flag) + "</span>";
+  return '<div class="fixrow' + (r.on ? "" : " off") + '">' +
+    '<label class="check" title="' + (r.on ? "Retirer du socle" : "Compter dans le socle") + '"><input type="checkbox" data-chg="fixed" data-key="' +
+      esc(r.key) + '" ' + (r.on ? "checked" : "") + "></label>" +
+    '<span class="nm" style="text-transform:capitalize" title="' +
+      esc(r.count + " prélèvements depuis " + monthLabel(r.firstMonth) + " · régularité " + Math.round(r.regular * 100) + " % · variation " + Math.round(r.spread * 100) + " %") +
+      '">' + esc(r.name) + "</span>" +
+    "<span>" + fixedTag(r.cat) + "</span>" +
+    '<span class="tiny muted">' + esc(rhythm) + "</span>" +
+    '<span class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(r.monthly)) + "</span>" +
+    '<span style="text-align:right">' + status + "</span>" +
+    "</div>";
+}
+function fixedCard(s) {
+  const bc = baseCost();
+  let html = '<div class="card"><div class="chead"><h2>Coût de base</h2><div class="spacer"></div>' +
+    '<span class="tiny muted">charges repérées sur les ' + FIXED_WINDOW + " derniers mois</span></div>";
+  if (!bc.list.length)
+    return html + '<div class="empty"><b>Rien de récurrent détecté pour l\u2019instant</b>' +
+      "Il faut au moins trois passages d\u2019un même commerçant, à un rythme et pour un montant stables. Importez plus d\u2019historique et la liste se remplira seule.</div></div>";
+
+  const income = s.income || avgIncome12();
+  const fromAvg = !s.income && income > 0;
+  const share = income > 0 ? bc.monthly / income * 100 : null;
+  const left = income > 0 ? income - bc.monthly : null;
+  const goal = DB.settings.savingsGoal || 0;
+  const toSave = goal && income > 0 ? income * goal / 100 : 0;
+
+  html += '<div class="basegrid">' +
+    '<div><div class="eyebrow">Socle mensuel</div><div class="v num">' + esc(fmtEur(bc.monthly)) + "</div>" +
+      '<div class="tiny muted">' + bc.kept.length + " charge" + (bc.kept.length > 1 ? "s" : "") + " retenue" + (bc.kept.length > 1 ? "s" : "") +
+      ", en équivalent mensuel</div></div>" +
+    '<div><div class="eyebrow">Part engagée d\u2019avance</div><div class="v num' + (share == null ? "" : share > 60 ? " neg" : share > 45 ? " warn" : "") + '">' +
+      (share == null ? "—" : esc(fmtRate(share))) + "</div>" +
+      '<div class="tiny muted">' + (share == null ? "revenus non saisis" : "de vos revenus part sans décision") + "</div></div>" +
+    '<div><div class="eyebrow">Reste à vivre</div><div class="v num' + (left == null ? "" : left < 0 ? " neg" : "") + '">' +
+      (left == null ? "—" : esc(fmtEur(left))) + "</div>" +
+      '<div class="tiny muted">' + (left == null ? "revenus non saisis"
+        : fromAvg ? "sur un revenu moyen de " + fmtEur(income)
+        : toSave ? "dont " + fmtEur(toSave) + " à épargner pour tenir " + fmtRate(goal)
+        : "revenus du mois − socle") + "</div></div>" +
+    "</div>";
+
+  const miss = missingFixed(bc.kept, UI.month);
+  if (miss.length) html += '<div class="note warn" style="margin:0 0 12px">' + icon("warn") + " " +
+    (miss.length > 1 ? miss.length + " charges habituelles ne sont pas passées" : "Une charge habituelle n\u2019est pas passée") +
+    " en " + esc(monthLabel(UI.month)) + " : " + esc(miss.map(r => r.name).join(", ")) +
+    ". Soit elle est en retard, soit elle a cessé — dans ce cas, décochez-la.</div>";
+
+  html += '<div class="fixlist">' + bc.kept.map(r => fixedRow(r, UI.month)).join("") + "</div>";
+  if (bc.out.length)
+    html += '<div class="legendline" style="justify-content:space-between">' +
+      '<span class="muted">' + bc.out.length + " autre" + (bc.out.length > 1 ? "s" : "") + " détectée" + (bc.out.length > 1 ? "s" : "") +
+      ", écartée" + (bc.out.length > 1 ? "s" : "") + " du socle</span>" +
+      '<button class="btn sm ghost" data-act="showcand">' + (UI.showCand ? "Masquer" : "Voir et arbitrer") + "</button></div>" +
+      (UI.showCand ? '<div class="fixlist">' + bc.out.map(r => fixedRow(r, UI.month)).join("") + "</div>" : "");
+  return html + '<p class="tiny muted" style="margin:12px 0 0">Une charge est retenue quand elle revient au même rythme pour un montant stable. ' +
+    "Le socle est le plancher de dépense d\u2019un mois où vous ne décidez de rien : il donne la marge de manœuvre réelle et sert de base au matelas de sécurité (3 à 6 mois).</p></div>";
+}
+
+/* Group breakdown, drilling down to subcategories then to merchants. */
+function catCard(s) {
+  const rows = GROUPS.filter(g => g.kind === KIND_EXPENSE).map(g => ({ g, v: s.groups[g.id] || 0 }))
+    .filter(r => r.v !== 0).sort((a, b) => b.v - a.v);
+  const total = rows.reduce((a, r) => a + Math.max(r.v, 0), 0) || 1;
+  let html = '<div class="card"><div class="chead"><h2>Dépenses par groupe</h2><div class="spacer"></div>' +
+    '<span class="tiny muted">' + esc(fmtEur(s.expense)) + " · cliquez pour déplier</span></div>";
+  if (!rows.length) return html + '<div class="empty">Aucune dépense classée sur ce mois.</div></div>';
+  html += rows.map(r => {
+    const share = Math.max(r.v, 0) / total * 100;
+    const open = UI.openGroup === r.g.id;
+    let sub = "";
+    if (open) {
+      const cats = CATS.filter(c => c.group === r.g.id).map(c => ({ c, v: s.cats[c.id] || 0 })).filter(x => x.v !== 0).sort((a, b) => b.v - a.v);
+      sub = cats.map(x => {
+        const openCat = UI.openCat === x.c.id;
+        let merch = "";
+        if (openCat) {
+          const list = merchantsOfCat(s.ops, x.c.id);
+          merch = list.map(m => '<div class="merchrow"><span style="text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(m.name) + "</span>" +
+            '<span class="num muted" style="text-align:right">' + m.n + " ×</span>" +
+            '<span class="num" style="text-align:right">' + esc(fmtEur(m.v)) + "</span></div>").join("");
+        }
+        return '<div class="subrow ' + (openCat ? "open" : "") + '" data-act="togglecat" data-cat="' + x.c.id + '">' +
+          "<span>" + (openCat ? "▾ " : "▸ ") + esc(x.c.name) + '</span><span class="num" style="text-align:right">' + esc(fmtEur(x.v)) +
+          '</span><span class="num muted" style="text-align:right">' + Math.round(x.v / r.v * 100) + " %</span></div>" + merch;
+      }).join("");
+    }
+    return '<div class="catrow" data-act="togglegroup" data-group="' + r.g.id + '">' +
+      groupBadge(r.g) +
+      "<div><div>" + (open ? "▾ " : "▸ ") + esc(r.g.name) + '</div><div class="bar"><i style="width:' + share.toFixed(1) + "%;background:" + r.g.color + '"></i></div></div>' +
+      '<div class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(r.v)) + "</div>" +
+      '<div class="num muted" style="text-align:right">' + Math.round(share) + " %</div></div>" + sub;
+  }).join("");
+  return html + "</div>";
+}
+
+/* =========================================================================
+   Operations table
+   ========================================================================= */
+function importLabel(id) {
+  const imp = DB.imports.find(i => i.id === id);
+  return imp ? imp.name : "—";
+}
+function importDate(id) {
+  const imp = DB.imports.find(i => i.id === id);
+  return imp ? imp.date : "";
+}
+function opsCard(s) {
+  const batches = Array.from(new Set(s.ops.map(t => t.imp)));
+  let ops = s.ops.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  if (UI.batch !== "all") ops = ops.filter(t => String(t.imp) === UI.batch);
+  const shown = ops.filter(t => {
+    if (t.status === ST_DUP || t.status === ST_DUP_MAYBE) return UI.showDup;
+    if (t.status === ST_IGNORED) return UI.showIgnored;
+    return true;
+  });
+
+  let html = '<div class="card"><div class="chead"><h2>Opérations</h2><div class="spacer"></div>' +
+    '<button class="btn sm" data-act="addop">' + icon("plus") + "Ajouter</button>" +
+    (s.ops.length ? ' <button class="btn sm danger" data-act="delmonth" title="Vide le mois pour rejouer un import">' + icon("trash") + "Vider le mois</button>" : "") + "</div>";
+
+  html += '<div class="controls">' +
+    '<label class="check"><input type="checkbox" data-chg="showdup" ' + (UI.showDup ? "checked" : "") + "> Afficher les doublons" +
+      (s.dupCount ? ' <span class="tag dup">' + s.dupCount + "</span>" : "") + "</label>" +
+    '<label class="check"><input type="checkbox" data-chg="showign" ' + (UI.showIgnored ? "checked" : "") + "> Afficher les virements internes" +
+      (s.ignoredCount ? ' <span class="tag ign">' + s.ignoredCount + "</span>" : "") + "</label>";
+  if (batches.length > 1 || UI.batch !== "all") {
+    html += '<span class="spacer" style="flex:1"></span><span class="tiny muted">Lot d\u2019import :</span><div class="pillrow">' +
+      '<span class="pill ' + (UI.batch === "all" ? "on" : "") + '" data-act="batch" data-batch="all">Tous</span>' +
+      batches.map(b => '<span class="pill ' + (String(b) === UI.batch ? "on" : "") + '" data-act="batch" data-batch="' + b + '">' + esc(importLabel(b)) + "</span>").join("") + "</div>";
+  }
+  html += "</div>";
+
+  if (!shown.length) return html + '<div class="empty"><b>Rien à afficher</b>Importez un relevé pour remplir ce mois.</div></div>';
+
+  html += '<table class="ops"><thead><tr><th class="c-date">Date</th><th>Opération</th><th class="c-cat">Catégorie</th>' +
+    '<th class="c-imp">Importé le</th><th class="c-amt">Montant</th><th class="c-act"></th></tr></thead><tbody>';
+  html += shown.map(t => opRow(t)).join("");
+  html += "</tbody></table>";
+  const hidden = ops.length - shown.length;
+  if (hidden > 0) html += '<div class="tiny muted" style="margin-top:8px">' + hidden + " opération" + (hidden > 1 ? "s" : "") + " masquée" + (hidden > 1 ? "s" : "") + " (doublons ou virements internes).</div>";
+  return html + "</div>";
+}
+
+function catTag(t) {
+  if (!t.cat) return '<button class="tag-cat none" data-act="editcat" data-id="' + t.id + '">' + icon("plus", 13) + "choisir…</button>";
+  const g = catGroup(t.cat);
+  return '<button class="tag-cat" data-act="editcat" data-id="' + t.id + '" style="background:' + g.color + '1A;color:' + g.color + '" title="' +
+    esc(g.name + " · " + catName(t.cat)) + '">' + icon(g.icon, 13) + esc(catName(t.cat)) + "</button>";
+}
+function opRow(t) {
+  const dup = t.status === ST_DUP || t.status === ST_DUP_MAYBE;
+  const ign = t.status === ST_IGNORED;
+  const cls = dup ? "is-dup" : ign ? "is-ign" : "";
+  let tags = "";
+  if (t.status === ST_DUP) tags = '<span class="tag dup">doublon</span>';
+  else if (t.status === ST_DUP_MAYBE) tags = '<span class="tag dup">doublon probable</span>';
+  else if (ign) tags = '<span class="tag ign">interne</span>';
+  else if (!t.cat) tags = '<span class="tag todo">à catégoriser</span>';
+
+  let actions = "";
+  if (dup) {
+    actions = '<button class="iconbtn" title="Ce n\u2019est pas un doublon" data-act="undup" data-id="' + t.id + '">' + icon("undo", 14) + "</button>" +
+      '<button class="iconbtn danger" title="Supprimer" data-act="del" data-id="' + t.id + '">' + icon("trash", 14) + "</button>";
+  } else {
+    actions = ign
+      ? '<button class="iconbtn" title="Recompter cette opération" data-act="unignore" data-id="' + t.id + '">' + icon("undo", 14) + "</button>"
+      : '<button class="iconbtn" title="Ignorer (virement interne)" data-act="ignore" data-id="' + t.id + '">' + icon("vault", 14) + "</button>";
+    actions += '<button class="iconbtn" title="Marquer comme doublon" data-act="mkdup" data-id="' + t.id + '">' + icon("warn", 14) + "</button>" +
+      '<button class="iconbtn danger" title="Supprimer" data-act="del" data-id="' + t.id + '">' + icon("trash", 14) + "</button>";
+  }
+  const merchant = t.merchantRaw || merchantFromLabel(t.label) || "—";
+  return '<tr class="' + cls + '"><td class="c-date num">' + t.date.slice(8, 10) + "/" + t.date.slice(5, 7) + "</td>" +
+    "<td><div class=\"merchant\">" + esc(merchant) + " " + tags + '</div><span class="rawlabel">' + esc(t.label) + "</span></td>" +
+    '<td class="c-cat">' + catTag(t) + "</td>" +
+    '<td class="c-imp tiny muted">' + esc(importDate(t.imp)) + "</td>" +
+    '<td class="c-amt num ' + (t.amount > 0 ? "pos" : "") + '">' + esc(fmtEur(t.amount)) + "</td>" +
+    '<td class="c-act">' + actions + "</td></tr>";
+}
+
+/* =========================================================================
+   Year view
+   ========================================================================= */
+function viewYear() {
+  const year = UI.year;
+  const proj = yearProjection(year);
+  const months = [];
+  for (let m = 1; m <= 12; m++) {
+    const key = year + "-" + pad2(m), st = monthStats(key);
+    months.push({ key, m, expense: st.expense, income: st.income, balance: st.balance });
+  }
+  const maxV = Math.max(1, ...months.map(x => Math.max(x.expense, x.income)));
+
+  let html = periodBar(String(year), "year");
+
+  const yRate = savingsRate(proj.income, proj.expense);
+  const ySgoal = DB.settings.savingsGoal || 0;
+  html += '<div class="kpis k5">' +
+    kpi("Revenus " + year, fmtEur(proj.income), proj.complete ? "année complète" : "depuis le 1er janvier") +
+    kpi("Dépenses " + year, fmtEur(proj.expense), proj.complete ? "année complète" : "depuis le 1er janvier") +
+    kpi("Balance " + year, fmtEur(proj.balance), proj.balance >= 0 ? "mise de côté" : "déficit", proj.balance >= 0 ? "pos" : "neg") +
+    kpi("Taux d\u2019épargne " + year,
+        yRate == null ? "—" : fmtRate(yRate),
+        yRate == null ? "revenus de l\u2019année non saisis"
+          : ySgoal ? savingsVerdict(yRate, ySgoal)
+          : (proj.complete ? "sur l\u2019année complète" : "cumul depuis janvier"),
+        yRate == null ? "warn" : ySgoal ? SAVINGS_CLASS[savingsState(yRate, ySgoal)] : (yRate >= 0 ? "" : "neg"),
+        yRate == null ? "Le taux se calcule sur les revenus : saisissez-les dans Réglages."
+          : "(" + fmtEur(proj.income) + " − " + fmtEur(proj.expense) + ") ÷ " + fmtEur(proj.income) +
+            ". Le taux annuel ne bouge pas avec la projection : cumul et projection sont dans le même rapport.") +
+    kpi(proj.complete ? "Balance finale" : "Projection fin " + year, fmtEur(proj.balanceYear),
+        proj.complete ? "réalisé" : "au rythme actuel (moyenne YTD)", proj.balanceYear >= 0 ? "pos" : "neg") +
+    "</div>";
+
+  /* goals first: what the user steers with */
+  const yearOps = DB.tx.filter(t => yearOf(t.date) === year);
+  html += goalCard(yearOps, "y", year < yearOf(todayISO()) ? 1 : (year > yearOf(todayISO()) ? 0 : proj.elapsed));
+
+  /* monthly bars */
+  html += '<div class="card"><div class="chead"><h2>Mois par mois</h2><div class="spacer"></div>' +
+    '<span class="legendline" style="border:0;margin:0;padding:0"><span class="chip"><span class="sw" style="background:var(--pos)"></span>revenus</span>' +
+    '<span class="chip"><span class="sw" style="background:var(--neg)"></span>dépenses</span></span></div>';
+  html += '<div class="bars">' + months.map(x => {
+    const he = Math.round(x.expense / maxV * 118), hi = Math.round(x.income / maxV * 118);
+    const on = x.key === UI.month;
+    return '<div class="barcol ' + (on ? "on" : "") + '" data-act="openmonth" data-month="' + x.key + '" title="' + esc(monthLabel(x.key) + " · dépenses " + fmtEur(x.expense) + " · revenus " + fmtEur(x.income)) + '">' +
+      '<div class="stack" style="flex-direction:row;align-items:flex-end;gap:2px;height:118px">' +
+        '<i style="flex:1;height:' + Math.max(hi, x.income ? 2 : 0) + 'px;background:var(--pos)"></i>' +
+        '<i style="flex:1;height:' + Math.max(he, x.expense ? 2 : 0) + 'px;background:var(--neg)"></i>' +
+      "</div><span class=\"lb\">" + MONTHS_SHORT[x.m - 1] + "</span></div>";
+  }).join("") + "</div></div>";
+
+  /* projection vs previous years */
+  const years = yearsWithData().filter(y => y <= yearOf(todayISO()));
+  const bal = years.map(y => ({ y, p: yearProjection(y) }));
+  const maxB = Math.max(1, ...bal.map(b => Math.abs(b.p.balanceYear)));
+  html += '<div class="grid2"><div class="card"><div class="chead"><h2>Balance et taux d\u2019épargne par année</h2><div class="spacer"></div>' +
+    '<span class="tiny muted">' + (proj.complete ? "" : "estimation " + year + " au rythme actuel") + "</span></div>" +
+    bal.map(b => {
+      const v = b.p.balanceYear, w = Math.abs(v) / maxB * 100, cur = b.y === year;
+      const r = savingsRate(b.p.incomeYear, b.p.expenseYear);
+      const rc = r == null ? "muted" : ySgoal ? SAVINGS_CLASS[savingsState(r, ySgoal)] : "muted";
+      return '<div style="display:grid;grid-template-columns:52px 1fr 108px 72px;gap:10px;align-items:center;padding:5px 0;border-top:1px solid var(--line-2)">' +
+        '<span class="num" style="font-weight:' + (cur ? 700 : 400) + '">' + b.y + (b.p.complete ? "" : " *") + "</span>" +
+        '<div class="hbar"><i style="width:' + w.toFixed(1) + "%;background:" + (v >= 0 ? "var(--pos)" : "var(--neg)") + '"></i></div>' +
+        '<span class="num ' + (v >= 0 ? "pos" : "neg") + '" style="text-align:right">' + esc(fmtEur(v)) + "</span>" +
+        '<span class="num ' + rc + '" style="text-align:right" title="taux d\u2019épargne ' + b.y + '">' +
+          (r == null ? "—" : esc(fmtRate(r))) + "</span></div>";
+    }).join("") +
+    '<div class="tiny muted" style="margin-top:8px">* année en cours, projetée depuis la moyenne mensuelle constatée (' +
+      esc(fmtEur(proj.monthlyExpense || 0)) + " de dépenses par mois).</div></div>";
+
+  /* YTD comparison with last year */
+  const prevY = ytdTotals(year - 1, (year - 1) + todayISO().slice(4));
+  const curY = ytdTotals(year);
+  const infl = 1 + (DB.settings.inflation || 0) / 100;
+  const band = (DB.settings.band || 5) / 100;
+  html += '<div class="card"><div class="chead"><h2>Cumul depuis janvier vs ' + (year - 1) + "</h2></div>";
+  const cmpRows = GROUPS.filter(g => g.kind === KIND_EXPENSE).map(g => {
+    const now = curY.groups[g.id] || 0, ref = (prevY.groups[g.id] || 0) * infl;
+    return { g, now, ref, delta: now - ref, pct: ref > 0 ? (now - ref) / ref * 100 : 0 };
+  }).filter(r => r.now || r.ref).sort((a, b) => b.now - a.now);
+  if (!cmpRows.length) html += '<div class="empty">Pas de données sur les deux années.</div>';
+  else html += cmpRows.map(r => {
+    const over = r.delta > r.ref * band, under = r.delta < -r.ref * band;
+    const cls = over ? "neg" : under ? "pos" : "muted";
+    const arrow = over ? "▲" : under ? "▼" : "＝";
+    return '<div style="display:grid;grid-template-columns:1fr 100px 96px;gap:8px;padding:5px 0;border-top:1px solid var(--line-2);align-items:center">' +
+      '<span style="display:flex;gap:8px;align-items:center">' + groupBadge(r.g) + esc(r.g.name) + "</span>" +
+      '<span class="num" style="text-align:right">' + esc(fmtEur(r.now)) + "</span>" +
+      '<span class="num ' + cls + '" style="text-align:right">' + arrow + " " + esc(r.ref >= 20 ? fmtPct(r.pct) : "n.s.") + "</span></div>";
+  }).join("");
+  html += "</div></div>";
+
+  html += topMerchants(yearOps);
+  return html;
+}
+
+function topMerchants(ops) {
+  const agg = {};
+  ops.forEach(t => {
+    if (!isExpense(t)) return;
+    const k = canonOf(t) || normalize(t.merchantRaw || merchantFromLabel(t.label)) || "divers";
+    (agg[k] = agg[k] || { n: 0, v: 0, name: t.merchantRaw || merchantFromLabel(t.label) }).n++;
+    agg[k].v -= t.amount;
+  });
+  const top = Object.values(agg).sort((a, b) => b.v - a.v).slice(0, 12);
+  let html = '<div class="card"><div class="chead"><h2>Où part l\u2019argent</h2><div class="spacer"></div><span class="tiny muted">top 12</span></div>';
+  if (!top.length) return html + '<div class="empty">Aucune dépense.</div></div>';
+  const max = top[0].v || 1;
+  return html + top.map((m, i) =>
+    '<div style="display:grid;grid-template-columns:20px 1fr 104px 52px;gap:8px;align-items:center;padding:4px 0;border-top:1px solid var(--line-2)">' +
+    '<span class="num muted tiny">' + (i + 1) + "</span>" +
+    "<div><div style=\"text-transform:capitalize\">" + esc(m.name || "—") + '</div><div class="hbar" style="height:5px;margin-top:3px"><i style="width:' + (m.v / max * 100).toFixed(1) + '%;background:var(--accent)"></i></div></div>' +
+    '<span class="num" style="text-align:right">' + esc(fmtEur(m.v)) + "</span>" +
+    '<span class="num muted tiny" style="text-align:right">' + m.n + " ×</span></div>").join("") + "</div>";
+}
+
+/* =========================================================================
+   "À catégoriser" — grouped by merchant so one click settles many lines
+   ========================================================================= */
+function viewTodo() {
+  const todo = DB.tx.filter(isTodo);
+  let html = '<div class="topbar"><h1>À catégoriser</h1><div class="spacer"></div>' +
+    '<span class="tiny muted">' + todo.length + " opération" + (todo.length > 1 ? "s" : "") + " hors calcul</span>" +
+    (todo.length ? '<button class="btn primary" data-act="reviewall">' + icon("check") + "Trier une par une</button>" : "") + "</div>";
+  if (!todo.length) return html + '<div class="empty"><b>Tout est classé</b>Aucune opération n\u2019attend de catégorie.</div>';
+
+  const groups = {};
+  todo.forEach(t => {
+    const k = canonOf(t) || normalize(t.merchantRaw || merchantFromLabel(t.label)) || "(sans nom)";
+    (groups[k] = groups[k] || { key: k, name: t.merchantRaw || merchantFromLabel(t.label), ops: [], total: 0 });
+    groups[k].ops.push(t); groups[k].total -= t.amount;
+  });
+  const list = Object.values(groups).sort((a, b) => b.ops.length - a.ops.length);
+  html += '<div class="note" style="margin-bottom:14px">Choisir une catégorie ici classe toutes les opérations du vendeur, et retient la règle pour les prochains imports.</div>';
+  html += '<div class="card">' + list.map(g =>
+    '<div style="display:grid;grid-template-columns:1fr 90px 110px 220px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line-2)">' +
+    "<div><div style=\"font-weight:550;text-transform:capitalize\">" + esc(g.name || "—") + "</div>" +
+    '<div class="rawlabel">' + esc(g.ops[0].label) + "</div></div>" +
+    '<span class="num muted tiny" style="text-align:right">' + g.ops.length + " op.</span>" +
+    '<span class="num" style="text-align:right">' + esc(fmtEur(g.total)) + "</span>" +
+    catSelect(null, 'data-chg="bulkcat" data-key="' + esc(g.key) + '"') + "</div>").join("") + "</div>";
+  return html;
+}
+
+/* =========================================================================
+   Settings
+   ========================================================================= */
+function registerCat(c) { if (!CAT_BY_ID[c.id]) { CATS.push(c); CAT_BY_ID[c.id] = c; } }
+function newCatId(name) {
+  let base = "x_" + normalize(name).replace(/ /g, "_").slice(0, 22) || "x_cat";
+  let id = base, n = 2; while (CAT_BY_ID[id]) id = base + "_" + n++;
+  return id;
+}
+function createCategory(name, groupId) {
+  const c = { id: newCatId(name), group: groupId, name: name.trim(), custom: true };
+  registerCat(c);
+  DB.customCats = DB.customCats || []; DB.customCats.push(c);
+  saveDB(); return c;
+}
+
+function viewSettings() {
+  const year = UI.year;
+  const bytes = storageBytes(), quota = 5 * 1024 * 1024;
+  let html = '<div class="topbar"><h1>Réglages</h1><div class="spacer"></div></div>';
+
+  /* --- revenus --- */
+  html += '<div class="card"><div class="chead"><h2>Revenus ' + year + "</h2><div class=\"spacer\"></div>" +
+    '<div class="periodnav"><button data-act="prevyear">' + icon("left") + '</button><span class="label">' + year +
+    '</span><button data-act="nextyear">' + icon("right") + "</button></div></div>" +
+    '<p class="tiny muted" style="margin:0 0 10px">Les revenus ne figurent pas dans le relevé importé : ils se saisissent ici, mois par mois.</p>' +
+    '<table class="incgrid"><thead><tr><th>Mois</th><th>Salaire</th><th>Bonus</th><th>Divers</th><th>Depuis le relevé</th><th>Total</th></tr></thead><tbody>';
+  for (let m = 1; m <= 12; m++) {
+    const key = year + "-" + pad2(m), a = DB.income[key] || [0, 0, 0], fromStmt = statementIncome(key);
+    html += "<tr><td>" + MONTHS[m - 1] + "</td>" +
+      [0, 1, 2].map(i => '<td style="text-align:right"><input type="number" step="0.01" value="' + (a[i] || "") +
+        '" data-chg="income" data-key="' + key + '" data-slot="' + i + '"></td>').join("") +
+      '<td class="num muted" style="text-align:right">' + (fromStmt ? esc(fmtEur(fromStmt)) : "—") + "</td>" +
+      '<td class="num" style="text-align:right">' + esc(fmtEur(manualIncome(key) + fromStmt)) + "</td></tr>";
+  }
+  html += '</tbody></table><div style="margin-top:10px"><button class="btn sm" data-act="fillyear">' + icon("down") +
+    "Recopier janvier sur toute l\u2019année</button></div></div>";
+
+  /* --- savings rate --- */
+  const sv = DB.settings.savingsGoal || 0;
+  const svs = suggestedSavingsGoal(), w12s = savingsRateWindow(12);
+  html += '<div class="card"><div class="chead"><h2>Taux d\u2019épargne</h2><div class="spacer"></div>' +
+    '<span class="tiny muted">affiché en en-tête du mois et de l\u2019année</span></div>' +
+    '<p class="tiny muted" style="margin:0 0 12px">(revenus − dépenses) ÷ revenus, sur le mois ou sur l\u2019année. ' +
+    "Les virements vers l\u2019épargne ne sont pas comptés comme des dépenses : ce qui n\u2019est pas dépensé est épargné, quel que soit le compte où il dort. " +
+    "Repères usuels : <b>10 %</b> plancher, <b>20 %</b> cible, <b>25 %</b> et au-delà, constitution de patrimoine rapide.</p>" +
+    '<div style="display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start">' +
+      "<div>" + numField("Objectif (%)", sv || "", "savingsGoal", 1, "0 ou vide : le taux s\u2019affiche sans verdict.") + "</div>" +
+      '<div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">' +
+        SAVINGS_STEPS.concat(svs.value % 5 === 0 && !SAVINGS_STEPS.some(x => x.v === svs.value)
+          ? [{ v: svs.value, name: "Votre niveau", help: "le taux que vous tenez déjà" }] : [])
+          .sort((a, b) => a.v - b.v)
+          .map(st => '<button class="btn sm ' + (sv === st.v ? "primary" : st.v === svs.value ? "" : "ghost") +
+            '" data-act="usesaverate" data-v="' + st.v + '" title="' + esc(st.help) + '">' +
+            (sv === st.v ? icon("check", 13) : "") + '<span class="num">' + st.v + " %</span> " + esc(st.name) +
+            (st.v === svs.value ? ' <span class="tiny muted">· suggéré</span>' : "") + "</button>").join("") +
+      "</div>" +
+      '<p class="tiny muted" style="margin:0">' + esc(svs.why) + "</p>" +
+      (w12s.months
+        ? '<p class="tiny muted" style="margin:6px 0 0">Constaté sur ' + (w12s.months > 1 ? "les <b>" + w12s.months + " derniers mois complets</b>" : "le <b>dernier mois complet</b>") + " : " +
+          esc(fmtEur(w12s.income)) + " de revenus, " + esc(fmtEur(w12s.expense)) + " de dépenses, soit <b>" + esc(fmtRate(w12s.rate)) + "</b>.</p>"
+        : "") +
+      "</div></div></div>";
+
+  /* --- categories & goals --- */
+  const sg = suggestedGoals();
+  html += '<div class="card"><div class="chead"><h2>Catégories &amp; objectifs</h2><div class="spacer"></div>' +
+    (sg.income ? '<button class="btn sm primary" data-act="suggest">' + icon("check") + "Appliquer les suggestions</button> " : "") +
+    '<button class="btn sm" data-act="newcat">' + icon("plus") + "Nouvelle sous-catégorie</button></div>" +
+    '<p class="tiny muted" style="margin:0 0 10px">Un objectif à 0 n\u2019est pas suivi. Les objectifs se posent sur un groupe entier ou sur une sous-catégorie précise.' +
+    (sg.income ? " Suggestions calculées sur un revenu net moyen de <b>" + esc(fmtEur(sg.income)) + "</b> (12 derniers mois saisis), réparti selon la règle 50/30/20 : 80 % de dépenses, 20 % d\u2019épargne. Le logement vise 25 % du revenu, l\u2019alimentation 15 %, les transports 10 %. Cliquez un montant suggéré pour l\u2019adopter."
+               : " Saisissez vos revenus pour obtenir des montants suggérés.") + "</p>" +
+    '<table class="maptable"><thead><tr><th>Catégorie</th><th style="text-align:right">Suggéré / mois</th><th style="text-align:right">Objectif / mois</th><th style="text-align:right">Objectif / an</th></tr></thead><tbody>';
+  GROUPS.forEach(g => {
+    if (g.kind !== KIND_EXPENSE) return;
+    const gg = goalOf(g.id);
+    html += '<tr><td style="font-weight:620"><span style="display:inline-flex;gap:8px;align-items:center">' + groupBadge(g) + esc(g.name) + "</span></td>" +
+      suggestCell(sg, g.id) +
+      '<td style="text-align:right"><input type="number" step="10" value="' + (gg.m || "") + '" data-chg="goal" data-id="' + g.id + '" data-slot="m"></td>' +
+      '<td style="text-align:right"><input type="number" step="100" value="' + (gg.y || "") + '" data-chg="goal" data-id="' + g.id + '" data-slot="y"></td></tr>';
+    CATS.filter(c => c.group === g.id && !c.legacy).forEach(c => {
+      const cg = goalOf(c.id);
+      html += '<tr><td style="padding-left:34px" class="muted">' + esc(c.name) + "</td>" +
+        suggestCell(sg, c.id) +
+        '<td style="text-align:right"><input type="number" step="10" value="' + (cg.m || "") + '" data-chg="goal" data-id="' + c.id + '" data-slot="m"></td>' +
+        '<td style="text-align:right"><input type="number" step="100" value="' + (cg.y || "") + '" data-chg="goal" data-id="' + c.id + '" data-slot="y"></td></tr>';
+    });
+  });
+  html += "</tbody></table></div>";
+
+  /* --- parameters --- */
+  const s = DB.settings;
+  html += '<div class="grid2"><div class="card"><div class="chead"><h2>Comparaison &amp; doublons</h2></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+    numField("Inflation moyenne (%)", s.inflation, "inflation", 0.1, "Sert à revaloriser l\u2019année précédente avant comparaison.") +
+    numField("Zone neutre (±%)", s.band, "band", 1, "En dessous de cet écart, le mois est jugé équivalent.") +
+    numField("Fenêtre doublon (jours)", s.dupWindow, "dupWindow", 1, "Écart de date toléré entre deux exports.") +
+    numField("Tolérance montant (%)", s.dupTol, "dupTol", 1, "Au-delà d\u2019un montant identique, doublon « probable ».") +
+    "</div></div>";
+
+  /* --- data --- */
+  html += '<div class="card"><div class="chead"><h2>Données</h2></div>' +
+    '<div class="tiny muted" style="margin-bottom:6px">Stockage utilisé : ' + (bytes / 1024).toFixed(0) + " Ko sur ~5 Mo (" + (bytes / quota * 100).toFixed(1) + " %)</div>" +
+    '<div class="hbar" style="margin-bottom:14px"><i style="width:' + Math.min(bytes / quota * 100, 100).toFixed(1) + '%;background:var(--accent)"></i></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn" data-act="export-json">' + icon("file") + "Exporter la sauvegarde (JSON)</button>" +
+    '<button class="btn" data-act="import-json">' + icon("up") + "Restaurer une sauvegarde</button>" +
+    '<button class="btn" data-act="export-csv">' + icon("file") + "Exporter en CSV</button>" +
+    '<button class="btn" data-act="wizard">' + icon("inbox") + "Reprise de l\u2019historique</button>" +
+    '<button class="btn" data-act="learn">' + icon("check") + "Réapprendre les règles vendeur</button>" +
+    '<div class="spacer" style="flex:1"></div>' +
+    '<button class="btn danger" data-act="reset">' + icon("trash") + "Tout effacer</button></div>" +
+    '<p class="tiny muted" style="margin:12px 0 0">Les données vivent uniquement dans le stockage local de ce navigateur, sous la clé <code>' + STORE_KEY +
+    "</code>. Rien ne part sur un serveur. Vider les données de navigation les supprime : l\u2019export JSON est la seule sauvegarde.</p>" +
+    "<p class=\"tiny muted\" style=\"margin:6px 0 0\">" + DB.tx.length + " opérations · " + DB.imports.length + " import(s) · " +
+    Object.keys(DB.rules).length + " règles vendeur</p></div></div>";
+  return html;
+}
+function suggestCell(sg, id) {
+  const v = sg.byId[id];
+  if (!v) return '<td class="tiny muted" style="text-align:right">—</td>';
+  return '<td style="text-align:right"><button class="btn sm ghost num" data-act="usesugg" data-id="' + id + '" data-v="' + v +
+    '" title="Adopter ce montant">' + esc(fmtEurShort(v)) + "</button></td>";
+}
+function numField(label, value, key, step, help) {
+  return '<div class="field"><label>' + esc(label) + "</label>" +
+    '<input type="number" step="' + step + '" value="' + value + '" data-chg="setting" data-key="' + key + '">' +
+    '<span class="tiny muted">' + esc(help) + "</span></div>";
+}
+
+/* =========================================================================
+   Import — monthly statement and full history wizard
+   ========================================================================= */
+let WIZ = null;
+
+function openImport(mode) {
+  WIZ = { mode: mode || "month", step: 1, rows: [], error: null, name: "", mapping: {}, result: null, dups: [], importDups: false };
+  UI.modal = importModal; render();
+}
+/* Duplicates are computed as soon as the file is read, so the choice can be offered. */
+function analyseDuplicates() {
+  const rows = WIZ.rows;
+  rows.forEach(r => r.merchantKey = merchantKey(r));
+  const verdicts = detectDuplicates(rows, DB.tx, { windowDays: DB.settings.dupWindow, amountTol: (DB.settings.dupTol || 5) / 100 });
+  WIZ.verdicts = verdicts;
+  WIZ.dups = verdicts.filter(v => v.status !== ST_OK);
+}
+function dupBox() {
+  if (!WIZ.dups.length) return '<div class="note" style="margin-top:12px">' + icon("check") + " Aucun doublon détecté dans ce fichier.</div>";
+  const sure = WIZ.dups.filter(d => d.status === ST_DUP).length;
+  const maybe = WIZ.dups.length - sure;
+  return '<div class="dupbox">' +
+    '<div style="display:flex;align-items:center;gap:8px;font-weight:600">' + icon("warn") + WIZ.dups.length +
+    " opération" + (WIZ.dups.length > 1 ? "s" : "") + " déjà présente" + (WIZ.dups.length > 1 ? "s" : "") + " dans le budget</div>" +
+    '<div class="tiny" style="margin:5px 0 8px">' + sure + " doublon" + (sure > 1 ? "s" : "") + " certain" + (sure > 1 ? "s" : "") +
+    (maybe ? ", " + maybe + " probable" + (maybe > 1 ? "s" : "") + " (même commerçant, montant proche)" : "") +
+    ". Par défaut, ces lignes ne sont pas importées.</div>" +
+    '<label class="check"><input type="checkbox" data-chg="impdup" ' + (WIZ.importDups ? "checked" : "") +
+    "> Les importer quand même, marquées comme doublons, pour les contrôler à la main</label>" +
+    '<div class="scroll" style="margin-top:10px;max-height:180px"><table class="maptable"><tbody>' +
+    WIZ.dups.slice(0, 40).map(d => "<tr><td>" + esc(d.row.date.slice(8, 10) + "/" + d.row.date.slice(5, 7)) +
+      "</td><td>" + esc((d.row.merchantRaw || merchantFromLabel(d.row.label) || d.row.label).slice(0, 42)) +
+      '</td><td class="num" style="text-align:right">' + esc(fmtEur(d.row.amount)) + "</td>" +
+      '<td class="tiny muted">' + (d.status === ST_DUP ? "certain" : "probable") + "</td></tr>").join("") +
+    "</tbody></table></div>" + (WIZ.dups.length > 40 ? '<div class="tiny muted" style="margin-top:6px">…et ' + (WIZ.dups.length - 40) + " autres.</div>" : "") + "</div>";
+}
+function closeModal() { UI.modal = null; WIZ = null; REVIEW = null; render(); }
+
+function importModal() {
+  const wizard = WIZ.mode === "history";
+  let body = "";
+  const steps = wizard ? ["Fichier", "Catégories", "Revenus", "Import"] : ["Fichier", "Analyse", "Tri"];
+  const stepsHtml = '<div class="steps">' + steps.map((s, i) =>
+    '<div class="step ' + (WIZ.step === i + 1 ? "on" : WIZ.step > i + 1 ? "done" : "") + '">' + (i + 1) + ". " + s + "</div>").join("") + "</div>";
+
+  if (WIZ.step === 1) {
+    body = '<div class="drop" id="drop">' + icon("down", 22) +
+      "<div style=\"margin-top:8px;font-weight:600\">Déposer le fichier CSV du relevé</div>" +
+      '<div class="tiny" style="margin-top:4px">ou <button class="btn sm" data-act="pick">choisir un fichier</button></div>' +
+      '<div class="tiny muted" style="margin-top:10px">Les colonnes sont reconnues par leur en-tête (date, libellé, montant, catégorie, vendeur) — peu importe leur ordre.</div></div>' +
+      '<div style="margin-top:14px"><div class="tiny muted" style="margin-bottom:5px">Ou coller les lignes directement :</div>' +
+      '<textarea id="pastebox" placeholder="dateOp,dateVal,label,category,categoryParent,supplierFound,amount…"></textarea>' +
+      '<button class="btn sm" data-act="paste" style="margin-top:8px">Lire le texte collé</button></div>';
+    if (WIZ.error) body += '<div class="note warn" style="margin-top:12px">' + icon("warn") + " " + esc(WIZ.error) + "</div>";
+  }
+
+  if (WIZ.step === 2 && !wizard) {
+    const news = WIZ.verdicts.filter(v => v.status === ST_OK).length;
+    body = '<div class="grid3" style="margin-bottom:6px">' +
+      kpi("Lignes lues", String(WIZ.rows.length), esc(WIZ.name)) +
+      kpi("Nouvelles", String(news), "à trier une par une") +
+      kpi("Doublons", String(WIZ.dups.length), WIZ.dups.length ? "exclus par défaut" : "aucun", WIZ.dups.length ? "warn" : "") +
+      "</div>" + dupBox() +
+      (WIZ.noMerchantCol ? '<div class="note warn" style="margin-top:12px">' + icon("warn") +
+        " Ce fichier ne contient pas de colonne commerçant : la banque y met désormais sa propre catégorie. " +
+        "Les commerçants sont donc lus dans le libellé de l\u2019opération, ce qui reste fiable pour les paiements par carte.</div>" : "") +
+      '<div class="note" style="margin-top:12px">' + icon("check") +
+      " Les " + news + " nouvelles opérations passeront par le tri manuel : l\u2019application propose une catégorie, vous validez.</div>";
+  }
+
+  if (WIZ.step === 2 && wizard) {
+    const counts = {};
+    WIZ.rows.forEach(r => { const k = normalize(r.bankCat); if (!k) return; (counts[k] = counts[k] || { n: 0, raw: r.bankCat, amount: 0 }); counts[k].n++; counts[k].amount -= Math.min(r.amount, 0); });
+    const list = Object.entries(counts).sort((a, b) => b[1].n - a[1].n);
+    body = '<p class="tiny muted" style="margin-top:0">Chaque valeur de la colonne « catégorie » du fichier est rattachée à une catégorie de l\u2019application. ' +
+      'Laisser « à catégoriser » renvoie les lignes vers la file d\u2019attente ; « Épargne &amp; transferts » les sort des calculs, comme dans le tableur.</p>' +
+      '<div class="scroll"><table class="maptable"><thead><tr><th>Valeur du fichier</th><th style="text-align:right">Lignes</th><th style="text-align:right">Montant</th><th>Devient</th></tr></thead><tbody>' +
+      list.map(([k, v]) => {
+        const cur = WIZ.mapping[k] !== undefined ? WIZ.mapping[k] : (LEGACY_MAP[k] || "");
+        return "<tr><td>" + esc(v.raw) + '</td><td class="num" style="text-align:right">' + v.n +
+          '</td><td class="num" style="text-align:right">' + esc(fmtEurShort(v.amount)) + "</td>" +
+          "<td>" + catSelect(cur, 'data-chg="map" data-key="' + esc(k) + '"') + "</td></tr>";
+      }).join("") + "</tbody></table></div>" +
+      '<div style="margin-top:10px"><button class="btn sm" data-act="newcat">' + icon("plus") + "Créer une sous-catégorie</button></div>" + dupBox();
+  }
+
+  if (WIZ.step === 3 && wizard) {
+    const months = Array.from(new Set(WIZ.rows.map(r => monthKey(r.date)))).sort();
+    const years = Array.from(new Set(months.map(m => m.slice(0, 4))));
+    body = '<p class="tiny muted" style="margin-top:0">Un mois sans revenu saisi comptera 0 € de revenu : la balance de ce mois sera négative. ' +
+      "Le bouton en tête d\u2019année recopie la première ligne remplie sur les mois suivants.</p>";
+    body += years.map(y => {
+      const ms = months.filter(m => m.startsWith(y));
+      return '<div style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">' +
+        "<h3>" + y + "</h3><button class=\"btn sm ghost\" data-act=\"wizfill\" data-year=\"" + y + "\">Recopier sur l\u2019année</button></div>" +
+        '<table class="incgrid"><thead><tr><th>Mois</th><th>Salaire</th><th>Bonus</th><th>Divers</th><th>Depuis le relevé</th></tr></thead><tbody>' +
+        ms.map(k => { const a = DB.income[k] || [0, 0, 0], fromStmt = statementIncome(k);
+          return "<tr><td>" + MONTHS[+k.slice(5) - 1] + "</td>" + [0, 1, 2].map(i =>
+            '<td style="text-align:right"><input type="number" step="0.01" value="' + (a[i] || "") +
+            '" data-chg="income" data-key="' + k + '" data-slot="' + i + '"></td>').join("") +
+            '<td class="num muted" style="text-align:right">' + (fromStmt ? esc(fmtEur(fromStmt)) : "—") + "</td></tr>"; }).join("") +
+        "</tbody></table></div>";
+    }).join("");
+  }
+
+  if (wizard && WIZ.step === 4) {
+    const r = WIZ.result;
+    body = '<div class="grid3" style="margin-bottom:14px">' +
+      kpi("Ajoutées", String(r.added), "opérations comptées") +
+      kpi("Doublons", String(r.dup), r.dup ? "masqués, à vérifier" : "aucun") +
+      kpi("À catégoriser", String(r.todo), r.todo ? "en attente de catégorie" : "tout est classé") + "</div>" +
+      '<div class="note">' + icon("check") + " Import « " + esc(r.name) + " » terminé." +
+      (r.ignored ? " " + r.ignored + " virement(s) interne(s) sortis des calculs." : "") +
+      (r.rules ? " " + r.rules + " règles vendeur apprises." : "") + "</div>";
+  }
+
+  const canNext = WIZ.step === 1 ? WIZ.rows.length > 0 : true;
+  const isLast = WIZ.step === 4 && wizard;
+  let foot = '<div style="display:flex;gap:8px;margin-top:18px">';
+  if (WIZ.step > 1 && !isLast) foot += '<button class="btn" data-act="wizback">Retour</button>';
+  foot += '<div class="spacer" style="flex:1"></div>';
+  if (isLast) foot += '<button class="btn primary" data-act="wizclose">Terminer</button>';
+  else {
+    foot += '<button class="btn ghost" data-act="wizclose">Annuler</button>';
+    const toImport = wizard ? WIZ.rows.length : WIZ.verdicts ? WIZ.verdicts.filter(v => v.status === ST_OK || WIZ.importDups).length : 0;
+    foot += '<button class="btn primary" data-act="wiznext" ' + (canNext ? "" : "disabled") + ">" +
+      (WIZ.step === (wizard ? 3 : 2) ? "Importer " + toImport + " opérations" : "Continuer") + "</button>";
+  }
+  foot += "</div>";
+
+  return '<div class="modal-back" data-act="backdrop"><div class="modal ' + (wizard ? "wide" : "") + '">' +
+    '<div class="mhead"><div><h1>' + (wizard ? "Reprise de l\u2019historique" : "Importer un relevé") + "</h1>" +
+    '<div class="tiny muted">' + (wizard ? "Tout le tableur, en une fois : catégories reprises, règles apprises, revenus saisis."
+      : "Les doublons sont détectés puis masqués, jamais supprimés sans votre accord.") + "</div></div>" +
+    '<div class="spacer" style="flex:1"></div><button class="iconbtn" data-act="wizclose">' + icon("x") + "</button></div>" +
+    stepsHtml + body + foot + '<input type="file" id="filein" accept=".csv,.txt,.tsv" style="display:none">' + "</div></div>";
+}
+
+function readFileText(file, cb) {
+  const fr = new FileReader();
+  fr.onload = () => {
+    let text;
+    try { text = new TextDecoder("utf-8", { fatal: true }).decode(fr.result); }
+    catch (e) { text = new TextDecoder("windows-1252").decode(fr.result); }
+    cb(text, file.name);
+  };
+  fr.readAsArrayBuffer(file);
+}
+function ingest(text, name) {
+  const res = parseStatement(text);
+  if (res.error) { WIZ.error = res.error; WIZ.rows = []; }
+  else { WIZ.rows = res.rows; WIZ.error = null; WIZ.name = name || "collé"; WIZ.step = 2; WIZ.noMerchantCol = res.merchantColumnIsCategory; }
+  if (WIZ.rows.length) analyseDuplicates();
+  render();
+}
+
+function commitImport() {
+  const rows = WIZ.rows;
+  rows.forEach(r => r.merchantKey = merchantKey(r));
+  const idx = buildMerchantIndex(DB.tx.map(t => t.merchantKey).concat(rows.map(r => r.merchantKey)));
+  const legacy = WIZ.mode === "history" ? Object.assign({}, LEGACY_MAP, DB.legacyMap, WIZ.mapping) : Object.assign({}, LEGACY_MAP, DB.legacyMap);
+  const dup = WIZ.verdicts || detectDuplicates(rows, DB.tx, { windowDays: DB.settings.dupWindow, amountTol: (DB.settings.dupTol || 5) / 100 });
+  const impId = (DB.imports.reduce((m, i) => Math.max(m, i.id), 0) || 0) + 1;
+  const label = WIZ.mode === "history" ? "Reprise historique" : todayISO().split("-").reverse().join("/");
+  let added = 0, dupCount = 0, ignored = 0;
+  const fresh = [];
+  const history = WIZ.mode === "history";
+  dup.forEach(({ row, status }) => {
+    if (status !== ST_OK && !WIZ.importDups && !history) return;      // skipped entirely, as chosen
+    const c = categorise(row, DB.rules, idx, legacy);
+    const st = status !== ST_OK ? status : (history ? c.status : ST_OK);
+    const t = { date: row.date, label: row.label, merchantRaw: row.merchantRaw, amount: row.amount,
+                /* a new operation is never categorised behind the user's back: only the reprise
+                   inherits the categories a human already assigned in the spreadsheet */
+                cat: history ? c.cat : null, status: st, imp: impId, bankCat: row.bankCat, merchantKey: row.merchantKey };
+    fresh.push(t);
+    if (st === ST_DUP || st === ST_DUP_MAYBE) dupCount++; else if (st === ST_IGNORED) ignored++; else added++;
+  });
+  DB.tx = DB.tx.concat(fresh);
+  if (WIZ.mode === "history") DB.legacyMap = Object.assign({}, DB.legacyMap, WIZ.mapping);
+  reindex();
+  let learned = 0;
+  if (WIZ.mode === "history") {
+    learned = learnRulesFromHistory(0.6);
+    // second pass: vendor rules fill in what the old spreadsheet never categorised
+    fresh.forEach(t => {
+      if (t.cat || t.status === ST_DUP || t.status === ST_DUP_MAYBE) return;
+      const c = categorise(t, DB.rules, MERCHANT_INDEX, legacy);
+      if (c.cat) { t.cat = c.cat; if (c.status === ST_IGNORED) { t.status = ST_IGNORED; ignored++; added--; } }
+    });
+  }
+  DB.imports.push({ id: impId, date: label, name: label, file: WIZ.name, n: fresh.length });
+  const todo = fresh.filter(t => t.status === ST_OK && !t.cat).length;
+  saveDB(); reindex();
+  WIZ.result = { added, dup: dupCount, todo, ignored, rules: learned, name: label };
+  UI.showDup = false;
+  const dates = fresh.map(t => t.date).sort();
+  if (dates.length) { UI.month = monthKey(dates[dates.length - 1]); UI.year = yearOf(dates[dates.length - 1]); }
+  if (history) { WIZ.step = 4; render(); }
+  else {                                   // straight into one-by-one sorting
+    const ids = fresh.filter(t => t.status === ST_OK).map(t => t.id);
+    UI.modal = null; WIZ = null;
+    if (ids.length) startReview(ids, "Import du " + label);
+    else { render(); toast("Rien de nouveau à trier."); }
+  }
+}
+
+/* =========================================================================
+   One-by-one sorting. New operations are never filed automatically: the app
+   proposes, the user decides.
+   ========================================================================= */
+let REVIEW = null;
+function startReview(ids, title) {
+  REVIEW = { ids: ids.slice(), i: 0, sel: undefined, remember: true, title: title || "Tri des opérations", total: ids.length, history: [] };
+  UI.modal = reviewModal; render();
+}
+function reviewCurrent() { return REVIEW && REVIEW.i < REVIEW.ids.length ? DB.tx[REVIEW.ids[REVIEW.i]] : null; }
+function reviewSuggestion(t) {
+  const c = categorise(t, DB.rules, MERCHANT_INDEX, DB.legacyMap);
+  return c;
+}
+function reviewModal() {
+  const t = reviewCurrent();
+  if (!t) {
+    return '<div class="modal-back"><div class="modal" style="max-width:420px;text-align:center">' +
+      '<div class="doneburst">' + icon("check", 30) + "</div>" +
+      '<h1 style="text-align:center">Tri terminé</h1>' +
+      '<p class="muted" style="margin:6px 0 20px">' + REVIEW.total + " opération" + (REVIEW.total > 1 ? "s" : "") +
+      " passée" + (REVIEW.total > 1 ? "s" : "") + " en revue. Le mois est à jour.</p>" +
+      '<button class="btn primary big" data-act="revclose">Voir le mois</button>' +
+      (REVIEW.history.length ? '<div style="margin-top:12px"><button class="btn ghost sm" data-act="revback">' + icon("undo", 14) +
+        "Revenir sur la dernière</button></div>" : "") + "</div></div>";
+  }
+  const sug = reviewSuggestion(t);
+  const sel = REVIEW.sel === undefined ? sug.cat : REVIEW.sel;
+  const expense = t.amount < 0;
+  const merchant = t.merchantRaw || merchantFromLabel(t.label) || "Opération";
+  const kind = /CARTE/i.test(t.label) ? "Carte" : /VIR/i.test(t.label) ? "Virement" : /PRLV|PREL/i.test(t.label) ? "Prélèvement" : /RETRAIT|DAB/i.test(t.label) ? "Retrait" : "Opération";
+  const selGroup = sel ? catGroup(sel) : null;
+  const accent = selGroup ? selGroup.color : "var(--ink-mute)";
+
+  /* avatar: the group icon once a category is on the table, initials before that */
+  const initials = merchant.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, " ").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "?";
+  const avatar = '<div class="avatar" style="background:' + (selGroup ? selGroup.color + "1F" : "var(--line-2)") + ";color:" + accent + '">' +
+    (selGroup ? icon(selGroup.icon, 24) : esc(initials)) + "</div>";
+
+  /* why this suggestion, in four words rather than a sentence */
+  const why = { rule: "déjà classé ainsi", legacy: "d\u2019après le relevé", keyword: "commerçant reconnu", neutral: "transfert interne probable" }[sug.source];
+  const twins = sug.source === "rule" ? DB.tx.filter(x => x.cat === sug.cat && x !== t && canonOf(x) === canonOf(t)).length : 0;
+
+  /* quick picks: the suggestion, then the categories actually used the most */
+  const used = {};
+  DB.tx.forEach(x => { if (x.cat && !CAT_BY_ID[x.cat].legacy) used[x.cat] = (used[x.cat] || 0) + 1; });
+  const quick = [];
+  if (sug.cat) quick.push(sug.cat);
+  Object.keys(used).sort((a, b) => used[b] - used[a]).forEach(c => { if (quick.length < 6 && quick.indexOf(c) < 0) quick.push(c); });
+  if (sel && quick.indexOf(sel) < 0) quick.unshift(sel);
+
+  const pickBtn = cid => {
+    const c = CAT_BY_ID[cid], g = GROUP_BY_ID[c.group], on = sel === cid;
+    return '<button class="pick ' + (on ? "on" : "") + '" data-act="revsel" data-cat="' + cid + '"' +
+      (on ? ' style="border-color:' + g.color + ";background:" + g.color + '14;color:' + g.color + '"' : "") + ">" +
+      '<span class="dot" style="background:' + g.color + '"></span>' + esc(c.name) + "</button>";
+  };
+
+  let picker = '<div class="pickrow">' + quick.map(pickBtn).join("") + "</div>";
+  if (REVIEW.expand) {
+    picker += GROUPS.map(g => {
+      const list = CATS.filter(c => c.group === g.id && (!c.legacy || c.id === sel) && quick.indexOf(c.id) < 0);
+      if (!list.length) return "";
+      return '<div class="grouplab">' + esc(g.name) + '</div><div class="pickrow">' + list.map(c => pickBtn(c.id)).join("") + "</div>";
+    }).join("");
+  }
+
+  const segments = [];
+  for (let i = 0; i < Math.min(REVIEW.total, 24); i++) {
+    const at = Math.floor(i * REVIEW.total / Math.min(REVIEW.total, 24));
+    segments.push('<i class="' + (at < REVIEW.i ? "done" : at === REVIEW.i ? "now" : "") + '"></i>');
+  }
+
+  return '<div class="modal-back"><div class="modal" style="max-width:600px">' +
+    '<div class="mhead"><div><h1>' + esc(REVIEW.title) + "</h1>" +
+    '<div class="tiny muted"><b class="num">' + (REVIEW.i + 1) + "</b> sur " + REVIEW.total + " · " + (REVIEW.total - REVIEW.i - 1) + " restantes</div></div>" +
+    '<div class="spacer" style="flex:1"></div><button class="iconbtn" data-act="revclose" title="Fermer — le reste part dans « À catégoriser »">' + icon("x") + "</button></div>" +
+    '<div class="segbar">' + segments.join("") + "</div>" +
+    '<div class="rev" id="revcard">' +
+      '<div class="revhead">' + avatar +
+        '<div class="revwho"><div class="rmerch" style="margin:0">' + esc(merchant.toLowerCase()) + "</div>" +
+        '<div class="rdate">' + esc(t.date.slice(8, 10) + "/" + t.date.slice(5, 7)) + " · " + kind + "</div></div>" +
+        '<div class="revamt num ' + (expense ? "" : "pos") + '">' + esc(fmtEur(t.amount, { plus: true })) + "</div>" +
+      "</div>" +
+      '<div class="rlabel" style="margin-top:10px">' + esc(t.label) + "</div>" +
+      (sug.cat && sug.source ? '<div class="revwhy">' + icon(sug.source === "rule" ? "check" : "eye", 12) + esc(why) +
+        (twins ? " · " + twins + " opération" + (twins > 1 ? "s" : "") + " de ce commerçant" : "") + "</div>" : "") +
+      (!expense ? '<div class="revwhy">' + icon("income", 12) + "montant reçu : revenu, ou remboursement à déduire d\u2019un poste</div>" : "") +
+      '<div class="moreline"><span class="hr"></span><button data-act="revexpand">' +
+        (REVIEW.expand ? "Réduire" : "Toutes les catégories") + "</button><span class=\"hr\"></span></div>" +
+      picker +
+    "</div>" +
+    '<div class="revfoot">' +
+      '<button class="btn" data-act="revback" ' + (REVIEW.history.length ? "" : "disabled") +
+        ' title="Annule l\u2019opération précédente et y revient">' + icon("undo") + "Précédent</button>" +
+      '<button class="btn" data-act="revignore" title="Sort l\u2019opération des calculs">' + icon("vault") + "Ignorer</button>" +
+      '<button class="btn ghost" data-act="revskip">Plus tard</button>' +
+      '<div class="spacer" style="flex:1"></div>' +
+      '<label class="memo ' + (REVIEW.remember ? "on" : "") + '" title="Crée une règle pour ce commerçant"><input type="checkbox" data-chg="revremember" ' +
+        (REVIEW.remember ? "checked" : "") + "> Mémoriser</label>" +
+      '<button class="btn primary big" data-act="revvalidate" ' + (sel ? "" : "disabled") +
+        (sel && selGroup ? ' style="background:' + selGroup.color + ";border-color:" + selGroup.color + '"' : "") + ">" +
+        icon("check") + (sel ? esc(CAT_BY_ID[sel].name) : "Choisir une catégorie") + "</button>" +
+    "</div>" +
+    '<div class="tiny muted" style="margin-top:10px;text-align:right"><span class="kbd">Entrée</span> valider · <span class="kbd">←</span> ignorer · ' +
+      '<span class="kbd">→</span> plus tard · <span class="kbd">Retour arrière</span> revenir</div>' +
+    "</div></div>";
+}
+function reviewAct(action) {
+  const t = reviewCurrent();
+  if (!t || REVIEW.busy) return;      // one card at a time, even on a double tap
+  const card = document.getElementById("revcard");
+  const sug = reviewSuggestion(t);
+  const sel = REVIEW.sel === undefined ? sug.cat : REVIEW.sel;
+  if (action === "validate" && !sel) { toast("Choisissez une catégorie."); return; }
+  REVIEW.busy = true;
+  /* everything this action touches is recorded, so it can be taken back */
+  const undo = { at: REVIEW.i, id: t.id, action: action, sel: sel,
+                 prevCat: t.cat, prevStatus: t.status, rules: [], siblings: [] };
+  const apply = () => {
+    REVIEW.busy = false;
+    if (action === "validate") {
+      t.cat = sel;
+      t.status = catKind(sel) === KIND_NEUTRAL ? ST_IGNORED : ST_OK;
+      const key = canonOf(t) || labelKey(t);
+      const legacy = CAT_BY_ID[sel] && CAT_BY_ID[sel].legacy;
+      if (REVIEW.remember && !legacy && key && key.length > 2 && /[a-z]{3}/.test(key) && !OPAQUE_MERCHANTS.has(key)) {
+        const lk = labelKey(t);
+        [key, lk].forEach(k => {
+          if (!k || k.length < 3 || OPAQUE_MERCHANTS.has(k) || DB.rules[k] === sel) return;
+          undo.rules.push([k, DB.rules[k]]);
+          DB.rules[k] = sel;
+        });
+        /* the rest of the batch from the same merchant is settled at the same time */
+        const removals = [];
+        DB.tx.forEach(x => {
+          if (x === t || !isTodo(x) || canonOf(x) !== canonOf(t)) return;
+          const at = REVIEW.ids.indexOf(x.id);
+          if (at <= REVIEW.i) return;
+          undo.siblings.push({ id: x.id, at: at, prevCat: x.cat, prevStatus: x.status });
+          x.cat = sel;
+          if (catKind(sel) === KIND_NEUTRAL) x.status = ST_IGNORED;
+          removals.push(at);
+        });
+        removals.sort((a, b) => b - a).forEach(at => REVIEW.ids.splice(at, 1));
+      }
+    } else if (action === "ignore") {
+      t.status = ST_IGNORED; t.cat = t.cat || "c_transfer";
+    }
+    REVIEW.history.push(undo);
+    REVIEW.i++; REVIEW.sel = undefined;
+    saveDB(); render();
+  };
+  if (card && action !== "skip") {
+    card.classList.add(action === "ignore" ? "out-left" : "out-right");
+    setTimeout(apply, 240);
+  } else apply();
+}
+
+/* Step back one card and undo what that card's action changed. */
+function reviewBack() {
+  if (!REVIEW || !REVIEW.history.length || REVIEW.busy) return;
+  const u = REVIEW.history.pop();
+  const t = DB.tx[u.id];
+  if (t) { t.cat = u.prevCat; t.status = u.prevStatus; }
+  u.rules.forEach(([k, prev]) => { if (prev === undefined) delete DB.rules[k]; else DB.rules[k] = prev; });
+  u.siblings.slice().sort((a, b) => a.at - b.at).forEach(s => {
+    const x = DB.tx[s.id];
+    if (x) { x.cat = s.prevCat; x.status = s.prevStatus; }
+    REVIEW.ids.splice(s.at, 0, s.id);
+  });
+  REVIEW.i = u.at;
+  REVIEW.sel = u.action === "validate" ? u.sel : undefined;   // the previous pick comes back selected
+  saveDB(); render();
+}
+
+/* =========================================================================
+   Backup / export
+   ========================================================================= */
+function download(filename, content, type) {
+  const blob = new Blob([content], { type: type || "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function exportJSON() {
+  download("budget-sauvegarde-" + todayISO() + ".json", serialize(DB), "application/json");
+  toast("Sauvegarde exportée.");
+}
+function exportCSV() {
+  const head = ["date", "libelle", "vendeur", "montant", "groupe", "categorie", "statut", "import"];
+  const statusLabel = { 0: "compte", 1: "doublon", 2: "doublon probable", 3: "ignore" };
+  const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+  const lines = [head.join(";")].concat(DB.tx.map(t => [
+    t.date, t.label, t.merchantRaw || "", String(t.amount).replace(".", ","),
+    t.cat && catGroup(t.cat) ? catGroup(t.cat).name : "", t.cat ? catName(t.cat) : "",
+    statusLabel[t.status], importLabel(t.imp),
+  ].map(q).join(";")));
+  download("budget-operations-" + todayISO() + ".csv", "\ufeff" + lines.join("\r\n"), "text/csv;charset=utf-8");
+  toast("Export CSV terminé.");
+}
+function restoreJSON(text) {
+  try {
+    const db = deserialize(text);
+    if (!confirm("Restaurer cette sauvegarde ? Les " + DB.tx.length + " opérations actuelles seront remplacées par " + db.tx.length + " opérations.")) return;
+    DB = db;
+    (DB.customCats || []).forEach(registerCat);
+    reindex(); saveDB(); render(); toast("Sauvegarde restaurée.");
+  } catch (e) { toast("Fichier illisible : ce n\u2019est pas une sauvegarde Budget."); }
+}
+
+/* =========================================================================
+   Small modal: create a subcategory
+   ========================================================================= */
+function newCatModal() {
+  return '<div class="modal-back" data-act="backdrop"><div class="modal" style="max-width:440px">' +
+    '<div class="mhead"><h1>Nouvelle sous-catégorie</h1><div class="spacer" style="flex:1"></div>' +
+    '<button class="iconbtn" data-act="closesmall">' + icon("x") + "</button></div>" +
+    '<div class="field" style="margin-bottom:12px"><label>Nom</label><input type="text" id="newcatname" placeholder="Ex. Péniche, Cave à vin…"></div>' +
+    '<div class="field"><label>Groupe</label><select id="newcatgroup" class="selcat">' +
+    GROUPS.map(g => '<option value="' + g.id + '">' + esc(g.name) + "</option>").join("") + "</select></div>" +
+    '<div style="display:flex;gap:8px;margin-top:18px"><div class="spacer" style="flex:1"></div>' +
+    '<button class="btn ghost" data-act="closesmall">Annuler</button>' +
+    '<button class="btn primary" data-act="createcat">Créer</button></div></div></div>';
+}
+
+/* =========================================================================
+   Events
+   ========================================================================= */
+function txById(id) { return DB.tx[+id]; }
+function setStatus(id, status) {
+  const t = txById(id); if (!t) return;
+  t.status = status; saveDB(); render();
+}
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  const act = el.dataset.act;
+  if (act === "backdrop" && e.target !== el) return;
+
+  switch (act) {
+    case "view": UI.view = el.dataset.view; render(); break;
+    case "prev": UI.view === "year" ? UI.year-- : (UI.month = addMonth(UI.month, -1)); render(); break;
+    case "next": UI.view === "year" ? UI.year++ : (UI.month = addMonth(UI.month, 1)); render(); break;
+    case "today": UI.month = monthKey(todayISO()); UI.year = yearOf(todayISO()); render(); break;
+    case "prevyear": UI.year--; render(); break;
+    case "nextyear": UI.year++; render(); break;
+    case "openmonth": UI.month = el.dataset.month; UI.view = "month"; render(); break;
+    case "togglegroup":
+      UI.openGroup = UI.openGroup === el.dataset.group ? null : el.dataset.group; UI.openCat = null; render(); break;
+    case "togglecat":
+      e.stopPropagation();
+      UI.openCat = UI.openCat === el.dataset.cat ? null : el.dataset.cat; render(); break;
+    case "batch": UI.batch = el.dataset.batch; render(); break;
+    case "theme": cycleTheme(); break;
+    case "import": openImport(DB.tx.length ? "month" : "history"); break;
+    case "wizard": openImport("history"); break;
+    case "undup": setStatus(el.dataset.id, ST_OK); toast("Opération réintégrée dans les totaux."); break;
+    case "mkdup": setStatus(el.dataset.id, ST_DUP); toast("Marquée comme doublon."); break;
+    case "ignore": setStatus(el.dataset.id, ST_IGNORED); break;
+    case "unignore": setStatus(el.dataset.id, ST_OK); break;
+    case "del": {
+      const t = txById(el.dataset.id); if (!t) break;
+      if (!confirm("Supprimer définitivement « " + t.label + " » ?")) break;
+      DB.tx.splice(+el.dataset.id, 1); reindex(); saveDB(); render(); toast("Opération supprimée."); break;
+    }
+    case "addop": addManual(); break;
+    case "cmpmode": UI.cmpMode = el.dataset.mode; render(); break;
+    case "revexpand": REVIEW.expand = !REVIEW.expand; render(); break;
+    case "delmonth": {
+      const ops = opsOfMonth(UI.month);
+      if (!ops.length) break;
+      if (!confirm("Supprimer les " + ops.length + " opérations de " + monthLabel(UI.month) +
+                   " ? Doublons et virements internes compris. Les règles, objectifs et revenus ne bougent pas.")) break;
+      const doomed = new Set(ops.map(o => o.id));
+      DB.tx = DB.tx.filter(t => !doomed.has(t.id));
+      reindex(); saveDB(); render();
+      toast(ops.length + " opérations supprimées — le mois est vide.");
+      break;
+    }
+    case "editcat": {                       // the picker is built only for the row being edited
+      const t = txById(el.dataset.id); if (!t) break;
+      const cell = el.parentNode;
+      cell.innerHTML = catSelect(t.cat, 'data-chg="cat" data-id="' + t.id + '"');
+      const sel = cell.querySelector("select"); if (sel) sel.focus();
+      break;
+    }
+    case "pick": $("#filein").click(); break;
+    case "paste": { const v = $("#pastebox").value.trim(); if (v) ingest(v, "collé"); break; }
+    case "wiznext":
+      if (WIZ.mode === "history" && WIZ.step === 3) commitImport();
+      else if (WIZ.mode === "history") { WIZ.step++; render(); }
+      else commitImport();
+      break;
+    case "wizback": WIZ.step--; render(); break;
+    case "wizclose": closeModal(); break;
+    case "wizfill": fillYear(el.dataset.year, WIZ); break;
+    case "fillyear": fillYear(String(UI.year)); break;
+    case "newcat": UI.small = newCatModal; renderSmall(); break;
+    case "closesmall": UI.small = null; renderSmall(); break;
+    case "createcat": {
+      const name = ($("#newcatname").value || "").trim();
+      if (!name) { toast("Il faut un nom."); break; }
+      createCategory(name, $("#newcatgroup").value);
+      UI.small = null; render(); toast("Catégorie « " + name + " » créée."); break;
+    }
+    case "reviewall": {
+      const ids = DB.tx.filter(isTodo).map(t => t.id);
+      if (!ids.length) { toast("Rien à trier."); break; }
+      startReview(ids, "Tri des opérations"); break;
+    }
+    case "revsel": REVIEW.sel = el.dataset.cat === REVIEW.sel ? null : el.dataset.cat; render(); break;
+    case "revvalidate": reviewAct("validate"); break;
+    case "revignore": reviewAct("ignore"); break;
+    case "revskip": reviewAct("skip"); break;
+    case "revback": reviewBack(); break;
+    case "revclose": {
+      const left = REVIEW ? REVIEW.ids.length - REVIEW.i : 0;
+      REVIEW = null; UI.modal = null; render();
+      if (left > 0) toast(left + " opération(s) restent dans « À catégoriser ».");
+      break;
+    }
+    case "suggest": {
+      const sg = suggestedGoals();
+      if (!sg.income) { toast("Saisissez d\u2019abord vos revenus."); break; }
+      if (!confirm("Poser un objectif sur chacun des grands groupes, aux montants suggérés ? Vos objectifs déjà saisis ne bougent pas, et les sous-catégories restent libres (cliquez un montant suggéré pour en adopter un).")) break;
+      GROUPS.forEach(gr => {
+        const v = sg.byId[gr.id]; if (!v) return;
+        const g = DB.goals[gr.id] || { m: 0, y: 0 };
+        if (!g.m) g.m = v;
+        if (!g.y) g.y = v * 12;
+        DB.goals[gr.id] = g;
+      });
+      saveDB(); UI.view = "settings"; render(); toast("Objectifs proposés appliqués — ajustez-les à votre guise.");
+      break;
+    }
+    case "showcand": UI.showCand = !UI.showCand; render(); break;
+    case "usesaverate": {
+      const v = +el.dataset.v;
+      DB.settings.savingsGoal = DB.settings.savingsGoal === v ? 0 : v;
+      saveDB(); render();
+      toast(DB.settings.savingsGoal ? "Objectif de taux d\u2019épargne : " + fmtRate(v) : "Objectif de taux d\u2019épargne retiré.");
+      break;
+    }
+    case "usesugg": {
+      const id = el.dataset.id, v = +el.dataset.v;
+      const g = DB.goals[id] || { m: 0, y: 0 };
+      g.m = v; if (!g.y) g.y = v * 12;
+      DB.goals[id] = g; saveDB(); render(); break;
+    }
+    case "export-json": exportJSON(); break;
+    case "export-csv": exportCSV(); break;
+    case "import-json": {
+      const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json";
+      inp.onchange = () => inp.files[0] && readFileText(inp.files[0], t => restoreJSON(t));
+      inp.click(); break;
+    }
+    case "learn": { const n = learnRulesFromHistory(0.6); saveDB(); render(); toast(n + " nouvelle(s) règle(s) apprise(s)."); break; }
+    case "reset":
+      if (confirm("Effacer toutes les données de Budget ? Cette action est irréversible.") &&
+          confirm("Dernière confirmation : les " + DB.tx.length + " opérations seront perdues.")) {
+        DB = emptyDB(); reindex(); saveDB(); render(); toast("Données effacées.");
+      }
+      break;
+  }
+});
+
+document.addEventListener("change", e => {
+  const el = e.target.closest("[data-chg]");
+  if (!el) return;
+  const kind = el.dataset.chg;
+  if (kind === "cat") {
+    const t = txById(el.dataset.id); if (!t) return;
+    t.cat = el.value || null;
+    if (t.cat && catKind(t.cat) === KIND_NEUTRAL) t.status = ST_IGNORED;
+    else if (t.status === ST_IGNORED) t.status = ST_OK;
+    saveDB();
+    const key = canonOf(t);
+    if (t.cat && key && DB.rules[key] !== t.cat) {
+      const others = DB.tx.filter(x => x.id !== t.id && canonOf(x) === key);
+      const msg = others.length
+        ? "Classer aussi les " + others.length + " autre(s) opération(s) de « " + (t.merchantRaw || key) + " » en « " + catName(t.cat) + " » et retenir la règle ?"
+        : "Retenir « " + catName(t.cat) + " » pour les prochaines opérations de « " + (t.merchantRaw || key) + " » ?";
+      if (confirm(msg)) {
+        DB.rules[key] = t.cat;
+        others.forEach(x => { if (x.status !== ST_DUP) { x.cat = t.cat; x.status = catKind(t.cat) === KIND_NEUTRAL ? ST_IGNORED : x.status; } });
+        saveDB();
+      }
+    }
+    render();
+  } else if (kind === "bulkcat") {
+    const key = el.dataset.key, cat = el.value || null;
+    if (!cat) return;
+    DB.tx.forEach(t => { if (isTodo(t) && (canonOf(t) || normalize(t.merchantRaw || merchantFromLabel(t.label))) === key) {
+      t.cat = cat; if (catKind(cat) === KIND_NEUTRAL) t.status = ST_IGNORED; } });
+    if (!OPAQUE_MERCHANTS.has(key)) DB.rules[key] = cat;
+    saveDB(); render(); toast("Classé, et la règle est retenue.");
+  } else if (kind === "showdup") { UI.showDup = el.checked; render(); }
+  else if (kind === "showign") { UI.showIgnored = el.checked; render(); }
+  else if (kind === "map") { WIZ.mapping[el.dataset.key] = el.value || ""; }
+  else if (kind === "impdup") { WIZ.importDups = el.checked; render(); }
+  else if (kind === "revremember") { REVIEW.remember = el.checked; }
+  else if (kind === "income") {
+    const key = el.dataset.key, slot = +el.dataset.slot;
+    const a = DB.income[key] || [0, 0, 0];
+    a[slot] = parseAmount(el.value) || 0;
+    if (a[0] || a[1] || a[2]) DB.income[key] = a; else delete DB.income[key];
+    saveDB();
+    if (!WIZ) render();
+  } else if (kind === "goal") {
+    const id = el.dataset.id, slot = el.dataset.slot;
+    const g = DB.goals[id] || { m: 0, y: 0 };
+    g[slot] = parseAmount(el.value) || 0;
+    if (g.m || g.y) DB.goals[id] = g; else delete DB.goals[id];
+    saveDB();
+  } else if (kind === "fixed") {
+    const key = el.dataset.key;
+    DB.fixed = DB.fixed || {};
+    DB.fixed[key] = el.checked ? 1 : 0;
+    saveDB(); render();
+  } else if (kind === "setting") {
+    const v = parseAmount(el.value);
+    DB.settings[el.dataset.key] = v == null ? DEFAULT_SETTINGS[el.dataset.key] : v;
+    saveDB(); render();
+  }
+});
+
+document.addEventListener("dragover", e => {
+  if (!WIZ) return;
+  e.preventDefault(); const d = $("#drop"); if (d) d.classList.add("hot");
+});
+document.addEventListener("dragleave", () => { const d = $("#drop"); if (d) d.classList.remove("hot"); });
+document.addEventListener("drop", e => {
+  if (!WIZ) return;
+  e.preventDefault(); const d = $("#drop"); if (d) d.classList.remove("hot");
+  const f = e.dataTransfer.files[0]; if (f) readFileText(f, (text, name) => ingest(text, name));
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    if (UI.small) { UI.small = null; renderSmall(); }
+    else if (REVIEW) { REVIEW = null; UI.modal = null; render(); }
+    else if (UI.modal) closeModal();
+    return;
+  }
+  if (!REVIEW) return;
+  if (!reviewCurrent()) {
+    if (e.key === "Backspace" || (e.key === "z" && (e.ctrlKey || e.metaKey))) { e.preventDefault(); reviewBack(); }
+    return;
+  }
+  if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  if (e.key === "Enter") { e.preventDefault(); reviewAct("validate"); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); reviewAct("ignore"); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); reviewAct("skip"); }
+  else if (e.key === "Backspace" || (e.key === "z" && (e.ctrlKey || e.metaKey))) { e.preventDefault(); reviewBack(); }
+});
+
+function fillYear(year, wiz) {
+  const months = [];
+  for (let m = 1; m <= 12; m++) months.push(year + "-" + pad2(m));
+  const first = months.find(k => DB.income[k]);
+  if (!first) { toast("Renseignez d\u2019abord un mois, il sera recopié."); return; }
+  const src = DB.income[first];
+  const scope = wiz ? Array.from(new Set(wiz.rows.map(r => monthKey(r.date)))).filter(k => k.startsWith(year)) : months;
+  scope.forEach(k => { if (!DB.income[k]) DB.income[k] = src.slice(); });
+  saveDB(); render();
+}
+function addManual() {
+  const label = prompt("Libellé de l\u2019opération ?");
+  if (!label) return;
+  const raw = prompt("Montant ? (négatif pour une dépense, ex. -23,90)");
+  const amount = parseAmount(raw);
+  if (amount == null) { toast("Montant illisible."); return; }
+  const d = prompt("Date ? (JJ/MM/AAAA)", todayISO().split("-").reverse().join("/"));
+  const date = parseDate(d) || todayISO();
+  let impId = DB.imports.find(i => i.name === "Saisie manuelle");
+  if (!impId) { impId = { id: (DB.imports.reduce((m, i) => Math.max(m, i.id), 0) || 0) + 1, date: "manuel", name: "Saisie manuelle", n: 0 }; DB.imports.push(impId); }
+  const row = { date, label, amount, merchantRaw: "", bankCat: "" };
+  row.merchantKey = merchantKey(row);
+  const c = categorise(row, DB.rules, MERCHANT_INDEX, DB.legacyMap);
+  DB.tx.push({ ...row, cat: c.cat, status: c.status, imp: impId.id });
+  UI.month = monthKey(date);
+  reindex(); saveDB(); render();
+}
+
+/* =========================================================================
+   Theme
+   ========================================================================= */
+function applyTheme() {
+  const t = DB.settings.theme || "auto";
+  const dark = t === "dark" || (t === "auto" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+}
+function cycleTheme() {
+  const order = ["auto", "light", "dark"];
+  DB.settings.theme = order[(order.indexOf(DB.settings.theme || "auto") + 1) % 3];
+  saveDB(); applyTheme();
+  toast("Thème : " + { auto: "automatique", light: "clair", dark: "sombre" }[DB.settings.theme]);
+}
+
+/* =========================================================================
+   Boot
+   ========================================================================= */
+function renderSmall() {
+  const old = document.getElementById("smallmodal");
+  if (old) old.remove();
+  if (!UI.small) return;
+  const d = document.createElement("div");
+  d.id = "smallmodal"; d.innerHTML = UI.small();
+  document.body.appendChild(d);
+  const inp = document.getElementById("newcatname"); if (inp) inp.focus();
+}
+document.addEventListener("change", e => {
+  if (e.target && e.target.id === "filein" && e.target.files[0]) readFileText(e.target.files[0], (t, n) => ingest(t, n));
+});
+
+DB = loadDB();
+(DB.customCats || []).forEach(registerCat);
+reindex();
+applyTheme();
+if (window.matchMedia) {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  if (mq.addEventListener) mq.addEventListener("change", applyTheme);
+}
+render();
+if (!DB.tx.length) {
+  setTimeout(() => {
+    const app = $(".main");
+    if (app && !DB.tx.length) app.insertAdjacentHTML("afterbegin",
+      '<div class="note" style="margin-bottom:16px">' + icon("inbox") +
+      " Premier lancement : <b>Réglages → Reprise de l\u2019historique</b> pour charger le tableur complet, " +
+      "ou <b>Importer</b> pour un simple relevé mensuel.</div>");
+  }, 0);
+}
+
+</script>
+</body>
+</html>
