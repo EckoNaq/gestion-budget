@@ -817,13 +817,14 @@ function detectDuplicates(incoming, existing, opts) {
 const DEFAULT_SETTINGS = { inflation: 1.9, band: 5, dupWindow: 5, dupTol: 5, theme: "auto", savingsGoal: 0 };
 
 function emptyDB() {
-  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS } };
+  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [] };
 }
 function serialize(db) {
   return JSON.stringify({
     v: SCHEMA_VERSION,
     t: db.tx.map(t => [t.date, t.label, t.merchantRaw || "", t.amount, t.cat || "", t.status, t.imp, t.bankCat || ""]),
     r: db.rules, i: db.income, g: db.goals, m: db.imports, l: db.legacyMap, f: db.fixed, s: db.settings,
+    c: db.customCats || [],
   });
 }
 function deserialize(json) {
@@ -832,6 +833,7 @@ function deserialize(json) {
   db.rules = raw.r || {}; db.income = raw.i || {}; db.goals = raw.g || {};
   db.imports = raw.m || []; db.legacyMap = raw.l || {}; db.fixed = raw.f || {};
   db.settings = Object.assign({}, DEFAULT_SETTINGS, raw.s || {});
+  db.customCats = raw.c || [];
   return db;
 }
 function loadDB() {
@@ -1807,6 +1809,19 @@ function viewTodo() {
    Settings
    ========================================================================= */
 function registerCat(c) { if (!CAT_BY_ID[c.id]) { CATS.push(c); CAT_BY_ID[c.id] = c; } }
+/* Backups exported before the customCats fix don't carry custom category
+   definitions, so a restored tx can point at an id nothing declares. Rebuild
+   a placeholder from the bank's own label rather than let lookups crash. */
+function recoverMissingCats(db) {
+  const known = new Set((db.customCats || []).map(c => c.id));
+  db.tx.forEach(t => {
+    if (!t.cat || CAT_BY_ID[t.cat] || known.has(t.cat)) return;
+    const c = { id: t.cat, group: "g_legacy", name: t.bankCat || t.cat, custom: true, recovered: true };
+    registerCat(c);
+    db.customCats = db.customCats || []; db.customCats.push(c);
+    known.add(t.cat);
+  });
+}
 function newCatId(name) {
   let base = "x_" + normalize(name).replace(/ /g, "_").slice(0, 22) || "x_cat";
   let id = base, n = 2; while (CAT_BY_ID[id]) id = base + "_" + n++;
@@ -1883,9 +1898,14 @@ function viewSettings() {
       suggestCell(sg, g.id) +
       '<td style="text-align:right"><input type="number" step="10" value="' + (gg.m || "") + '" data-chg="goal" data-id="' + g.id + '" data-slot="m"></td>' +
       '<td style="text-align:right"><input type="number" step="100" value="' + (gg.y || "") + '" data-chg="goal" data-id="' + g.id + '" data-slot="y"></td></tr>';
-    CATS.filter(c => c.group === g.id && !c.legacy).forEach(c => {
+    CATS.filter(c => c.group === g.id).forEach(c => {
       const cg = goalOf(c.id);
-      html += '<tr><td style="padding-left:34px" class="muted">' + esc(c.name) + "</td>" +
+      html += '<tr><td style="padding-left:34px" class="muted">' + esc(c.name) +
+        (c.legacy ? ' <span class="tiny muted">(historique)</span>' : "") +
+        (c.custom ? ' <select class="tiny" data-chg="catgroup" data-id="' + c.id + '" title="Déplacer vers un autre groupe">' +
+          GROUPS.filter(gr => gr.kind === KIND_EXPENSE).map(gr =>
+            '<option value="' + gr.id + '"' + (gr.id === c.group ? " selected" : "") + ">" + esc(gr.name) + "</option>").join("") +
+          "</select>" : "") + "</td>" +
         suggestCell(sg, c.id) +
         '<td style="text-align:right"><input type="number" step="10" value="' + (cg.m || "") + '" data-chg="goal" data-id="' + c.id + '" data-slot="m"></td>' +
         '<td style="text-align:right"><input type="number" step="100" value="' + (cg.y || "") + '" data-chg="goal" data-id="' + c.id + '" data-slot="y"></td></tr>';
@@ -2348,6 +2368,7 @@ function restoreJSON(text) {
     if (!confirm("Restaurer cette sauvegarde ? Les " + DB.tx.length + " opérations actuelles seront remplacées par " + db.tx.length + " opérations.")) return;
     DB = db;
     (DB.customCats || []).forEach(registerCat);
+    recoverMissingCats(DB);
     reindex(); saveDB(); render(); toast("Sauvegarde restaurée.");
   } catch (e) { toast("Fichier illisible : ce n\u2019est pas une sauvegarde Budget."); }
 }
@@ -2562,6 +2583,11 @@ document.addEventListener("change", e => {
     DB.fixed = DB.fixed || {};
     DB.fixed[key] = el.checked ? 1 : 0;
     saveDB(); render();
+  } else if (kind === "catgroup") {
+    const c = CAT_BY_ID[el.dataset.id]; if (!c) return;
+    c.group = el.value;
+    const dc = (DB.customCats || []).find(x => x.id === c.id); if (dc) dc.group = el.value;
+    saveDB(); render(); toast("Catégorie déplacée.");
   } else if (kind === "setting") {
     const v = parseAmount(el.value);
     DB.settings[el.dataset.key] = v == null ? DEFAULT_SETTINGS[el.dataset.key] : v;
@@ -2659,6 +2685,7 @@ document.addEventListener("change", e => {
 
 DB = loadDB();
 (DB.customCats || []).forEach(registerCat);
+recoverMissingCats(DB);
 reindex();
 applyTheme();
 if (window.matchMedia) {
