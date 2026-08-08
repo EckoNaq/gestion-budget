@@ -14,6 +14,8 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ### 2026-08-08
 
+- Ajout : nouvel onglet **Patrimoine** — suivi des comptes (livrets, PEA, assurance-vie...), de leur valorisation mois par mois, et des dépôts/retraits. La synthèse affiche le patrimoine total, la répartition par compte et la performance (mensuelle et annuelle) neutralisée de l'effet des mouvements, comme dans le suivi Excel qu'il remplace.
+- Ajout (en cours / WIP) : sous-onglet **Aperçu** dans Patrimoine — vue de synthèse avec KPIs (patrimoine total, performance du mois/de l'année), graphique d'évolution sur tout l'historique disponible, répartition par compte, détail de la performance par compte (tableau + comparatif) avec sélecteurs de mois/année, et performance mensuelle sur 12 mois.
 - Correction : les catégories personnalisées (ex. "Jeux Vidéos") n'étaient jamais incluses dans les sauvegardes JSON, ce qui faisait planter la restauration d'un ancien export.
 - Ajout : filet de sécurité si un fichier de sauvegarde restauré référence une catégorie absente du JSON (typiquement un ancien export fait avant ce correctif) — elle est recréée automatiquement depuis le libellé bancaire au lieu de faire planter l'appli. Pour toute sauvegarde exportée à partir de maintenant, ce cas ne se produit plus : les catégories perso sont incluses dans le fichier.
 - Ajout : dans Réglages, un menu pour déplacer une catégorie personnalisée vers un autre groupe.

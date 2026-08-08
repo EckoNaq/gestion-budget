@@ -60,6 +60,8 @@ h3{font-size:13px}
 .brand b{font-size:17px;font-weight:660;letter-spacing:-.02em}
 .brand span{font-size:11px;color:var(--ink-mute)}
 .navgroup{display:flex;flex-direction:column;gap:1px}
+.navlabel{padding:14px 8px 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute)}
+.navlabel:first-child{padding-top:2px}
 .navbtn{
   display:flex;align-items:center;gap:9px;width:100%;text-align:left;
   background:none;border:0;padding:7px 8px;border-radius:var(--radius-sm);
@@ -817,7 +819,7 @@ function detectDuplicates(incoming, existing, opts) {
 const DEFAULT_SETTINGS = { inflation: 1.9, band: 5, dupWindow: 5, dupTol: 5, theme: "auto", savingsGoal: 0 };
 
 function emptyDB() {
-  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [] };
+  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [], patAccounts: [], patValues: {}, patMovements: [] };
 }
 function serialize(db) {
   return JSON.stringify({
@@ -825,6 +827,7 @@ function serialize(db) {
     t: db.tx.map(t => [t.date, t.label, t.merchantRaw || "", t.amount, t.cat || "", t.status, t.imp, t.bankCat || ""]),
     r: db.rules, i: db.income, g: db.goals, m: db.imports, l: db.legacyMap, f: db.fixed, s: db.settings,
     c: db.customCats || [],
+    pa: db.patAccounts || [], pv: db.patValues || {}, pm: db.patMovements || [],
   });
 }
 function deserialize(json) {
@@ -834,6 +837,7 @@ function deserialize(json) {
   db.imports = raw.m || []; db.legacyMap = raw.l || {}; db.fixed = raw.f || {};
   db.settings = Object.assign({}, DEFAULT_SETTINGS, raw.s || {});
   db.customCats = raw.c || [];
+  db.patAccounts = raw.pa || []; db.patValues = raw.pv || {}; db.patMovements = raw.pm || [];
   return db;
 }
 function loadDB() {
@@ -858,6 +862,7 @@ let MERCHANT_INDEX = {};
 const UI = {
   view: "month", month: monthKey(todayISO()), year: yearOf(todayISO()),
   showDup: false, showIgnored: false, showCand: false, batch: "all", openGroup: null, openCat: null, modal: null, small: null, cmpMode: "pct",
+  patMonth: monthKey(todayISO()),
 };
 
 function reindex() {
@@ -988,6 +993,11 @@ function yearProjection(year) {
 function yearsWithData() {
   const s = new Set(DB.tx.map(t => yearOf(t.date)));
   Object.keys(DB.income).forEach(k => s.add(+k.slice(0, 4)));
+  return Array.from(s).sort();
+}
+function patYearsWithData() {
+  const s = new Set([yearOf(todayISO())]);
+  Object.values(DB.patValues || {}).forEach(v => Object.keys(v).forEach(k => s.add(+k.slice(0, 4))));
   return Array.from(s).sort();
 }
 /* -------------------------------------------------------------------------
@@ -1289,16 +1299,25 @@ function catSelect(value, attrs) {
    ========================================================================= */
 function render() {
   const todo = DB.tx.filter(isTodo).length;
-  const nav = [
+  const navItem = ([id, ic, label, badge]) =>
+    '<button class="navbtn ' + (UI.view === id ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
+  const budgetNav = [
     ["month", "cal", "Mois"], ["year", "chart", "Année"],
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
-  ].map(([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
-    icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>").join("");
+  ];
+  const patNav = [["pathome", "home", "Aperçu"], ["pat", "vault", "Comptes"]];
+  const dataNav = [["data", "file", "Données"]];
+  const nav = '<div class="navlabel">Budget</div>' + budgetNav.map(navItem).join("") +
+    '<div class="navlabel">Patrimoine</div>' + patNav.map(navItem).join("") +
+    '<div class="navlabel">Général</div>' + dataNav.map(navItem).join("");
 
   const body = UI.view === "month" ? viewMonth()
     : UI.view === "year" ? viewYear()
-    : UI.view === "todo" ? viewTodo() : viewSettings();
+    : UI.view === "todo" ? viewTodo()
+    : UI.view === "pathome" ? viewPatrimoineHome()
+    : UI.view === "pat" ? viewPatrimoine()
+    : UI.view === "data" ? viewGeneral() : viewSettings();
 
   $("#app").innerHTML =
     '<div class="shell"><aside class="rail">' +
@@ -1806,6 +1825,410 @@ function viewTodo() {
 }
 
 /* =========================================================================
+   Patrimoine — comptes, valorisations mensuelles, mouvements.
+   Perf = (valeur_fin − valeur_début − mouvement) / (valeur_début + mouvement),
+   neutralise l'effet des dépôts/retraits sur la performance affichée.
+   ========================================================================= */
+const PAT_TYPES = [
+  { id: "courant", name: "Compte courant" }, { id: "livret", name: "Livret" },
+  { id: "pea", name: "PEA" }, { id: "av", name: "Assurance-vie" },
+  { id: "per", name: "PER" }, { id: "pee", name: "PEE" },
+  { id: "immo", name: "Immobilier" }, { id: "autre", name: "Autre" },
+];
+function patTypeName(id) { const t = PAT_TYPES.find(x => x.id === id); return t ? t.name : id; }
+function newPatAccountId(name) {
+  let base = "pa_" + normalize(name).replace(/ /g, "_").slice(0, 22) || "pa_compte";
+  let id = base, n = 2; while ((DB.patAccounts || []).some(a => a.id === id)) id = base + "_" + n++;
+  return id;
+}
+function patAccountValue(accountId, mk) {
+  const vals = (DB.patValues || {})[accountId]; if (!vals) return null;
+  const keys = Object.keys(vals).filter(k => k <= mk).sort();
+  return keys.length ? vals[keys[keys.length - 1]] : null;
+}
+function patTotalAt(mk) {
+  return (DB.patAccounts || []).reduce((s, a) => s + (patAccountValue(a.id, mk) || 0), 0);
+}
+function patHasHistoryAt(mk) {
+  return (DB.patAccounts || []).some(a => patAccountValue(a.id, mk) != null);
+}
+/* Comptes exclus (ex. immobilier) : gardés dans le patrimoine total mais sortis
+   de la performance globale, qui n'a pas de sens sur des actifs sans valorisation régulière. */
+function patPerfAccounts() {
+  return (DB.patAccounts || []).filter(a => !a.perfExcluded);
+}
+function patPerfTotalAt(mk) {
+  const accs = patPerfAccounts();
+  return accs.some(a => patAccountValue(a.id, mk) != null) ? accs.reduce((s, a) => s + (patAccountValue(a.id, mk) || 0), 0) : null;
+}
+function patMovementsInMonth(accountId, mk) {
+  return (DB.patMovements || []).filter(m => monthKey(m.date) === mk && (!accountId || m.accountId === accountId))
+    .reduce((s, m) => s + m.amount, 0);
+}
+function patMovementsInYear(accountId, year) {
+  return (DB.patMovements || []).filter(m => yearOf(m.date) === year && (!accountId || m.accountId === accountId))
+    .reduce((s, m) => s + m.amount, 0);
+}
+function patPerfMovements(period, isYear) {
+  const ids = new Set(patPerfAccounts().map(a => a.id));
+  return (DB.patMovements || []).filter(m => (isYear ? yearOf(m.date) === period : monthKey(m.date) === period) && ids.has(m.accountId))
+    .reduce((s, m) => s + m.amount, 0);
+}
+function patPerf(valFin, valDebut, mouvement) {
+  if (valFin == null || valDebut == null) return null;
+  const denom = valDebut + mouvement;
+  return denom ? (valFin - valDebut - mouvement) / denom * 100 : null;
+}
+function patMonthlyPerf(accountId, mk) {
+  const prevM = addMonth(mk, -1);
+  const valFin = accountId ? patAccountValue(accountId, mk) : patPerfTotalAt(mk);
+  const valDebut = accountId ? patAccountValue(accountId, prevM) : patPerfTotalAt(prevM);
+  const mouvement = accountId ? patMovementsInMonth(accountId, mk) : patPerfMovements(mk, false);
+  return patPerf(valFin, valDebut, mouvement);
+}
+function patAnnualPerf(accountId, year) {
+  const endKey = year + "-12", prevEndKey = (year - 1) + "-12";
+  const valFin = accountId ? patAccountValue(accountId, endKey) : patPerfTotalAt(endKey);
+  const valDebut = accountId ? patAccountValue(accountId, prevEndKey) : patPerfTotalAt(prevEndKey);
+  const mouvement = accountId ? patMovementsInYear(accountId, year) : patPerfMovements(year, true);
+  return patPerf(valFin, valDebut, mouvement);
+}
+function newPatAccountModal() {
+  return '<div class="modal-back" data-act="backdrop"><div class="modal" style="max-width:440px">' +
+    '<div class="mhead"><h1>Nouveau compte</h1><div class="spacer" style="flex:1"></div>' +
+    '<button class="iconbtn" data-act="closesmall">' + icon("x") + "</button></div>" +
+    '<div class="field" style="margin-bottom:12px"><label>Nom</label><input type="text" id="newpataccountname" placeholder="Ex. Livret A, PEA Boursorama…"></div>' +
+    '<div class="field"><label>Type</label><select id="newpataccounttype">' +
+    PAT_TYPES.map(t => '<option value="' + t.id + '">' + esc(t.name) + "</option>").join("") + "</select></div>" +
+    '<label class="check" style="margin-top:12px"><input type="checkbox" id="newpataccountperf" checked> Inclure dans le calcul de performance</label>' +
+    '<div style="display:flex;gap:8px;margin-top:18px"><div class="spacer" style="flex:1"></div>' +
+    '<button class="btn ghost" data-act="closesmall">Annuler</button>' +
+    '<button class="btn primary" data-act="createpataccount">Créer</button></div></div></div>';
+}
+
+/* =========================================================================
+   Import CSV — reprise de l'historique Excel (Data-Comptes / Data-Mouvements)
+   ========================================================================= */
+let PATIMP = null;
+const FR_MONTHS_ABBR = ["janv", "fevr", "mars", "avr", "mai", "juin", "juil", "aout", "sept", "oct", "nov", "dec"];
+/* Dates du tableur : "1 janv 2023" — un seul jour saisi par mois, donc on ne garde que le mois. */
+function parseFrCompteDate(raw) {
+  const parts = normalize(raw).split(" ").filter(Boolean);
+  const year = parts.find(p => /^\d{4}$/.test(p));
+  if (!year) return null;
+  const idx = FR_MONTHS_ABBR.findIndex(a => parts.some(p => p.startsWith(a)));
+  return idx < 0 ? null : year + "-" + pad2(idx + 1);
+}
+function guessPatType(name) {
+  const n = normalize(name);
+  if (n.includes("courant")) return "courant";
+  if (n.includes("livret") || n.includes("lld") || n.includes("pel")) return "livret";
+  if (n.includes(" av ") || n.startsWith("av") || n.includes("assurance")) return "av";
+  if (n.includes("pea")) return "pea";
+  if (n.includes("per")) return "per";
+  if (n.includes("pee")) return "pee";
+  if (n.includes("immo")) return "immo";
+  return "autre";
+}
+/* Tableau large : une ligne par mois, une colonne par compte. Les colonnes après le
+   dernier compte réel ("Colonne5"…, "Total"…) sont des calculs du tableur, pas des comptes. */
+function parsePatComptesCSV(text) {
+  const rows = parseCSV(text, ";");
+  const hIdx = rows.findIndex(r => normalize(r[0]) === "date");
+  if (hIdx < 0) return { error: "Colonne « Date » introuvable dans Data-Comptes." };
+  const header = rows[hIdx], accCols = [];
+  for (let i = 1; i < header.length; i++) {
+    const h = (header[i] || "").trim();
+    if (!h) continue;
+    const n = normalize(h);
+    if (n.startsWith("colonne") || n.startsWith("total")) break;
+    accCols.push({ idx: i, name: h });
+  }
+  if (!accCols.length) return { error: "Aucune colonne de compte trouvée dans Data-Comptes." };
+  const values = {};
+  accCols.forEach(a => (values[a.name] = {}));
+  for (let r = hIdx + 1; r < rows.length; r++) {
+    const mkRaw = parseFrCompteDate(rows[r][0]);
+    if (!mkRaw) continue;
+    /* La ligne "1 janv 2023" est l'état des comptes AU 1er janvier, donc la valorisation
+       de clôture de décembre 2022 — même convention que les valeurs saisies dans l'app
+       (patAccountValue traite une clé "YYYY-MM" comme la valeur de FIN de ce mois-là). */
+    const mk = addMonth(mkRaw, -1);
+    accCols.forEach(a => {
+      const v = parseAmount(rows[r][a.idx]);
+      if (v != null) values[a.name][mk] = v;
+    });
+  }
+  return { accounts: accCols.map(a => a.name), values, error: null };
+}
+function parsePatMouvementsCSV(text) {
+  const rows = parseCSV(text, ";");
+  const hIdx = rows.findIndex(r => normalize(r[0]) === "date");
+  if (hIdx < 0) return { error: "Colonne « Date » introuvable dans Data-Mouvements." };
+  const norm = rows[hIdx].map(normalize);
+  const ci = { date: norm.indexOf("date"), compte: norm.indexOf("compte"), montant: norm.findIndex(h => h.startsWith("montant")) };
+  if (ci.date < 0 || ci.compte < 0 || ci.montant < 0)
+    return { error: "Colonnes Date/Compte/Montant introuvables dans Data-Mouvements." };
+  const movements = [];
+  for (let r = hIdx + 1; r < rows.length; r++) {
+    const row = rows[r];
+    const date = parseDate(row[ci.date]), compte = (row[ci.compte] || "").trim(), amount = parseAmount(row[ci.montant]);
+    if (!date || !compte || amount == null) continue;
+    movements.push({ compte, date, amount });
+  }
+  return { movements, error: null };
+}
+function importPatrimoineCsv(comptesText, mouvementsText) {
+  const c = parsePatComptesCSV(comptesText);
+  if (c.error) return { error: c.error };
+  const m = parsePatMouvementsCSV(mouvementsText);
+  if (m.error) return { error: m.error };
+
+  /* Le CSV est la source de vérité : on remplace tout l'onglet Patrimoine plutôt que de
+     fusionner, pour qu'un ré-import après mise à jour du tableur reflète exactement le fichier
+     (pas de doublons, pas de compte fantôme). On garde juste le réglage "perf. globale" par
+     compte, qui n'existe pas dans le CSV. */
+  const prevPerfExcluded = {};
+  (DB.patAccounts || []).forEach(a => { prevPerfExcluded[normalize(a.name)] = a.perfExcluded; });
+
+  DB.patAccounts = []; DB.patValues = {}; DB.patMovements = [];
+  const nameToId = {};
+  c.accounts.forEach(name => {
+    const key = normalize(name);
+    const id = newPatAccountId(name);
+    DB.patAccounts.push({ id, name, type: guessPatType(name), perfExcluded: prevPerfExcluded[key] || false });
+    nameToId[key] = id;
+  });
+  let valuesImported = 0;
+  c.accounts.forEach(name => {
+    const id = nameToId[normalize(name)];
+    DB.patValues[id] = { ...c.values[name] };
+    valuesImported += Object.keys(c.values[name]).length;
+  });
+  let nextId = 1, movementsImported = 0, movementsSkipped = 0;
+  m.movements.forEach(mv => {
+    const accountId = nameToId[normalize(mv.compte)];
+    if (!accountId) { movementsSkipped++; return; }
+    DB.patMovements.push({ id: nextId++, accountId, date: mv.date, amount: mv.amount });
+    movementsImported++;
+  });
+
+  saveDB();
+  return { accountsCreated: c.accounts.length, valuesImported, movementsImported, movementsSkipped, error: null };
+}
+function patImportModal() {
+  const c = PATIMP.comptesName, m = PATIMP.mouvementsName;
+  return '<div class="modal-back" data-act="backdrop"><div class="modal" style="max-width:480px">' +
+    '<div class="mhead"><div><h1>Reprendre l’historique Excel</h1>' +
+    '<div class="tiny muted">Exportez en CSV les onglets Data-Comptes (valorisations mensuelles) et Data-Mouvements (dépôts/retraits) de votre tableur, puis choisissez-les ici.</div></div>' +
+    '<div class="spacer" style="flex:1"></div><button class="iconbtn" data-act="closesmall">' + icon("x") + "</button></div>" +
+    '<div class="note warn" style="margin-bottom:12px">' + icon("warn") + " Remplace entièrement l’onglet Patrimoine (comptes, valorisations, mouvements) par le contenu de ces fichiers.</div>" +
+    '<div class="field" style="margin-bottom:12px"><label>Data-Comptes.csv</label>' +
+    '<button class="btn sm" data-act="patpickcomptes">' + icon("down", 14) + (c ? esc(c) : "Choisir un fichier") + "</button></div>" +
+    '<div class="field"><label>Data-Mouvements.csv</label>' +
+    '<button class="btn sm" data-act="patpickmouvements">' + icon("down", 14) + (m ? esc(m) : "Choisir un fichier") + "</button></div>" +
+    (PATIMP.error ? '<div class="note warn" style="margin-top:12px">' + icon("warn") + " " + esc(PATIMP.error) + "</div>" : "") +
+    '<div style="display:flex;gap:8px;margin-top:18px"><button class="btn ghost" data-act="closesmall">Annuler</button>' +
+    '<div class="spacer" style="flex:1"></div><button class="btn primary" data-act="patrunimport" ' + (c && m ? "" : "disabled") + ">Importer</button></div>" +
+    '<input type="file" id="patfilecomptes" accept=".csv" style="display:none">' +
+    '<input type="file" id="patfilemouvements" accept=".csv" style="display:none">' +
+    "</div></div>";
+}
+function last12Months(endKey) {
+  const out = []; for (let i = 11; i >= 0; i--) out.push(addMonth(endKey, -i));
+  return out;
+}
+/* Tout l'historique saisi, du plus ancien mois valorisé (sur n'importe quel compte) jusqu'à endKey. */
+function allPatMonths(endKey) {
+  const vals = DB.patValues || {};
+  let minKey = endKey;
+  Object.values(vals).forEach(v => Object.keys(v).forEach(k => { if (k < minKey) minKey = k; }));
+  const out = []; let k = minKey;
+  while (k <= endKey) { out.push(k); k = addMonth(k, 1); }
+  return out;
+}
+function viewPatrimoineHome() {
+  const accounts = DB.patAccounts || [];
+  const month = UI.patMonth, year = yearOf(month + "-01");
+  const total = patTotalAt(month);
+  const perfM = patMonthlyPerf(null, month);
+  const perfY = patAnnualPerf(null, year);
+
+  let html = '<div class="topbar"><h1>Aperçu du patrimoine</h1><div class="spacer"></div></div>';
+
+  if (!accounts.length) {
+    html += '<div class="card"><div class="empty"><b>Aucun compte suivi</b>' +
+      "Ajoutez un compte dans l’onglet <b>Comptes</b> pour voir apparaître la synthèse ici.</div></div>";
+    return html;
+  }
+
+  html += '<div class="kpis">' +
+    kpi("Patrimoine total", fmtEur(total), monthLabel(month)) +
+    kpi("Comptes", String(accounts.length), "suivis") +
+    kpi("Performance du mois", perfM == null ? "—" : fmtRate(perfM), "hors mouvements", perfM == null ? "" : (perfM >= 0 ? "pos" : "neg")) +
+    kpi("Performance " + year, perfY == null ? "—" : fmtRate(perfY), "hors mouvements", perfY == null ? "" : (perfY >= 0 ? "pos" : "neg")) +
+    "</div>";
+
+  const months = allPatMonths(month).map(mk => ({ mk, total: patTotalAt(mk) }));
+  const maxT = Math.max(1, ...months.map(x => x.total));
+  html += '<div class="card"><div class="chead"><h2>Évolution du patrimoine</h2><div class="spacer"></div>' +
+    '<span class="tiny muted">' + (months.length > 1 ? "depuis " + monthLabel(months[0].mk) : "") + "</span></div>";
+  html += '<div class="bars">' + months.map(x => {
+    const h = Math.round(x.total / maxT * 118);
+    const on = x.mk === month;
+    const mm = x.mk.slice(5, 7), lb = mm === "01" ? x.mk.slice(0, 4) : (x.mk === month ? MONTHS_SHORT[+mm - 1] : "");
+    return '<div class="barcol ' + (on ? "on" : "") + '" title="' + esc(monthLabel(x.mk) + " · " + fmtEur(x.total)) + '">' +
+      '<div class="stack" style="align-items:flex-end;height:118px">' +
+        '<i style="width:100%;height:' + Math.max(h, x.total ? 2 : 0) + 'px;background:' + (x.total ? "var(--accent)" : "var(--line-2)") + '"></i>' +
+      "</div><span class=\"lb\">" + esc(lb) + "&nbsp;</span></div>";
+  }).join("") + "</div></div>";
+
+  const withVal = accounts.map(a => ({ a, v: patAccountValue(a.id, month) || 0 })).filter(x => x.v).sort((x, y) => y.v - x.v);
+  if (withVal.length) {
+    html += '<div class="card"><div class="chead"><h2>Répartition par compte</h2></div>' +
+      withVal.map(({ a, v }) => {
+        const pct = total ? v / total * 100 : 0;
+        return '<div style="display:grid;grid-template-columns:1fr 90px;gap:10px;align-items:center;padding:6px 0">' +
+          '<div><div class="tiny" style="margin-bottom:3px">' + esc(a.name) + " · " + esc(fmtEur(v)) + "</div>" +
+          '<div class="hbar"><i style="width:' + pct.toFixed(1) + '%;background:var(--accent)"></i></div></div>' +
+          '<span class="num tiny muted" style="text-align:right">' + pct.toFixed(1) + " %</span></div>";
+      }).join("") + "</div>";
+  }
+
+  const accPerf = accounts.map(a => ({
+    a, v: patAccountValue(a.id, month), pm: patMonthlyPerf(a.id, month), py: patAnnualPerf(a.id, year),
+  }));
+  const patYears = patYearsWithData();
+  html += '<div class="card"><div class="chead"><h2>Performance par compte</h2><div class="spacer"></div>' +
+    '<select data-chg="patmonthsel" style="margin-right:6px">' +
+    MONTHS.map((mn, i) => '<option value="' + (i + 1) + '"' + (i + 1 === +month.slice(5, 7) ? " selected" : "") + ">" + mn + "</option>").join("") +
+    "</select>" +
+    '<select data-chg="patyearsel">' +
+    patYears.map(y => '<option value="' + y + '"' + (y === year ? " selected" : "") + ">" + y + "</option>").join("") +
+    "</select></div>" +
+    '<table class="ops"><thead><tr><th>Compte</th><th style="text-align:right">Valorisation</th>' +
+    '<th style="text-align:right">Perf. mois</th><th style="text-align:right">Perf. ' + year + "</th></tr></thead><tbody>" +
+    accPerf.map(x => "<tr><td>" + esc(x.a.name) +
+      (x.a.perfExcluded ? ' <span class="tiny muted">(hors calcul global)</span>' : "") + "</td>" +
+      '<td class="num" style="text-align:right">' + (x.v == null ? "—" : esc(fmtEur(x.v))) + "</td>" +
+      '<td class="num ' + (x.pm == null ? "muted" : x.pm >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
+      (x.pm == null ? "—" : esc(fmtRate(x.pm))) + "</td>" +
+      '<td class="num ' + (x.py == null ? "muted" : x.py >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
+      (x.py == null ? "—" : esc(fmtRate(x.py))) + "</td></tr>").join("") + "</tbody></table>";
+  const cmp = accPerf.filter(x => x.pm != null).sort((x, y) => y.pm - x.pm);
+  if (cmp.length) {
+    const maxCmp = Math.max(1, ...cmp.map(x => Math.abs(x.pm)));
+    html += '<div style="margin-top:16px"><div class="tiny muted" style="margin-bottom:8px">Comparatif perf. du mois</div>' +
+      cmp.map(x => {
+        const w = Math.abs(x.pm) / maxCmp * 100;
+        return '<div style="display:grid;grid-template-columns:130px 1fr 64px;gap:10px;align-items:center;padding:4px 0">' +
+          '<span class="tiny" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(x.a.name) + "</span>" +
+          '<div class="hbar"><i style="width:' + w.toFixed(1) + "%;background:" + (x.pm >= 0 ? "var(--pos)" : "var(--neg)") + '"></i></div>' +
+          '<span class="num tiny ' + (x.pm >= 0 ? "pos" : "neg") + '" style="text-align:right">' + esc(fmtRate(x.pm)) + "</span></div>";
+      }).join("") + "</div>";
+  }
+  html += "</div>";
+
+  const perfMonths = last12Months(month).map(mk => ({ mk, perf: patMonthlyPerf(null, mk) }));
+  const maxP = Math.max(1, ...perfMonths.map(x => Math.abs(x.perf || 0)));
+  html += '<div class="card"><div class="chead"><h2>Performance mensuelle</h2><div class="spacer"></div>' +
+    '<span class="tiny muted">hors mouvements</span></div>' +
+    perfMonths.map(x => {
+      const w = x.perf == null ? 0 : Math.abs(x.perf) / maxP * 100;
+      return '<div style="display:grid;grid-template-columns:52px 1fr 72px;gap:10px;align-items:center;padding:5px 0;border-top:1px solid var(--line-2)">' +
+        '<span class="tiny muted">' + MONTHS_SHORT[+x.mk.slice(5, 7) - 1] + "</span>" +
+        '<div class="hbar"><i style="width:' + w.toFixed(1) + "%;background:" + (x.perf == null ? "var(--line-2)" : x.perf >= 0 ? "var(--pos)" : "var(--neg)") + '"></i></div>' +
+        '<span class="num tiny ' + (x.perf == null ? "muted" : x.perf >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
+        (x.perf == null ? "—" : esc(fmtRate(x.perf))) + "</span></div>";
+    }).join("") + "</div>";
+
+  return html;
+}
+function viewPatrimoine() {
+  const accounts = DB.patAccounts || [];
+  const month = UI.patMonth, year = yearOf(month + "-01");
+  const total = patTotalAt(month);
+  const perfM = patMonthlyPerf(null, month);
+  const perfY = patAnnualPerf(null, year);
+
+  let html = '<div class="topbar"><h1>Patrimoine</h1><div class="spacer"></div>' +
+    '<div class="periodnav"><button data-act="prev" aria-label="Précédent">' + icon("left") + "</button>" +
+    '<span class="label">' + esc(monthLabel(month)) + "</span>" +
+    '<button data-act="next" aria-label="Suivant">' + icon("right") + "</button></div>" +
+    '<button class="btn sm ghost" data-act="today">Mois en cours</button>' +
+    '<button class="btn sm ghost" data-act="patimportcsv">' + icon("down", 16) + "Importer CSV Excel</button></div>";
+
+  html += '<div class="kpis">' +
+    kpi("Patrimoine total", fmtEur(total), monthLabel(month)) +
+    kpi("Comptes", String(accounts.length), accounts.length ? "suivis" : "aucun compte") +
+    kpi("Performance du mois", perfM == null ? "—" : fmtRate(perfM), "hors mouvements", perfM == null ? "" : (perfM >= 0 ? "pos" : "neg")) +
+    kpi("Performance " + year, perfY == null ? "—" : fmtRate(perfY), "hors mouvements", perfY == null ? "" : (perfY >= 0 ? "pos" : "neg")) +
+    "</div>";
+
+  if (accounts.length && total > 0) {
+    html += '<div class="card" style="margin-top:-4px;margin-bottom:16px">' + accounts.map(a => {
+      const v = patAccountValue(a.id, month) || 0, pct = total ? v / total * 100 : 0;
+      return '<div style="display:grid;grid-template-columns:1fr 90px;gap:10px;align-items:center;padding:6px 0">' +
+        '<div><div class="tiny" style="margin-bottom:3px">' + esc(a.name) + " · " + esc(fmtEur(v)) + "</div>" +
+        '<div class="hbar"><i style="width:' + pct.toFixed(1) + '%;background:var(--accent)"></i></div></div>' +
+        '<span class="num tiny muted" style="text-align:right">' + pct.toFixed(1) + " %</span></div>";
+    }).join("") + "</div>";
+  }
+
+  html += '<div class="card"><div class="chead"><h2>Comptes</h2><div class="spacer"></div>' +
+    '<button class="btn sm" data-act="newpataccount">' + icon("plus") + "Compte</button></div>";
+  if (!accounts.length) {
+    html += '<div class="empty"><b>Aucun compte suivi</b>Ajoutez un compte pour commencer à saisir vos valorisations mensuelles.</div>';
+  } else {
+    html += '<table class="ops"><thead><tr><th>Nom</th><th>Type</th>' +
+      '<th style="text-align:right">Valorisation · ' + esc(monthLabel(month)) + "</th>" +
+      '<th style="text-align:right">Perf. mois</th><th style="text-align:right">Perf. ' + year + "</th>" +
+      '<th style="text-align:center" title="Inclure ce compte dans la performance globale">Perf. globale</th><th></th></tr></thead><tbody>' +
+      accounts.map(a => {
+        const raw = ((DB.patValues || {})[a.id] || {})[month];
+        const pm = patMonthlyPerf(a.id, month), py = patAnnualPerf(a.id, year);
+        return "<tr><td>" + esc(a.name) + '</td><td class="tiny muted">' + esc(patTypeName(a.type)) + "</td>" +
+          '<td style="text-align:right"><input type="number" step="10" value="' + (raw != null ? raw : "") +
+          '" data-chg="patvalue" data-id="' + a.id + '"></td>' +
+          '<td class="num" style="text-align:right">' + (pm == null ? "—" : esc(fmtRate(pm))) + "</td>" +
+          '<td class="num" style="text-align:right">' + (py == null ? "—" : esc(fmtRate(py))) + "</td>" +
+          '<td style="text-align:center"><input type="checkbox" data-chg="patperfexcluded" data-id="' + a.id + '" ' +
+          (a.perfExcluded ? "" : "checked") + " title=\"Inclure dans le calcul de performance\"></td>" +
+          '<td style="text-align:right"><button class="iconbtn danger" title="Supprimer le compte" data-act="delpataccount" data-id="' +
+          a.id + '">' + icon("trash", 14) + "</button></td></tr>";
+      }).join("") + "</tbody></table>";
+  }
+  html += "</div>";
+
+  html += '<div class="card"><div class="chead"><h2>Mouvements</h2></div>';
+  if (!accounts.length) {
+    html += '<div class="empty"><b>Aucun compte</b>Créez d’abord un compte pour enregistrer un dépôt ou un retrait.</div></div>';
+  } else {
+    const movs = (DB.patMovements || []).slice().sort((x, y) => y.date < x.date ? -1 : y.date > x.date ? 1 : 0);
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:16px">' +
+      '<div class="field"><label>Compte</label><select id="patmovaccount">' +
+      accounts.map(a => '<option value="' + a.id + '">' + esc(a.name) + "</option>").join("") + "</select></div>" +
+      '<div class="field"><label>Date</label><input type="date" id="patmovdate" value="' + todayISO() + '"></div>' +
+      '<div class="field"><label>Montant (+ dépôt / − retrait)</label><input type="number" step="0.01" id="patmovamount"></div>' +
+      '<button class="btn primary" data-act="addpatmovement">' + icon("plus") + "Ajouter</button></div>";
+    if (!movs.length) {
+      html += '<div class="empty">Aucun mouvement enregistré.</div>';
+    } else {
+      html += '<table class="ops"><thead><tr><th>Date</th><th>Compte</th><th style="text-align:right">Montant</th><th></th></tr></thead><tbody>' +
+        movs.map(m => {
+          const a = accounts.find(x => x.id === m.accountId);
+          return "<tr><td>" + esc(m.date.split("-").reverse().join("/")) + "</td><td>" + esc(a ? a.name : "—") + "</td>" +
+            '<td class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(m.amount, { plus: true })) + "</td>" +
+            '<td style="text-align:right"><button class="iconbtn danger" title="Supprimer" data-act="delpatmovement" data-id="' +
+            m.id + '">' + icon("trash", 14) + "</button></td></tr>";
+        }).join("") + "</tbody></table>";
+    }
+  }
+  html += "</div>";
+  return html;
+}
+
+/* =========================================================================
    Settings
    ========================================================================= */
 function registerCat(c) { if (!CAT_BY_ID[c.id]) { CATS.push(c); CAT_BY_ID[c.id] = c; } }
@@ -1923,22 +2346,30 @@ function viewSettings() {
     numField("Tolérance montant (%)", s.dupTol, "dupTol", 1, "Au-delà d\u2019un montant identique, doublon « probable ».") +
     "</div></div>";
 
-  /* --- data --- */
-  html += '<div class="card"><div class="chead"><h2>Données</h2></div>' +
+  /* --- data (budget only) --- */
+  html += '<div class="card"><div class="chead"><h2>Données du budget</h2></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn" data-act="export-csv">' + icon("file") + "Exporter en CSV</button>" +
+    '<button class="btn" data-act="wizard">' + icon("inbox") + "Reprise de l\u2019historique</button>" +
+    '<button class="btn" data-act="learn">' + icon("check") + "Réapprendre les règles vendeur</button></div>" +
+    "<p class=\"tiny muted\" style=\"margin:12px 0 0\">" + DB.tx.length + " opérations · " + DB.imports.length + " import(s) · " +
+    Object.keys(DB.rules).length + " règles vendeur</p></div>";
+  return html;
+}
+function viewGeneral() {
+  const bytes = storageBytes(), quota = 5 * 1024 * 1024;
+  let html = '<div class="topbar"><h1>Données</h1><div class="spacer"></div></div>';
+  html += '<div class="card"><div class="chead"><h2>Sauvegarde &amp; réinitialisation</h2></div>' +
+    '<p class="tiny muted" style="margin:0 0 12px">Sauvegarde et remise à zéro globales, Budget et Patrimoine confondus.</p>' +
     '<div class="tiny muted" style="margin-bottom:6px">Stockage utilisé : ' + (bytes / 1024).toFixed(0) + " Ko sur ~5 Mo (" + (bytes / quota * 100).toFixed(1) + " %)</div>" +
     '<div class="hbar" style="margin-bottom:14px"><i style="width:' + Math.min(bytes / quota * 100, 100).toFixed(1) + '%;background:var(--accent)"></i></div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn" data-act="export-json">' + icon("file") + "Exporter la sauvegarde (JSON)</button>" +
     '<button class="btn" data-act="import-json">' + icon("up") + "Restaurer une sauvegarde</button>" +
-    '<button class="btn" data-act="export-csv">' + icon("file") + "Exporter en CSV</button>" +
-    '<button class="btn" data-act="wizard">' + icon("inbox") + "Reprise de l\u2019historique</button>" +
-    '<button class="btn" data-act="learn">' + icon("check") + "Réapprendre les règles vendeur</button>" +
     '<div class="spacer" style="flex:1"></div>' +
     '<button class="btn danger" data-act="reset">' + icon("trash") + "Tout effacer</button></div>" +
     '<p class="tiny muted" style="margin:12px 0 0">Les données vivent uniquement dans le stockage local de ce navigateur, sous la clé <code>' + STORE_KEY +
-    "</code>. Rien ne part sur un serveur. Vider les données de navigation les supprime : l\u2019export JSON est la seule sauvegarde.</p>" +
-    "<p class=\"tiny muted\" style=\"margin:6px 0 0\">" + DB.tx.length + " opérations · " + DB.imports.length + " import(s) · " +
-    Object.keys(DB.rules).length + " règles vendeur</p></div></div>";
+    "</code>. Rien ne part sur un serveur. Vider les données de navigation les supprime : l’export JSON est la seule sauvegarde.</p></div>";
   return html;
 }
 function suggestCell(sg, id) {
@@ -2405,9 +2836,14 @@ document.addEventListener("click", e => {
 
   switch (act) {
     case "view": UI.view = el.dataset.view; render(); break;
-    case "prev": UI.view === "year" ? UI.year-- : (UI.month = addMonth(UI.month, -1)); render(); break;
-    case "next": UI.view === "year" ? UI.year++ : (UI.month = addMonth(UI.month, 1)); render(); break;
-    case "today": UI.month = monthKey(todayISO()); UI.year = yearOf(todayISO()); render(); break;
+    case "prev":
+      UI.view === "year" ? UI.year-- : UI.view === "pat" ? (UI.patMonth = addMonth(UI.patMonth, -1)) : (UI.month = addMonth(UI.month, -1));
+      render(); break;
+    case "next":
+      UI.view === "year" ? UI.year++ : UI.view === "pat" ? (UI.patMonth = addMonth(UI.patMonth, 1)) : (UI.month = addMonth(UI.month, 1));
+      render(); break;
+    case "today":
+      UI.month = monthKey(todayISO()); UI.year = yearOf(todayISO()); UI.patMonth = monthKey(todayISO()); render(); break;
     case "prevyear": UI.year--; render(); break;
     case "nextyear": UI.year++; render(); break;
     case "openmonth": UI.month = el.dataset.month; UI.view = "month"; render(); break;
@@ -2521,6 +2957,53 @@ document.addEventListener("click", e => {
       inp.click(); break;
     }
     case "learn": { const n = learnRulesFromHistory(0.6); saveDB(); render(); toast(n + " nouvelle(s) règle(s) apprise(s)."); break; }
+    case "newpataccount": UI.small = newPatAccountModal; renderSmall(); break;
+    case "createpataccount": {
+      const name = ($("#newpataccountname").value || "").trim();
+      if (!name) { toast("Il faut un nom."); break; }
+      const type = $("#newpataccounttype").value;
+      const perfExcluded = !$("#newpataccountperf").checked;
+      DB.patAccounts = DB.patAccounts || [];
+      DB.patAccounts.push({ id: newPatAccountId(name), name, type, perfExcluded });
+      UI.small = null; renderSmall(); saveDB(); render(); toast("Compte « " + name + " » créé."); break;
+    }
+    case "delpataccount": {
+      const id = el.dataset.id, a = (DB.patAccounts || []).find(x => x.id === id); if (!a) break;
+      if (!confirm("Supprimer le compte « " + a.name + " » ? Ses valorisations et mouvements seront perdus.")) break;
+      DB.patAccounts = DB.patAccounts.filter(x => x.id !== id);
+      if (DB.patValues) delete DB.patValues[id];
+      DB.patMovements = (DB.patMovements || []).filter(m => m.accountId !== id);
+      saveDB(); render(); toast("Compte supprimé."); break;
+    }
+    case "addpatmovement": {
+      const accSel = $("#patmovaccount"), dateInp = $("#patmovdate"), amtInp = $("#patmovamount");
+      if (!accSel || !accSel.value) { toast("Créez d’abord un compte."); break; }
+      const amount = parseAmount(amtInp.value);
+      if (!amount) { toast("Montant illisible."); break; }
+      DB.patMovements = DB.patMovements || [];
+      const id = (DB.patMovements.reduce((m, x) => Math.max(m, x.id), 0) || 0) + 1;
+      DB.patMovements.push({ id, accountId: accSel.value, date: dateInp.value || todayISO(), amount });
+      saveDB(); render(); toast("Mouvement ajouté."); break;
+    }
+    case "delpatmovement": {
+      const id = +el.dataset.id;
+      DB.patMovements = (DB.patMovements || []).filter(m => m.id !== id);
+      saveDB(); render(); break;
+    }
+    case "patimportcsv": PATIMP = { comptesText: null, comptesName: null, mouvementsText: null, mouvementsName: null, error: null };
+      UI.small = patImportModal; renderSmall(); break;
+    case "patpickcomptes": $("#patfilecomptes").click(); break;
+    case "patpickmouvements": $("#patfilemouvements").click(); break;
+    case "patrunimport": {
+      if ((DB.patAccounts || []).length && !confirm("Remplacer tout l’onglet Patrimoine par le contenu de ces fichiers ? Les comptes, valorisations et mouvements actuels seront perdus.")) break;
+      const res = importPatrimoineCsv(PATIMP.comptesText, PATIMP.mouvementsText);
+      if (res.error) { PATIMP.error = res.error; renderSmall(); break; }
+      UI.small = null; renderSmall(); render();
+      toast("Onglet Patrimoine remplacé : " + res.accountsCreated + " compte(s), " + res.valuesImported + " valorisation(s) et " +
+        res.movementsImported + " mouvement(s) importés" +
+        (res.movementsSkipped ? " (" + res.movementsSkipped + " mouvement(s) ignoré(s), compte inconnu)" : "") + ".");
+      break;
+    }
     case "reset":
       if (confirm("Effacer toutes les données de Budget ? Cette action est irréversible.") &&
           confirm("Dernière confirmation : les " + DB.tx.length + " opérations seront perdues.")) {
@@ -2592,6 +3075,22 @@ document.addEventListener("change", e => {
     const v = parseAmount(el.value);
     DB.settings[el.dataset.key] = v == null ? DEFAULT_SETTINGS[el.dataset.key] : v;
     saveDB(); render();
+  } else if (kind === "patvalue") {
+    const id = el.dataset.id, v = parseAmount(el.value);
+    DB.patValues = DB.patValues || {};
+    DB.patValues[id] = DB.patValues[id] || {};
+    if (v == null) delete DB.patValues[id][UI.patMonth]; else DB.patValues[id][UI.patMonth] = v;
+    saveDB(); render();
+  } else if (kind === "patperfexcluded") {
+    const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
+    a.perfExcluded = !el.checked;
+    saveDB(); render();
+  } else if (kind === "patmonthsel") {
+    UI.patMonth = UI.patMonth.slice(0, 5) + pad2(+el.value);
+    render();
+  } else if (kind === "patyearsel") {
+    UI.patMonth = el.value + UI.patMonth.slice(4);
+    render();
   }
 });
 
@@ -2681,6 +3180,10 @@ function renderSmall() {
 }
 document.addEventListener("change", e => {
   if (e.target && e.target.id === "filein" && e.target.files[0]) readFileText(e.target.files[0], (t, n) => ingest(t, n));
+  if (e.target && e.target.id === "patfilecomptes" && e.target.files[0])
+    readFileText(e.target.files[0], (t, n) => { PATIMP.comptesText = t; PATIMP.comptesName = n; PATIMP.error = null; renderSmall(); });
+  if (e.target && e.target.id === "patfilemouvements" && e.target.files[0])
+    readFileText(e.target.files[0], (t, n) => { PATIMP.mouvementsText = t; PATIMP.mouvementsName = n; PATIMP.error = null; renderSmall(); });
 });
 
 DB = loadDB();
