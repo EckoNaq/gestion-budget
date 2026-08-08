@@ -15,7 +15,7 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 ### 2026-08-08
 
 - Correction : les catégories personnalisées (ex. "Jeux Vidéos") n'étaient jamais incluses dans les sauvegardes JSON, ce qui faisait planter la restauration d'un ancien export.
-- Ajout : récupération automatique d'une catégorie manquante à la restauration (recréée depuis le libellé bancaire) pour les sauvegardes exportées avant ce correctif.
+- Ajout : filet de sécurité si un fichier de sauvegarde restauré référence une catégorie absente du JSON (typiquement un ancien export fait avant ce correctif) — elle est recréée automatiquement depuis le libellé bancaire au lieu de faire planter l'appli. Pour toute sauvegarde exportée à partir de maintenant, ce cas ne se produit plus : les catégories perso sont incluses dans le fichier.
 - Ajout : dans Réglages, un menu pour déplacer une catégorie personnalisée vers un autre groupe.
 - Ajout : les catégories historiques ("Divers vie quotidienne", "Inconnu", etc.) sont désormais visibles dans le tableau des catégories & objectifs.
 
