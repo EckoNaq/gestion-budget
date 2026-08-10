@@ -1930,12 +1930,26 @@ function guessPatType(name) {
   if (n.includes("immo")) return "immo";
   return "autre";
 }
+/* Le tableur exporte en « ; » (Excel FR) ou en « , » (Excel US, Google Sheets, LibreOffice)
+   selon la machine. Plutôt que de deviner sur la première ligne — qui n'est pas toujours
+   l'en-tête dans ces exports — on essaie chaque délimiteur et on garde celui qui retrouve la
+   ligne « Date » : un mauvais délimiteur laisse la ligne entière dans une seule cellule et se
+   disqualifie tout seul. À égalité, le plus grand nombre de colonnes gagne. */
+function parsePatCSV(text) {
+  let best = { rows: [], hIdx: -1, cols: 0 };
+  for (const sep of [";", ",", "\t"]) {
+    const rows = parseCSV(text, sep);
+    const hIdx = rows.findIndex(r => normalize(r[0]) === "date" && r.length > 1);
+    if (hIdx >= 0 && rows[hIdx].length > best.cols) best = { rows, hIdx, cols: rows[hIdx].length };
+  }
+  return best;
+}
+const SEP_HINT = " (colonnes séparées par « ; » ou « , »)";
 /* Tableau large : une ligne par mois, une colonne par compte. Les colonnes après le
    dernier compte réel ("Colonne5"…, "Total"…) sont des calculs du tableur, pas des comptes. */
 function parsePatComptesCSV(text) {
-  const rows = parseCSV(text, ";");
-  const hIdx = rows.findIndex(r => normalize(r[0]) === "date");
-  if (hIdx < 0) return { error: "Colonne « Date » introuvable dans Data-Comptes." };
+  const { rows, hIdx } = parsePatCSV(text);
+  if (hIdx < 0) return { error: "Colonne « Date » introuvable dans Data-Comptes" + SEP_HINT + "." };
   const header = rows[hIdx], accCols = [];
   for (let i = 1; i < header.length; i++) {
     const h = (header[i] || "").trim();
@@ -1962,13 +1976,12 @@ function parsePatComptesCSV(text) {
   return { accounts: accCols.map(a => a.name), values, error: null };
 }
 function parsePatMouvementsCSV(text) {
-  const rows = parseCSV(text, ";");
-  const hIdx = rows.findIndex(r => normalize(r[0]) === "date");
-  if (hIdx < 0) return { error: "Colonne « Date » introuvable dans Data-Mouvements." };
+  const { rows, hIdx } = parsePatCSV(text);
+  if (hIdx < 0) return { error: "Colonne « Date » introuvable dans Data-Mouvements" + SEP_HINT + "." };
   const norm = rows[hIdx].map(normalize);
   const ci = { date: norm.indexOf("date"), compte: norm.indexOf("compte"), montant: norm.findIndex(h => h.startsWith("montant")) };
   if (ci.date < 0 || ci.compte < 0 || ci.montant < 0)
-    return { error: "Colonnes Date/Compte/Montant introuvables dans Data-Mouvements." };
+    return { error: "Colonnes Date/Compte/Montant introuvables dans Data-Mouvements" + SEP_HINT + "." };
   const movements = [];
   for (let r = hIdx + 1; r < rows.length; r++) {
     const row = rows[r];
@@ -2020,7 +2033,7 @@ function patImportModal() {
   const c = PATIMP.comptesName, m = PATIMP.mouvementsName;
   return '<div class="modal-back" data-act="backdrop"><div class="modal" style="max-width:480px">' +
     '<div class="mhead"><div><h1>Reprendre l’historique Excel</h1>' +
-    '<div class="tiny muted">Exportez en CSV les onglets Data-Comptes (valorisations mensuelles) et Data-Mouvements (dépôts/retraits) de votre tableur, puis choisissez-les ici.</div></div>' +
+    '<div class="tiny muted">Exportez en CSV les onglets Data-Comptes (valorisations mensuelles) et Data-Mouvements (dépôts/retraits) de votre tableur, puis choisissez-les ici. Colonnes séparées par « ; » ou « , » — les deux sont reconnus.</div></div>' +
     '<div class="spacer" style="flex:1"></div><button class="iconbtn" data-act="closesmall">' + icon("x") + "</button></div>" +
     '<div class="note warn" style="margin-bottom:12px">' + icon("warn") + " Remplace entièrement l’onglet Patrimoine (comptes, valorisations, mouvements) par le contenu de ces fichiers.</div>" +
     '<div class="field" style="margin-bottom:12px"><label>Data-Comptes.csv</label>' +

@@ -12,6 +12,10 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-10
+
+- Ajout : l'import `Data-Comptes.csv` / `Data-Mouvements.csv` (Patrimoine) accepte désormais les fichiers délimités par « , » en plus de « ; ». Le délimiteur est détecté automatiquement — utile quand le tableur exporte en format US (Excel US, Google Sheets, LibreOffice) plutôt qu'en format FR.
+
 ### 2026-08-08
 
 - Ajout : nouvel onglet **Patrimoine** — suivi des comptes (livrets, PEA, assurance-vie...), de leur valorisation mois par mois, et des dépôts/retraits. La synthèse affiche le patrimoine total, la répartition par compte et la performance (mensuelle et annuelle) neutralisée de l'effet des mouvements, comme dans le suivi Excel qu'il remplace.
