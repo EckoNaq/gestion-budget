@@ -1910,13 +1910,20 @@ function newPatAccountModal() {
    Import CSV — reprise de l'historique Excel (Data-Comptes / Data-Mouvements)
    ========================================================================= */
 let PATIMP = null;
-const FR_MONTHS_ABBR = ["janv", "fevr", "mars", "avr", "mai", "juin", "juil", "aout", "sept", "oct", "nov", "dec"];
-/* Dates du tableur : "1 janv 2023" — un seul jour saisi par mois, donc on ne garde que le mois. */
-function parseFrCompteDate(raw) {
+/* Le mois est écrit dans la langue du tableur qui a exporté : "1 janv 2023" en Excel FR,
+   "1 Jan 2023" en Excel/Sheets EN. Il faut donc les deux — oct/nov/dec sont les seuls mois
+   qui s'écrivent pareil, et ne reconnaître que le français perdait silencieusement les neuf
+   autres. Chaque entrée liste les préfixes acceptés pour un mois, dans l'ordre janvier→décembre. */
+const MONTH_ABBR = [
+  ["janv", "jan"], ["fevr", "feb"], ["mars", "mar"], ["avr", "apr"], ["mai", "may"], ["juin", "jun"],
+  ["juil", "jul"], ["aout", "aug"], ["sept", "sep"], ["oct"], ["nov"], ["dec"],
+];
+/* Un seul jour est saisi par mois dans le tableur, donc on ne garde que le mois. */
+function parseCompteMonth(raw) {
   const parts = normalize(raw).split(" ").filter(Boolean);
   const year = parts.find(p => /^\d{4}$/.test(p));
   if (!year) return null;
-  const idx = FR_MONTHS_ABBR.findIndex(a => parts.some(p => p.startsWith(a)));
+  const idx = MONTH_ABBR.findIndex(aliases => aliases.some(a => parts.some(p => p.startsWith(a))));
   return idx < 0 ? null : year + "-" + pad2(idx + 1);
 }
 function guessPatType(name) {
@@ -1959,11 +1966,16 @@ function parsePatComptesCSV(text) {
     accCols.push({ idx: i, name: h });
   }
   if (!accCols.length) return { error: "Aucune colonne de compte trouvée dans Data-Comptes." };
-  const values = {};
+  const values = {}, datesSkipped = [];
   accCols.forEach(a => (values[a.name] = {}));
   for (let r = hIdx + 1; r < rows.length; r++) {
-    const mkRaw = parseFrCompteDate(rows[r][0]);
-    if (!mkRaw) continue;
+    const raw = (rows[r][0] || "").trim();
+    /* Les dernières lignes du tableur ne portent plus de date, juste des totaux calculés :
+       on les passe. Une date présente mais illisible, en revanche, est une valorisation
+       perdue — on la remonte à l'utilisateur au lieu de la laisser disparaître. */
+    if (!raw) continue;
+    const mkRaw = parseCompteMonth(raw);
+    if (!mkRaw) { datesSkipped.push(raw); continue; }
     /* La ligne "1 janv 2023" est l'état des comptes AU 1er janvier, donc la valorisation
        de clôture de décembre 2022 — même convention que les valeurs saisies dans l'app
        (patAccountValue traite une clé "YYYY-MM" comme la valeur de FIN de ce mois-là). */
@@ -1973,7 +1985,7 @@ function parsePatComptesCSV(text) {
       if (v != null) values[a.name][mk] = v;
     });
   }
-  return { accounts: accCols.map(a => a.name), values, error: null };
+  return { accounts: accCols.map(a => a.name), values, datesSkipped, error: null };
 }
 function parsePatMouvementsCSV(text) {
   const { rows, hIdx } = parsePatCSV(text);
@@ -2027,7 +2039,8 @@ function importPatrimoineCsv(comptesText, mouvementsText) {
   });
 
   saveDB();
-  return { accountsCreated: c.accounts.length, valuesImported, movementsImported, movementsSkipped, error: null };
+  return { accountsCreated: c.accounts.length, valuesImported, movementsImported, movementsSkipped,
+    datesSkipped: c.datesSkipped, error: null };
 }
 function patImportModal() {
   const c = PATIMP.comptesName, m = PATIMP.mouvementsName;
@@ -3012,9 +3025,14 @@ document.addEventListener("click", e => {
       const res = importPatrimoineCsv(PATIMP.comptesText, PATIMP.mouvementsText);
       if (res.error) { PATIMP.error = res.error; renderSmall(); break; }
       UI.small = null; renderSmall(); render();
+      /* Un mois dont la date n'est pas comprise laisse un trou dans les graphiques sans rien
+         dire : on le signale dans le même toast, avec les libellés fautifs. */
+      const skipped = res.datesSkipped || [];
       toast("Onglet Patrimoine remplacé : " + res.accountsCreated + " compte(s), " + res.valuesImported + " valorisation(s) et " +
         res.movementsImported + " mouvement(s) importés" +
-        (res.movementsSkipped ? " (" + res.movementsSkipped + " mouvement(s) ignoré(s), compte inconnu)" : "") + ".");
+        (res.movementsSkipped ? " (" + res.movementsSkipped + " mouvement(s) ignoré(s), compte inconnu)" : "") + "." +
+        (skipped.length ? " ⚠ " + skipped.length + " ligne(s) sans date comprise, non importée(s) : " +
+          skipped.slice(0, 3).join(", ") + (skipped.length > 3 ? "…" : "") : ""));
       break;
     }
     case "reset":

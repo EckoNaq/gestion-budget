@@ -15,6 +15,8 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 ### 2026-08-10
 
 - Ajout : l'import `Data-Comptes.csv` / `Data-Mouvements.csv` (Patrimoine) accepte désormais les fichiers délimités par « , » en plus de « ; ». Le délimiteur est détecté automatiquement — utile quand le tableur exporte en format US (Excel US, Google Sheets, LibreOffice) plutôt qu'en format FR.
+- Correction : dans `Data-Comptes.csv`, les mois écrits en anglais (« 1 Jun 2025 ») n'étaient pas reconnus — seuls oct/nov/déc s'écrivant pareil dans les deux langues passaient, et les neuf autres mois de chaque année disparaissaient sans un mot, laissant des trous dans les valorisations et les graphiques. Les noms de mois français **et** anglais sont maintenant acceptés.
+- Ajout : si une ligne datée de `Data-Comptes.csv` reste incomprise, l'import le signale (nombre de lignes et libellés fautifs) au lieu de l'ignorer silencieusement.
 
 ### 2026-08-08
 
