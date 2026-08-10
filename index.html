@@ -15,6 +15,12 @@
   --neg:#C1272D; --neg-soft:#FBECEC;
   --warn:#9A6700; --warn-soft:#FFF6E0;
   --focus:#3B5BDB;
+  /* Une teinte par classe d'actif. Aucune n'est un vert ni un rouge saturé : ces deux
+     couleurs restent réservées au gain et à la perte, sinon un compte se lirait comme
+     une performance. Deux comptes d'une même classe se départagent par une nuance,
+     calculée dans patAccountColor(). */
+  --c-pea:#3B5BDB; --c-av:#0F8B84; --c-livret:#0B6FA4; --c-pee:#7B4AD1;
+  --c-per:#8E3F6B; --c-crypto:#B0740A; --c-immo:#6E7A18; --c-courant:#5A6478; --c-autre:#6B7280;
   --radius:10px; --radius-sm:7px;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -28,6 +34,8 @@ html[data-theme="dark"]{
   --neg:#F4726F; --neg-soft:#331A1C;
   --warn:#E0B04A; --warn-soft:#2E2611;
   --focus:#7C93F5;
+  --c-pea:#7C93F5; --c-av:#3EC1B6; --c-livret:#4FADD8; --c-pee:#AC8CF2;
+  --c-per:#CE86AC; --c-crypto:#E0A63C; --c-immo:#AEBC4E; --c-courant:#99A4B8; --c-autre:#9AA3B2;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -191,6 +199,9 @@ textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:12px}
 /* ---------- misc ---------- */
 .empty{padding:34px 16px;text-align:center;color:var(--ink-soft);border:1px dashed var(--line);border-radius:var(--radius)}
 .empty b{display:block;color:var(--ink);margin-bottom:5px;font-size:14px}
+/* Le <b> d'un état vide sert de titre et passe donc en bloc ; pour appuyer un mot au fil du
+   texte il faut ce recours, sinon la phrase se coupe en trois. */
+.empty .inl,.inl{display:inline;font-weight:650;color:var(--ink);margin:0;font-size:inherit}
 .note{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:9px 12px;font-size:12.5px;color:var(--ink-2)}
 .note.warn{border-left-color:var(--warn)}
 .bars{display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:8px}
@@ -281,6 +292,82 @@ textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:12px}
 .rev .ramt{font-size:30px;font-weight:640;letter-spacing:-.03em;margin:10px 0 4px}
 .progress{height:5px;border-radius:3px;background:var(--line-2);overflow:hidden;margin-bottom:6px}
 .progress>i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .25s}
+
+/* ---- Patrimoine ---- */
+.pathero{display:grid;grid-template-columns:minmax(230px,1.05fr) 1fr;gap:24px;align-items:start}
+.pathero .big{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:34px;font-weight:600;letter-spacing:-.035em;line-height:1.04}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-mute);font-weight:600}
+/* Variation du mois : un seul bloc, la performance en tête et le montant en appui. */
+.monthdelta{display:inline-flex;flex-direction:column;gap:2px;padding:8px 14px;border-radius:9px;border:1px solid transparent}
+.monthdelta .mv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:22px;font-weight:650;letter-spacing:-.025em;line-height:1.08}
+.monthdelta .ms{font-size:11.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.monthdelta.pos{background:var(--pos-soft)} .monthdelta.pos .mv{color:var(--pos)}
+.monthdelta.neg{background:var(--neg-soft)} .monthdelta.neg .mv{color:var(--neg)}
+.monthdelta.flat{background:var(--surface-2);border-color:var(--line)} .monthdelta.flat .mv{color:var(--ink-soft)}
+.dpill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:650;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.dpill.pos{background:var(--pos-soft);color:var(--pos)}
+.dpill.neg{background:var(--neg-soft);color:var(--neg)}
+.dpill.flat{background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line)}
+.splitbar{display:flex;height:26px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.splitbar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:5px 16px;margin-top:9px;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:650;color:var(--ink)}
+.sw{display:inline-block;flex:none;width:9px;height:9px;border-radius:3px}
+.allocbar{display:flex;height:32px;border-radius:7px;overflow:hidden;gap:2px}
+.allocbar i{display:block;height:100%;min-width:2px}
+.alloclist{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:4px 18px;margin-top:12px;font-size:12.5px}
+.alloclist span{display:flex;align-items:center;gap:7px;color:var(--ink-2);min-width:0}
+.alloclist em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alloclist b{margin-left:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);padding-left:8px}
+/* Barres de performance centrées sur zéro : la forme dit le signe avant la couleur. */
+.dvrow{display:grid;grid-template-columns:46px 1fr 118px;align-items:center;gap:10px;padding:3px 0;font-size:12px}
+.dvrow .dvval{display:flex;flex-direction:column;align-items:flex-end;line-height:1.25}
+.dvrow .dvval b{font-weight:650}
+.dvrow .dvval em{font-style:normal;font-size:10.5px;color:var(--ink-mute)}
+/* Grille mois par mois : une case par mois, teinte selon le signe et l'ampleur. */
+.ygrid{display:flex;flex-direction:column;gap:3px;overflow-x:auto;padding-bottom:2px}
+.grow{display:grid;grid-template-columns:42px repeat(12,minmax(20px,1fr)) 76px 62px;gap:3px;align-items:center;
+  font-size:11.5px;min-width:540px}
+.grow .gy{font-family:var(--mono);font-weight:650;color:var(--ink-2)}
+.grow .gh{text-align:center;font-size:9.5px;color:var(--ink-mute);font-weight:600}
+.gcell{height:21px;border-radius:3px;background:var(--line-2)}
+.gcell.on{cursor:help}
+.grow .gtot{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:650}
+.grow .gcnt{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+.ghead .gtot,.ghead .gcnt{font-size:9.5px;font-weight:600;color:var(--ink-mute);text-transform:uppercase;font-family:var(--sans)}
+/* Meilleure année d'un compte : soulignée plutôt que colorée, la couleur portant déjà le signe. */
+td.bestyear{font-weight:700;box-shadow:inset 0 -2px 0 var(--accent)}
+th.curyear{color:var(--accent-ink)}
+/* Point d'aide : l'explication ne mérite pas d'occuper l'écran en permanence. */
+.help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;
+  border:1px solid var(--line);color:var(--ink-mute);font-size:10.5px;font-weight:700;cursor:help;flex:none}
+.help:hover,.help:focus-visible{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}
+tr.rowoff td{opacity:.55}
+tr.rowoff td:first-child{opacity:.8}
+.dvtrack{position:relative;height:16px;background:var(--line-2);border-radius:3px}
+.dvtrack::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+.dvtrack i{position:absolute;top:2px;bottom:2px;border-radius:2px;min-width:2px}
+.acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(214px,1fr));gap:10px}
+.acard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px 12px 12px;display:flex;flex-direction:column;gap:7px;position:relative;overflow:hidden}
+.acard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac,var(--accent))}
+.acard.todo{border-style:dashed;border-color:var(--ink-mute)}
+.acard .an{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:650;min-width:0}
+.acard .an em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acard .av{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:19px;font-weight:600;letter-spacing:-.02em}
+.acard .am{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft)}
+.acard .am b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:650}
+.acard input{width:100%;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:16px;font-weight:600}
+.acard .go{position:absolute;top:8px;right:8px;opacity:.45}
+.acard:hover .go{opacity:1}
+.msbar{height:10px;background:var(--line-2);border-radius:5px;overflow:hidden;margin:11px 0 6px}
+.msbar i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.patgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
+/* Six colonnes de chiffres tiennent mal sous 1100 px : plutôt que de couper « +1,50 % »
+   en deux lignes, on laisse le conteneur défiler — les montants restent lisibles d'un bloc. */
+.patnum td.num,.patnum th{white-space:nowrap}
+.patnum td:first-child{min-width:150px}
+@media (max-width:1080px){.pathero,.patgrid{grid-template-columns:1fr}}
 .catgrid{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 .catchip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:3px 10px;font-size:12.5px;cursor:pointer;color:var(--ink-2);display:inline-flex;align-items:center;gap:5px}
 .catchip:hover{border-color:var(--ink-mute)}
@@ -346,7 +433,10 @@ textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:12px}
 /* ==== PURE START ==== */
 
 const STORE_KEY = "budget.app.v1";          // distinct from any other local app
-const SCHEMA_VERSION = 1;
+/* 2 : ajout des passifs (patLiabilities / patDebtValues) et des réglages de projection.
+   Aucune migration n'est nécessaire — deserialize() donne une valeur par défaut à toute
+   clé absente, donc une sauvegarde v1 se restaure telle quelle. */
+const SCHEMA_VERSION = 2;
 
 const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const MONTHS_SHORT = ["jan","fév","mar","avr","mai","jun","jui","aoû","sep","oct","nov","déc"];
@@ -563,8 +653,11 @@ function normalize(s) {
     .replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
 }
 function fmtEur(n, opts) {
-  const sign = n < 0 ? "-" : (opts && opts.plus && n > 0 ? "+" : "");
-  return sign + Math.abs(n).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  /* Un calcul qui rend exactement zéro peut produire −0 : sans ce garde-fou, un gain nul
+     s'afficherait « -0,00 € ». Même précaution que dans fmtPerf. */
+  const v = Math.abs(n) < 0.005 ? 0 : n;
+  const sign = v < 0 ? "-" : (opts && opts.plus && v > 0 ? "+" : "");
+  return sign + Math.abs(v).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 }
 function fmtEurShort(n) {
   return (n < 0 ? "-" : "") + Math.round(Math.abs(n)).toLocaleString("fr-FR") + " €";
@@ -574,6 +667,15 @@ function fmtPct(n) { return (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n).toF
    dropped when it says nothing: 20 % rather than 20,0 %. */
 function trim1(n) { return Math.abs(n).toFixed(1).replace(/\.0$/, "").replace(".", ","); }
 function fmtRate(n) { return (n < 0 ? "−" : "") + trim1(n) + " %"; }
+/* Performance d'un placement : toujours deux décimales, signe explicite. Sur un PEA à
+   cinq chiffres, un dixième de point vaut des dizaines d'euros — le trim1() des taux
+   d'épargne serait ici une perte d'information. Un calcul qui rend exactement zéro peut
+   produire −0 en JS, ce qui s'afficherait « −0,00 % » : on le ramène à zéro. */
+function fmtPerf(n) {
+  if (n == null) return "—";
+  const v = Math.abs(n) < 0.005 ? 0 : n;
+  return (v < 0 ? "−" : v > 0 ? "+" : "") + Math.abs(v).toFixed(2).replace(".", ",") + " %";
+}
 function fmtPts(n) { return trim1(n) + " pt" + (Math.abs(n) >= 2 ? "s" : ""); }
 
 /* ---------------- amount parsing ----------------
@@ -816,10 +918,15 @@ function detectDuplicates(incoming, existing, opts) {
 /* =========================================================================
    Storage — one localStorage key, rows stored as arrays to stay compact.
    ========================================================================= */
-const DEFAULT_SETTINGS = { inflation: 1.9, band: 5, dupWindow: 5, dupTol: 5, theme: "auto", savingsGoal: 0 };
+/* patReturn / patContribution : hypothèses de projection. null = déduites de l'historique
+   (rendement annualisé et versement moyen des douze derniers mois) plutôt que devinées.
+   patTarget : 0 = palier rond suivant, calculé automatiquement.
+   patSafetyTarget : mois de dépenses visés en épargne de précaution, repère usuel 3 à 6. */
+const DEFAULT_SETTINGS = { inflation: 1.9, band: 5, dupWindow: 5, dupTol: 5, theme: "auto", savingsGoal: 0,
+  patReturn: null, patContribution: null, patTarget: 0, patSafetyTarget: 4 };
 
 function emptyDB() {
-  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [], patAccounts: [], patValues: {}, patMovements: [] };
+  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [], patAccounts: [], patValues: {}, patMovements: [], patLiabilities: [], patDebtValues: {} };
 }
 function serialize(db) {
   return JSON.stringify({
@@ -828,6 +935,7 @@ function serialize(db) {
     r: db.rules, i: db.income, g: db.goals, m: db.imports, l: db.legacyMap, f: db.fixed, s: db.settings,
     c: db.customCats || [],
     pa: db.patAccounts || [], pv: db.patValues || {}, pm: db.patMovements || [],
+    pl: db.patLiabilities || [], pd: db.patDebtValues || {},
   });
 }
 function deserialize(json) {
@@ -838,6 +946,7 @@ function deserialize(json) {
   db.settings = Object.assign({}, DEFAULT_SETTINGS, raw.s || {});
   db.customCats = raw.c || [];
   db.patAccounts = raw.pa || []; db.patValues = raw.pv || {}; db.patMovements = raw.pm || [];
+  db.patLiabilities = raw.pl || []; db.patDebtValues = raw.pd || {};
   return db;
 }
 function loadDB() {
@@ -863,7 +972,14 @@ const UI = {
   view: "month", month: monthKey(todayISO()), year: yearOf(todayISO()),
   showDup: false, showIgnored: false, showCand: false, batch: "all", openGroup: null, openCat: null, modal: null, small: null, cmpMode: "pct",
   patMonth: monthKey(todayISO()),
+  patAccount: null, patShowInactive: false, patMovFilter: "all", patRange: "all",
+  patHlSeed: 1, patYearUnit: "pct",
 };
+/* Les cinq écrans Patrimoine partagent le même mois courant : passer de l'Aperçu aux
+   Comptes ne doit pas ramener au mois en cours. */
+function isPatView() {
+  return ["pathome", "patanalyse", "pat", "patcredits", "patacct"].indexOf(UI.view) >= 0;
+}
 
 function reindex() {
   DB.tx.forEach((t, i) => { t.id = i; t.merchantKey = merchantKey(t); });
@@ -1263,6 +1379,8 @@ const ICONS = {
   warn:'<path d="M8 2.6 14.4 13H1.6z"/><path d="M8 6.6v3M8 11.1v.1"/>',
   file:'<path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3.2h3"/>',
   eye:'<path d="M1.6 8S3.9 4 8 4s6.4 4 6.4 4-2.3 4-6.4 4S1.6 8 1.6 8z"/><circle cx="8" cy="8" r="1.6"/>',
+  pie:'<circle cx="8" cy="8" r="5.8"/><path d="M8 2.2V8h5.8"/>',
+  debt:'<rect x="1.8" y="4.2" width="12.4" height="7.6" rx="1.3"/><path d="M5.2 8h5.6"/>',
 };
 function icon(name, size) {
   const s = size || 16;
@@ -1299,14 +1417,17 @@ function catSelect(value, attrs) {
    ========================================================================= */
 function render() {
   const todo = DB.tx.filter(isTodo).length;
+  /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
+     barre latérale n'indiquerait plus où l'on se trouve. */
   const navItem = ([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["year", "chart", "Année"],
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
-  const patNav = [["pathome", "home", "Aperçu"], ["pat", "vault", "Comptes"]];
+  const patNav = [["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
+    ["pat", "vault", "Comptes"], ["patcredits", "debt", "Crédits"]];
   const dataNav = [["data", "file", "Données"]];
   const nav = '<div class="navlabel">Budget</div>' + budgetNav.map(navItem).join("") +
     '<div class="navlabel">Patrimoine</div>' + patNav.map(navItem).join("") +
@@ -1316,7 +1437,10 @@ function render() {
     : UI.view === "year" ? viewYear()
     : UI.view === "todo" ? viewTodo()
     : UI.view === "pathome" ? viewPatrimoineHome()
+    : UI.view === "patanalyse" ? viewPatAnalyse()
     : UI.view === "pat" ? viewPatrimoine()
+    : UI.view === "patcredits" ? viewPatCredits()
+    : UI.view === "patacct" ? viewPatAccount()
     : UI.view === "data" ? viewGeneral() : viewSettings();
 
   $("#app").innerHTML =
@@ -1829,13 +1953,39 @@ function viewTodo() {
    Perf = (valeur_fin − valeur_début − mouvement) / (valeur_début + mouvement),
    neutralise l'effet des dépôts/retraits sur la performance affichée.
    ========================================================================= */
+/* risk : safe = capital garanti, risky = exposé aux marchés, mixed = dépend du support
+   choisi (une assurance-vie peut être 100 % fonds euros comme 100 % actions), on ne
+   tranche donc pas à la place de l'utilisateur.
+   liquid : false quand l'argent est bloqué par la loi ou le contrat (PER jusqu'à la
+   retraite, PEE cinq ans, immobilier le temps d'une vente). */
 const PAT_TYPES = [
-  { id: "courant", name: "Compte courant" }, { id: "livret", name: "Livret" },
-  { id: "pea", name: "PEA" }, { id: "av", name: "Assurance-vie" },
-  { id: "per", name: "PER" }, { id: "pee", name: "PEE" },
-  { id: "immo", name: "Immobilier" }, { id: "autre", name: "Autre" },
+  { id: "courant", name: "Compte courant", risk: "safe",  liquid: true  },
+  { id: "livret",  name: "Livret",         risk: "safe",  liquid: true  },
+  { id: "pea",     name: "PEA",            risk: "risky", liquid: true  },
+  { id: "av",      name: "Assurance-vie",  risk: "mixed", liquid: true  },
+  { id: "per",     name: "PER",            risk: "mixed", liquid: false },
+  { id: "pee",     name: "PEE",            risk: "risky", liquid: false },
+  { id: "crypto",  name: "Crypto",         risk: "risky", liquid: true  },
+  { id: "immo",    name: "Immobilier",     risk: "mixed", liquid: false },
+  { id: "autre",   name: "Autre",          risk: "mixed", liquid: true  },
 ];
+function patType(id) { return PAT_TYPES.find(x => x.id === id) || PAT_TYPES[PAT_TYPES.length - 1]; }
 function patTypeName(id) { const t = PAT_TYPES.find(x => x.id === id); return t ? t.name : id; }
+function patTypeColor(id) { return "var(--c-" + patType(id).id + ")"; }
+/* Deux comptes de même classe partagent la teinte : on les sépare en tirant les suivants
+   vers le fond de la carte, ce qui éclaircit en thème clair et assombrit en sombre. */
+function patAccountColor(a) {
+  if (!a) return "var(--c-autre)";
+  const base = patTypeColor(a.type);
+  const peers = (DB.patAccounts || []).filter(x => x.type === a.type);
+  const i = peers.findIndex(x => x.id === a.id);
+  return i <= 0 ? base : "color-mix(in oklab, " + base + " " + Math.max(40, 100 - i * 26) + "%, var(--surface))";
+}
+function patSwatch(a, size) {
+  const s = size || 9;
+  return '<i style="display:inline-block;flex:none;width:' + s + "px;height:" + s + "px;border-radius:3px;background:" +
+    patAccountColor(a) + '"></i>';
+}
 function newPatAccountId(name) {
   let base = "pa_" + normalize(name).replace(/ /g, "_").slice(0, 22) || "pa_compte";
   let id = base, n = 2; while ((DB.patAccounts || []).some(a => a.id === id)) id = base + "_" + n++;
@@ -1852,10 +2002,38 @@ function patTotalAt(mk) {
 function patHasHistoryAt(mk) {
   return (DB.patAccounts || []).some(a => patAccountValue(a.id, mk) != null);
 }
+/* Un compte qui n'a jamais reçu de valorisation ne peut pas entrer dans un calcul de
+   performance : ses mouvements comptent au numérateur alors qu'aucune valeur ne leur
+   répond, si bien qu'un simple retrait ressort en gain. Sur des données réelles, un PEL
+   vidé de 1 404 € mais jamais valorisé faisait passer janvier 2024 de +2 % à +10 %. */
+function patIsValued(a) {
+  return Object.keys((DB.patValues || {})[a.id] || {}).length > 0;
+}
+/* Un compte clôturé garde tout son historique — il a compté, et le retirer fausserait le
+   passé — mais il quitte la saisie mensuelle : on ne redemande pas chaque mois la valeur
+   d'un compte qui n'existe plus. Un compte jamais valorisé est traité de même : il n'a
+   jamais rien eu à dire. */
+function patIsClosed(a) { return !!a.closed || !patIsValued(a); }
+function patActiveAccounts() { return (DB.patAccounts || []).filter(a => !patIsClosed(a)); }
+/* Mouvements orphelins : à signaler à l'utilisateur, jamais à absorber dans les chiffres. */
+function patOrphanMovements() {
+  const rows = (DB.patAccounts || []).filter(a => !patIsValued(a))
+    .map(a => ({ a, n: (DB.patMovements || []).filter(m => m.accountId === a.id).length,
+                 net: patInvested(a.id) }))
+    .filter(x => x.n > 0);
+  return rows.length ? { rows, net: rows.reduce((s, x) => s + x.net, 0) } : null;
+}
 /* Comptes exclus (ex. immobilier) : gardés dans le patrimoine total mais sortis
    de la performance globale, qui n'a pas de sens sur des actifs sans valorisation régulière. */
 function patPerfAccounts() {
-  return (DB.patAccounts || []).filter(a => !a.perfExcluded);
+  return (DB.patAccounts || []).filter(a => !a.perfExcluded && patIsValued(a));
+}
+/* Périmètre d'un mois : seuls les comptes valorisés aux deux bornes. Un compte qui reçoit sa
+   première valorisation ce mois-ci partirait de zéro et afficherait un gain de 100 %. */
+function patPerfScope(mk) {
+  const prev = addMonth(mk, -1);
+  return patPerfAccounts().filter(a =>
+    patAccountValue(a.id, prev) != null && patAccountValue(a.id, mk) != null);
 }
 function patPerfTotalAt(mk) {
   const accs = patPerfAccounts();
@@ -1879,20 +2057,302 @@ function patPerf(valFin, valDebut, mouvement) {
   const denom = valDebut + mouvement;
   return denom ? (valFin - valDebut - mouvement) / denom * 100 : null;
 }
+/* Performance d'un périmètre donné entre deux bornes : valeurs et mouvements portent sur
+   exactement les mêmes comptes, faute de quoi le résultat n'a pas de sens. */
+function patScopedPerf(scope, fromKey, toKey) {
+  if (!scope.length) return null;
+  const ids = new Set(scope.map(a => a.id));
+  const valDebut = scope.reduce((s, a) => s + (patAccountValue(a.id, fromKey) || 0), 0);
+  const valFin = scope.reduce((s, a) => s + (patAccountValue(a.id, toKey) || 0), 0);
+  const mouvement = (DB.patMovements || []).filter(m => {
+    const k = monthKey(m.date);
+    return k > fromKey && k <= toKey && ids.has(m.accountId);
+  }).reduce((s, m) => s + m.amount, 0);
+  return patPerf(valFin, valDebut, mouvement);
+}
 function patMonthlyPerf(accountId, mk) {
   const prevM = addMonth(mk, -1);
-  const valFin = accountId ? patAccountValue(accountId, mk) : patPerfTotalAt(mk);
-  const valDebut = accountId ? patAccountValue(accountId, prevM) : patPerfTotalAt(prevM);
-  const mouvement = accountId ? patMovementsInMonth(accountId, mk) : patPerfMovements(mk, false);
-  return patPerf(valFin, valDebut, mouvement);
+  if (accountId) {
+    return patPerf(patAccountValue(accountId, mk), patAccountValue(accountId, prevM),
+      patMovementsInMonth(accountId, mk));
+  }
+  return patScopedPerf(patPerfScope(mk), prevM, mk);
 }
 function patAnnualPerf(accountId, year) {
   const endKey = year + "-12", prevEndKey = (year - 1) + "-12";
-  const valFin = accountId ? patAccountValue(accountId, endKey) : patPerfTotalAt(endKey);
-  const valDebut = accountId ? patAccountValue(accountId, prevEndKey) : patPerfTotalAt(prevEndKey);
-  const mouvement = accountId ? patMovementsInYear(accountId, year) : patPerfMovements(year, true);
-  return patPerf(valFin, valDebut, mouvement);
+  if (accountId) {
+    return patPerf(patAccountValue(accountId, endKey), patAccountValue(accountId, prevEndKey),
+      patMovementsInYear(accountId, year));
+  }
+  /* Même exigence sur l'année : un compte ouvert en cours d'année n'y entre pas. */
+  const scope = patPerfAccounts().filter(a =>
+    patAccountValue(a.id, prevEndKey) != null && patAccountValue(a.id, endKey) != null);
+  return patScopedPerf(scope, prevEndKey, endKey);
 }
+
+/* Le même écart, mais en euros. Un pourcentage ne dit pas ce qu'il pèse : +3 % sur le PER
+   et +3 % sur le PEA, ce n'est pas la même journée. Même périmètre que la version en
+   pourcentage, pour que les deux affichages racontent bien la même chose. */
+function patScopedGain(scope, fromKey, toKey) {
+  if (!scope.length) return null;
+  const ids = new Set(scope.map(a => a.id));
+  const v0 = scope.reduce((s, a) => s + (patAccountValue(a.id, fromKey) || 0), 0);
+  const v1 = scope.reduce((s, a) => s + (patAccountValue(a.id, toKey) || 0), 0);
+  const mv = (DB.patMovements || []).filter(m => {
+    const k = monthKey(m.date);
+    return k > fromKey && k <= toKey && ids.has(m.accountId);
+  }).reduce((s, m) => s + m.amount, 0);
+  return v1 - v0 - mv;
+}
+function patMonthlyGain(accountId, mk) {
+  const prevM = addMonth(mk, -1);
+  if (accountId) {
+    const v1 = patAccountValue(accountId, mk), v0 = patAccountValue(accountId, prevM);
+    return v1 == null || v0 == null ? null : v1 - v0 - patMovementsInMonth(accountId, mk);
+  }
+  return patScopedGain(patPerfScope(mk), prevM, mk);
+}
+function patAnnualGain(accountId, year) {
+  const endKey = year + "-12", prevEndKey = (year - 1) + "-12";
+  if (accountId) {
+    const v1 = patAccountValue(accountId, endKey), v0 = patAccountValue(accountId, prevEndKey);
+    return v1 == null || v0 == null ? null : v1 - v0 - patMovementsInYear(accountId, year);
+  }
+  return patScopedGain(patPerfAccounts().filter(a =>
+    patAccountValue(a.id, prevEndKey) != null && patAccountValue(a.id, endKey) != null), prevEndKey, endKey);
+}
+
+/* =========================================================================
+   Effort / marché, plus-value, TWR, allocation, projection, passifs.
+   ========================================================================= */
+
+/* Toute variation de patrimoine a deux causes, et deux seulement : ce qui a été versé,
+   et ce que les placements ont rendu. Les confondre fait passer un virement pour une
+   performance. fromMk = null signifie « depuis l'origine » : tout est alors versement. */
+function patSplit(fromMk, toMk, accountId) {
+  const v0 = fromMk ? (accountId ? patAccountValue(accountId, fromMk) || 0 : patTotalAt(fromMk)) : 0;
+  const v1 = accountId ? patAccountValue(accountId, toMk) || 0 : patTotalAt(toMk);
+  /* Les mouvements d'un compte jamais valorisé sont écartés : sans valeur en face, ils
+     basculeraient intégralement dans la performance résiduelle. */
+  const versements = (DB.patMovements || []).filter(m => {
+    const k = monthKey(m.date);
+    if (k <= (fromMk || "") && fromMk) return false;
+    if (k > toMk) return false;
+    if (accountId) return m.accountId === accountId;
+    const a = (DB.patAccounts || []).find(x => x.id === m.accountId);
+    return a ? patIsValued(a) : false;
+  }).reduce((s, m) => s + m.amount, 0);
+  const perf = v1 - v0 - versements;
+  return { v0, v1, delta: v1 - v0, versements, perf,
+    rate: (v0 + versements) ? perf / (v0 + versements) * 100 : null };
+}
+
+/* Versé cumulé contre valeur du jour. Le chiffre que l'on cherche vraiment : « est-ce que
+   ce compte m'a rapporté quelque chose depuis que je l'ai ouvert ». */
+function patInvested(accountId, upToMk) {
+  return (DB.patMovements || []).filter(m => {
+    if (upToMk && monthKey(m.date) > upToMk) return false;
+    if (accountId) return m.accountId === accountId;
+    /* Cumul global : même périmètre que la valeur, sinon la plus-value totale ne
+       correspondrait pas à la somme des lignes affichées. */
+    const a = (DB.patAccounts || []).find(x => x.id === m.accountId);
+    return a ? patIsValued(a) : false;
+  }).reduce((s, m) => s + m.amount, 0);
+}
+function patUnrealized(accountId, mk) {
+  const value = accountId ? patAccountValue(accountId, mk) : patTotalAt(mk);
+  const invested = patInvested(accountId, mk);
+  if (value == null || invested <= 0) return null;
+  return { value, invested, gain: value - invested, rate: (value - invested) / invested * 100 };
+}
+/* La plus-value suppose que les mouvements remontent à l'ouverture du compte. Si la
+   première valorisation précède le premier versement connu, l'apport initial manque et
+   le gain affiché serait surévalué : on le signale plutôt que de le taire. */
+function patInvestedIsComplete(accountId) {
+  const firstVal = Object.keys((DB.patValues || {})[accountId] || {}).sort()[0];
+  if (!firstVal) return true;
+  const movs = (DB.patMovements || []).filter(m => m.accountId === accountId).map(m => monthKey(m.date)).sort();
+  return movs.length > 0 && movs[0] <= firstVal;
+}
+
+/* Performances mensuelles enchaînées. C'est la mesure comparable à un indice : elle ne
+   dépend ni de la taille ni de la date des versements, contrairement au taux d'un seul
+   intervalle, qu'un gros apport en cours d'année suffit à fausser. */
+function patTWR(fromMk, toMk) {
+  let chain = 1, n = 0;
+  for (let mk = addMonth(fromMk, 1); mk <= toMk && n < 1200; mk = addMonth(mk, 1)) {
+    const r = patMonthlyPerf(null, mk);
+    if (r == null) continue;
+    chain *= 1 + r / 100; n++;
+  }
+  if (!n || chain <= 0) return null;
+  return { months: n, cumul: (chain - 1) * 100, annualized: (Math.pow(chain, 12 / n) - 1) * 100 };
+}
+/* Ce qui reste une fois l'inflation retirée : un patrimoine qui gagne 2 % quand les prix
+   montent de 1,9 % n'a presque pas progressé. Réutilise le réglage du côté Budget. */
+function patRealRate(nominalAnnual) {
+  if (nominalAnnual == null) return null;
+  const inf = Number(DB.settings.inflation) || 0;
+  return ((1 + nominalAnnual / 100) / (1 + inf / 100) - 1) * 100;
+}
+
+/* La répartition qui compte n'est pas « par compte » mais par nature d'actif : deux
+   lignes du même type portent le même risque, quel que soit l'établissement. */
+function patAllocByType(mk) {
+  const byType = {};
+  (DB.patAccounts || []).forEach(a => {
+    const v = patAccountValue(a.id, mk) || 0;
+    if (v <= 0) return;
+    const id = patType(a.type).id;
+    if (!byType[id]) byType[id] = { type: id, value: 0, accounts: [] };
+    byType[id].value += v;
+    byType[id].accounts.push({ a, v });
+  });
+  const rows = Object.values(byType);
+  const total = rows.reduce((s, x) => s + x.value, 0) || 1;
+  rows.forEach(x => { x.pct = x.value / total * 100; x.accounts.sort((p, q) => q.v - p.v); });
+  return rows.sort((x, y) => y.value - x.value);
+}
+/* Les répartitions risqué/sécurisé et liquide/bloqué ont été retirées de l'écran : sans
+   allocation cible à confronter, ces pourcentages n'appelaient aucune décision. Les
+   métadonnées risk/liquid de PAT_TYPES restent utilisées par l'épargne de précaution, et
+   suffiraient à les reconstruire le jour où une allocation cible existera.
+
+   Une ligne qui pèse la moitié du patrimoine, en revanche, est un risque en soi,
+   indépendamment de sa qualité : cela reste la première chose qu'un suivi doit montrer. */
+function patConcentration(mk) {
+  const rows = (DB.patAccounts || []).map(a => ({ a, v: patAccountValue(a.id, mk) || 0 }))
+    .filter(x => x.v > 0).sort((x, y) => y.v - x.v);
+  if (!rows.length) return null;
+  const total = rows.reduce((s, x) => s + x.v, 0);
+  return { top: rows[0], pct: total ? rows[0].v / total * 100 : 0, count: rows.length };
+}
+
+/* Records mesurés sur le patrimoine net, celui que le bandeau affiche : annoncer un plus
+   haut calculé sur les actifs bruts à côté d'un net négatif n'aurait aucun sens. */
+function patATH(upToMk) {
+  let best = null;
+  allPatMonths(upToMk).forEach(mk => {
+    const t = patNetAt(mk);
+    if (!best || t > best.total) best = { mk, total: t };
+  });
+  return best;
+}
+function patRiseStreak(mk) {
+  const months = allPatMonths(mk);
+  let n = 0;
+  for (let i = months.length - 1; i > 0; i--) {
+    if (patNetAt(months[i]) > patNetAt(months[i - 1])) n++; else break;
+  }
+  return n;
+}
+
+/* Hypothèses de projection, déduites de l'historique tant que l'utilisateur n'a rien fixé :
+   rendement annualisé observé et versement moyen des douze derniers mois. C'est une
+   extrapolation du passé récent, pas une prévision — l'écran doit le dire en toutes lettres. */
+function patAssumptions(mk) {
+  const s = DB.settings;
+  let rate = s.patReturn;
+  if (rate == null) {
+    const months = allPatMonths(mk);
+    const twr = months.length > 1 ? patTWR(months[0], mk) : null;
+    rate = twr ? twr.annualized : 0;
+  }
+  let contrib = s.patContribution;
+  if (contrib == null) {
+    const from = addMonth(mk, -12);
+    contrib = (DB.patMovements || []).filter(m => {
+      const k = monthKey(m.date); return k > from && k <= mk;
+    }).reduce((x, m) => x + m.amount, 0) / 12;
+  }
+  return { rate: Number(rate) || 0, contrib: Number(contrib) || 0,
+    autoRate: s.patReturn == null, autoContrib: s.patContribution == null };
+}
+/* Nombre de mois pour passer de current à target, en capitalisant chaque mois puis en
+   ajoutant le versement. null quand la cible est hors de portée des hypothèses. */
+function patMonthsToTarget(current, target, annualRate, monthly) {
+  if (target <= current) return 0;
+  const r = Math.pow(1 + Math.max(annualRate, -99) / 100, 1 / 12) - 1;
+  if (monthly <= 0 && (r <= 0 || current <= 0)) return null;
+  let v = current, n = 0;
+  while (v < target && n < 720) { v = v * (1 + r) + monthly; n++; }
+  return n >= 720 ? null : n;
+}
+function patNextMilestone(total) {
+  if (DB.settings.patTarget > 0) return DB.settings.patTarget;
+  const step = total < 100000 ? 10000 : total < 500000 ? 50000 : 100000;
+  return Math.floor(total / step) * step + step;
+}
+
+/* ---- Passifs ------------------------------------------------------------
+   Un crédit se suit de deux façons : en laissant l'app dérouler le tableau
+   d'amortissement à partir du capital, du taux et de la durée, ou en recopiant le capital
+   restant dû de l'échéancier de la banque. share couvre un bien détenu à plusieurs. */
+function patMonthsBetween(a, b) {
+  const [ya, ma] = a.split("-").map(Number), [yb, mb] = b.split("-").map(Number);
+  return (yb - ya) * 12 + (mb - ma);
+}
+function patAmortBalance(l, mk) {
+  if (!l.principal || !l.months || !l.start) return 0;
+  const n = patMonthsBetween(l.start, mk);
+  if (n <= 0) return l.principal;
+  if (n >= l.months) return 0;
+  const r = (Number(l.rate) || 0) / 100 / 12;
+  if (!r) return l.principal * (1 - n / l.months);
+  /* Capital restant dû après n échéances d'un prêt à mensualité constante. */
+  return l.principal * (Math.pow(1 + r, l.months) - Math.pow(1 + r, n)) / (Math.pow(1 + r, l.months) - 1);
+}
+function patDebtAt(liabilityId, mk) {
+  const l = (DB.patLiabilities || []).find(x => x.id === liabilityId);
+  if (!l) return 0;
+  const share = (l.share == null ? 100 : Number(l.share)) / 100;
+  if (l.mode === "manual") {
+    const vals = (DB.patDebtValues || {})[liabilityId] || {};
+    const keys = Object.keys(vals).filter(k => k <= mk).sort();
+    return keys.length ? vals[keys[keys.length - 1]] * share : 0;
+  }
+  return patAmortBalance(l, mk) * share;
+}
+function patDebtTotalAt(mk) {
+  return (DB.patLiabilities || []).reduce((s, l) => s + patDebtAt(l.id, mk), 0);
+}
+function patNetAt(mk) { return patTotalAt(mk) - patDebtTotalAt(mk); }
+function patHasDebt() { return (DB.patLiabilities || []).length > 0; }
+function newPatLiabilityId(name) {
+  let base = "pl_" + normalize(name).replace(/ /g, "_").slice(0, 22) || "pl_credit";
+  let id = base, n = 2; while ((DB.patLiabilities || []).some(l => l.id === id)) id = base + "_" + n++;
+  return id;
+}
+
+/* ---- Épargne de précaution ---------------------------------------------
+   Ce qui est mobilisable tout de suite, rapporté aux dépenses mensuelles réelles calculées
+   côté Budget. Se mesure en mois couverts, jamais en euros : 10 000 € ne veulent rien dire
+   tant qu'on ne sait pas ce qu'ils tiennent. */
+function patSafeLiquid(mk) {
+  return (DB.patAccounts || []).reduce((s, a) => {
+    const t = patType(a.type);
+    return s + (t.risk === "safe" && t.liquid ? (patAccountValue(a.id, mk) || 0) : 0);
+  }, 0);
+}
+function avgMonthlyExpense(n) {
+  const cur = monthKey(todayISO());
+  const keys = Array.from(new Set(DB.tx.map(t => monthKey(t.date)))).filter(k => k < cur).sort().reverse();
+  let sum = 0, months = 0;
+  for (const k of keys) {
+    const s = monthStats(k);
+    if (s.expense <= 0) continue;
+    sum += s.expense; months++;
+    if (months >= n) break;
+  }
+  return months ? { avg: sum / months, months } : null;
+}
+function patSafetyMonths(mk) {
+  const e = avgMonthlyExpense(12);
+  if (!e || !e.avg) return null;
+  const liquid = patSafeLiquid(mk);
+  return { liquid, avg: e.avg, months: liquid / e.avg, basis: e.months };
+}
+
 function newPatAccountModal() {
   return '<div class="modal-back" data-act="backdrop"><div class="modal" style="max-width:440px">' +
     '<div class="mhead"><h1>Nouveau compte</h1><div class="spacer" style="flex:1"></div>' +
@@ -1934,6 +2394,7 @@ function guessPatType(name) {
   if (n.includes("pea")) return "pea";
   if (n.includes("per")) return "per";
   if (n.includes("pee")) return "pee";
+  if (n.includes("crypto") || n.includes("bitcoin") || n.includes("btc") || n.includes("ether")) return "crypto";
   if (n.includes("immo")) return "immo";
   return "autre";
 }
@@ -2073,184 +2534,975 @@ function allPatMonths(endKey) {
   while (k <= endKey) { out.push(k); k = addMonth(k, 1); }
   return out;
 }
+/* =========================================================================
+   Patrimoine — les cinq écrans.
+   Aperçu : combien j'ai et pourquoi ça a bougé. Analyse : comment c'est réparti et ce que
+   ça rapporte. Comptes : la saisie mensuelle. Crédits : les passifs. Plus le détail d'un
+   compte, atteint depuis une carte.
+   ========================================================================= */
+function patTypeTotalAt(typeId, mk) {
+  return (DB.patAccounts || []).filter(a => patType(a.type).id === typeId)
+    .reduce((s, a) => s + (patAccountValue(a.id, mk) || 0), 0);
+}
+/* Classes réellement utilisées, la plus lourde d'abord. Un compte créé mais jamais valorisé
+   ne compte pas : sa classe encombrerait la légende sans jamais dessiner de segment. */
+function patTypesUsed(mk) {
+  const seen = [];
+  (DB.patAccounts || []).forEach(a => {
+    const vals = (DB.patValues || {})[a.id] || {};
+    if (!Object.keys(vals).some(k => vals[k] > 0)) return;
+    const t = patType(a.type).id;
+    if (seen.indexOf(t) < 0) seen.push(t);
+  });
+  return seen.map(t => ({ t, v: patTypeTotalAt(t, mk) })).sort((x, y) => y.v - x.v).map(x => x.t);
+}
+function patTopbar(title, extra) {
+  return '<div class="topbar"><h1>' + esc(title) + "</h1>" +
+    '<div class="periodnav"><button data-act="prev" aria-label="Mois précédent">' + icon("left") + "</button>" +
+    '<span class="label">' + esc(monthLabel(UI.patMonth)) + "</span>" +
+    '<button data-act="next" aria-label="Mois suivant">' + icon("right") + "</button></div>" +
+    '<button class="btn sm ghost" data-act="today">Mois en cours</button>' +
+    '<div class="spacer" style="flex:1"></div>' + (extra || "") + "</div>";
+}
+function patNoAccounts(where) {
+  return '<div class="card"><div class="empty"><b>Aucun compte suivi</b>' + where + "</div></div>";
+}
+/* Une seule étiquette pour la variation du mois : deux pastilles côte à côte donnaient
+   l'impression de deux mesures sans rapport. La performance mène, le montant la précise. */
+function patMonthDelta(pct, eur) {
+  const v = pct == null ? eur : pct;
+  const cls = v == null ? "flat" : v > 0.005 ? "pos" : v < -0.005 ? "neg" : "flat";
+  const arrow = cls === "pos" ? "↑" : cls === "neg" ? "↓" : "→";
+  return '<div class="monthdelta ' + cls + '"><span class="mv">' + arrow + " " + esc(fmtPerf(pct)) + "</span>" +
+    '<span class="ms">' + (eur == null ? "" : esc(fmtEur(eur, { plus: true })) + " · ") + "sur le mois</span></div>";
+}
+function perfClass(v) { return v == null ? "muted" : v > 0.005 ? "pos" : v < -0.005 ? "neg" : "muted"; }
+
+/* ---- Graphique d'évolution ----------------------------------------------
+   Deux couches : ce qui a été versé, et ce que les placements ont ajouté par-dessus.
+   L'écart entre les deux courbes est le gain — c'est lui qu'on vient regarder. */
+const PAT_RANGES = [["3m", 3], ["6m", 6], ["1a", 12], ["2a", 24], ["3a", 36], ["5a", 60], ["all", 0]];
+const PAT_RANGE_LABEL = { "3m": "3 mois", "6m": "6 mois", "1a": "1 an", "2a": "2 ans", "3a": "3 ans", "5a": "5 ans", all: "Tout" };
+function patRangeMonths(endMk) {
+  const all = allPatMonths(endMk);
+  const r = PAT_RANGES.find(x => x[0] === UI.patRange) || PAT_RANGES[PAT_RANGES.length - 1];
+  if (!r[1]) return all;
+  /* r[1] mois de performance demandent r[1]+1 points, la borne de départ comprise. */
+  return all.slice(Math.max(0, all.length - (r[1] + 1)));
+}
+/* Repères de marché : de quoi situer sa propre courbe dans ce qui se passait au même
+   moment. Datés au mois où l'événement a eu lieu ; la liste s'arrête là où s'arrête ce
+   qui est vérifiable, et se complètera au fil du temps. */
+const PAT_EVENTS = [
+  { mk: "2024-03", label: "Le Japon sort des taux négatifs" },
+  { mk: "2024-06", label: "La BCE amorce la baisse des taux" },
+  { mk: "2024-08", label: "Krach éclair sur le yen" },
+  { mk: "2024-09", label: "Première baisse de taux de la Fed" },
+  { mk: "2024-11", label: "Élection de Trump, rallye des actions" },
+  { mk: "2024-12", label: "Bitcoin franchit 100 000 $" },
+  { mk: "2025-04", label: "Droits de douane Trump, −12 % sur le CAC" },
+  { mk: "2025-06", label: "La BCE ramène son taux à 2 %" },
+  { mk: "2025-09", label: "La Fed baisse à nouveau" },
+  { mk: "2025-10", label: "Bitcoin à son record, 126 200 $" },
+  { mk: "2025-11", label: "Nouvelle baisse de taux de la Fed" },
+];
+/* Générateur pseudo-aléatoire à graine : le tirage doit rester stable tant que
+   l'utilisateur ne redemande pas un nouveau, sinon l'affichage changerait à chaque
+   redessin de l'écran. */
+function patRng(seed) {
+  let t = (seed >>> 0) + 0x6D2B79F5;
+  return function () {
+    t = Math.imul(t ^ (t >>> 15), 1 | t);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function patShuffle(arr, rnd) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+
+/* Repères de la trajectoire. On calcule bien plus de candidats qu'on n'en affichera : ne
+   méritent l'encombrement que ceux qui sortent vraiment du lot, et le tri par priorité
+   suivi d'un espacement minimal fait le ménage. Un patrimoine qui n'a rien vécu
+   d'inhabituel n'affiche rien, et c'est très bien. */
+function patHighlightCandidates(months) {
+  const out = [], first = months[0];
+  const at = mk => patTotalAt(mk);
+  const gainAt = mk => at(mk) - patInvested(null, mk);
+  const movIn = mk => (DB.patMovements || []).filter(m => monthKey(m.date) === mk).reduce((s, m) => s + m.amount, 0);
+  const push = (mk, label, prio) => { if (mk && mk > first) out.push({ mk, label, prio }); };
+  /* Premier mois où une valeur seuil est dépassée. */
+  const crossing = (f, c) => {
+    for (let i = 1; i < months.length; i++) if (f(months[i - 1]) < c && f(months[i]) >= c) return months[i];
+    return null;
+  };
+
+  /* Caps ronds : seuls les deux derniers franchis, sinon toute la frise se remplit. */
+  const caps = [10000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 500000, 1000000]
+    .map(c => ({ c, mk: crossing(at, c) })).filter(x => x.mk);
+  caps.slice(-2).forEach((x, i, arr) => push(x.mk, fmtEurShort(x.c) + " franchis", i === arr.length - 1 ? 1 : 5));
+
+  /* Plus-value cumulée : le plus haut palier de gains atteint. */
+  const gcross = [1000, 5000, 10000, 25000, 50000, 100000, 250000]
+    .map(c => ({ c, mk: crossing(gainAt, c) })).filter(x => x.mk);
+  if (gcross.length) push(gcross[gcross.length - 1].mk, fmtEurShort(gcross[gcross.length - 1].c) + " de gains", 2);
+
+  /* Le patrimoine a doublé, triplé… par rapport au point de départ. */
+  const base = at(first);
+  if (base > 0) {
+    const mult = [2, 3, 4, 5, 10].map(x => ({ x, mk: crossing(at, base * x) })).filter(y => y.mk);
+    if (mult.length) push(mult[mult.length - 1].mk, "Patrimoine ×" + mult[mult.length - 1].x, 4);
+  }
+
+  /* Le mois où les placements ont rapporté plus que le versement du mois : le moment où
+     l'argent commence à travailler plus fort que l'épargnant. */
+  for (let i = 1; i < months.length; i++) {
+    const mk = months[i], mv = movIn(mk), gain = at(mk) - at(months[i - 1]) - mv;
+    if (mv > 0 && gain > mv) { push(mk, "Le marché dépasse vos versements", 2); break; }
+  }
+
+  const perfs = months.map(mk => ({ mk, r: patMonthlyPerf(null, mk) })).filter(x => x.r != null);
+  if (perfs.length > 3) {
+    const best = perfs.reduce((a, b) => (b.r > a.r ? b : a));
+    const worst = perfs.reduce((a, b) => (b.r < a.r ? b : a));
+    if (best.r > 2) push(best.mk, "Meilleur mois " + fmtPerf(best.r), 3);
+    if (worst.r < -2) push(worst.mk, "Pire mois " + fmtPerf(worst.r), 3);
+  }
+
+  /* Plus forte baisse depuis un sommet, et le mois où le sommet est retrouvé : c'est la
+     mesure que retiennent les suivis de portefeuille sérieux, parce qu'elle dit combien de
+     temps il a fallu pour effacer une mauvaise passe. */
+  let peak = 0, peakMk = "", dd = 0, ddPeak = "", ddTrough = "";
+  months.forEach(mk => {
+    const v = at(mk);
+    if (v > peak) { peak = v; peakMk = mk; }
+    const d = peak ? (v - peak) / peak * 100 : 0;
+    if (d < dd) { dd = d; ddPeak = peakMk; ddTrough = mk; }
+  });
+  if (dd < -4 && ddTrough) {
+    const rec = months.find(mk => mk > ddTrough && at(mk) >= at(ddPeak));
+    if (rec) push(rec, "Sommet retrouvé en " + patMonthsBetween(ddPeak, rec) + " mois", 3);
+  }
+
+  /* Plus gros versement, en écartant le premier mois : cette ligne-là ne fait
+     qu'initialiser le suivi avec ce qui dormait déjà sur les comptes. */
+  const later = months.slice(1).map(mk => ({ mk, v: movIn(mk) })).filter(x => x.v > 0);
+  if (later.length > 2) {
+    const top = later.reduce((a, b) => (b.v > a.v ? b : a));
+    const median = later.map(x => x.v).sort((a, b) => a - b)[Math.floor(later.length / 2)];
+    /* Ne mérite un repère que s'il sort nettement de l'ordinaire. */
+    if (top.v > median * 1.8) push(top.mk, "Plus gros versement " + fmtEurShort(top.v), 4);
+  }
+  const out2 = later.length ? months.slice(1).map(mk => ({ mk, v: movIn(mk) })).filter(x => x.v < 0) : [];
+  if (out2.length) {
+    const worstOut = out2.reduce((a, b) => (b.v < a.v ? b : a));
+    if (Math.abs(worstOut.v) > 500) push(worstOut.mk, "Plus gros retrait " + fmtEurShort(worstOut.v), 5);
+  }
+  return out;
+}
+/* Sélection : priorité d'abord, puis un écart minimal entre deux repères pour que les
+   étiquettes ne se chevauchent pas. minGapMonths dépend de la largeur disponible. */
+function patHighlights(months, maxCount) {
+  if (months.length < 5) return [];
+  const max = maxCount || 5;
+  const rnd = patRng(UI.patHlSeed || 0);
+  /* Les étiquettes alternent sur deux niveaux : deux repères voisins ne sont donc jamais
+     sur la même ligne, et peuvent se serrer bien plus qu'une largeur d'étiquette. */
+  const gap = Math.max(2, Math.round(months.length / 12));
+  const keep = [];
+  const tryAdd = (h, g) => {
+    if (keep.length >= max) return;
+    if (keep.some(k => Math.abs(patMonthsBetween(k.mk, h.mk)) < g)) return;
+    keep.push(h);
+  };
+  /* Deux repères de marché au plus, tirés au sort parmi ceux qui tombent dans la fenêtre :
+     ils situent la courbe dans son époque sans monopoliser la place. */
+  patShuffle(PAT_EVENTS.filter(e => months.indexOf(e.mk) >= 0), rnd)
+    .slice(0, 2).forEach(e => tryAdd({ mk: e.mk, label: e.label, event: true }, gap));
+  const cand = patShuffle(patHighlightCandidates(months), rnd);
+  cand.forEach(h => tryAdd(h, gap));
+  /* Second passage plus tolérant : on cherche à remplir les cinq places, quitte à serrer. */
+  if (keep.length < max) cand.forEach(h => {
+    if (keep.some(k => k.mk === h.mk)) return;
+    tryAdd(h, Math.max(1, Math.floor(gap / 2)));
+  });
+  return keep.sort((a, b) => (a.mk < b.mk ? -1 : 1));
+}
+/* Frise des paliers : ceux déjà franchis à gauche, ceux à venir à droite, « aujourd'hui »
+   au milieu. Voir le chemin parcouru à côté du chemin restant rend la projection concrète
+   au lieu de la laisser flotter dans un futur abstrait. */
+function patMilestoneTimeline(month, net, asm, target) {
+  const months = allPatMonths(month);
+  const caps = [10000, 25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000, 1000000];
+  const past = [];
+  caps.forEach(c => {
+    for (let i = 1; i < months.length; i++) {
+      if (patTotalAt(months[i - 1]) < c && patTotalAt(months[i]) >= c) { past.push({ c, mk: months[i], done: true }); return; }
+    }
+  });
+  const future = [];
+  caps.filter(c => c > net).forEach(c => {
+    if (future.length >= 3) return;
+    const m = patMonthsToTarget(net, c, asm.rate, asm.contrib);
+    if (m != null && m > 0) future.push({ c, mk: addMonth(month, m), done: false });
+  });
+  const pts = past.slice(-2).concat(future);
+  if (pts.length < 2) return "";
+  /* Échelle en mois, du plus ancien repère au plus lointain, « aujourd'hui » compris. */
+  const lo = pts[0].mk < month ? pts[0].mk : month;
+  const hi = pts[pts.length - 1].mk > month ? pts[pts.length - 1].mk : month;
+  const span = Math.max(1, patMonthsBetween(lo, hi));
+  /* Trois niveaux d'étiquettes : « aujourd'hui » tout en haut, puis les paliers en
+     quinconce au-dessus et au-dessous de l'axe. Sur deux niveaux seulement, un palier
+     franchi récemment venait buter contre le repère du présent. */
+  const W = 460, H = 104, AXIS = 56;
+  const X = mk => 28 + (patMonthsBetween(lo, mk) / span) * (W - 56);
+  const nowX = X(month);
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" height="' + H +
+    '" role="img" aria-label="' + esc("Paliers de patrimoine franchis et projetés, de " + monthLabel(lo) + " à " + monthLabel(hi)) +
+    '" style="display:block;margin-top:14px;overflow:visible">';
+  s += '<line x1="28" y1="' + AXIS + '" x2="' + nowX.toFixed(1) + '" y2="' + AXIS + '" stroke="var(--accent)" stroke-width="2.5"/>';
+  s += '<line x1="' + nowX.toFixed(1) + '" y1="' + AXIS + '" x2="' + (W - 28) + '" y2="' + AXIS +
+    '" stroke="var(--line)" stroke-width="2.5" stroke-dasharray="4 4"/>';
+  const nowAnchor = nowX < 40 ? "start" : nowX > W - 40 ? "end" : "middle";
+  s += '<line x1="' + nowX.toFixed(1) + '" y1="' + (AXIS - 40) + '" x2="' + nowX.toFixed(1) + '" y2="' + (AXIS - 7) +
+      '" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2 2" opacity=".55"/>' +
+    '<circle cx="' + nowX.toFixed(1) + '" cy="' + AXIS + '" r="4.5" fill="var(--accent)"/>' +
+    '<text x="' + nowX.toFixed(1) + '" y="' + (AXIS - 44) + '" text-anchor="' + nowAnchor +
+      '" font-size="9.5" font-weight="700" fill="var(--accent-ink)">aujourd’hui</text>';
+  pts.forEach((p, i) => {
+    const x = X(p.mk);
+    /* Au-dessus de l'axe, le montant coiffe la date ; en dessous, l'ordre s'inverse. Dans
+       les deux cas la ligne la plus proche garde ses onze pixels de dégagement, faute de
+       quoi le texte vient buter contre l'axe. */
+    const above = i % 2 === 0;
+    const amountY = above ? AXIS - 28 : AXIS + 21;
+    const dateY = above ? AXIS - 17 : AXIS + 32;
+    const anchor = x < 44 ? "start" : x > W - 44 ? "end" : "middle";
+    const tx = anchor === "start" ? 2 : anchor === "end" ? W - 2 : x;
+    s += '<circle cx="' + x.toFixed(1) + '" cy="' + AXIS + '" r="3.5" fill="' +
+      (p.done ? "var(--accent)" : "var(--surface)") + '" stroke="' + (p.done ? "var(--accent)" : "var(--ink-mute)") + '" stroke-width="2"/>' +
+      '<text x="' + tx.toFixed(1) + '" y="' + amountY + '" text-anchor="' + anchor + '" font-size="11" font-weight="650" fill="' +
+        (p.done ? "var(--ink)" : "var(--ink-soft)") + '">' + esc(fmtEurShort(p.c)) + "</text>" +
+      '<text x="' + tx.toFixed(1) + '" y="' + dateY + '" text-anchor="' + anchor +
+      '" font-size="9.5" fill="var(--ink-mute)" font-family="ui-monospace,monospace">' + esc(monthLabel(p.mk)) + "</text>";
+  });
+  return s + "</svg>";
+}
+function patAreaChart(months) {
+  if (months.length < 2) return '<div class="empty" style="padding:26px 14px">Il faut au moins deux mois valorisés pour tracer une évolution.</div>';
+  const pts = months.map(mk => ({ mk, val: patTotalAt(mk), inv: patInvested(null, mk) }));
+  const max = Math.max(1, ...pts.map(p => Math.max(p.val, p.inv)));
+  const W = 920, H = 250, TOP = 54, BOT = 26;
+  const X = i => (i / (pts.length - 1)) * (W - 8) + 4;
+  const Y = v => H - BOT - (v / max) * (H - TOP - BOT);
+  const line = key => pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(p[key]).toFixed(1)).join(" ");
+  const area = key => line(key) + " L" + X(pts.length - 1).toFixed(1) + "," + (H - BOT) + " L" + X(0).toFixed(1) + "," + (H - BOT) + " Z";
+
+  let svg = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" height="' + H +
+    '" role="img" aria-label="' + esc("Évolution du patrimoine de " + monthLabel(months[0]) + " à " +
+      monthLabel(months[months.length - 1]) + ", versements cumulés et performance") +
+    '" style="display:block;max-width:100%">';
+  /* Ligne de base et graduations discrètes, pour situer les montants sans grille lourde. */
+  [0.5, 1].forEach(f => {
+    const y = Y(max * f);
+    svg += '<line x1="4" y1="' + y.toFixed(1) + '" x2="' + (W - 4) + '" y2="' + y.toFixed(1) +
+      '" stroke="var(--line-2)" stroke-width="1"/>' +
+      '<text x="8" y="' + (y - 4).toFixed(1) + '" font-size="10" fill="var(--ink-mute)" font-family="ui-monospace,monospace">' +
+      esc(fmtEurShort(max * f)) + "</text>";
+  });
+  svg += '<path d="' + area("val") + '" fill="var(--pos)" fill-opacity=".18"/>';
+  svg += '<path d="' + area("inv") + '" fill="var(--accent)" fill-opacity=".30"/>';
+  svg += '<path d="' + line("inv") + '" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="4 3"/>';
+  svg += '<path d="' + line("val") + '" fill="none" stroke="var(--pos)" stroke-width="2"/>';
+
+  /* Repères : trait vertical depuis la courbe jusqu'à l'étiquette, alternée sur deux
+     niveaux pour que deux dates proches ne se recouvrent pas. */
+  const hi = patHighlights(months);
+  hi.forEach((h, n) => {
+    const i = months.indexOf(h.mk);
+    if (i < 0) return;
+    const x = X(i), y = Y(pts[i].val), ly = n % 2 ? 38 : 16;
+    const anchor = x < 90 ? "start" : x > W - 90 ? "end" : "middle";
+    const tx = anchor === "start" ? 4 : anchor === "end" ? W - 4 : x;
+    /* Un repère de marché n'appartient pas à votre trajectoire : losange creux et libellé
+       en retrait, pour qu'on ne le confonde pas avec un jalon personnel. */
+    const mark = h.event
+      ? '<path d="M' + x.toFixed(1) + "," + (y - 4).toFixed(1) + "l4,4l-4,4l-4,-4Z" +
+        '" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.6"/>'
+      : '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3" fill="var(--surface)" stroke="var(--pos)" stroke-width="2"/>';
+    svg += '<line x1="' + x.toFixed(1) + '" y1="' + (ly + 5) + '" x2="' + x.toFixed(1) + '" y2="' + (y - 6).toFixed(1) +
+      '" stroke="var(--ink-mute)" stroke-width="1" stroke-dasharray="2 2" opacity="' + (h.event ? ".45" : ".7") + '"/>' +
+      mark +
+      '<text x="' + tx.toFixed(1) + '" y="' + ly + '" text-anchor="' + anchor +
+      '" font-size="11" font-weight="' + (h.event ? "500" : "650") + '" fill="var(--' + (h.event ? "ink-soft" : "ink") + ')">' +
+      esc(h.label) + "</text>" +
+      '<text x="' + tx.toFixed(1) + '" y="' + (ly + 12) + '" text-anchor="' + anchor +
+      '" font-size="10" fill="var(--ink-mute)" font-family="ui-monospace,monospace">' + esc(monthLabel(h.mk)) + "</text>";
+  });
+  /* Bornes de l'axe des mois. */
+  svg += '<text x="4" y="' + (H - 8) + '" font-size="10" fill="var(--ink-mute)">' + esc(monthLabel(months[0])) + "</text>" +
+    '<text x="' + (W - 4) + '" y="' + (H - 8) + '" text-anchor="end" font-size="10" fill="var(--ink-mute)">' +
+    esc(monthLabel(months[months.length - 1])) + "</text></svg>";
+  return svg;
+}
+function perfCell(v) {
+  return '<td class="num ' + (v == null ? "muted" : v > 0.005 ? "pos" : v < -0.005 ? "neg" : "muted") +
+    '" style="text-align:right">' + esc(fmtPerf(v)) + "</td>";
+}
+function patLegendByType(types) {
+  return '<div class="legend">' + types.map(t =>
+    '<span><i class="sw" style="background:' + patTypeColor(t) + '"></i>' + esc(patTypeName(t)) + "</span>").join("") + "</div>";
+}
+
+/* ---- Aperçu ------------------------------------------------------------- */
 function viewPatrimoineHome() {
   const accounts = DB.patAccounts || [];
   const month = UI.patMonth, year = yearOf(month + "-01");
-  const total = patTotalAt(month);
+  let html = patTopbar("Aperçu du patrimoine",
+    '<button class="btn sm ghost" data-act="patimportcsv">' + icon("down", 16) + "Importer CSV Excel</button>");
+  if (!accounts.length) return html + patNoAccounts("Ajoutez un compte dans l’onglet <b class='inl'>Comptes</b>, ou reprenez votre historique depuis un export Excel, pour voir la synthèse apparaître ici.");
+
+  const gross = patTotalAt(month), debt = patDebtTotalAt(month), net = gross - debt;
+  const prevM = addMonth(month, -1);
+  const netPrev = patTotalAt(prevM) - patDebtTotalAt(prevM);
+  const deltaEur = patHasHistoryAt(prevM) ? net - netPrev : null;
   const perfM = patMonthlyPerf(null, month);
-  const perfY = patAnnualPerf(null, year);
+  const ath = patATH(month), streak = patRiseStreak(month);
+  const ytd = patSplit((year - 1) + "-12", month);
 
-  let html = '<div class="topbar"><h1>Aperçu du patrimoine</h1><div class="spacer"></div></div>';
-
-  if (!accounts.length) {
-    html += '<div class="card"><div class="empty"><b>Aucun compte suivi</b>' +
-      "Ajoutez un compte dans l’onglet <b>Comptes</b> pour voir apparaître la synthèse ici.</div></div>";
-    return html;
-  }
-
-  html += '<div class="kpis">' +
-    kpi("Patrimoine total", fmtEur(total), monthLabel(month)) +
-    kpi("Comptes", String(accounts.length), "suivis") +
-    kpi("Performance du mois", perfM == null ? "—" : fmtRate(perfM), "hors mouvements", perfM == null ? "" : (perfM >= 0 ? "pos" : "neg")) +
-    kpi("Performance " + year, perfY == null ? "—" : fmtRate(perfY), "hors mouvements", perfY == null ? "" : (perfY >= 0 ? "pos" : "neg")) +
-    "</div>";
-
-  const months = allPatMonths(month).map(mk => ({ mk, total: patTotalAt(mk) }));
-  const maxT = Math.max(1, ...months.map(x => x.total));
-  html += '<div class="card"><div class="chead"><h2>Évolution du patrimoine</h2><div class="spacer"></div>' +
-    '<span class="tiny muted">' + (months.length > 1 ? "depuis " + monthLabel(months[0].mk) : "") + "</span></div>";
-  html += '<div class="bars">' + months.map(x => {
-    const h = Math.round(x.total / maxT * 118);
-    const on = x.mk === month;
-    const mm = x.mk.slice(5, 7), lb = mm === "01" ? x.mk.slice(0, 4) : (x.mk === month ? MONTHS_SHORT[+mm - 1] : "");
-    return '<div class="barcol ' + (on ? "on" : "") + '" title="' + esc(monthLabel(x.mk) + " · " + fmtEur(x.total)) + '">' +
-      '<div class="stack" style="align-items:flex-end;height:118px">' +
-        '<i style="width:100%;height:' + Math.max(h, x.total ? 2 : 0) + 'px;background:' + (x.total ? "var(--accent)" : "var(--line-2)") + '"></i>' +
-      "</div><span class=\"lb\">" + esc(lb) + "&nbsp;</span></div>";
-  }).join("") + "</div></div>";
-
-  const withVal = accounts.map(a => ({ a, v: patAccountValue(a.id, month) || 0 })).filter(x => x.v).sort((x, y) => y.v - x.v);
-  if (withVal.length) {
-    html += '<div class="card"><div class="chead"><h2>Répartition par compte</h2></div>' +
-      withVal.map(({ a, v }) => {
-        const pct = total ? v / total * 100 : 0;
-        return '<div style="display:grid;grid-template-columns:1fr 90px;gap:10px;align-items:center;padding:6px 0">' +
-          '<div><div class="tiny" style="margin-bottom:3px">' + esc(a.name) + " · " + esc(fmtEur(v)) + "</div>" +
-          '<div class="hbar"><i style="width:' + pct.toFixed(1) + '%;background:var(--accent)"></i></div></div>' +
-          '<span class="num tiny muted" style="text-align:right">' + pct.toFixed(1) + " %</span></div>";
-      }).join("") + "</div>";
-  }
-
-  const accPerf = accounts.map(a => ({
-    a, v: patAccountValue(a.id, month), pm: patMonthlyPerf(a.id, month), py: patAnnualPerf(a.id, year),
-  }));
-  const patYears = patYearsWithData();
-  html += '<div class="card"><div class="chead"><h2>Performance par compte</h2><div class="spacer"></div>' +
-    '<select data-chg="patmonthsel" style="margin-right:6px">' +
-    MONTHS.map((mn, i) => '<option value="' + (i + 1) + '"' + (i + 1 === +month.slice(5, 7) ? " selected" : "") + ">" + mn + "</option>").join("") +
-    "</select>" +
-    '<select data-chg="patyearsel">' +
-    patYears.map(y => '<option value="' + y + '"' + (y === year ? " selected" : "") + ">" + y + "</option>").join("") +
-    "</select></div>" +
-    '<table class="ops"><thead><tr><th>Compte</th><th style="text-align:right">Valorisation</th>' +
-    '<th style="text-align:right">Perf. mois</th><th style="text-align:right">Perf. ' + year + "</th></tr></thead><tbody>" +
-    accPerf.map(x => "<tr><td>" + esc(x.a.name) +
-      (x.a.perfExcluded ? ' <span class="tiny muted">(hors calcul global)</span>' : "") + "</td>" +
-      '<td class="num" style="text-align:right">' + (x.v == null ? "—" : esc(fmtEur(x.v))) + "</td>" +
-      '<td class="num ' + (x.pm == null ? "muted" : x.pm >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
-      (x.pm == null ? "—" : esc(fmtRate(x.pm))) + "</td>" +
-      '<td class="num ' + (x.py == null ? "muted" : x.py >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
-      (x.py == null ? "—" : esc(fmtRate(x.py))) + "</td></tr>").join("") + "</tbody></table>";
-  const cmp = accPerf.filter(x => x.pm != null).sort((x, y) => y.pm - x.pm);
-  if (cmp.length) {
-    const maxCmp = Math.max(1, ...cmp.map(x => Math.abs(x.pm)));
-    html += '<div style="margin-top:16px"><div class="tiny muted" style="margin-bottom:8px">Comparatif perf. du mois</div>' +
-      cmp.map(x => {
-        const w = Math.abs(x.pm) / maxCmp * 100;
-        return '<div style="display:grid;grid-template-columns:130px 1fr 64px;gap:10px;align-items:center;padding:4px 0">' +
-          '<span class="tiny" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(x.a.name) + "</span>" +
-          '<div class="hbar"><i style="width:' + w.toFixed(1) + "%;background:" + (x.pm >= 0 ? "var(--pos)" : "var(--neg)") + '"></i></div>' +
-          '<span class="num tiny ' + (x.pm >= 0 ? "pos" : "neg") + '" style="text-align:right">' + esc(fmtRate(x.pm)) + "</span></div>";
-      }).join("") + "</div>";
-  }
+  /* --- Bandeau : combien, et de combien ça a bougé ce mois-ci --- */
+  html += '<div class="card"><div class="pathero"><div>' +
+    '<div class="eyebrow">' + (debt ? "Patrimoine net" : "Patrimoine total") + "</div>" +
+    '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">' +
+      '<div class="big">' + esc(fmtEur(net)) + "</div>" + patMonthDelta(perfM, deltaEur) + "</div>";
+  const marks = [];
+  if (ath && ath.mk === month && gross > 0) marks.push("Plus haut historique");
+  else if (ath && gross > 0) marks.push("Plus haut : " + fmtEurShort(ath.total) + " en " + monthLabel(ath.mk));
+  if (streak >= 2) marks.push(streak + " mois de hausse d’affilée");
+  if (debt) marks.push(fmtEur(gross) + " d’actifs − " + fmtEur(debt) + " de dettes");
+  html += marks.length ? '<div class="tiny muted" style="margin-top:7px">' + esc(marks.join(" · ")) + "</div>" : "";
   html += "</div>";
 
-  const perfMonths = last12Months(month).map(mk => ({ mk, perf: patMonthlyPerf(null, mk) }));
-  const maxP = Math.max(1, ...perfMonths.map(x => Math.abs(x.perf || 0)));
-  html += '<div class="card"><div class="chead"><h2>Performance mensuelle</h2><div class="spacer"></div>' +
-    '<span class="tiny muted">hors mouvements</span></div>' +
-    perfMonths.map(x => {
-      const w = x.perf == null ? 0 : Math.abs(x.perf) / maxP * 100;
-      return '<div style="display:grid;grid-template-columns:52px 1fr 72px;gap:10px;align-items:center;padding:5px 0;border-top:1px solid var(--line-2)">' +
-        '<span class="tiny muted">' + MONTHS_SHORT[+x.mk.slice(5, 7) - 1] + "</span>" +
-        '<div class="hbar"><i style="width:' + w.toFixed(1) + "%;background:" + (x.perf == null ? "var(--line-2)" : x.perf >= 0 ? "var(--pos)" : "var(--neg)") + '"></i></div>' +
-        '<span class="num tiny ' + (x.perf == null ? "muted" : x.perf >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
-        (x.perf == null ? "—" : esc(fmtRate(x.perf))) + "</span></div>";
-    }).join("") + "</div>";
+  /* --- Effort contre marché : la question « d'où vient l'évolution » --- */
+  html += "<div>";
+  if (ytd.delta === 0 && !ytd.versements) {
+    html += '<div class="eyebrow">Depuis le 1<sup>er</sup> janvier</div>' +
+      '<p class="tiny muted" style="margin:8px 0 0">Pas encore de mouvement cette année.</p>';
+  } else {
+    const av = Math.abs(ytd.versements), ap = Math.abs(ytd.perf), tot = av + ap || 1;
+    html += '<div class="eyebrow">Depuis le 1<sup>er</sup> janvier</div>' +
+      '<div class="splitbar" style="margin-top:9px">' +
+        '<i style="width:' + (av / tot * 100).toFixed(2) + '%;background:var(--accent)"></i>' +
+        '<i style="width:' + (ap / tot * 100).toFixed(2) + '%;background:' + (ytd.perf >= 0 ? "var(--pos)" : "var(--neg)") + '"></i>' +
+      "</div>" +
+      '<div class="legend">' +
+        '<span><i class="sw" style="background:var(--accent)"></i>Vos versements <b>' + esc(fmtEur(ytd.versements)) + "</b></span>" +
+        '<span><i class="sw" style="background:' + (ytd.perf >= 0 ? "var(--pos)" : "var(--neg)") + '"></i>Performance <b>' +
+          esc(fmtEur(ytd.perf, { plus: true })) + "</b></span>" +
+      "</div>" +
+      '<p class="tiny muted" style="margin:10px 0 0">' + esc(fmtEur(ytd.delta, { plus: true })) + " cette année" +
+        (ytd.rate != null ? ", soit <b class='inl'>" + esc(fmtPerf(ytd.rate)) + "</b> de performance hors versements" : "") + ". " +
+        esc(ap > av ? "La performance dépasse l’effort." : "L’effort porte encore l’essentiel de la progression.") + "</p>";
+  }
+  html += "</div></div></div>";
 
+  /* --- Évolution : versements et performance empilés, sur la période choisie --- */
+  const allMonths = allPatMonths(month);
+  const months = patRangeMonths(month);
+  const from = months[0], last = months[months.length - 1];
+  const rangeTwr = months.length > 1 ? patTWR(from, last) : null;
+  const rangeDelta = patTotalAt(last) - patTotalAt(from);
+  html += '<div class="card"><div class="chead"><h2>Évolution</h2>' +
+    '<button class="iconbtn" data-act="pathlshuffle" title="Afficher d’autres repères">' + icon("undo", 15) + "</button>" +
+    '<div class="spacer" style="flex:1"></div>' +
+    '<div style="display:flex;gap:4px;flex-wrap:wrap">' + PAT_RANGES.map(r => {
+      /* Une période plus longue que l'historique n'a rien à montrer. */
+      const enough = !r[1] || allMonths.length > r[1];
+      return enough ? '<span class="pill ' + ((UI.patRange || "all") === r[0] ? "on" : "") +
+        '" data-act="patrange" data-range="' + r[0] + '">' + PAT_RANGE_LABEL[r[0]] + "</span>" : "";
+    }).join("") + "</div></div>";
+  if (months.length > 1) {
+    const rangeName = (PAT_RANGE_LABEL[UI.patRange || "all"] || "Tout").toLowerCase();
+    html += '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:baseline;margin-bottom:8px">' +
+      '<span class="num ' + perfClass(rangeTwr ? rangeTwr.cumul : null) +
+        '" style="font-size:20px;font-weight:650;letter-spacing:-.02em">' +
+        esc(rangeTwr ? fmtPerf(rangeTwr.cumul) : "—") + "</span>" +
+      '<span class="tiny muted">de performance sur ' + esc(rangeName === "tout" ? "toute la période" : rangeName) +
+        ", et " + esc(fmtEur(rangeDelta, { plus: true })) + " de patrimoine</span></div>";
+  }
+  html += patAreaChart(months);
+  /* La légende suit la période : sur « 6 mois » on veut ce qui a été versé et gagné pendant
+     ces six mois, pas un cumul depuis l'origine qui ne bougerait jamais d'un filtre à l'autre. */
+  const whole = (UI.patRange || "all") === "all";
+  const seg = whole
+    ? { versements: patInvested(null, last), perf: patTotalAt(last) - patInvested(null, last) }
+    : patSplit(from, last);
+  html += '<div class="legend" style="margin-top:12px">' +
+    '<span><i class="sw" style="background:var(--accent);opacity:.55"></i>' +
+      (whole ? "Versements cumulés" : "Versé sur la période") + " <b>" + esc(fmtEur(seg.versements)) + "</b></span>" +
+    '<span><i class="sw" style="background:var(--pos);opacity:.4"></i>' +
+      (whole ? "Performance accumulée" : "Performance sur la période") + " <b>" +
+      esc(fmtEur(seg.perf, { plus: true })) + "</b></span>" +
+    (whole ? '<span class="muted">l’écart entre les deux courbes est votre gain</span>'
+           : '<span class="muted">depuis l’origine : ' + esc(fmtEur(patInvested(null, last))) + " versés, " +
+             esc(fmtEur(patTotalAt(last) - patInvested(null, last), { plus: true })) + " de gains</span>") +
+    "</div></div>";
+
+  /* --- Où ça va : la frise des paliers, franchis et à venir --- */
+  const asm = patAssumptions(month);
+  const target = patNextMilestone(net);
+  const toGo = Math.max(0, target - net);
+  const monthsTo = patMonthsToTarget(net, target, asm.rate, asm.contrib);
+  const help = "Calculé sur " +
+    (asm.autoRate ? "le rendement observé de " + fmtPerf(asm.rate) + " par an"
+                  : "un rendement fixé à " + fmtPerf(asm.rate) + " par an") + " et " +
+    (asm.autoContrib ? "votre versement moyen des douze derniers mois, " + fmtEur(asm.contrib)
+                     : "un versement fixé à " + fmtEur(asm.contrib)) +
+    " par mois. Extrapolation du passé récent, pas une prévision. Ces hypothèses se modifient dans Réglages.";
+  html += '<div class="patgrid"><div class="card"><div class="chead"><h2>Prochain palier</h2>' +
+    '<span class="help" tabindex="0" role="note" aria-label="' + esc(help) + '" title="' + esc(help) + '">?</span>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">' + esc(fmtEurShort(target)) + "</span></div>" +
+    '<div class="msbar"><i style="width:' + Math.min(100, target ? net / target * 100 : 0).toFixed(1) + '%"></i></div>' +
+    '<div style="display:flex;justify-content:space-between" class="tiny muted">' +
+      '<span class="num">' + esc(fmtEurShort(net)) + '</span><span class="num">' + esc(fmtEurShort(target)) + "</span></div>" +
+    '<p class="tiny" style="margin:12px 0 0;color:var(--ink-2)">Il reste <b class="num">' + esc(fmtEur(toGo)) + "</b>. " +
+      (monthsTo == null ? "Les hypothèses actuelles n’y mènent pas."
+        : monthsTo === 0 ? "Palier déjà atteint."
+        : "Au rythme retenu, vous y êtes en <b>" + esc(monthLabel(addMonth(month, monthsTo))) + "</b>.") + "</p>";
+  html += patMilestoneTimeline(month, net, asm, target) + "</div>";
+
+  /* --- Épargne de précaution : le pont avec le côté Budget --- */
+  const safety = patSafetyMonths(month);
+  const goalM = Number(DB.settings.patSafetyTarget) || 4;
+  html += '<div class="card"><div class="chead"><h2>Épargne de précaution</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">objectif ' + goalM + " mois</span></div>";
+  if (!safety) {
+    html += '<div class="empty" style="padding:22px 14px"><b>Pas encore calculable</b>' +
+      "Ce chiffre se mesure en mois de dépenses couverts. Importez au moins un relevé dans l’onglet <b class='inl'>Mois</b> pour que vos dépenses moyennes soient connues.</div>";
+  } else {
+    const ratio = Math.min(100, safety.months / goalM * 100);
+    const st = safety.months >= goalM ? "pos" : safety.months >= goalM - 1 ? "warn" : "neg";
+    html += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">' +
+      '<span class="num ' + st + '" style="font-size:26px;font-weight:600;letter-spacing:-.02em">' +
+        esc(safety.months.toFixed(1).replace(".", ",")) + " mois</span>" +
+      '<span class="tiny muted">de dépenses couvertes</span></div>' +
+      '<div class="msbar"><i style="width:' + ratio.toFixed(1) + "%;background:var(--" + st + ')"></i></div>' +
+      '<p class="tiny muted" style="margin:8px 0 0"><b class=\'inl\'>' + esc(fmtEur(safety.liquid)) +
+      "</b> disponibles sur vos livrets et comptes courants, pour <b class='inl'>" + esc(fmtEur(safety.avg)) +
+      "</b> de dépenses mensuelles moyennes (" + safety.basis + " mois observés). Repère usuel : trois à six mois.</p>";
+  }
+  html += "</div></div>";
   return html;
 }
-function viewPatrimoine() {
+
+/* ---- Analyse ------------------------------------------------------------ */
+function viewPatAnalyse() {
   const accounts = DB.patAccounts || [];
   const month = UI.patMonth, year = yearOf(month + "-01");
+  let html = patTopbar("Analyse du patrimoine");
+  if (!accounts.length) return html + patNoAccounts("Il n’y a rien à analyser tant qu’aucun compte n’est suivi.");
+
   const total = patTotalAt(month);
-  const perfM = patMonthlyPerf(null, month);
-  const perfY = patAnnualPerf(null, year);
+  const alloc = patAllocByType(month);
+  const conc = patConcentration(month);
 
-  let html = '<div class="topbar"><h1>Patrimoine</h1><div class="spacer"></div>' +
-    '<div class="periodnav"><button data-act="prev" aria-label="Précédent">' + icon("left") + "</button>" +
-    '<span class="label">' + esc(monthLabel(month)) + "</span>" +
-    '<button data-act="next" aria-label="Suivant">' + icon("right") + "</button></div>" +
-    '<button class="btn sm ghost" data-act="today">Mois en cours</button>' +
-    '<button class="btn sm ghost" data-act="patimportcsv">' + icon("down", 16) + "Importer CSV Excel</button></div>";
-
-  html += '<div class="kpis">' +
-    kpi("Patrimoine total", fmtEur(total), monthLabel(month)) +
-    kpi("Comptes", String(accounts.length), accounts.length ? "suivis" : "aucun compte") +
-    kpi("Performance du mois", perfM == null ? "—" : fmtRate(perfM), "hors mouvements", perfM == null ? "" : (perfM >= 0 ? "pos" : "neg")) +
-    kpi("Performance " + year, perfY == null ? "—" : fmtRate(perfY), "hors mouvements", perfY == null ? "" : (perfY >= 0 ? "pos" : "neg")) +
-    "</div>";
-
-  if (accounts.length && total > 0) {
-    html += '<div class="card" style="margin-top:-4px;margin-bottom:16px">' + accounts.map(a => {
-      const v = patAccountValue(a.id, month) || 0, pct = total ? v / total * 100 : 0;
-      return '<div style="display:grid;grid-template-columns:1fr 90px;gap:10px;align-items:center;padding:6px 0">' +
-        '<div><div class="tiny" style="margin-bottom:3px">' + esc(a.name) + " · " + esc(fmtEur(v)) + "</div>" +
-        '<div class="hbar"><i style="width:' + pct.toFixed(1) + '%;background:var(--accent)"></i></div></div>' +
-        '<span class="num tiny muted" style="text-align:right">' + pct.toFixed(1) + " %</span></div>";
-    }).join("") + "</div>";
-  }
-
-  html += '<div class="card"><div class="chead"><h2>Comptes</h2><div class="spacer"></div>' +
-    '<button class="btn sm" data-act="newpataccount">' + icon("plus") + "Compte</button></div>";
-  if (!accounts.length) {
-    html += '<div class="empty"><b>Aucun compte suivi</b>Ajoutez un compte pour commencer à saisir vos valorisations mensuelles.</div>';
+  /* --- Répartition --- */
+  html += '<div class="patgrid"><div class="card"><div class="chead"><h2>Répartition</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">par classe d’actif</span></div>';
+  if (!alloc.length) {
+    html += '<div class="empty" style="padding:22px 14px">Aucune valorisation pour ' + esc(monthLabel(month)) + ".</div>";
   } else {
-    html += '<table class="ops"><thead><tr><th>Nom</th><th>Type</th>' +
-      '<th style="text-align:right">Valorisation · ' + esc(monthLabel(month)) + "</th>" +
-      '<th style="text-align:right">Perf. mois</th><th style="text-align:right">Perf. ' + year + "</th>" +
-      '<th style="text-align:center" title="Inclure ce compte dans la performance globale">Perf. globale</th><th></th></tr></thead><tbody>' +
-      accounts.map(a => {
-        const raw = ((DB.patValues || {})[a.id] || {})[month];
-        const pm = patMonthlyPerf(a.id, month), py = patAnnualPerf(a.id, year);
-        return "<tr><td>" + esc(a.name) + '</td><td class="tiny muted">' + esc(patTypeName(a.type)) + "</td>" +
-          '<td style="text-align:right"><input type="number" step="10" value="' + (raw != null ? raw : "") +
-          '" data-chg="patvalue" data-id="' + a.id + '"></td>' +
-          '<td class="num" style="text-align:right">' + (pm == null ? "—" : esc(fmtRate(pm))) + "</td>" +
-          '<td class="num" style="text-align:right">' + (py == null ? "—" : esc(fmtRate(py))) + "</td>" +
-          '<td style="text-align:center"><input type="checkbox" data-chg="patperfexcluded" data-id="' + a.id + '" ' +
-          (a.perfExcluded ? "" : "checked") + " title=\"Inclure dans le calcul de performance\"></td>" +
-          '<td style="text-align:right"><button class="iconbtn danger" title="Supprimer le compte" data-act="delpataccount" data-id="' +
-          a.id + '">' + icon("trash", 14) + "</button></td></tr>";
-      }).join("") + "</tbody></table>";
-  }
-  html += "</div>";
-
-  html += '<div class="card"><div class="chead"><h2>Mouvements</h2></div>';
-  if (!accounts.length) {
-    html += '<div class="empty"><b>Aucun compte</b>Créez d’abord un compte pour enregistrer un dépôt ou un retrait.</div></div>';
-  } else {
-    const movs = (DB.patMovements || []).slice().sort((x, y) => y.date < x.date ? -1 : y.date > x.date ? 1 : 0);
-    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:16px">' +
-      '<div class="field"><label>Compte</label><select id="patmovaccount">' +
-      accounts.map(a => '<option value="' + a.id + '">' + esc(a.name) + "</option>").join("") + "</select></div>" +
-      '<div class="field"><label>Date</label><input type="date" id="patmovdate" value="' + todayISO() + '"></div>' +
-      '<div class="field"><label>Montant (+ dépôt / − retrait)</label><input type="number" step="0.01" id="patmovamount"></div>' +
-      '<button class="btn primary" data-act="addpatmovement">' + icon("plus") + "Ajouter</button></div>";
-    if (!movs.length) {
-      html += '<div class="empty">Aucun mouvement enregistré.</div>';
-    } else {
-      html += '<table class="ops"><thead><tr><th>Date</th><th>Compte</th><th style="text-align:right">Montant</th><th></th></tr></thead><tbody>' +
-        movs.map(m => {
-          const a = accounts.find(x => x.id === m.accountId);
-          return "<tr><td>" + esc(m.date.split("-").reverse().join("/")) + "</td><td>" + esc(a ? a.name : "—") + "</td>" +
-            '<td class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(m.amount, { plus: true })) + "</td>" +
-            '<td style="text-align:right"><button class="iconbtn danger" title="Supprimer" data-act="delpatmovement" data-id="' +
-            m.id + '">' + icon("trash", 14) + "</button></td></tr>";
-        }).join("") + "</tbody></table>";
+    html += '<div class="allocbar">' + alloc.map(x =>
+      '<i style="width:' + x.pct.toFixed(2) + "%;background:" + patTypeColor(x.type) + '" title="' +
+      esc(patTypeName(x.type) + " · " + fmtEur(x.value)) + '"></i>').join("") + "</div>";
+    html += '<div class="alloclist">' + alloc.map(x =>
+      '<span><i class="sw" style="background:' + patTypeColor(x.type) + '"></i><em>' + esc(patTypeName(x.type)) +
+      "</em><b>" + esc(fmtRate(x.pct)) + "</b></span>").join("") + "</div>";
+    /* Les parts « risqué / sécurisé / liquide / bloqué » ont été retirées : sans allocation
+       cible à confronter, un pourcentage brut n'appelle aucune décision. Ce qui reste utile
+       de cette information est déjà dit ailleurs — la part mobilisable dans l'épargne de
+       précaution, la ligne trop lourde dans l'alerte ci-dessous. */
+    if (conc && conc.pct >= 40 && conc.count > 1) {
+      html += '<div class="note warn" style="margin-top:12px">' + icon("warn") + " <b>" + esc(conc.top.a.name) +
+        "</b> pèse " + esc(fmtRate(conc.pct)) + " du patrimoine. Une ligne aussi lourde fait porter l’essentiel du risque sur une seule décision.</div>";
     }
   }
   html += "</div>";
+
+  /* --- Détail par compte, teintes nuancées à l'intérieur d'une classe --- */
+  const withVal = accounts.map(a => ({ a, v: patAccountValue(a.id, month) || 0 }))
+    .filter(x => x.v > 0).sort((x, y) => y.v - x.v);
+  html += '<div class="card"><div class="chead"><h2>Par compte</h2></div>';
+  html += withVal.length ? withVal.map(({ a, v }) => {
+    const pct = total ? v / total * 100 : 0;
+    return '<div style="display:grid;grid-template-columns:1fr 74px;gap:10px;align-items:center;padding:5px 0">' +
+      '<div style="min-width:0"><div class="tiny" style="margin-bottom:3px;display:flex;align-items:center;gap:7px">' +
+        patSwatch(a) + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(a.name) +
+        '</span><span class="muted">' + esc(fmtEur(v)) + "</span></div>" +
+      '<div class="hbar"><i style="width:' + pct.toFixed(1) + "%;background:" + patAccountColor(a) + '"></i></div></div>' +
+      '<span class="num tiny muted" style="text-align:right">' + esc(fmtRate(pct)) + "</span></div>";
+  }).join("") : '<div class="empty" style="padding:22px 14px">Aucun compte valorisé.</div>';
+  html += "</div></div>";
+
+  /* --- Performance et plus-value, avec les années côte à côte ---
+     Comparer 2024, 2025 et 2026 sur une même ligne montre d'un coup quelles enveloppes
+     tiennent la distance et lesquelles ne doivent leur bilan qu'à une bonne année. */
+  /* La première année de l'historique n'a pas de borne de départ : sa colonne serait vide
+     de haut en bas. On ne garde que les années réellement comparables. */
+  const perfYears = patYearsWithData().filter(y => y <= year && patAnnualPerf(null, y) != null).slice(-4);
+  const rows = accounts.map(a => ({
+    a, v: patAccountValue(a.id, month), u: patUnrealized(a.id, month),
+    pm: patMonthlyPerf(a.id, month),
+    ys: perfYears.map(y => patAnnualPerf(a.id, y)),
+    complete: patInvestedIsComplete(a.id),
+  })).filter(x => x.v != null || x.u);
+  const orphans = patOrphanMovements();
+  const totU = patUnrealized(null, month);
+  /* Deux questions différentes, donc deux tableaux : « combien vaut chaque compte et
+     qu'a-t-il rapporté depuis l'origine », puis « comment il se comporte année par année ».
+     Les mélanger donnait sept colonnes de chiffres où l'œil ne se posait nulle part. */
+  rows.sort((x, y) => (y.v || 0) - (x.v || 0));
+  html += '<div class="card"><div class="chead"><h2>Où en est chaque compte</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">' + esc(monthLabel(month)) + "</span></div>";
+  if (!rows.length) {
+    html += '<div class="empty" style="padding:22px 14px">Aucune valorisation à comparer.</div>';
+  } else {
+    html += '<div style="overflow-x:auto"><table class="ops patnum"><thead><tr><th>Compte</th>' +
+      '<th style="text-align:right">Valeur</th><th style="text-align:right">Versé</th>' +
+      '<th style="text-align:right">Plus-value</th></tr></thead><tbody>';
+    html += rows.map(r =>
+      '<tr><td><span style="display:flex;align-items:center;gap:8px">' + patSwatch(r.a) + esc(r.a.name) +
+        (r.u && !r.complete ? ' <span class="tiny muted" title="Les mouvements ne remontent pas à l’ouverture du compte : la plus-value est surévaluée.">≈</span>' : "") +
+        "</span></td>" +
+      '<td class="num" style="text-align:right">' + (r.v == null ? "—" : esc(fmtEur(r.v))) + "</td>" +
+      '<td class="num muted" style="text-align:right">' + (r.u ? esc(fmtEur(r.u.invested)) : "—") + "</td>" +
+      '<td class="num ' + (!r.u ? "muted" : r.u.gain >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
+        (r.u ? esc(fmtEur(r.u.gain, { plus: true })) + ' <span class="tiny">(' + esc(fmtPerf(r.u.rate)) + ")</span>" : "—") +
+        "</td></tr>").join("");
+    if (totU) {
+      html += '<tr><td style="font-weight:650">Ensemble</td>' +
+        '<td class="num" style="text-align:right;font-weight:650">' + esc(fmtEur(totU.value)) + "</td>" +
+        '<td class="num muted" style="text-align:right">' + esc(fmtEur(totU.invested)) + "</td>" +
+        '<td class="num ' + (totU.gain >= 0 ? "pos" : "neg") + '" style="text-align:right;font-weight:650">' +
+        esc(fmtEur(totU.gain, { plus: true })) + ' <span class="tiny">(' + esc(fmtPerf(totU.rate)) + ")</span></td></tr>";
+    }
+    html += "</tbody></table></div>" +
+      '<p class="tiny muted" style="margin:11px 0 0">La <b class=\'inl\'>plus-value</b> compare ce que vous avez versé à ce que le compte vaut : c’est le seul chiffre qui dit si une ligne a rapporté quelque chose depuis son ouverture.</p>';
+    /* Des mouvements sans aucune valorisation en face fausseraient toute la performance :
+       ils sont écartés des calculs, et on dit lesquels plutôt que de les faire disparaître. */
+    if (orphans) {
+      html += '<div class="note warn" style="margin-top:12px">' + icon("warn") +
+        " <b>" + esc(orphans.rows.map(r => r.a.name).join(", ")) + "</b> " +
+        (orphans.rows.length > 1 ? "portent" : "porte") + " des mouvements (" +
+        esc(fmtEur(orphans.net, { plus: true })) + " au total) mais aucune valorisation. " +
+        "Ces comptes sont exclus des calculs : sans valeur en face, un retrait s’y compterait comme un gain. " +
+        "Saisissez leurs valorisations, ou supprimez-les s’ils ne servent plus.</div>";
+    }
+  }
+  html += "</div>";
+
+  /* --- Performance année par année ---
+     La meilleure année de chaque compte est mise en avant : c'est elle qu'on cherche quand
+     on parcourt une ligne, et sans repère visuel il faut comparer les chiffres un à un. */
+  if (rows.length && perfYears.length) {
+    /* Deux lectures du même écart : le taux dit si le placement est bon, le montant dit ce
+       qu'il pèse dans le patrimoine. Un bascule plutôt que deux tableaux côte à côte. */
+    const inEur = UI.patYearUnit === "eur";
+    const cell = v => inEur
+      ? '<td class="num ' + (v == null ? "muted" : v > 0.005 ? "pos" : v < -0.005 ? "neg" : "muted") +
+        '" style="text-align:right">' + (v == null ? "—" : esc(fmtEur(v, { plus: true }))) + "</td>"
+      : perfCell(v);
+    html += '<div class="card"><div class="chead"><h2>Performance année par année</h2>' +
+      '<div class="spacer" style="flex:1"></div>' +
+      '<div class="seg"><button class="' + (inEur ? "" : "on") + '" data-act="patyearunit" data-unit="pct">%</button>' +
+      '<button class="' + (inEur ? "on" : "") + '" data-act="patyearunit" data-unit="eur">€</button></div></div>' +
+      '<div style="overflow-x:auto"><table class="ops patnum"><thead><tr><th>Compte</th>' +
+      '<th style="text-align:right">Mois</th>' +
+      perfYears.map(y => '<th style="text-align:right"' + (y === year ? ' class="curyear"' : "") + ">" +
+        y + (y === year ? " *" : "") + "</th>").join("") + "</tr></thead><tbody>";
+    html += rows.map(r => {
+      const vals = inEur ? perfYears.map(y => patAnnualGain(r.a.id, y)) : r.ys;
+      const known = vals.filter(v => v != null);
+      const bestY = known.length > 1 ? Math.max.apply(null, known) : null;
+      return '<tr><td><span style="display:flex;align-items:center;gap:8px">' + patSwatch(r.a) + esc(r.a.name) +
+        (r.a.perfExcluded ? ' <span class="tiny muted">(hors perf. globale)</span>' : "") + "</span></td>" +
+        cell(inEur ? patMonthlyGain(r.a.id, month) : r.pm) +
+        vals.map(v => {
+          const star = bestY != null && v != null && v === bestY && v > 0;
+          const cls = v == null ? "muted" : v > 0.005 ? "pos" : v < -0.005 ? "neg" : "muted";
+          return '<td class="num ' + cls + (star ? " bestyear" : "") + '" style="text-align:right"' +
+            (star ? ' title="Meilleure année de ce compte"' : "") + ">" +
+            (v == null ? "—" : esc(inEur ? fmtEur(v, { plus: true }) : fmtPerf(v))) + "</td>";
+        }).join("") + "</tr>";
+    }).join("");
+    html += '<tr><td style="font-weight:650">Ensemble</td>' +
+      cell(inEur ? patMonthlyGain(null, month) : patMonthlyPerf(null, month)) +
+      perfYears.map(y => cell(inEur ? patAnnualGain(null, y) : patAnnualPerf(null, y))).join("") + "</tr>";
+    html += "</tbody></table></div>" +
+      '<p class="tiny muted" style="margin:11px 0 0">La meilleure année de chaque compte est soulignée. ' +
+      (inEur ? "Les montants sont les gains hors versements : ce que les placements ont ajouté d’eux-mêmes. "
+             : "") +
+      "L’année " + year + " est en cours (*), elle court de janvier à " + esc(monthLabel(month)) + ".</p></div>";
+  }
+
+  /* --- Rendement d'ensemble --- */
+  const first = allPatMonths(month)[0];
+  const twr = first && first < month ? patTWR(first, month) : null;
+  const perfs = allPatMonths(month).map(mk => ({ mk, r: patMonthlyPerf(null, mk) })).filter(x => x.r != null);
+  html += '<div class="card"><div class="chead"><h2>Rendement d’ensemble</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">performances mensuelles enchaînées</span></div>';
+  if (!twr) {
+    html += '<div class="empty" style="padding:22px 14px">Il faut au moins deux mois valorisés.</div>';
+  } else {
+    const real = patRealRate(twr.annualized);
+    const best = perfs.slice().sort((a, b) => b.r - a.r)[0], worst = perfs.slice().sort((a, b) => a.r - b.r)[0];
+    const up = perfs.filter(p => p.r > 0).length;
+    html += '<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="eyebrow">Cumulé</div>' +
+      '<div class="v num ' + (twr.cumul >= 0 ? "pos" : "neg") + '">' + esc(fmtPerf(twr.cumul)) + "</div>" +
+      '<div class="s">' + twr.months + " mois</div></div>" +
+      '<div class="kpi"><div class="eyebrow">Annualisé</div><div class="v num ' + (twr.annualized >= 0 ? "pos" : "neg") + '">' +
+      esc(fmtPerf(twr.annualized)) + '</div><div class="s">par an</div></div>' +
+      '<div class="kpi"><div class="eyebrow">Net d’inflation</div><div class="v num ' + (real >= 0 ? "pos" : "neg") + '">' +
+      esc(fmtPerf(real)) + '</div><div class="s">à ' + esc(fmtRate(Number(DB.settings.inflation) || 0)) + " d’inflation</div></div></div>";
+
+    /* Une case par mois, verte ou rouge selon le signe, d'autant plus foncée que le mois
+       a été marquant. On voit ainsi *quand* les choses se sont passées — une barre de
+       proportion ne disait que « combien », ce qui n'apprend presque rien. */
+    const byYear = {};
+    perfs.forEach(p => { const y = +p.mk.slice(0, 4); (byYear[y] = byYear[y] || {})[+p.mk.slice(5, 7)] = p.r; });
+    const years = Object.keys(byYear).map(Number).sort();
+    const scale = Math.max(1, ...perfs.map(p => Math.abs(p.r)));
+    const gridHelp = "Une case par mois. Vert : le patrimoine a gagné ce mois-là, hors versements. " +
+      "Rouge : il a perdu. Plus la case est foncée, plus le mois a été marqué. Survolez une case pour le détail.";
+    html += '<div class="chead" style="margin:18px 0 10px"><h2 style="font-size:13px">Mois par mois</h2>' +
+      '<span class="help" tabindex="0" title="' + esc(gridHelp) + '" aria-label="' + esc(gridHelp) + '">?</span>' +
+      '<div class="spacer" style="flex:1"></div><span class="tiny muted">' + up + " mois gagnants sur " +
+      perfs.length + "</span></div>";
+    const MI = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+    html += '<div class="ygrid"><div class="grow ghead"><span></span>' +
+      MI.map((m, i) => '<span class="gh" title="' + esc(MONTHS[i]) + '">' + m + "</span>").join("") +
+      '<span class="gtot">année</span><span class="gcnt">gagnants</span></div>';
+    html += years.map(y => {
+      const l = byYear[y], keys = Object.keys(l).map(Number);
+      const pos = keys.filter(m => l[m] > 0).length;
+      const ya = patAnnualPerf(null, y);
+      return '<div class="grow"><span class="gy">' + y + "</span>" +
+        MI.map((_, i) => {
+          const r = l[i + 1];
+          if (r == null) return '<span class="gcell" title="' + esc(MONTHS[i] + " " + y + " — pas de donnée") + '"></span>';
+          const int = 22 + Math.min(1, Math.abs(r) / scale) * 66;
+          return '<span class="gcell on" style="background:color-mix(in oklab, var(--' + (r > 0 ? "pos" : "neg") +
+            ") " + int.toFixed(0) + '%, var(--surface))" title="' +
+            esc(MONTHS[i] + " " + y + " : " + fmtPerf(r)) + '"></span>';
+        }).join("") +
+        '<span class="gtot ' + perfClass(ya) + '">' + esc(fmtPerf(ya)) + "</span>" +
+        '<span class="gcnt">' + pos + " / " + keys.length + "</span></div>";
+    }).join("") + "</div>";
+    html += '<p class="tiny muted" style="margin:14px 0 0">Le cumulé enchaîne les performances mois par mois : contrairement à un écart calculé de bout en bout, il ne dépend ni de la taille ni de la date de vos versements, et se compare donc à un indice.<br>' +
+      (best ? "Votre meilleur mois reste <b class='inl'>" + esc(monthLabel(best.mk)) + "</b> à " + esc(fmtPerf(best.r)) + ", " : "") +
+      (worst ? "le pire <b class='inl'>" + esc(monthLabel(worst.mk)) + "</b> à " + esc(fmtPerf(worst.r)) + "." : "") + "</p>";
+  }
+  html += "</div>";
+
+  /* --- Performance mensuelle : le pourcentage, et ce qu'il pèse en euros ---
+     Un même +2 % ne représente pas la même chose sur 15 000 € et sur 60 000 € : la barre
+     cède un peu de largeur pour laisser place au montant. */
+  const last12 = last12Months(month).map(mk => {
+    const r = patMonthlyPerf(null, mk), prev = addMonth(mk, -1);
+    const base = patPerfTotalAt(prev);
+    return { mk, r, eur: r == null || base == null ? null : base * r / 100 };
+  });
+  const maxAbs = Math.max(1, ...last12.map(x => Math.abs(x.r || 0)));
+  html += '<div class="card"><div class="chead"><h2>Performance mensuelle</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">douze mois · axe centré sur zéro</span></div>' +
+    last12.map(x => {
+      const w = x.r == null ? 0 : Math.abs(x.r) / maxAbs * 50;
+      const pos = x.r != null && x.r >= 0;
+      /* Pourcentage et montant dans une seule cellule : deux colonnes séparées laissaient
+         croire à deux mesures, alors que la seconde ne fait que traduire la première. */
+      return '<div class="dvrow"><span class="muted">' + MONTHS_SHORT[+x.mk.slice(5, 7) - 1] + "</span>" +
+        '<div class="dvtrack">' + (x.r == null ? "" :
+          '<i style="' + (pos ? "left:50%" : "right:50%") + ";width:" + w.toFixed(2) + "%;background:" +
+          (pos ? "var(--pos)" : "var(--neg)") + '"></i>') + "</div>" +
+        '<span class="dvval"><b class="num ' + perfClass(x.r) + '">' + esc(fmtPerf(x.r)) + "</b>" +
+        '<em class="num">' + (x.eur == null ? "" : esc(fmtEur(x.eur, { plus: true }))) + "</em></span></div>";
+    }).join("") + "</div>";
+  return html;
+}
+
+/* ---- Comptes : l'écran où l'on saisit ----------------------------------- */
+function viewPatrimoine() {
+  const accounts = DB.patAccounts || [];
+  const month = UI.patMonth;
+  let html = patTopbar("Comptes",
+    '<button class="btn sm" data-act="newpataccount">' + icon("plus") + "Compte</button>" +
+    '<button class="btn sm ghost" data-act="patimportcsv">' + icon("down", 16) + "Importer CSV Excel</button>");
+  if (!accounts.length) return html + patNoAccounts("Créez un compte pour commencer à saisir vos valorisations mensuelles, ou reprenez votre historique depuis un export Excel.");
+
+  /* La saisie ne porte que sur les comptes vivants. Les clôturés restent consultables sous
+     un repli : leur histoire compte encore dans les performances passées. */
+  const active = patActiveAccounts(), closed = accounts.filter(patIsClosed);
+  const shown = UI.patShowInactive ? active.concat(closed) : active;
+  const missing = active.filter(a => ((DB.patValues || {})[a.id] || {})[month] == null);
+
+  /* --- Saisie du mois, les comptes manquants en tête --- */
+  html += '<div class="card"><div class="chead"><h2>Valorisations de ' + esc(monthLabel(month)) + "</h2>" +
+    '<div class="spacer" style="flex:1"></div>' +
+    (missing.length
+      ? '<span class="tag" style="color:var(--warn);border-color:var(--warn)">' + missing.length + " à saisir</span>"
+      : '<span class="tag" style="color:var(--pos);border-color:var(--pos)">' + icon("check", 13) + " complet</span>") + "</div>";
+  const order = active.slice().sort((a, b) => {
+    const ma = ((DB.patValues || {})[a.id] || {})[month] == null ? 0 : 1;
+    const mb = ((DB.patValues || {})[b.id] || {})[month] == null ? 0 : 1;
+    if (ma !== mb) return ma - mb;
+    return (patAccountValue(b.id, month) || 0) - (patAccountValue(a.id, month) || 0);
+  });
+  html += '<div class="acards">' + order.map(a => {
+    const raw = ((DB.patValues || {})[a.id] || {})[month];
+    const pm = patMonthlyPerf(a.id, month), u = patUnrealized(a.id, month);
+    const prev = patAccountValue(a.id, addMonth(month, -1));
+    return '<div class="acard ' + (raw == null ? "todo" : "") + '" style="--ac:' + patAccountColor(a) + '">' +
+      '<button class="iconbtn go" data-act="patopenacct" data-id="' + a.id + '" title="Voir le détail du compte">' +
+        icon("right", 14) + "</button>" +
+      '<span class="an">' + patSwatch(a) + "<em>" + esc(a.name) + "</em></span>" +
+      '<input type="number" step="10" inputmode="decimal" value="' + (raw != null ? raw : "") +
+        '" placeholder="' + (prev != null ? Math.round(prev) : "—") + '" data-chg="patvalue" data-id="' + a.id +
+        '" aria-label="Valorisation de ' + esc(a.name) + ' en ' + esc(monthLabel(month)) + '">' +
+      '<span class="am">' +
+        (raw == null && prev != null ? '<span class="muted">' + esc(monthLabel(addMonth(month, -1))) + " : " + esc(fmtEur(prev)) + "</span>"
+          : '<span>mois <b class="' + (pm == null ? "muted" : pm >= 0 ? "pos" : "neg") + '">' + esc(fmtPerf(pm)) + "</b></span>") +
+        (u ? '<span>P/V <b class="' + (u.gain >= 0 ? "pos" : "neg") + '">' + esc(fmtEur(u.gain, { plus: true })) + "</b></span>" : "") +
+      "</span></div>";
+  }).join("") + "</div>";
+  if (!order.length) {
+    html += '<div class="empty" style="padding:22px 14px">Tous vos comptes sont clôturés.</div>';
+  }
+  if (closed.length) {
+    html += '<div style="margin-top:12px"><button class="btn sm ghost" data-act="pattoggleinactive">' +
+      (UI.patShowInactive ? "Masquer" : "Afficher") + " les " + closed.length + " compte(s) clôturé(s)</button></div>";
+  }
+  html += "</div>";
+
+  /* --- Réglages des comptes, hors du chemin de saisie --- */
+  html += '<div class="card"><div class="chead"><h2>Réglages des comptes</h2></div>' +
+    '<div style="overflow-x:auto"><table class="ops"><thead><tr><th>Nom</th><th>Classe</th>' +
+    '<th style="text-align:center" title="Inclure ce compte dans la performance globale">Perf. globale</th>' +
+    '<th style="text-align:center">État</th><th></th></tr></thead><tbody>' +
+    active.concat(closed).map(a => {
+      const isClosed = patIsClosed(a), neverValued = !patIsValued(a);
+      return '<tr' + (isClosed ? ' class="rowoff"' : "") + '><td><span style="display:flex;align-items:center;gap:8px">' +
+        patSwatch(a) + esc(a.name) + "</span></td>" +
+      '<td><select data-chg="pataccounttype" data-id="' + a.id + '">' +
+        PAT_TYPES.map(t => '<option value="' + t.id + '"' + (t.id === patType(a.type).id ? " selected" : "") + ">" +
+          esc(t.name) + "</option>").join("") + "</select></td>" +
+      '<td style="text-align:center"><input type="checkbox" data-chg="patperfexcluded" data-id="' + a.id + '" ' +
+        (a.perfExcluded ? "" : "checked") + ' title="Inclure dans le calcul de performance"></td>' +
+      '<td style="text-align:center">' +
+        (neverValued
+          ? '<span class="tag" title="Aucune valorisation n’a jamais été saisie sur ce compte.">jamais valorisé</span>'
+          : '<button class="btn sm ghost" data-act="pattoggleclosed" data-id="' + a.id + '">' +
+            (a.closed ? "Rouvrir" : "Clôturer") + "</button>") + "</td>" +
+      '<td style="text-align:right"><button class="iconbtn danger" title="Supprimer le compte et tout son historique" data-act="delpataccount" data-id="' +
+        a.id + '">' + icon("trash", 14) + "</button></td></tr>";
+    }).join("") +
+    "</tbody></table></div>" +
+    '<p class="tiny muted" style="margin:10px 0 0">La classe détermine la couleur du compte, sa place dans la répartition et son classement en risqué, sécurisé ou bloqué. ' +
+    "<b class='inl'>Clôturer</b> retire le compte de la saisie mensuelle sans toucher à son historique : ses performances passées restent comptées. " +
+    "Supprimer, au contraire, efface tout.</p></div>";
+
+  html += patMovementsCard(accounts, null);
+  return html;
+}
+
+/* Bloc mouvements, partagé entre l'écran Comptes et le détail d'un compte. */
+function patMovementsCard(accounts, onlyAccountId) {
+  const filter = onlyAccountId || UI.patMovFilter;
+  let movs = (DB.patMovements || []).slice().sort((x, y) => y.date < x.date ? -1 : y.date > x.date ? 1 : 0);
+  if (filter && filter !== "all") movs = movs.filter(m => m.accountId === filter);
+  let html = '<div class="card"><div class="chead"><h2>Mouvements</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">dépôts et retraits, hors performance</span></div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:14px">' +
+    '<div class="field"><label>Compte</label><select id="patmovaccount">' +
+      accounts.map(a => '<option value="' + a.id + '"' + (onlyAccountId === a.id ? " selected" : "") + ">" +
+        esc(a.name) + "</option>").join("") + "</select></div>" +
+    '<div class="field"><label>Date</label><input type="date" id="patmovdate" value="' + todayISO() + '"></div>' +
+    '<div class="field"><label>Montant (+ dépôt / − retrait)</label><input type="number" step="0.01" id="patmovamount"></div>' +
+    '<button class="btn primary" data-act="addpatmovement">' + icon("plus") + "Ajouter</button></div>";
+  if (!onlyAccountId && accounts.length > 1) {
+    html += '<div class="pillrow" style="margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap">' +
+      '<span class="pill ' + (UI.patMovFilter === "all" ? "on" : "") + '" data-act="patmovfilter" data-id="all">Tous</span>' +
+      accounts.filter(a => (DB.patMovements || []).some(m => m.accountId === a.id)).map(a =>
+        '<span class="pill ' + (UI.patMovFilter === a.id ? "on" : "") + '" data-act="patmovfilter" data-id="' + a.id + '">' +
+        esc(a.name) + "</span>").join("") + "</div>";
+  }
+  if (!movs.length) {
+    html += '<div class="empty" style="padding:22px 14px">Aucun mouvement' + (filter && filter !== "all" ? " sur ce compte" : "") + ".</div>";
+  } else {
+    html += '<div style="overflow-x:auto"><table class="ops"><thead><tr><th>Date</th>' +
+      (onlyAccountId ? "" : "<th>Compte</th>") + '<th style="text-align:right">Montant</th><th></th></tr></thead><tbody>' +
+      movs.map(m => {
+        const a = accounts.find(x => x.id === m.accountId);
+        return "<tr><td>" + esc(m.date.split("-").reverse().join("/")) + "</td>" +
+          (onlyAccountId ? "" : '<td><span style="display:flex;align-items:center;gap:8px">' +
+            (a ? patSwatch(a) : "") + esc(a ? a.name : "—") + "</span></td>") +
+          '<td class="num ' + (m.amount >= 0 ? "" : "neg") + '" style="text-align:right;font-weight:600">' +
+            esc(fmtEur(m.amount, { plus: true })) + "</td>" +
+          '<td style="text-align:right"><button class="iconbtn danger" title="Supprimer" data-act="delpatmovement" data-id="' +
+            m.id + '">' + icon("trash", 14) + "</button></td></tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+  return html + "</div>";
+}
+
+/* ---- Détail d'un compte -------------------------------------------------- */
+function viewPatAccount() {
+  const a = (DB.patAccounts || []).find(x => x.id === UI.patAccount);
+  if (!a) { UI.view = "pat"; return viewPatrimoine(); }
+  const month = UI.patMonth, year = yearOf(month + "-01");
+  const v = patAccountValue(a.id, month), u = patUnrealized(a.id, month);
+  const pm = patMonthlyPerf(a.id, month), py = patAnnualPerf(a.id, year);
+
+  let html = '<div class="topbar"><button class="btn sm ghost" data-act="patback">' + icon("left", 14) + "Comptes</button>" +
+    '<h1 style="display:flex;align-items:center;gap:10px">' + patSwatch(a, 12) + esc(a.name) + "</h1>" +
+    '<span class="tag">' + esc(patTypeName(patType(a.type).id)) + "</span>" +
+    '<div class="periodnav"><button data-act="prev" aria-label="Mois précédent">' + icon("left") + "</button>" +
+    '<span class="label">' + esc(monthLabel(month)) + "</span>" +
+    '<button data-act="next" aria-label="Mois suivant">' + icon("right") + "</button></div>" +
+    '<div class="spacer" style="flex:1"></div></div>';
+
+  html += '<div class="kpis"><div class="kpi"><div class="eyebrow">Valorisation</div>' +
+    '<div class="v num">' + (v == null ? "—" : esc(fmtEur(v))) + '</div><div class="s">' + esc(monthLabel(month)) + "</div></div>" +
+    '<div class="kpi"><div class="eyebrow">Versé cumulé</div><div class="v num">' +
+      (u ? esc(fmtEur(u.invested)) : "—") + '</div><div class="s">dépôts nets des retraits</div></div>' +
+    '<div class="kpi"><div class="eyebrow">Plus-value</div><div class="v num ' +
+      (!u ? "" : u.gain >= 0 ? "pos" : "neg") + '">' + (u ? esc(fmtEur(u.gain, { plus: true })) : "—") + "</div>" +
+      '<div class="s">' + (u ? esc(fmtPerf(u.rate)) + " depuis l’origine" : "versements inconnus") + "</div></div>" +
+    '<div class="kpi"><div class="eyebrow">Performance</div><div class="v num ' +
+      (pm == null ? "" : pm >= 0 ? "pos" : "neg") + '">' + esc(fmtPerf(pm)) + "</div>" +
+      '<div class="s">' + esc(fmtPerf(py)) + " sur " + year + "</div></div></div>";
+
+  if (u && !patInvestedIsComplete(a.id)) {
+    html += '<div class="note warn">' + icon("warn") +
+      " Le premier mouvement enregistré est postérieur à la première valorisation : l’apport initial manque, donc la plus-value affichée est surévaluée.</div>";
+  }
+
+  /* --- Valeur contre versements cumulés : l'écart entre les deux, c'est le gain --- */
+  const months = allPatMonths(month).filter(mk => patAccountValue(a.id, mk) != null || patInvested(a.id, mk) !== 0);
+  if (months.length > 1) {
+    const pts = months.map(mk => ({ mk, v: patAccountValue(a.id, mk) || 0, inv: patInvested(a.id, mk) }));
+    const max = Math.max(1, ...pts.map(p => Math.max(p.v, p.inv)));
+    const W = 640, H = 150, PAD = 6;
+    const X = i => (pts.length === 1 ? 0 : i / (pts.length - 1) * W);
+    const Y = val => H - PAD - (val / max) * (H - PAD * 2);
+    const path = key => pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(p[key]).toFixed(1)).join(" ");
+    const last = pts[pts.length - 1];
+    html += '<div class="card"><div class="chead"><h2>Valeur et versements</h2>' +
+      '<div class="spacer" style="flex:1"></div><span class="tiny muted">depuis ' + esc(monthLabel(months[0])) + "</span></div>" +
+      '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" height="' + H + '" preserveAspectRatio="none" role="img" aria-label="' +
+        esc("Valorisation de " + a.name + " et versements cumulés, de " + monthLabel(months[0]) + " à " + monthLabel(month)) +
+        '" style="display:block;overflow:visible">' +
+      '<path d="' + path("v") + " L" + W + "," + H + " L0," + H + ' Z" fill="' + patAccountColor(a) + '" fill-opacity=".16"/>' +
+      '<path d="' + path("v") + '" fill="none" stroke="' + patAccountColor(a) + '" stroke-width="2"/>' +
+      '<path d="' + path("inv") + '" fill="none" stroke="var(--ink-mute)" stroke-width="1.4" stroke-dasharray="4 3"/>' +
+      "</svg>" +
+      '<div class="legend" style="margin-top:10px">' +
+        '<span><i class="sw" style="background:' + patAccountColor(a) + '"></i>Valeur <b>' + esc(fmtEur(last.v)) + "</b></span>" +
+        '<span><i class="sw" style="background:var(--ink-mute)"></i>Versé cumulé <b>' + esc(fmtEur(last.inv)) + "</b></span>" +
+      "</div></div>";
+  }
+
+  /* --- Performance mois par mois --- */
+  const last12 = last12Months(month).map(mk => ({ mk, r: patMonthlyPerf(a.id, mk) }));
+  const maxAbs = Math.max(1, ...last12.map(x => Math.abs(x.r || 0)));
+  html += '<div class="card"><div class="chead"><h2>Performance mensuelle</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">douze mois</span></div>' +
+    last12.map(x => {
+      const w = x.r == null ? 0 : Math.abs(x.r) / maxAbs * 50;
+      const pos = x.r != null && x.r >= 0;
+      return '<div class="dvrow"><span class="muted">' + MONTHS_SHORT[+x.mk.slice(5, 7) - 1] + "</span>" +
+        '<div class="dvtrack">' + (x.r == null ? "" :
+          '<i style="' + (pos ? "left:50%" : "right:50%") + ";width:" + w.toFixed(2) + "%;background:" +
+          (pos ? "var(--pos)" : "var(--neg)") + '"></i>') + "</div>" +
+        '<span class="num ' + (x.r == null ? "muted" : pos ? "pos" : "neg") + '" style="text-align:right">' +
+        esc(fmtPerf(x.r)) + "</span></div>";
+    }).join("") + "</div>";
+
+  html += patMovementsCard(DB.patAccounts || [], a.id);
+  return html;
+}
+
+/* ---- Crédits ------------------------------------------------------------- */
+function viewPatCredits() {
+  const month = UI.patMonth;
+  const liabs = DB.patLiabilities || [];
+  let html = patTopbar("Crédits",
+    '<button class="btn sm" data-act="newpatliability">' + icon("plus") + "Crédit</button>");
+
+  const gross = patTotalAt(month), debt = patDebtTotalAt(month);
+  html += '<div class="kpis" style="grid-template-columns:repeat(3,1fr)">' +
+    '<div class="kpi"><div class="eyebrow">Actifs</div><div class="v num">' + esc(fmtEur(gross)) + "</div>" +
+      '<div class="s">' + esc(monthLabel(month)) + "</div></div>" +
+    '<div class="kpi"><div class="eyebrow">Capital restant dû</div><div class="v num ' + (debt ? "neg" : "") + '">' +
+      esc(fmtEur(debt)) + '</div><div class="s">' + liabs.length + " crédit(s)</div></div>" +
+    '<div class="kpi"><div class="eyebrow">Patrimoine net</div><div class="v num">' + esc(fmtEur(gross - debt)) + "</div>" +
+      '<div class="s">actifs moins dettes</div></div></div>';
+
+  if (!liabs.length) {
+    html += '<div class="card"><div class="empty"><b>Aucun crédit enregistré</b>' +
+      "Tant qu’aucun passif n’est saisi, le patrimoine affiché est brut. Un bien financé à crédit vaut, pour vous, sa valeur moins le capital qui reste à rembourser.</div></div>";
+    return html;
+  }
+
+  html += liabs.map(l => {
+    const bal = patDebtAt(l.id, month);
+    const share = l.share == null ? 100 : Number(l.share);
+    const initial = l.mode === "auto" ? (Number(l.principal) || 0) * share / 100 : null;
+    const done = initial ? Math.min(100, Math.max(0, (1 - bal / initial) * 100)) : null;
+    const elapsed = l.start ? patMonthsBetween(l.start, month) : null;
+    const left = l.mode === "auto" && l.months ? Math.max(0, Number(l.months) - (elapsed || 0)) : null;
+    return '<div class="card"><div class="chead"><h2>' + esc(l.name || "Crédit") + "</h2>" +
+      '<div class="spacer" style="flex:1"></div>' +
+      '<span class="num" style="font-weight:650">' + esc(fmtEur(bal)) + "</span>" +
+      '<button class="iconbtn danger" title="Supprimer ce crédit" data-act="delpatliability" data-id="' + l.id + '">' +
+        icon("trash", 14) + "</button></div>" +
+      (done != null ? '<div class="msbar"><i style="width:' + done.toFixed(1) + '%"></i></div>' +
+        '<div class="tiny muted" style="display:flex;justify-content:space-between">' +
+        "<span>" + esc(fmtRate(done)) + " remboursé</span>" +
+        (left != null ? "<span>" + left + " mensualité(s) restante(s)</span>" : "<span></span>") + "</div>" : "") +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">' +
+        '<div class="field" style="flex:2;min-width:150px"><label>Nom</label>' +
+          '<input type="text" data-chg="patliab" data-id="' + l.id + '" data-f="name" value="' + esc(l.name || "") + '"></div>' +
+        '<div class="field" style="flex:1;min-width:132px"><label>Suivi</label>' +
+          '<select data-chg="patliab" data-id="' + l.id + '" data-f="mode">' +
+          '<option value="auto"' + (l.mode !== "manual" ? " selected" : "") + ">Amortissement calculé</option>" +
+          '<option value="manual"' + (l.mode === "manual" ? " selected" : "") + ">Saisie manuelle</option></select></div>" +
+        '<div class="field" style="flex:1;min-width:110px"><label>Quote-part (%)</label>' +
+          '<input type="number" step="1" min="0" max="100" data-chg="patliab" data-id="' + l.id + '" data-f="share" value="' +
+          share + '"></div></div>' +
+      (l.mode === "manual"
+        ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">' +
+            '<div class="field" style="flex:1;min-width:180px"><label>Capital restant dû en ' + esc(monthLabel(month)) + " (avant quote-part)</label>" +
+            '<input type="number" step="100" data-chg="patdebtvalue" data-id="' + l.id + '" value="' +
+            (((DB.patDebtValues || {})[l.id] || {})[month] != null ? DB.patDebtValues[l.id][month] : "") + '"></div></div>' +
+          '<p class="tiny muted" style="margin:8px 0 0">Recopiez le montant de l’échéancier de votre banque, mois par mois. Le dernier montant saisi vaut pour les mois suivants.</p>'
+        : '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">' +
+            '<div class="field" style="flex:1;min-width:126px"><label>Capital emprunté</label>' +
+              '<input type="number" step="1000" data-chg="patliab" data-id="' + l.id + '" data-f="principal" value="' +
+              (l.principal || "") + '"></div>' +
+            '<div class="field" style="flex:1;min-width:100px"><label>Taux annuel (%)</label>' +
+              '<input type="number" step="0.05" data-chg="patliab" data-id="' + l.id + '" data-f="rate" value="' +
+              (l.rate == null ? "" : l.rate) + '"></div>' +
+            '<div class="field" style="flex:1;min-width:100px"><label>Durée (mois)</label>' +
+              '<input type="number" step="12" data-chg="patliab" data-id="' + l.id + '" data-f="months" value="' +
+              (l.months || "") + '"></div>' +
+            '<div class="field" style="flex:1;min-width:120px"><label>Première échéance</label>' +
+              '<input type="month" data-chg="patliab" data-id="' + l.id + '" data-f="start" value="' + esc(l.start || "") + '"></div></div>' +
+          '<p class="tiny muted" style="margin:8px 0 0">Le capital restant dû est déroulé pour un prêt à mensualité constante. Il peut s’écarter de quelques euros de l’échéancier réel, qui dépend des arrondis de la banque.</p>') +
+      "</div>";
+  }).join("");
   return html;
 }
 
@@ -2370,6 +3622,29 @@ function viewSettings() {
     numField("Zone neutre (±%)", s.band, "band", 1, "En dessous de cet écart, le mois est jugé équivalent.") +
     numField("Fenêtre doublon (jours)", s.dupWindow, "dupWindow", 1, "Écart de date toléré entre deux exports.") +
     numField("Tolérance montant (%)", s.dupTol, "dupTol", 1, "Au-delà d\u2019un montant identique, doublon « probable ».") +
+    "</div></div>";
+
+  /* --- hypothèses du patrimoine ---
+     Ces réglages ne servent qu'à la projection de l'Aperçu. Laissés vides, ils se déduisent
+     de l'historique : c'est le comportement par défaut, et l'écran de projection reste ainsi
+     débarrassé de ses champs de saisie. */
+  const asm = patAssumptions(UI.patMonth);
+  html += '<div class="card"><div class="chead"><h2>Projection du patrimoine</h2></div>' +
+    '<p class="tiny muted" style="margin:0 0 12px">Hypothèses du bloc <b class=\'inl\'>Prochain palier</b>. ' +
+    "Laissez un champ vide pour le déduire automatiquement de votre historique.</p>" +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">' +
+    '<div class="field"><label>Rendement annuel (%)</label>' +
+      '<input type="number" step="0.5" data-chg="patreturn" placeholder="auto : ' + asm.rate.toFixed(2) + '" value="' +
+      (s.patReturn == null ? "" : s.patReturn) + '"></div>' +
+    '<div class="field"><label>Versement mensuel (€)</label>' +
+      '<input type="number" step="50" data-chg="patcontribution" placeholder="auto : ' + Math.round(asm.contrib) + '" value="' +
+      (s.patContribution == null ? "" : s.patContribution) + '"></div>' +
+    '<div class="field"><label>Objectif visé (€)</label>' +
+      '<input type="number" step="1000" data-chg="pattarget" placeholder="auto : palier suivant" value="' +
+      (s.patTarget ? s.patTarget : "") + '"></div>' +
+    '<div class="field"><label>Épargne de précaution (mois)</label>' +
+      '<input type="number" step="1" min="0" data-chg="patsafetytarget" value="' +
+      (Number(s.patSafetyTarget) || 4) + '"></div>' +
     "</div></div>";
 
   /* --- data (budget only) --- */
@@ -2863,10 +4138,10 @@ document.addEventListener("click", e => {
   switch (act) {
     case "view": UI.view = el.dataset.view; render(); break;
     case "prev":
-      UI.view === "year" ? UI.year-- : UI.view === "pat" ? (UI.patMonth = addMonth(UI.patMonth, -1)) : (UI.month = addMonth(UI.month, -1));
+      UI.view === "year" ? UI.year-- : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, -1)) : (UI.month = addMonth(UI.month, -1));
       render(); break;
     case "next":
-      UI.view === "year" ? UI.year++ : UI.view === "pat" ? (UI.patMonth = addMonth(UI.patMonth, 1)) : (UI.month = addMonth(UI.month, 1));
+      UI.view === "year" ? UI.year++ : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, 1)) : (UI.month = addMonth(UI.month, 1));
       render(); break;
     case "today":
       UI.month = monthKey(todayISO()); UI.year = yearOf(todayISO()); UI.patMonth = monthKey(todayISO()); render(); break;
@@ -3016,6 +4291,37 @@ document.addEventListener("click", e => {
       DB.patMovements = (DB.patMovements || []).filter(m => m.id !== id);
       saveDB(); render(); break;
     }
+    case "patopenacct": UI.patAccount = el.dataset.id; UI.view = "patacct"; render(); break;
+    case "patback": UI.view = "pat"; UI.patAccount = null; render(); break;
+    case "pattoggleinactive": UI.patShowInactive = !UI.patShowInactive; render(); break;
+    case "pattoggleclosed": {
+      const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) break;
+      a.closed = !a.closed;
+      saveDB(); render();
+      toast(a.closed ? "« " + a.name + " » clôturé : il sort de la saisie mensuelle, son historique est conservé."
+                     : "« " + a.name + " » rouvert.");
+      break;
+    }
+    /* Changer de période retire aussi les repères : la fenêtre change, autant en profiter
+       pour en montrer d'autres plutôt que de resservir les mêmes. */
+    case "patrange": UI.patRange = el.dataset.range; UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
+    case "pathlshuffle": UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
+    case "patyearunit": UI.patYearUnit = el.dataset.unit; render(); break;
+    case "patmovfilter": UI.patMovFilter = el.dataset.id; render(); break;
+    case "newpatliability": {
+      DB.patLiabilities = DB.patLiabilities || [];
+      const name = "Crédit " + (DB.patLiabilities.length + 1);
+      DB.patLiabilities.push({ id: newPatLiabilityId(name), name, mode: "auto",
+        principal: 0, rate: 0, months: 240, start: UI.patMonth, share: 100 });
+      saveDB(); render(); break;
+    }
+    case "delpatliability": {
+      const id = el.dataset.id, l = (DB.patLiabilities || []).find(x => x.id === id); if (!l) break;
+      if (!confirm("Supprimer le crédit « " + l.name + " » ?")) break;
+      DB.patLiabilities = DB.patLiabilities.filter(x => x.id !== id);
+      if (DB.patDebtValues) delete DB.patDebtValues[id];
+      saveDB(); render(); toast("Crédit supprimé."); break;
+    }
     case "patimportcsv": PATIMP = { comptesText: null, comptesName: null, mouvementsText: null, mouvementsName: null, error: null };
       UI.small = patImportModal; renderSmall(); break;
     case "patpickcomptes": $("#patfilecomptes").click(); break;
@@ -3122,6 +4428,35 @@ document.addEventListener("change", e => {
   } else if (kind === "patyearsel") {
     UI.patMonth = el.value + UI.patMonth.slice(4);
     render();
+  } else if (kind === "pataccounttype") {
+    const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
+    a.type = el.value;
+    saveDB(); render();
+  /* Champ vidé = hypothèse rendue à l'historique, d'où le null plutôt que zéro : un
+     rendement de 0 % et « pas d'avis » ne veulent pas dire la même chose. */
+  } else if (kind === "patreturn" || kind === "patcontribution") {
+    const key = kind === "patreturn" ? "patReturn" : "patContribution";
+    DB.settings[key] = el.value.trim() === "" ? null : parseAmount(el.value);
+    saveDB(); render();
+  } else if (kind === "pattarget") {
+    DB.settings.patTarget = el.value.trim() === "" ? 0 : Math.max(0, parseAmount(el.value) || 0);
+    saveDB(); render();
+  } else if (kind === "patsafetytarget") {
+    DB.settings.patSafetyTarget = Math.max(0, parseAmount(el.value) || 0);
+    saveDB(); render();
+  } else if (kind === "patliab") {
+    const l = (DB.patLiabilities || []).find(x => x.id === el.dataset.id); if (!l) return;
+    const f = el.dataset.f;
+    if (f === "name" || f === "mode" || f === "start") l[f] = el.value;
+    else l[f] = parseAmount(el.value) || 0;
+    saveDB(); render();
+  } else if (kind === "patdebtvalue") {
+    const id = el.dataset.id;
+    DB.patDebtValues = DB.patDebtValues || {};
+    DB.patDebtValues[id] = DB.patDebtValues[id] || {};
+    const v = parseAmount(el.value);
+    if (v == null) delete DB.patDebtValues[id][UI.patMonth]; else DB.patDebtValues[id][UI.patMonth] = v;
+    saveDB(); render();
   }
 });
 
