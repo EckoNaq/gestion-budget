@@ -4679,8 +4679,9 @@ if (!DB.tx.length) {
     const app = $(".main");
     if (app && !DB.tx.length) app.insertAdjacentHTML("afterbegin",
       '<div class="note" style="margin-bottom:16px">' + icon("inbox") +
-      " Premier lancement : <b>Réglages → Reprise de l\u2019historique</b> pour charger le tableur complet, " +
-      "ou <b>Importer</b> pour un simple relevé mensuel.</div>");
+      " Premier lancement : <b>Données → Reprise de l’historique</b> pour charger plusieurs années d’un coup, " +
+      "ou <b>Importer</b> pour un simple relevé mensuel. Le patrimoine se reprend depuis " +
+      "<b>Données → Patrimoine depuis Excel</b>.</div>");
   }, 0);
 }
 
