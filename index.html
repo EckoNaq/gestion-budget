@@ -367,6 +367,9 @@ tr.rowoff td:first-child{opacity:.8}
    en deux lignes, on laisse le conteneur défiler — les montants restent lisibles d'un bloc. */
 .patnum td.num,.patnum th{white-space:nowrap}
 .patnum td:first-child{min-width:150px}
+/* La réserve de 150 px vaut pour une colonne de noms de compte ; une colonne d'années n'en
+   a pas besoin et faisait déborder le tableau pour quelques pixels. */
+.patnum.narrow td:first-child{min-width:0}
 @media (max-width:1080px){.pathero,.patgrid{grid-template-columns:1fr}}
 .catgrid{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 .catchip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:3px 10px;font-size:12.5px;cursor:pointer;color:var(--ink-2);display:inline-flex;align-items:center;gap:5px}
@@ -2175,6 +2178,32 @@ function patSplit(fromMk, toMk, accountId) {
     rate: (v0 + versements) ? perf / (v0 + versements) * 100 : null };
 }
 
+/* Ce qui a été versé sur une année civile, même périmètre que le reste : un compte jamais
+   valorisé n'a pas de versements exploitables. */
+function patContributionsOfYear(year) {
+  return (DB.patMovements || []).filter(m => {
+    if (yearOf(m.date) !== year) return false;
+    const a = (DB.patAccounts || []).find(x => x.id === m.accountId);
+    return a ? patIsValued(a) : false;
+  }).reduce((s, m) => s + m.amount, 0);
+}
+/* Le pont entre les deux moitiés : ce que le budget a dégagé face à ce qui est réellement
+   parti au patrimoine. L'écart n'est pas une erreur, c'est une information — de l'argent
+   resté sur le compte courant, ou des mouvements qui ne viennent pas du budget de l'année.
+   On compare des montants réalisés, jamais la projection de fin d'année. */
+function patSavingsEffort(year) {
+  const b = ytdTotals(year);
+  const versements = patContributionsOfYear(year);
+  const hasBudget = b.income > 0;
+  return {
+    year, versements, hasBudget,
+    balance: hasBudget ? b.balance : null,
+    income: b.income, expense: b.expense,
+    /* Au-delà de 100 %, on a placé plus que le budget n'a dégagé cette année-là. */
+    placed: hasBudget && b.balance > 0 ? versements / b.balance * 100 : null,
+    gap: hasBudget ? versements - b.balance : null,
+  };
+}
 /* Versé cumulé contre valeur du jour. Le chiffre que l'on cherche vraiment : « est-ce que
    ce compte m'a rapporté quelque chose depuis que je l'ai ouvert ». */
 function patInvested(accountId, upToMk) {
@@ -3174,6 +3203,57 @@ function viewPatAnalyse() {
       (inEur ? "Les montants sont les gains hors versements : ce que les placements ont ajouté d’eux-mêmes. "
              : "") +
       "L’année " + year + " est en cours (*), elle court de janvier à " + esc(monthLabel(month)) + ".</p></div>";
+  }
+
+  /* --- Effort d'épargne : le pont avec le Budget ---
+     Répond à deux questions d'un coup : combien j'ai versé cette année, et est-ce que ça
+     correspond à ce que mon budget a dégagé. L'écart entre les deux est le vrai sujet. */
+  const effYears = patYearsWithData().filter(y => y <= year);
+  const efforts = effYears.map(patSavingsEffort).filter(e => e.versements !== 0 || e.hasBudget);
+  if (efforts.length) {
+    const firstYear = yearOf(allPatMonths(month)[0] + "-01");
+    const anyBudget = efforts.some(e => e.hasBudget);
+    const maxAmt = Math.max(1, ...efforts.map(e => Math.max(Math.abs(e.versements), Math.abs(e.balance || 0))));
+    html += '<div class="card"><div class="chead"><h2>Effort d’épargne</h2>' +
+      '<span class="help" tabindex="0" title="' + esc("La balance est ce que votre budget a dégagé sur l’année : revenus moins dépenses, sur les mois où un revenu est connu. Le versé est ce qui est réellement parti sur vos comptes de patrimoine. L’écart n’est pas une erreur : c’est de l’argent resté sur le compte courant, ou des versements venus d’ailleurs que du budget de l’année.") +
+      '">?</span><div class="spacer" style="flex:1"></div>' +
+      '<span class="tiny muted">budget et patrimoine confrontés</span></div>';
+    /* En-têtes courts : « Balance du budget » et « Versé au patrimoine » faisaient déborder
+       le tableau à eux seuls. Le titre de la carte et l'aide portent déjà le sens. */
+    html += '<div style="overflow-x:auto"><table class="ops patnum narrow"><thead><tr><th>Année</th>' +
+      '<th style="text-align:right" title="Revenus moins dépenses de l’année">Budget</th>' +
+      '<th style="text-align:right" title="Versements nets vers vos comptes de patrimoine">Versé</th>' +
+      '<th style="text-align:right" title="Part de la balance effectivement placée">Placé</th>' +
+      '<th style="text-align:right" title="Versé moins balance">Écart</th></tr></thead><tbody>';
+    html += efforts.map(e => {
+      const w = Math.abs(e.versements) / maxAmt * 100;
+      return "<tr><td>" + e.year + (e.year === year ? " *" : "") +
+        (e.year === firstYear ? ' <span class="tiny muted" title="Cette année contient la reprise initiale : le premier mouvement ne fait qu’enregistrer ce qui dormait déjà sur les comptes.">reprise</span>' : "") + "</td>" +
+        '<td class="num ' + (!e.hasBudget ? "muted" : e.balance >= 0 ? "pos" : "neg") + '" style="text-align:right">' +
+          (e.hasBudget ? esc(fmtEur(e.balance)) : "—") + "</td>" +
+        '<td class="num" style="text-align:right">' + esc(fmtEur(e.versements)) + "</td>" +
+        '<td style="text-align:right;white-space:nowrap">' +
+          (e.placed == null ? '<span class="num muted">—</span>' :
+            '<div style="display:inline-flex;align-items:center;gap:8px">' +
+            '<div class="hbar" style="width:48px;flex:none"><i style="width:' + Math.min(100, e.placed).toFixed(0) +
+            "%;background:" + (e.placed >= 90 ? "var(--pos)" : e.placed >= 60 ? "var(--accent)" : "var(--warn)") + '"></i></div>' +
+            '<span class="num" style="white-space:nowrap">' + esc(fmtRate(e.placed)) + "</span></div>") + "</td>" +
+        '<td class="num ' + (e.gap == null ? "muted" : Math.abs(e.gap) < 1 ? "muted" : e.gap > 0 ? "pos" : "warn") +
+          '" style="text-align:right">' + (e.gap == null ? "—" : esc(fmtEur(e.gap, { plus: true }))) + "</td></tr>";
+    }).join("") + "</tbody></table></div>";
+    const cur = efforts.filter(e => e.year === year)[0];
+    if (cur && cur.hasBudget && cur.balance > 0) {
+      html += '<p class="tiny muted" style="margin:11px 0 0">En ' + year + ", votre budget a dégagé <b class='inl'>" +
+        esc(fmtEur(cur.balance)) + "</b> et vous en avez placé <b class='inl'>" + esc(fmtEur(cur.versements)) +
+        "</b>. " + (cur.gap < -1
+          ? "Les " + esc(fmtEur(-cur.gap)) + " d’écart sont restés quelque part — sur le compte courant le plus souvent, à moins que des dépenses n’aient échappé au classement."
+          : cur.gap > 1
+            ? "Vous avez placé " + esc(fmtEur(cur.gap)) + " de plus que ce que le budget a dégagé : une réserve entamée, ou des revenus absents du suivi."
+            : "Les deux se rejoignent : tout ce que le budget dégage part effectivement au patrimoine.") + "</p>";
+    } else if (!anyBudget) {
+      html += '<p class="tiny muted" style="margin:11px 0 0">La balance du budget reste vide tant qu’aucun revenu n’est saisi : elle se renseigne mois par mois dans <b class=\'inl\'>Réglages</b>, et les dépenses arrivent par l’import des relevés.</p>';
+    }
+    html += "</div>";
   }
 
   /* --- Rendement d'ensemble --- */
