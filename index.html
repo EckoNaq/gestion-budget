@@ -928,15 +928,43 @@ const DEFAULT_SETTINGS = { inflation: 1.9, band: 5, dupWindow: 5, dupTol: 5, the
 function emptyDB() {
   return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [], patAccounts: [], patValues: {}, patMovements: [], patLiabilities: [], patDebtValues: {} };
 }
-function serialize(db) {
-  return JSON.stringify({
+/* Les deux moitiés de l'application, pour pouvoir en sauvegarder une sans l'autre.
+   Les réglages sont partagés : seuls ceux de la projection appartiennent au Patrimoine,
+   faute de quoi restaurer un export Patrimoine écraserait l'objectif d'épargne du Budget. */
+const BUDGET_KEYS = ["t", "r", "i", "g", "m", "l", "f", "c"];
+const PAT_KEYS = ["pa", "pv", "pm", "pl", "pd"];
+const PAT_SETTING_KEYS = ["patReturn", "patContribution", "patTarget", "patSafetyTarget"];
+
+function serialize(db, scope) {
+  const full = {
     v: SCHEMA_VERSION,
     t: db.tx.map(t => [t.date, t.label, t.merchantRaw || "", t.amount, t.cat || "", t.status, t.imp, t.bankCat || ""]),
     r: db.rules, i: db.income, g: db.goals, m: db.imports, l: db.legacyMap, f: db.fixed, s: db.settings,
     c: db.customCats || [],
     pa: db.patAccounts || [], pv: db.patValues || {}, pm: db.patMovements || [],
     pl: db.patLiabilities || [], pd: db.patDebtValues || {},
+  };
+  /* Le stockage local passe toujours par la sauvegarde complète : un export partiel ne
+     concerne que les fichiers que l'utilisateur emporte. */
+  if (!scope || scope === "all") return JSON.stringify(full);
+  const out = { v: SCHEMA_VERSION, scope, s: {} };
+  (scope === "pat" ? PAT_KEYS : BUDGET_KEYS).forEach(k => { out[k] = full[k]; });
+  Object.keys(full.s || {}).forEach(k => {
+    if ((PAT_SETTING_KEYS.indexOf(k) >= 0) === (scope === "pat")) out.s[k] = full.s[k];
   });
+  return JSON.stringify(out);
+}
+/* Ce qu'un fichier de sauvegarde contient réellement : on ne propose de restaurer que les
+   moitiés présentes, plutôt que de laisser effacer un Patrimoine avec un export Budget. */
+function backupSummary(raw) {
+  const tx = (raw.t || []).length, rules = Object.keys(raw.r || {}).length;
+  const accounts = (raw.pa || []).length, movements = (raw.pm || []).length;
+  const values = Object.values(raw.pv || {}).reduce((s, v) => s + Object.keys(v || {}).length, 0);
+  const liabilities = (raw.pl || []).length;
+  return {
+    hasBudget: tx > 0 || rules > 0, hasPat: accounts > 0 || movements > 0 || liabilities > 0,
+    tx, rules, accounts, movements, values, liabilities, imports: (raw.m || []).length,
+  };
 }
 function deserialize(json) {
   const raw = JSON.parse(json), db = emptyDB();
@@ -3660,15 +3688,27 @@ function viewSettings() {
 function viewGeneral() {
   const bytes = storageBytes(), quota = 5 * 1024 * 1024;
   let html = '<div class="topbar"><h1>Données</h1><div class="spacer"></div></div>';
+  /* Les deux moitiés se sauvegardent séparément : on peut vouloir emporter son patrimoine
+     sans trois ans de relevés bancaires, ou repartir d'un budget vierge sans y perdre
+     l'historique de ses placements. */
+  const nTx = DB.tx.length, nAcc = (DB.patAccounts || []).length;
   html += '<div class="card"><div class="chead"><h2>Sauvegarde &amp; réinitialisation</h2></div>' +
-    '<p class="tiny muted" style="margin:0 0 12px">Sauvegarde et remise à zéro globales, Budget et Patrimoine confondus.</p>' +
     '<div class="tiny muted" style="margin-bottom:6px">Stockage utilisé : ' + (bytes / 1024).toFixed(0) + " Ko sur ~5 Mo (" + (bytes / quota * 100).toFixed(1) + " %)</div>" +
-    '<div class="hbar" style="margin-bottom:14px"><i style="width:' + Math.min(bytes / quota * 100, 100).toFixed(1) + '%;background:var(--accent)"></i></div>' +
+    '<div class="hbar" style="margin-bottom:16px"><i style="width:' + Math.min(bytes / quota * 100, 100).toFixed(1) + '%;background:var(--accent)"></i></div>' +
+    '<div class="eyebrow" style="margin-bottom:8px">Exporter</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">' +
+    '<button class="btn primary" data-act="export-json" data-scope="all">' + icon("file") + "Tout</button>" +
+    '<button class="btn" data-act="export-json" data-scope="budget"' + (nTx ? "" : " disabled") + ">" +
+      icon("cal") + "Budget seul</button>" +
+    '<button class="btn" data-act="export-json" data-scope="pat"' + (nAcc ? "" : " disabled") + ">" +
+      icon("vault") + "Patrimoine seul</button>" +
+    '<span class="tiny muted" style="align-self:center">' + nTx + " opération(s) · " + nAcc + " compte(s)</span></div>" +
+    '<div class="eyebrow" style="margin-bottom:8px">Restaurer</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn" data-act="export-json">' + icon("file") + "Exporter la sauvegarde (JSON)</button>" +
-    '<button class="btn" data-act="import-json">' + icon("up") + "Restaurer une sauvegarde</button>" +
+    '<button class="btn" data-act="import-json">' + icon("up") + "Choisir une sauvegarde…</button>" +
     '<div class="spacer" style="flex:1"></div>' +
     '<button class="btn danger" data-act="reset">' + icon("trash") + "Tout effacer</button></div>" +
+    '<p class="tiny muted" style="margin:10px 0 0">À la restauration, l’application montre ce que contient le fichier et vous laisse choisir la partie à reprendre. La partie non choisie n’est pas touchée.</p>' +
     '<p class="tiny muted" style="margin:12px 0 0">Les données vivent uniquement dans le stockage local de ce navigateur, sous la clé <code>' + STORE_KEY +
     "</code>. Rien ne part sur un serveur. Vider les données de navigation les supprime : l’export JSON est la seule sauvegarde.</p></div>";
   return html;
@@ -4078,9 +4118,14 @@ function download(filename, content, type) {
   document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
-function exportJSON() {
-  download("budget-sauvegarde-" + todayISO() + ".json", serialize(DB), "application/json");
-  toast("Sauvegarde exportée.");
+const EXPORT_SCOPES = { all: "complet", budget: "budget", pat: "patrimoine" };
+function exportJSON(scope) {
+  const sc = EXPORT_SCOPES[scope] ? scope : "all";
+  /* Le nom du fichier dit ce qu'il contient : au moment de restaurer, six mois plus tard,
+     c'est la seule chose qu'on ait sous les yeux. */
+  download("budget-" + EXPORT_SCOPES[sc] + "-" + todayISO() + ".json", serialize(DB, sc), "application/json");
+  toast(sc === "budget" ? "Partie Budget exportée."
+      : sc === "pat" ? "Partie Patrimoine exportée." : "Sauvegarde complète exportée.");
 }
 function exportCSV() {
   const head = ["date", "libelle", "vendeur", "montant", "groupe", "categorie", "statut", "import"];
@@ -4094,15 +4139,68 @@ function exportCSV() {
   download("budget-operations-" + todayISO() + ".csv", "\ufeff" + lines.join("\r\n"), "text/csv;charset=utf-8");
   toast("Export CSV terminé.");
 }
-function restoreJSON(text) {
+/* Restauration en deux temps : on lit le fichier, on montre ce qu'il contient, puis
+   l'utilisateur choisit ce qu'il en reprend. Écraser d'un bloc un patrimoine de trois ans
+   parce qu'on venait chercher des opérations serait trop facile autrement. */
+let RESTORE = null;
+function openRestore(text, name) {
+  let raw;
+  try { raw = JSON.parse(text); }
+  catch (e) { toast("Fichier illisible : ce n’est pas une sauvegarde Budget."); return; }
+  const sum = backupSummary(raw);
+  if (!sum.hasBudget && !sum.hasPat) { toast("Cette sauvegarde ne contient aucune donnée."); return; }
+  RESTORE = { text, name, sum };
+  UI.small = restoreModal; renderSmall();
+}
+function restoreModal() {
+  const s = RESTORE.sum;
+  const part = (on, title, detail) =>
+    '<div class="note" style="margin-bottom:8px' + (on ? "" : ";opacity:.45") + '"><b>' + esc(title) +
+    '</b><br><span class="tiny muted">' + (on ? esc(detail) : "absent de ce fichier") + "</span></div>";
+  const btn = (scope, label, on) =>
+    '<button class="btn ' + (on ? "primary" : "") + '" data-act="dorestore" data-scope="' + scope + '"' +
+    (on ? "" : " disabled") + ">" + esc(label) + "</button>";
+  return '<div class="modal-back" data-act="backdrop"><div class="modal" style="max-width:520px">' +
+    '<div class="mhead"><div><h1>Restaurer une sauvegarde</h1>' +
+    '<div class="tiny muted">' + esc(RESTORE.name || "sauvegarde") + "</div></div>" +
+    '<div class="spacer" style="flex:1"></div><button class="iconbtn" data-act="closesmall">' + icon("x") + "</button></div>" +
+    part(s.hasBudget, "Budget", s.tx + " opération(s) · " + s.imports + " import(s) · " + s.rules + " règle(s) vendeur") +
+    part(s.hasPat, "Patrimoine", s.accounts + " compte(s) · " + s.values + " valorisation(s) · " +
+      s.movements + " mouvement(s)" + (s.liabilities ? " · " + s.liabilities + " crédit(s)" : "")) +
+    '<div class="note warn">' + icon("warn") +
+    " La partie restaurée remplace entièrement l’actuelle. L’autre n’est pas touchée.</div>" +
+    '<div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;align-items:center">' +
+    '<button class="btn ghost" data-act="closesmall">Annuler</button>' +
+    '<div class="spacer" style="flex:1"></div>' +
+    btn("budget", "Budget seul", s.hasBudget) +
+    btn("pat", "Patrimoine seul", s.hasPat) +
+    btn("all", "Les deux", s.hasBudget && s.hasPat) +
+    "</div></div></div>";
+}
+function restoreJSON(text, scope) {
   try {
-    const db = deserialize(text);
-    if (!confirm("Restaurer cette sauvegarde ? Les " + DB.tx.length + " opérations actuelles seront remplacées par " + db.tx.length + " opérations.")) return;
-    DB = db;
+    const src = deserialize(text);
+    if (!scope || scope === "all") {
+      DB = src;
+    } else if (scope === "budget") {
+      DB.tx = src.tx; DB.rules = src.rules; DB.income = src.income; DB.goals = src.goals;
+      DB.imports = src.imports; DB.legacyMap = src.legacyMap; DB.fixed = src.fixed;
+      DB.customCats = src.customCats;
+      Object.keys(src.settings).forEach(k => {
+        if (PAT_SETTING_KEYS.indexOf(k) < 0) DB.settings[k] = src.settings[k];
+      });
+    } else {
+      DB.patAccounts = src.patAccounts; DB.patValues = src.patValues; DB.patMovements = src.patMovements;
+      DB.patLiabilities = src.patLiabilities; DB.patDebtValues = src.patDebtValues;
+      PAT_SETTING_KEYS.forEach(k => { DB.settings[k] = src.settings[k]; });
+    }
     (DB.customCats || []).forEach(registerCat);
     recoverMissingCats(DB);
-    reindex(); saveDB(); render(); toast("Sauvegarde restaurée.");
-  } catch (e) { toast("Fichier illisible : ce n\u2019est pas une sauvegarde Budget."); }
+    reindex(); saveDB();
+    UI.small = null; RESTORE = null; renderSmall(); render();
+    toast(scope === "budget" ? "Partie Budget restaurée."
+        : scope === "pat" ? "Partie Patrimoine restaurée." : "Sauvegarde complète restaurée.");
+  } catch (e) { toast("Fichier illisible : ce n’est pas une sauvegarde Budget."); }
 }
 
 /* =========================================================================
@@ -4250,13 +4348,14 @@ document.addEventListener("click", e => {
       g.m = v; if (!g.y) g.y = v * 12;
       DB.goals[id] = g; saveDB(); render(); break;
     }
-    case "export-json": exportJSON(); break;
+    case "export-json": exportJSON(el.dataset.scope); break;
     case "export-csv": exportCSV(); break;
     case "import-json": {
       const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json";
-      inp.onchange = () => inp.files[0] && readFileText(inp.files[0], t => restoreJSON(t));
+      inp.onchange = () => inp.files[0] && readFileText(inp.files[0], (t, n) => openRestore(t, n));
       inp.click(); break;
     }
+    case "dorestore": restoreJSON(RESTORE.text, el.dataset.scope); break;
     case "learn": { const n = learnRulesFromHistory(0.6); saveDB(); render(); toast(n + " nouvelle(s) règle(s) apprise(s)."); break; }
     case "newpataccount": UI.small = newPatAccountModal; renderSmall(); break;
     case "createpataccount": {

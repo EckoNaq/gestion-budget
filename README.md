@@ -12,6 +12,12 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-11 — sauvegardes séparées
+
+- Ajout : l'export JSON se fait au choix sur **tout**, **le Budget seul** ou **le Patrimoine seul**. On peut vouloir emporter son patrimoine sans trois ans de relevés bancaires, ou archiver un budget sans y joindre l'historique de ses placements. Le nom du fichier porte la partie exportée — au moment de restaurer, six mois plus tard, c'est la seule chose qu'on ait sous les yeux.
+- Ajout : la restauration passe par une **fenêtre qui montre d'abord ce que contient le fichier** (opérations, imports et règles d'un côté ; comptes, valorisations, mouvements et crédits de l'autre), puis laisse choisir la partie à reprendre. Les parties absentes du fichier sont proposées désactivées, ce qui rend impossible d'effacer un patrimoine avec un export Budget. La partie non choisie n'est pas touchée.
+- Modification : les **réglages suivent leur moitié**. Inflation, zone neutre, doublons et objectif d'épargne partent avec le Budget ; rendement, versement, objectif de palier et épargne de précaution avec le Patrimoine. Sans cette séparation, restaurer un export Patrimoine écraserait l'objectif d'épargne du Budget.
+
 ### 2026-08-10 — refonte du suivi de patrimoine
 
 L'onglet Patrimoine passe de deux à quatre écrans, plus une vue de détail par compte.
