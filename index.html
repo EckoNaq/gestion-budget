@@ -2178,13 +2178,26 @@ function patSplit(fromMk, toMk, accountId) {
     rate: (v0 + versements) ? perf / (v0 + versements) * 100 : null };
 }
 
+/* Certaines enveloppes sont alimentées sur la fiche de paie : l'argent d'un PEE ou d'un PER
+   d'entreprise ne transite jamais par le compte bancaire, donc jamais par le budget. Le
+   confronter à la balance du budget n'aurait aucun sens. Par défaut on le déduit du type,
+   mais un PER alimenté par virement volontaire, lui, sort bien du budget : la valeur reste
+   modifiable compte par compte. L'absence du champ vaut « défaut selon le type », ce qui
+   évite toute migration des données existantes. */
+function patIsOffBudget(a) {
+  if (!a) return false;
+  const t = patType(a.type).id;
+  return a.offBudget == null ? (t === "pee" || t === "per") : !!a.offBudget;
+}
 /* Ce qui a été versé sur une année civile, même périmètre que le reste : un compte jamais
-   valorisé n'a pas de versements exploitables. */
-function patContributionsOfYear(year) {
+   valorisé n'a pas de versements exploitables. budgetOnly écarte en plus les enveloppes
+   alimentées hors budget. */
+function patContributionsOfYear(year, budgetOnly) {
   return (DB.patMovements || []).filter(m => {
     if (yearOf(m.date) !== year) return false;
     const a = (DB.patAccounts || []).find(x => x.id === m.accountId);
-    return a ? patIsValued(a) : false;
+    if (!a || !patIsValued(a)) return false;
+    return budgetOnly ? !patIsOffBudget(a) : true;
   }).reduce((s, m) => s + m.amount, 0);
 }
 /* Le pont entre les deux moitiés : ce que le budget a dégagé face à ce qui est réellement
@@ -2193,10 +2206,13 @@ function patContributionsOfYear(year) {
    On compare des montants réalisés, jamais la projection de fin d'année. */
 function patSavingsEffort(year) {
   const b = ytdTotals(year);
-  const versements = patContributionsOfYear(year);
+  /* Seuls les versements qui sortent effectivement du compte bancaire se comparent à la
+     balance : le reste vient de la fiche de paie et n'a jamais été un arbitrage de budget. */
+  const versements = patContributionsOfYear(year, true);
+  const offBudget = patContributionsOfYear(year, false) - versements;
   const hasBudget = b.income > 0;
   return {
-    year, versements, hasBudget,
+    year, versements, offBudget, hasBudget,
     balance: hasBudget ? b.balance : null,
     income: b.income, expense: b.expense,
     /* Au-delà de 100 %, on a placé plus que le budget n'a dégagé cette année-là. */
@@ -3209,13 +3225,16 @@ function viewPatAnalyse() {
      Répond à deux questions d'un coup : combien j'ai versé cette année, et est-ce que ça
      correspond à ce que mon budget a dégagé. L'écart entre les deux est le vrai sujet. */
   const effYears = patYearsWithData().filter(y => y <= year);
-  const efforts = effYears.map(patSavingsEffort).filter(e => e.versements !== 0 || e.hasBudget);
+  const efforts = effYears.map(patSavingsEffort)
+    .filter(e => e.versements !== 0 || e.offBudget !== 0 || e.hasBudget);
   if (efforts.length) {
     const firstYear = yearOf(allPatMonths(month)[0] + "-01");
     const anyBudget = efforts.some(e => e.hasBudget);
     const maxAmt = Math.max(1, ...efforts.map(e => Math.max(Math.abs(e.versements), Math.abs(e.balance || 0))));
+    const offNames = (DB.patAccounts || []).filter(a => patIsOffBudget(a) && patIsValued(a)).map(a => a.name);
+    const offTotal = efforts.reduce((s, e) => s + e.offBudget, 0);
     html += '<div class="card"><div class="chead"><h2>Effort d’épargne</h2>' +
-      '<span class="help" tabindex="0" title="' + esc("La balance est ce que votre budget a dégagé sur l’année : revenus moins dépenses, sur les mois où un revenu est connu. Le versé est ce qui est réellement parti sur vos comptes de patrimoine. L’écart n’est pas une erreur : c’est de l’argent resté sur le compte courant, ou des versements venus d’ailleurs que du budget de l’année.") +
+      '<span class="help" tabindex="0" title="' + esc("La balance est ce que votre budget a dégagé sur l’année : revenus moins dépenses, sur les mois où un revenu est connu. Le versé est ce qui est parti du compte bancaire vers vos placements. Les enveloppes alimentées sur la fiche de paie en sont exclues : cet argent n’a jamais transité par le budget. L’écart n’est pas une erreur : c’est de l’argent resté sur le compte courant, ou des versements venus d’ailleurs.") +
       '">?</span><div class="spacer" style="flex:1"></div>' +
       '<span class="tiny muted">budget et patrimoine confrontés</span></div>';
     /* En-têtes courts : « Balance du budget » et « Versé au patrimoine » faisaient déborder
@@ -3252,6 +3271,15 @@ function viewPatAnalyse() {
             : "Les deux se rejoignent : tout ce que le budget dégage part effectivement au patrimoine.") + "</p>";
     } else if (!anyBudget) {
       html += '<p class="tiny muted" style="margin:11px 0 0">La balance du budget reste vide tant qu’aucun revenu n’est saisi : elle se renseigne mois par mois dans <b class=\'inl\'>Réglages</b>, et les dépenses arrivent par l’import des relevés.</p>';
+    }
+    /* Dire ce qui a été écarté et pourquoi : sans cela, la colonne « Versé » semblerait en
+       contradiction avec le versé cumulé affiché plus haut. */
+    if (offNames.length) {
+      html += '<p class="tiny muted" style="margin:8px 0 0">' +
+        esc(offNames.join(", ")) + (offNames.length > 1 ? " sont alimentés" : " est alimenté") +
+        " sur la fiche de paie : " + (offTotal ? "leurs " + esc(fmtEur(offTotal)) + " de versements ne sont" : "ces versements ne sont") +
+        " pas comptés ici, cet argent n’ayant jamais transité par le budget. Il reste bien dans le versé cumulé et dans la plus-value. " +
+        "Un compte alimenté par virement volontaire se rebascule dans <b class='inl'>Comptes → Réglages des comptes</b>.</p>";
     }
     html += "</div>";
   }
@@ -3398,6 +3426,7 @@ function viewPatrimoine() {
   html += '<div class="card"><div class="chead"><h2>Réglages des comptes</h2></div>' +
     '<div style="overflow-x:auto"><table class="ops"><thead><tr><th>Nom</th><th>Classe</th>' +
     '<th style="text-align:center" title="Inclure ce compte dans la performance globale">Perf. globale</th>' +
+    '<th style="text-align:center" title="Coché si l’argent arrive directement dans l’enveloppe, sans passer par votre compte bancaire — un PEE ou un PER d’entreprise. Ces versements sont alors exclus de la comparaison avec le budget.">Hors budget</th>' +
     '<th style="text-align:center">État</th><th></th></tr></thead><tbody>' +
     active.concat(closed).map(a => {
       const isClosed = patIsClosed(a), neverValued = !patIsValued(a);
@@ -3408,6 +3437,8 @@ function viewPatrimoine() {
           esc(t.name) + "</option>").join("") + "</select></td>" +
       '<td style="text-align:center"><input type="checkbox" data-chg="patperfexcluded" data-id="' + a.id + '" ' +
         (a.perfExcluded ? "" : "checked") + ' title="Inclure dans le calcul de performance"></td>' +
+      '<td style="text-align:center"><input type="checkbox" data-chg="patoffbudget" data-id="' + a.id + '" ' +
+        (patIsOffBudget(a) ? "checked" : "") + ' title="Alimenté hors du compte bancaire"></td>' +
       '<td style="text-align:center">' +
         (neverValued
           ? '<span class="tag" title="Aucune valorisation n’a jamais été saisie sur ce compte.">jamais valorisé</span>'
@@ -4620,6 +4651,12 @@ document.addEventListener("change", e => {
   } else if (kind === "patyearsel") {
     UI.patMonth = el.value + UI.patMonth.slice(4);
     render();
+  } else if (kind === "patoffbudget") {
+    const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
+    /* On écrit la valeur explicitement, y compris quand elle rejoint le défaut du type :
+       une décision prise vaut mieux qu'un défaut qui changerait si le type change. */
+    a.offBudget = el.checked;
+    saveDB(); render();
   } else if (kind === "pataccounttype") {
     const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
     a.type = el.value;

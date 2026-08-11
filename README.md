@@ -17,6 +17,7 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 - Ajout : carte **Effort d'épargne** dans Analyse, qui confronte année par année ce que le budget a dégagé (revenus moins dépenses) à ce qui est réellement parti vers les comptes de patrimoine. Elle répond du même coup à « combien ai-je versé cette année », qui n'existait jusqu'ici que pour l'année en cours, dans le bandeau de l'Aperçu.
 - L'écart entre les deux n'est pas une erreur mais une information : de l'argent resté sur le compte courant, des dépenses non classées, ou à l'inverse des versements venus d'ailleurs que du budget de l'année. La colonne **Part placée** montre quelle fraction de la capacité d'épargne a effectivement rejoint le patrimoine.
 - La balance reste vide tant qu'aucun revenu n'est saisi pour l'année : sans revenu, elle ne serait qu'un cumul de dépenses. L'année contenant la reprise initiale est signalée, son premier mouvement n'enregistrant que ce qui dormait déjà sur les comptes.
+- Les enveloppes **alimentées sur la fiche de paie** — PEE, PER d'entreprise — sont exclues de cette comparaison : leur argent ne transite jamais par le compte bancaire, donc jamais par le budget, et le compter fausserait la part placée. Il reste bien entendu dans le versé cumulé et dans la plus-value. Le classement se déduit du type de compte mais se corrige au cas par cas dans **Comptes → Réglages des comptes**, un PER alimenté par virement volontaire sortant, lui, du budget.
 
 ### 2026-08-11 — sauvegardes séparées
 
