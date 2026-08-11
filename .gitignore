@@ -1,0 +1,15 @@
+# Autorisations Claude Code propres à cette machine : elles contiennent des chemins
+# absolus et un identifiant de session. Un éventuel .claude/settings.json, lui, est
+# partageable et reste versionné.
+.claude/settings.local.json
+
+# Pages de test et de démonstration générées à la volée dans le dossier du projet,
+# le temps d'une vérification. Elles embarquent une copie de l'application.
+.pat-*.html
+
+# Encombrants du système et des éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
