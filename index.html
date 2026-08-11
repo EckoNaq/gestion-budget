@@ -3675,14 +3675,9 @@ function viewSettings() {
       (Number(s.patSafetyTarget) || 4) + '"></div>' +
     "</div></div>";
 
-  /* --- data (budget only) --- */
-  html += '<div class="card"><div class="chead"><h2>Données du budget</h2></div>' +
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn" data-act="export-csv">' + icon("file") + "Exporter en CSV</button>" +
-    '<button class="btn" data-act="wizard">' + icon("inbox") + "Reprise de l\u2019historique</button>" +
-    '<button class="btn" data-act="learn">' + icon("check") + "Réapprendre les règles vendeur</button></div>" +
-    "<p class=\"tiny muted\" style=\"margin:12px 0 0\">" + DB.tx.length + " opérations · " + DB.imports.length + " import(s) · " +
-    Object.keys(DB.rules).length + " règles vendeur</p></div>";
+  /* Importer, exporter, réapprendre : ces actions ont rejoint l’onglet Données. Réglages
+     ne garde que ce qui se règle -- des valeurs, pas des traitements sur l’ensemble des
+     données. Deux endroits pour exporter, c’était un de trop. */
   return html;
 }
 function viewGeneral() {
@@ -3692,23 +3687,41 @@ function viewGeneral() {
      sans trois ans de relevés bancaires, ou repartir d'un budget vierge sans y perdre
      l'historique de ses placements. */
   const nTx = DB.tx.length, nAcc = (DB.patAccounts || []).length;
+
+  /* --- ce qui entre --- */
+  html += '<div class="card"><div class="chead"><h2>Importer</h2><div class="spacer" style="flex:1"></div>' +
+    '<span class="tiny muted">' + nTx + " opération(s) · " + DB.imports.length + " import(s) · " +
+    Object.keys(DB.rules).length + " règle(s) vendeur</span></div>" +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn primary" data-act="import">' + icon("down") + "Relevé mensuel</button>" +
+    '<button class="btn" data-act="wizard">' + icon("inbox") + "Reprise de l’historique</button>" +
+    '<button class="btn" data-act="patimportcsv">' + icon("vault") + "Patrimoine depuis Excel</button>" +
+    '<div class="spacer" style="flex:1"></div>' +
+    '<button class="btn ghost" data-act="learn">' + icon("check") + "Réapprendre les règles vendeur</button></div>" +
+    '<p class="tiny muted" style="margin:10px 0 0">La reprise de l’historique avale plusieurs années de relevés d’un coup ; le relevé mensuel sert ensuite chaque mois. ' +
+    "Réapprendre les règles relit vos opérations déjà classées pour en déduire de nouvelles associations vendeur → catégorie.</p></div>";
+
+  /* --- ce qui sort, et ce qu'on peut détruire --- */
   html += '<div class="card"><div class="chead"><h2>Sauvegarde &amp; réinitialisation</h2></div>' +
     '<div class="tiny muted" style="margin-bottom:6px">Stockage utilisé : ' + (bytes / 1024).toFixed(0) + " Ko sur ~5 Mo (" + (bytes / quota * 100).toFixed(1) + " %)</div>" +
     '<div class="hbar" style="margin-bottom:16px"><i style="width:' + Math.min(bytes / quota * 100, 100).toFixed(1) + '%;background:var(--accent)"></i></div>' +
-    '<div class="eyebrow" style="margin-bottom:8px">Exporter</div>' +
+    '<div class="eyebrow" style="margin-bottom:8px">Exporter une sauvegarde (JSON)</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">' +
     '<button class="btn primary" data-act="export-json" data-scope="all">' + icon("file") + "Tout</button>" +
     '<button class="btn" data-act="export-json" data-scope="budget"' + (nTx ? "" : " disabled") + ">" +
       icon("cal") + "Budget seul</button>" +
     '<button class="btn" data-act="export-json" data-scope="pat"' + (nAcc ? "" : " disabled") + ">" +
       icon("vault") + "Patrimoine seul</button>" +
-    '<span class="tiny muted" style="align-self:center">' + nTx + " opération(s) · " + nAcc + " compte(s)</span></div>" +
+    '<div class="spacer" style="flex:1"></div>' +
+    '<button class="btn ghost" data-act="export-csv"' + (nTx ? "" : " disabled") + ">" +
+      icon("file") + "Opérations en CSV</button></div>" +
     '<div class="eyebrow" style="margin-bottom:8px">Restaurer</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn" data-act="import-json">' + icon("up") + "Choisir une sauvegarde…</button>" +
     '<div class="spacer" style="flex:1"></div>' +
     '<button class="btn danger" data-act="reset">' + icon("trash") + "Tout effacer</button></div>" +
-    '<p class="tiny muted" style="margin:10px 0 0">À la restauration, l’application montre ce que contient le fichier et vous laisse choisir la partie à reprendre. La partie non choisie n’est pas touchée.</p>' +
+    '<p class="tiny muted" style="margin:10px 0 0">Le JSON est la sauvegarde : il se restaure. Le CSV est une sortie de lecture, pour un tableur — il ne se réimporte pas. ' +
+    "À la restauration, l’application montre ce que contient le fichier et vous laisse choisir la partie à reprendre ; l’autre n’est pas touchée.</p>" +
     '<p class="tiny muted" style="margin:12px 0 0">Les données vivent uniquement dans le stockage local de ce navigateur, sous la clé <code>' + STORE_KEY +
     "</code>. Rien ne part sur un serveur. Vider les données de navigation les supprime : l’export JSON est la seule sauvegarde.</p></div>";
   return html;
