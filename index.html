@@ -2886,6 +2886,94 @@ function patAchievements(mk) {
       hit ? hit.y + "-12" : null, Math.max(0, ...yearRates.map(x => x.r)), n, v => fmtPerf(v));
   });
 
+  /* --- Coups durs : les mauvais mois méritent leur trophée ---
+     Un tableau qui ne récompense que les hausses laisse entendre qu'une baisse est une
+     faute. Elle fait partie du métier d'investisseur : autant l'encadrer et lui donner un
+     nom, quitte à sourire en le lisant. */
+  const worstGain = Math.min(0, ...monthGains);
+  const worstPerf = Math.min(0, ...series.map(p => (p.perf == null ? 0 : p.perf)));
+  /* Montants et pourcentages entrelacés par sévérité croissante : le rang du badge suit
+     ainsi la difficulté, alors que traiter les deux échelles séparément faisait d'un
+     petit −2 % un trophée d'or et d'une perte de 2 500 € un simple argent. */
+  [
+    { pct: 2, name: "Petit frisson" },
+    { eur: 250, name: "Ça pique" },
+    { pct: 5, name: "Sueurs froides" },
+    { eur: 500, name: "Aïe" },
+    { eur: 1000, name: "Ouille" },
+    { pct: 10, name: "Chute libre" },
+    { eur: 2500, name: "Coup de massue" },
+    { pct: 20, name: "Krach personnel" },
+    { eur: 5000, name: "Cataclysme" },
+  ].forEach(x => {
+    if (x.eur) {
+      let at = null;
+      for (let k = 1; k < series.length; k++) if (monthGains[k] <= -x.eur) { at = series[k].mk; break; }
+      add("Coups durs", x.name, "Perdre " + fmtEurShort(x.eur) + " en un seul mois, hors versements",
+        at, Math.abs(worstGain), x.eur);
+    } else {
+      const hit = series.find(p => p.perf != null && p.perf <= -x.pct);
+      add("Coups durs", x.name, "Un mois terminé à −" + x.pct + " % ou moins",
+        hit ? hit.mk : null, Math.abs(worstPerf), x.pct, v => fmtPerf(-v));
+    }
+  });
+
+  /* --- Traversées : les creux qui durent, et le temps qu'il faut pour en sortir ---
+     Ordonnées par sévérité, pour que le rang du badge veuille dire quelque chose. */
+  let down = 0, worstDown = 0, hitDown = {};
+  series.forEach(p => {
+    if (p.perf != null && p.perf < 0) { down++; if (down > worstDown) worstDown = down; } else down = 0;
+    [2, 3, 6].forEach(n => { if (down === n && !hitDown[n]) hitDown[n] = p.mk; });
+  });
+  /* Profondeur du plus fort creux depuis un sommet : la mesure que suivent les gérants. */
+  let pk = 0, deepest = 0, deepAt = {};
+  series.forEach(p => {
+    if (p.total > pk) pk = p.total;
+    const d = pk ? (pk - p.total) / pk * 100 : 0;
+    if (d > deepest) deepest = d;
+    [5, 10, 20].forEach(n => { if (d >= n && !deepAt[n]) deepAt[n] = p.mk; });
+  });
+  /* Combien de mois le sommet est-il resté hors d'atteinte ? */
+  let high = 0, since = 0, longestWait = 0, waitAt = null;
+  series.forEach(p => {
+    if (p.total >= high) { high = p.total; since = 0; }
+    else { since++; if (since > longestWait) { longestWait = since; if (since === 6) waitAt = p.mk; } }
+  });
+  /* Verser et finir le mois plus bas qu'on ne l'avait commencé. */
+  let rowing = null;
+  for (let i = 1; i < series.length && !rowing; i++) {
+    if (series[i].mov > 0 && series[i].total < series[i - 1].total) rowing = series[i].mk;
+  }
+  /* Repasser sous un palier rond déjà franchi. */
+  let backward = null;
+  [10000, 25000, 50000, 75000, 100000, 250000].forEach(c => {
+    if (backward) return;
+    let seen = false;
+    for (const p of series) {
+      if (p.total >= c) seen = true;
+      else if (seen) { backward = p.mk; return; }
+    }
+  });
+  const badYear = years.map(y => ({ y, r: patAnnualPerf(null, y) })).find(x => x.r != null && x.r < 0);
+  const redLine = (DB.patAccounts || []).some(a => {
+    const u = patUnrealized(a.id, mk); return u && u.gain < 0;
+  });
+  const months2 = v => v + " mois";
+  [
+    ["Ramer", "Verser de l’argent et voir quand même le patrimoine baisser", rowing, rowing ? 1 : 0, 1, () => ""],
+    ["Deux mois dans le rouge", "Deux mois de baisse consécutifs", hitDown[2], worstDown, 2, months2],
+    ["Ligne rouge", "Un compte dont la plus-value reste négative", redLine ? mk : null, redLine ? 1 : 0, 1, () => ""],
+    ["Creux de 5 %", "Voir le patrimoine reculer de 5 % depuis son sommet", deepAt[5], deepest, 5, fmtRate],
+    ["Trimestre noir", "Trois mois de baisse consécutifs", hitDown[3], worstDown, 3, months2],
+    ["Marche arrière", "Repasser sous un palier déjà franchi", backward, backward ? 1 : 0, 1, () => ""],
+    ["Creux de 10 %", "Voir le patrimoine reculer de 10 % depuis son sommet", deepAt[10], deepest, 10, fmtRate],
+    ["Semestre noir", "Six mois de baisse consécutifs", hitDown[6], worstDown, 6, months2],
+    ["Traversée du désert", "Six mois sans retrouver son plus haut", waitAt, longestWait, 6, months2],
+    ["Douche froide", "Une année civile entière terminée en perte",
+      badYear ? badYear.y + "-12" : null, badYear ? 1 : 0, 1, () => ""],
+    ["Creux de 20 %", "Voir le patrimoine reculer de 20 % depuis son sommet", deepAt[20], deepest, 20, fmtRate],
+  ].forEach(x => add("Traversées", x[0], x[1], x[2] || null, x[3], x[4], x[5]));
+
   /* --- Curiosités : aucune valeur financière, uniquement le plaisir de la coïncidence.
      Ces jalons-là ne se travaillent pas, ils se croisent — c'est tout leur intérêt. --- */
   const flag = (name, desc, at) => add("Curiosités", name, desc, at, at ? 1 : 0, 1, () => "");
@@ -3391,7 +3479,7 @@ function viewPatMilestones() {
   const GROUP_ICON = { "Paliers": "vault", "Plus-value": "income", "Multiplicateurs": "chart",
     "Trajectoire": "signal", "Régularité": "cal", "Coups d’éclat": "income", "Diversification": "pie",
     "Sécurité": "heart", "Indépendance": "trophy", "Repères français": "home", "Rendement": "up",
-    "Curiosités": "ticket" };
+    "Curiosités": "ticket", "Coups durs": "warn", "Traversées": "undo" };
   html += groups.map(g => {
     const n = g.items.filter(x => x.done).length;
     return '<div class="card"><div class="chead"><h2>' + esc(g.name) + "</h2>" +
