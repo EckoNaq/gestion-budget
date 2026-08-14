@@ -362,21 +362,36 @@ tr.rowoff td:first-child{opacity:.8}
 .acard:hover .go{opacity:1}
 .msbar{height:10px;background:var(--line-2);border-radius:5px;overflow:hidden;margin:11px 0 6px}
 .msbar i{display:block;height:100%;background:var(--accent);border-radius:5px}
-/* Jalons : acquis en couleur, à venir en grisé. Le contraste porte l'information, mais un
-   jalon non atteint reste lisible — c'est une cible, pas un échec. */
-.mstones{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:10px}
-.mstone{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border-radius:var(--radius-sm);
-  border:1px solid var(--line);background:var(--surface-2)}
-.mstone .mk{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex:none;
-  border-radius:50%;background:var(--line-2);color:var(--ink-mute)}
-.mstone .mn{font-size:13px;font-weight:650;color:var(--ink-soft)}
-.mstone .md{font-size:11px;line-height:1.4;color:var(--ink-mute);margin-top:1px}
-.mstone .mw{font-family:var(--mono);font-size:11px;font-weight:650;color:var(--accent-ink);margin-top:5px}
-.mstone.on{background:var(--accent-soft);border-color:color-mix(in oklab,var(--accent) 30%,transparent)}
-.mstone.on .mk{background:var(--accent);color:#fff}
-.mstone.on .mn{color:var(--ink)}
-.mstone.on .md{color:var(--ink-2)}
-.mstone .mp .msbar{height:6px}
+/* Jalons : des médaillons, pas des lignes de tableau. Un badge acquis prend la couleur de
+   son rang ; un badge à venir garde un anneau de progression, pour rester une cible et non
+   un échec. Les rangs vont du bronze au platine selon la place du jalon dans sa famille. */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:16px 8px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;cursor:help}
+.bmed{position:relative;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  margin-bottom:5px}
+/* Anneau de progression du jalon non acquis : la part remplie est la distance parcourue. */
+.bmed::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(var(--accent) var(--p,0%),var(--line-2) 0)}
+.bmed::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--surface)}
+.bic{position:relative;z-index:1;color:var(--ink-mute);display:flex}
+.badge.on .bmed::before{background:var(--tier-l)}
+.badge.on .bmed::after{inset:5px;background:var(--tier)}
+.badge.on .bic{color:#fff}
+.btick{position:absolute;z-index:2;right:-1px;bottom:-1px;width:19px;height:19px;border-radius:50%;
+  background:var(--pos);color:#fff;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--surface)}
+.badge .bn{font-size:11.5px;font-weight:650;color:var(--ink-soft);line-height:1.25}
+.badge .bs{font-size:10px;color:var(--ink-mute);font-family:var(--mono);line-height:1.3}
+.badge.on .bn{color:var(--ink)}
+.badge.on .bs{color:var(--ink-2)}
+.t-bronze{--tier:#A9683A;--tier-l:#CD8B58}
+.t-silver{--tier:#78829A;--tier-l:#A2ABBE}
+.t-gold{--tier:#BE922A;--tier-l:#E3BE4C}
+.t-plat{--tier:#5F4FC0;--tier-l:#9284E8}
+html[data-theme="dark"] .t-bronze{--tier:#C4864F;--tier-l:#E0A87A}
+html[data-theme="dark"] .t-silver{--tier:#98A2B6;--tier-l:#BFC7D6}
+html[data-theme="dark"] .t-gold{--tier:#DDB447;--tier-l:#F0D585}
+html[data-theme="dark"] .t-plat{--tier:#8A79E4;--tier-l:#B4A8F5}
 .patgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
 /* Six colonnes de chiffres tiennent mal sous 1100 px : plutôt que de couper « +1,50 % »
    en deux lignes, on laisse le conteneur défiler — les montants restent lisibles d'un bloc. */
@@ -2696,6 +2711,16 @@ const PAT_EVENTS = [
   { mk: "2025-10", label: "Bitcoin à son record, 126 200 $" },
   { mk: "2025-11", label: "Nouvelle baisse de taux de la Fed" },
 ];
+/* Médianes du patrimoine brut des ménages français par âge de la personne de référence,
+   INSEE, enquête Histoire de vie et Patrimoine 2024. Résidence principale comprise : la
+   comparaison porte donc sur les actifs bruts, ce que les libellés précisent. */
+const PAT_INSEE = [
+  { amount: 26100, label: "Médiane des moins de 30 ans", desc: "de moins de 30 ans" },
+  { amount: 146200, label: "Médiane des 30-39 ans", desc: "de 30 à 39 ans" },
+  { amount: 215200, label: "Médiane des 40-49 ans", desc: "de 40 à 49 ans" },
+  { amount: 254100, label: "Médiane des 50-59 ans", desc: "de 50 à 59 ans" },
+];
+
 /* =========================================================================
    Catalogue des jalons — la version « tableau de trophées » des repères du graphique.
    Chaque entrée sait dire si elle est acquise et quand, et sinon où l'on en est. Montrer
@@ -2783,6 +2808,38 @@ function patAchievements(mk) {
   add("Trajectoire", "Trois ans de suivi", "Trente-six mois de valorisations enregistrées",
     months.length >= 36 ? months[35] : null, months.length, 36, v => v + " mois");
 
+  /* --- Régularité des versements : la constance compte autant que le montant --- */
+  let runMov = 0, bestMov = 0, hitMov = {};
+  series.forEach(p => {
+    if (p.mov > 0) { runMov++; if (runMov > bestMov) bestMov = runMov; } else runMov = 0;
+    [3, 6, 12, 24].forEach(n => { if (runMov === n && !hitMov[n]) hitMov[n] = p.mk; });
+  });
+  [3, 6, 12, 24].forEach(n => {
+    add("Régularité", n + " mois de suite", "Verser quelque chose " + n + " mois consécutifs",
+      hitMov[n] || null, bestMov, n, v => v + " mois");
+  });
+  /* Le premier mois est écarté : il n'enregistre que ce qui dormait déjà sur les comptes,
+     et décrocherait d'un coup tous les paliers de versement. */
+  const later = series.slice(1);
+  const bestMov2 = Math.max(0, ...later.map(p => p.mov));
+  [500, 1000, 2500, 5000].forEach(c => {
+    const hit = later.find(p => p.mov >= c);
+    add("Régularité", "Un mois à " + fmtEurShort(c), "Verser au moins " + fmtEurShort(c) + " en un seul mois",
+      hit ? hit.mk : null, bestMov2, c);
+  });
+
+  /* --- Coups d'éclat : ce que les placements ont rapporté sur un seul mois ---
+     Le pourcentage flatte les petits patrimoines, le montant flatte les gros : les deux
+     méritent leur famille, celle-ci récompense la somme réellement gagnée en un mois. */
+  const monthGains = series.map((p, i) => i ? p.total - series[i - 1].total - p.mov : 0);
+  const bestGain = Math.max(0, ...monthGains);
+  [250, 500, 1000, 2500, 5000, 10000].forEach(c => {
+    let at = null;
+    for (let i = 1; i < series.length; i++) if (monthGains[i] >= c) { at = series[i].mk; break; }
+    add("Coups d’éclat", fmtEurShort(c) + " en un mois", "Gagner " + fmtEurShort(c) +
+      " en un seul mois, hors versements", at, bestGain, c);
+  });
+
   /* --- Diversification et sécurité --- */
   const classes = patAllocByType(mk).length;
   [3, 5].forEach(n => {
@@ -2797,6 +2854,97 @@ function patAchievements(mk) {
       v => (Math.round(v * 10) / 10).toString().replace(".", ",") + " mois");
   });
 
+  /* --- Indépendance : le patrimoine mesuré en années de dépenses ---
+     Vingt-cinq ans de dépenses, c'est la règle des 4 % : le seuil à partir duquel le
+     patrimoine peut, en théorie, financer le train de vie indéfiniment. */
+  const yearlySpend = avgMonthlyExpense(12);
+  const spend = yearlySpend ? yearlySpend.avg * 12 : 0;
+  const yearsHeld = spend ? last.total / spend : 0;
+  [1, 3, 5, 10, 25].forEach(n => {
+    add("Indépendance", n + (n > 1 ? " ans" : " an") + " de dépenses",
+      n === 25 ? "Le seuil de la règle des 4 %, où le patrimoine peut financer le train de vie"
+               : "Patrimoine équivalent à " + n + (n > 1 ? " années" : " année") + " de dépenses",
+      spend && yearsHeld >= n ? mk : null, yearsHeld, n,
+      v => (Math.round(v * 10) / 10).toString().replace(".", ",") + (v >= 2 ? " ans" : " an"));
+  });
+
+  /* --- Repères français ---
+     Médianes INSEE 2024 du patrimoine BRUT des ménages, résidence principale comprise.
+     La comparaison se fait donc sur les actifs bruts, et reste flatteuse pour qui n'est pas
+     propriétaire : c'est dit dans le libellé plutôt que caché. */
+  PAT_INSEE.forEach(r => {
+    add("Repères français", r.label, "Dépasser le patrimoine brut médian des ménages " + r.desc +
+      " (INSEE 2024, résidence principale comprise)",
+      crossed(p => p.total, r.amount), last.total, r.amount);
+  });
+
+  /* --- Rendement : une belle année, ça se fête --- */
+  const yearRates = years.map(y => ({ y, r: patAnnualPerf(null, y) })).filter(x => x.r != null);
+  [5, 10, 20].forEach(n => {
+    const hit = yearRates.find(x => x.r >= n);
+    add("Rendement", "Une année à +" + n + " %", "Une année civile terminée au-dessus de " + n + " % de performance",
+      hit ? hit.y + "-12" : null, Math.max(0, ...yearRates.map(x => x.r)), n, v => fmtPerf(v));
+  });
+
+  /* --- Curiosités : aucune valeur financière, uniquement le plaisir de la coïncidence.
+     Ces jalons-là ne se travaillent pas, ils se croisent — c'est tout leur intérêt. --- */
+  const flag = (name, desc, at) => add("Curiosités", name, desc, at, at ? 1 : 0, 1, () => "");
+  const near123 = series.find(p => p.perf != null && Math.abs(p.perf - 1.23) < 0.005);
+  flag("1,23 %", "Une performance mensuelle de 1,23 % pile", near123 ? near123.mk : null);
+  /* Deux décimales identiques : +4,44 %, −7,77 %… */
+  const twin = series.find(p => {
+    if (p.perf == null || Math.abs(p.perf) < 0.005) return false;
+    const d = Math.abs(p.perf).toFixed(2).slice(-2);
+    return d[0] === d[1];
+  });
+  flag("Décimales jumelles", "Une performance mensuelle dont les deux décimales sont identiques",
+    twin ? twin.mk : null);
+  const palin = series.find(p => {
+    const s = String(Math.round(p.total));
+    return s.length >= 4 && s === s.split("").reverse().join("");
+  });
+  flag("Patrimoine palindrome", "Un patrimoine qui se lit pareil dans les deux sens",
+    palin ? palin.mk : null);
+  const repdigit = series.find(p => /^(\d)\1{3,}$/.test(String(Math.round(p.total))));
+  flag("Chiffres identiques", "Un patrimoine du genre 55 555 €", repdigit ? repdigit.mk : null);
+  const roundTotal = series.find(p => p.total >= 1000 && Math.round(p.total) % 1000 === 0);
+  flag("Compte rond", "Un patrimoine tombant pile sur un millier d’euros",
+    roundTotal ? roundTotal.mk : null);
+  /* Le gain du mois égale, à l'euro près, ce qui a été versé ce mois-là. */
+  let mirror = null;
+  for (let i = 1; i < series.length && !mirror; i++) {
+    if (series[i].mov > 0 && Math.abs(monthGains[i] - series[i].mov) < 1) mirror = series[i].mk;
+  }
+  flag("Pile poil", "Un mois où les placements rapportent exactement ce que vous avez versé", mirror);
+  const fri13 = (DB.patMovements || []).find(m => {
+    const d = new Date(m.date + "T12:00:00");
+    return d.getDate() === 13 && d.getDay() === 5;
+  });
+  flag("Vendredi 13", "Un versement enregistré un vendredi 13", fri13 ? monthKey(fri13.date) : null);
+  const feb29 = (DB.patMovements || []).find(m => m.date.slice(5) === "02-29");
+  flag("29 février", "Un versement un jour qui n’existe que tous les quatre ans",
+    feb29 ? monthKey(feb29.date) : null);
+  const newYear = (DB.patMovements || []).find(m => m.date.slice(5) === "01-01");
+  flag("Bonne année", "Un versement le 1er janvier", newYear ? monthKey(newYear.date) : null);
+  /* Deux comptes exactement à la même valeur le même mois. */
+  let twins = null;
+  for (const m of months) {
+    const vals = (DB.patAccounts || []).map(a => patAccountValue(a.id, m)).filter(v => v != null && v > 0)
+      .map(v => Math.round(v * 100));
+    if (new Set(vals).size < vals.length) { twins = m; break; }
+  }
+  flag("Faux jumeaux", "Deux comptes exactement à la même valeur le même mois", twins);
+
+  /* Un rang par famille : le premier jalon d'une série est facile, le dernier se mérite. */
+  const groups = {};
+  out.forEach(a => (groups[a.group] = groups[a.group] || []).push(a));
+  Object.keys(groups).forEach(g => {
+    const list = groups[g];
+    list.forEach((a, i) => {
+      const p = list.length > 1 ? i / (list.length - 1) : 0;
+      a.tier = p <= 0.25 ? "bronze" : p <= 0.5 ? "silver" : p <= 0.78 ? "gold" : "plat";
+    });
+  });
   return out;
 }
 
@@ -3205,8 +3353,14 @@ function viewPatMilestones() {
     '<button data-act="next" aria-label="Mois suivant">' + icon("right") + "</button></div>" +
     '<div class="spacer" style="flex:1"></div></div>';
 
+  /* Sans le moindre compte, la collection entière serait grise : mieux vaut inviter à
+     commencer. Dès qu'un compte existe, on montre tout le catalogue, verrouillé compris —
+     c'est ce qui donne envie d'aller le décrocher. */
+  if (!(DB.patAccounts || []).length) {
+    return html + patNoAccounts("Les jalons se débloquent au fil des valorisations. Ajoutez un compte dans l’onglet <b class='inl'>Comptes</b> pour ouvrir la collection.");
+  }
   const all = patAchievements(month);
-  if (!all.length) return html + patNoAccounts("Les jalons se débloquent au fil des valorisations : il n’y en a aucune pour l’instant.");
+  if (!all.length) return html + patNoAccounts("Aucun jalon à afficher pour ce mois.");
 
   const done = all.filter(a => a.done).length;
   html += '<div class="card"><div class="pathero"><div>' +
@@ -3234,21 +3388,29 @@ function viewPatMilestones() {
     if (!g) groups.push(g = { name: a.group, items: [] });
     g.items.push(a);
   });
+  const GROUP_ICON = { "Paliers": "vault", "Plus-value": "income", "Multiplicateurs": "chart",
+    "Trajectoire": "signal", "Régularité": "cal", "Coups d’éclat": "income", "Diversification": "pie",
+    "Sécurité": "heart", "Indépendance": "trophy", "Repères français": "home", "Rendement": "up",
+    "Curiosités": "ticket" };
   html += groups.map(g => {
     const n = g.items.filter(x => x.done).length;
     return '<div class="card"><div class="chead"><h2>' + esc(g.name) + "</h2>" +
       '<div class="spacer" style="flex:1"></div><span class="tiny muted">' + n + " / " + g.items.length + "</span></div>" +
-      '<div class="mstones">' + g.items.map(a =>
-        '<div class="mstone ' + (a.done ? "on" : "") + '">' +
-          '<div class="mk">' + (a.done ? icon("check", 15) : icon("vault", 15)) + "</div>" +
-          '<div style="min-width:0"><div class="mn">' + esc(a.name) + "</div>" +
-          '<div class="md">' + esc(a.desc) + "</div>" +
-          (a.done
-            ? '<div class="mw">' + esc(a.at ? monthLabel(a.at) : "atteint") + "</div>"
-            : '<div class="mp"><div class="msbar" style="margin:5px 0 3px"><i style="width:' + a.pct.toFixed(1) + '%"></i></div>' +
-              '<span class="tiny muted">' + esc(a.fmt(a.current)) +
-              (a.fmt(a.target) ? " sur " + esc(a.fmt(a.target)) : "") + "</span></div>") +
-          "</div></div>").join("") + "</div></div>";
+      '<div class="badges">' + g.items.map(a => {
+        /* L'espace avant l'euro devient insécable : sans cela « 1 000 000 € » se coupe et
+           laisse un symbole seul sur la ligne suivante. */
+        const nb = s => s.replace(/ €/g, " €");
+        /* Un jalon tout ou rien n'a pas de progression à montrer : plutôt que de laisser
+           un blanc, on dit franchement qu'il reste à décrocher. */
+        const sub = a.done ? (a.at ? monthLabel(a.at) : "atteint")
+          : a.fmt(a.target) ? nb(a.fmt(a.current)) + " / " + nb(a.fmt(a.target)) : "à débloquer";
+        return '<div class="badge ' + (a.done ? "on t-" + a.tier : "") + '" style="--p:' + a.pct.toFixed(1) + '%" title="' +
+          esc(a.name + " — " + a.desc + (a.done ? " · atteint en " + (a.at ? monthLabel(a.at) : "?") : " · " + sub)) + '">' +
+          '<div class="bmed"><span class="bic">' + icon(GROUP_ICON[g.name] || "vault", 22) + "</span>" +
+          (a.done ? '<span class="btick">' + icon("check", 11) + "</span>" : "") + "</div>" +
+          '<div class="bn">' + esc(a.name) + "</div>" +
+          '<div class="bs">' + esc(sub) + "</div></div>";
+      }).join("") + "</div></div>";
   }).join("");
   return html;
 }

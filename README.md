@@ -14,8 +14,11 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ### 2026-08-11 — écran des jalons
 
-- Ajout : un écran **Jalons**, à la manière d'un tableau de trophées — les jalons atteints en couleur avec leur date, ceux à venir en grisé avec la distance qui reste. Vingt-neuf jalons répartis en cinq familles : paliers de patrimoine, plus-value cumulée, multiplicateurs du point de départ, trajectoire (le marché qui dépasse vos versements, séries de mois gagnants, sommet retrouvé après une baisse, années dans le vert) et diversification, sécurité.
-- La progression est affichée pour chaque jalon non atteint, et le plus proche est mis en avant. Un jalon barré sans contexte décourage ; « 62 990 € sur 75 000 € » donne une direction.
+- Ajout : un écran **Jalons**, sous forme de **badges** — médaillons circulaires, rang bronze / argent / or / platine selon la place du jalon dans sa famille, pastille verte sur les acquis, anneau de progression sur les autres.
+- **Soixante-cinq jalons en douze familles** : paliers de patrimoine, plus-value cumulée, multiplicateurs du point de départ, trajectoire, régularité des versements, coups d'éclat (les gains d'un seul mois), diversification, sécurité, indépendance, repères français, rendement et curiosités.
+- **Indépendance** mesure le patrimoine en années de dépenses, jusqu'aux vingt-cinq ans de la règle des 4 %. **Repères français** confronte le patrimoine aux médianes INSEE 2024 par tranche d'âge — patrimoine brut, résidence principale comprise, ce que les libellés précisent.
+- **Curiosités** ne sert à rien financièrement, et c'est le but : une performance mensuelle à 1,23 % pile, deux décimales identiques, un patrimoine palindrome, un versement un vendredi 13 ou le 1<sup>er</sup> janvier. Des collectibles, pas des objectifs.
+- La progression est affichée pour chaque jalon non atteint, et le plus proche est mis en avant. Un badge grisé sans contexte décourage ; « 62 990 € sur 75 000 € » donne une direction.
 - L'écran s'ouvre depuis l'icône coupe, à côté du bouton de rafraîchissement des repères du graphique d'évolution.
 
 ### 2026-08-11 — effort d'épargne
