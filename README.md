@@ -12,6 +12,12 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-11 — écran des jalons
+
+- Ajout : un écran **Jalons**, à la manière d'un tableau de trophées — les jalons atteints en couleur avec leur date, ceux à venir en grisé avec la distance qui reste. Vingt-neuf jalons répartis en cinq familles : paliers de patrimoine, plus-value cumulée, multiplicateurs du point de départ, trajectoire (le marché qui dépasse vos versements, séries de mois gagnants, sommet retrouvé après une baisse, années dans le vert) et diversification, sécurité.
+- La progression est affichée pour chaque jalon non atteint, et le plus proche est mis en avant. Un jalon barré sans contexte décourage ; « 62 990 € sur 75 000 € » donne une direction.
+- L'écran s'ouvre depuis l'icône coupe, à côté du bouton de rafraîchissement des repères du graphique d'évolution.
+
 ### 2026-08-11 — effort d'épargne
 
 - Ajout : carte **Effort d'épargne** dans Analyse, qui confronte année par année ce que le budget a dégagé (revenus moins dépenses) à ce qui est réellement parti vers les comptes de patrimoine. Elle répond du même coup à « combien ai-je versé cette année », qui n'existait jusqu'ici que pour l'année en cours, dans le bandeau de l'Aperçu.

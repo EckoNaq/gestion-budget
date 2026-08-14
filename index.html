@@ -362,6 +362,21 @@ tr.rowoff td:first-child{opacity:.8}
 .acard:hover .go{opacity:1}
 .msbar{height:10px;background:var(--line-2);border-radius:5px;overflow:hidden;margin:11px 0 6px}
 .msbar i{display:block;height:100%;background:var(--accent);border-radius:5px}
+/* Jalons : acquis en couleur, à venir en grisé. Le contraste porte l'information, mais un
+   jalon non atteint reste lisible — c'est une cible, pas un échec. */
+.mstones{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:10px}
+.mstone{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border-radius:var(--radius-sm);
+  border:1px solid var(--line);background:var(--surface-2)}
+.mstone .mk{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex:none;
+  border-radius:50%;background:var(--line-2);color:var(--ink-mute)}
+.mstone .mn{font-size:13px;font-weight:650;color:var(--ink-soft)}
+.mstone .md{font-size:11px;line-height:1.4;color:var(--ink-mute);margin-top:1px}
+.mstone .mw{font-family:var(--mono);font-size:11px;font-weight:650;color:var(--accent-ink);margin-top:5px}
+.mstone.on{background:var(--accent-soft);border-color:color-mix(in oklab,var(--accent) 30%,transparent)}
+.mstone.on .mk{background:var(--accent);color:#fff}
+.mstone.on .mn{color:var(--ink)}
+.mstone.on .md{color:var(--ink-2)}
+.mstone .mp .msbar{height:6px}
 .patgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
 /* Six colonnes de chiffres tiennent mal sous 1100 px : plutôt que de couper « +1,50 % »
    en deux lignes, on laisse le conteneur défiler — les montants restent lisibles d'un bloc. */
@@ -1009,7 +1024,7 @@ const UI = {
 /* Les cinq écrans Patrimoine partagent le même mois courant : passer de l'Aperçu aux
    Comptes ne doit pas ramener au mois en cours. */
 function isPatView() {
-  return ["pathome", "patanalyse", "pat", "patcredits", "patacct"].indexOf(UI.view) >= 0;
+  return ["pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
 }
 
 function reindex() {
@@ -1411,6 +1426,7 @@ const ICONS = {
   file:'<path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3.2h3"/>',
   eye:'<path d="M1.6 8S3.9 4 8 4s6.4 4 6.4 4-2.3 4-6.4 4S1.6 8 1.6 8z"/><circle cx="8" cy="8" r="1.6"/>',
   pie:'<circle cx="8" cy="8" r="5.8"/><path d="M8 2.2V8h5.8"/>',
+  trophy:'<path d="M4.6 2.4h6.8v3.4a3.4 3.4 0 0 1-6.8 0z"/><path d="M4.6 3.4H2.8v1a2 2 0 0 0 1.9 2M11.4 3.4h1.8v1a2 2 0 0 1-1.9 2"/><path d="M8 9.2v2.4M5.6 13.6h4.8"/>',
   debt:'<rect x="1.8" y="4.2" width="12.4" height="7.6" rx="1.3"/><path d="M5.2 8h5.6"/>',
 };
 function icon(name, size) {
@@ -1451,7 +1467,7 @@ function render() {
   /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
      barre latérale n'indiquerait plus où l'on se trouve. */
   const navItem = ([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["year", "chart", "Année"],
@@ -1472,6 +1488,7 @@ function render() {
     : UI.view === "pat" ? viewPatrimoine()
     : UI.view === "patcredits" ? viewPatCredits()
     : UI.view === "patacct" ? viewPatAccount()
+    : UI.view === "patmilestones" ? viewPatMilestones()
     : UI.view === "data" ? viewGeneral() : viewSettings();
 
   $("#app").innerHTML =
@@ -2679,6 +2696,110 @@ const PAT_EVENTS = [
   { mk: "2025-10", label: "Bitcoin à son record, 126 200 $" },
   { mk: "2025-11", label: "Nouvelle baisse de taux de la Fed" },
 ];
+/* =========================================================================
+   Catalogue des jalons — la version « tableau de trophées » des repères du graphique.
+   Chaque entrée sait dire si elle est acquise et quand, et sinon où l'on en est. Montrer
+   les jalons non atteints en grisé n'a d'intérêt que si l'on voit la distance qui reste :
+   sans progression, c'est une liste de choses ratées.
+   ========================================================================= */
+function patAchievements(mk) {
+  const months = allPatMonths(mk);
+  if (!months.length) return [];
+  /* La série est calculée une fois : chaque patTotalAt refait un tri des valorisations,
+     et le catalogue interroge une trentaine de seuils. */
+  const series = months.map(m => ({
+    mk: m, total: patTotalAt(m), inv: patInvested(null, m),
+    perf: patMonthlyPerf(null, m), mov: patMovementsInMonth(null, m),
+  }));
+  const last = series[series.length - 1];
+  const out = [];
+  /* Premier mois où la valeur atteint le seuil ; null si jamais. */
+  const crossed = (pick, target) => {
+    for (const p of series) if (pick(p) >= target) return p.mk;
+    return null;
+  };
+  const add = (group, name, desc, at, current, target, fmt) => out.push({
+    group, name, desc, at, done: !!at, current, target, fmt: fmt || fmtEurShort,
+    pct: target > 0 ? Math.min(100, Math.max(0, current / target * 100)) : (at ? 100 : 0),
+  });
+
+  [10000, 25000, 50000, 75000, 100000, 250000, 500000, 1000000].forEach(c => {
+    add("Paliers", fmtEurShort(c), "Patrimoine total atteint",
+      crossed(p => p.total, c), last.total, c);
+  });
+
+  [1000, 5000, 10000, 25000, 50000, 100000].forEach(c => {
+    add("Plus-value", fmtEurShort(c) + " de gains", "Écart cumulé entre ce qui est versé et ce que ça vaut",
+      crossed(p => p.total - p.inv, c), last.total - last.inv, c);
+  });
+
+  const base = series[0].total;
+  if (base > 0) [2, 3, 5, 10].forEach(x => {
+    add("Multiplicateurs", "×" + x, "Patrimoine multiplié par " + x + " depuis " + monthLabel(series[0].mk),
+      crossed(p => p.total, base * x), last.total, base * x);
+  });
+
+  /* --- Jalons de comportement : ils racontent une manière d'épargner, pas un montant. --- */
+  let beatMk = null;
+  for (let i = 1; i < series.length; i++) {
+    const gain = series[i].total - series[i - 1].total - series[i].mov;
+    if (series[i].mov > 0 && gain > series[i].mov) { beatMk = series[i].mk; break; }
+  }
+  add("Trajectoire", "Le marché vous dépasse", "Un mois où les placements rapportent plus que votre versement",
+    beatMk, beatMk ? 1 : 0, 1, () => "");
+
+  let streak = 0, bestStreak = 0;
+  series.forEach(p => {
+    if (p.perf != null && p.perf > 0) { streak++; if (streak > bestStreak) bestStreak = streak; }
+    else streak = 0;
+  });
+  [3, 6, 12].forEach(n => {
+    let hit = null, run = 0;
+    for (const p of series) {
+      if (p.perf != null && p.perf > 0) { run++; if (run >= n) { hit = p.mk; break; } } else run = 0;
+    }
+    add("Trajectoire", n + " mois gagnants d’affilée", "Série de hausses consécutives, hors versements",
+      hit, bestStreak, n, v => v + " mois");
+  });
+
+  const years = [...new Set(months.map(m => +m.slice(0, 4)))];
+  const goodYear = years.find(y => { const r = patAnnualPerf(null, y); return r != null && r > 0; });
+  add("Trajectoire", "Une année dans le vert", "Une année civile entière en performance positive",
+    goodYear ? goodYear + "-12" : null, goodYear ? 1 : 0, 1, () => "");
+
+  /* Sortir d'un creux compte autant qu'y échapper : c'est ce que mesurent les suivis
+     sérieux sous le nom de « temps de récupération ». */
+  let peak = 0, peakMk = "", dd = 0, ddPeak = "", ddTrough = "";
+  series.forEach(p => {
+    if (p.total > peak) { peak = p.total; peakMk = p.mk; }
+    const d = peak ? (p.total - peak) / peak * 100 : 0;
+    if (d < dd) { dd = d; ddPeak = peakMk; ddTrough = p.mk; }
+  });
+  const recovered = dd < -4 && ddTrough
+    ? (series.find(p => p.mk > ddTrough && p.total >= patTotalAt(ddPeak)) || {}).mk || null : null;
+  add("Trajectoire", "Sommet retrouvé", "Revenir au plus haut après une baisse d’au moins 4 %",
+    recovered, recovered ? 1 : 0, 1, () => "");
+
+  add("Trajectoire", "Trois ans de suivi", "Trente-six mois de valorisations enregistrées",
+    months.length >= 36 ? months[35] : null, months.length, 36, v => v + " mois");
+
+  /* --- Diversification et sécurité --- */
+  const classes = patAllocByType(mk).length;
+  [3, 5].forEach(n => {
+    add("Diversification", n + " classes d’actifs", "Répartir sur au moins " + n + " natures de placement",
+      classes >= n ? mk : null, classes, n, v => v + " classes");
+  });
+
+  const safety = patSafetyMonths(mk);
+  [3, 6].forEach(n => {
+    add("Sécurité", n + " mois de dépenses", "Épargne de précaution couvrant " + n + " mois",
+      safety && safety.months >= n ? mk : null, safety ? safety.months : 0, n,
+      v => (Math.round(v * 10) / 10).toString().replace(".", ",") + " mois");
+  });
+
+  return out;
+}
+
 /* Générateur pseudo-aléatoire à graine : le tirage doit rester stable tant que
    l'utilisateur ne redemande pas un nouveau, sinon l'affichage changerait à chaque
    redessin de l'écran. */
@@ -2990,6 +3111,7 @@ function viewPatrimoineHome() {
   const rangeDelta = patTotalAt(last) - patTotalAt(from);
   html += '<div class="card"><div class="chead"><h2>Évolution</h2>' +
     '<button class="iconbtn" data-act="pathlshuffle" title="Afficher d’autres repères">' + icon("undo", 15) + "</button>" +
+    '<button class="iconbtn" data-act="patmilestones" title="Voir tous les jalons">' + icon("trophy", 15) + "</button>" +
     '<div class="spacer" style="flex:1"></div>' +
     '<div style="display:flex;gap:4px;flex-wrap:wrap">' + PAT_RANGES.map(r => {
       /* Une période plus longue que l'historique n'a rien à montrer. */
@@ -3068,6 +3190,66 @@ function viewPatrimoineHome() {
       "</b> de dépenses mensuelles moyennes (" + safety.basis + " mois observés). Repère usuel : trois à six mois.</p>";
   }
   html += "</div></div>";
+  return html;
+}
+
+/* ---- Jalons ---------------------------------------------------------------
+   Acquis en couleur, à venir en grisé, avec la distance qui reste. Un jalon barré sans
+   contexte décourage ; le même avec « 62 990 sur 75 000 » donne une direction. */
+function viewPatMilestones() {
+  const month = UI.patMonth;
+  let html = '<div class="topbar"><button class="btn sm ghost" data-act="patbackhome">' + icon("left", 14) + "Aperçu</button>" +
+    "<h1>Jalons</h1>" +
+    '<div class="periodnav"><button data-act="prev" aria-label="Mois précédent">' + icon("left") + "</button>" +
+    '<span class="label">' + esc(monthLabel(month)) + "</span>" +
+    '<button data-act="next" aria-label="Mois suivant">' + icon("right") + "</button></div>" +
+    '<div class="spacer" style="flex:1"></div></div>';
+
+  const all = patAchievements(month);
+  if (!all.length) return html + patNoAccounts("Les jalons se débloquent au fil des valorisations : il n’y en a aucune pour l’instant.");
+
+  const done = all.filter(a => a.done).length;
+  html += '<div class="card"><div class="pathero"><div>' +
+    '<div class="eyebrow">Jalons atteints</div>' +
+    '<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">' +
+      '<div class="big">' + done + '<span style="font-size:20px;color:var(--ink-mute)"> / ' + all.length + "</span></div>" +
+    "</div>" +
+    '<div class="msbar" style="max-width:320px"><i style="width:' + (done / all.length * 100).toFixed(1) + '%"></i></div>' +
+    '<div class="tiny muted">Certains ne dépendent que du temps, d’autres de ce que vous en faites.</div></div>';
+  /* Le prochain jalon accessible : celui dont la progression est la plus avancée. */
+  const next = all.filter(a => !a.done && a.pct > 0).sort((x, y) => y.pct - x.pct)[0];
+  html += "<div>";
+  if (next) {
+    html += '<div class="eyebrow">Le plus proche</div>' +
+      '<div style="font-size:15px;font-weight:650;margin-top:6px">' + esc(next.name) + "</div>" +
+      '<div class="msbar" style="margin-top:8px"><i style="width:' + next.pct.toFixed(1) + '%"></i></div>' +
+      '<div class="tiny muted">' + esc(next.fmt(next.current)) + " sur " + esc(next.fmt(next.target)) +
+      " · " + esc(fmtRate(next.pct)) + "</div>";
+  }
+  html += "</div></div></div>";
+
+  const groups = [];
+  all.forEach(a => {
+    let g = groups.filter(x => x.name === a.group)[0];
+    if (!g) groups.push(g = { name: a.group, items: [] });
+    g.items.push(a);
+  });
+  html += groups.map(g => {
+    const n = g.items.filter(x => x.done).length;
+    return '<div class="card"><div class="chead"><h2>' + esc(g.name) + "</h2>" +
+      '<div class="spacer" style="flex:1"></div><span class="tiny muted">' + n + " / " + g.items.length + "</span></div>" +
+      '<div class="mstones">' + g.items.map(a =>
+        '<div class="mstone ' + (a.done ? "on" : "") + '">' +
+          '<div class="mk">' + (a.done ? icon("check", 15) : icon("vault", 15)) + "</div>" +
+          '<div style="min-width:0"><div class="mn">' + esc(a.name) + "</div>" +
+          '<div class="md">' + esc(a.desc) + "</div>" +
+          (a.done
+            ? '<div class="mw">' + esc(a.at ? monthLabel(a.at) : "atteint") + "</div>"
+            : '<div class="mp"><div class="msbar" style="margin:5px 0 3px"><i style="width:' + a.pct.toFixed(1) + '%"></i></div>' +
+              '<span class="tiny muted">' + esc(a.fmt(a.current)) +
+              (a.fmt(a.target) ? " sur " + esc(a.fmt(a.target)) : "") + "</span></div>") +
+          "</div></div>").join("") + "</div></div>";
+  }).join("");
   return html;
 }
 
@@ -4516,6 +4698,8 @@ document.addEventListener("click", e => {
     }
     case "patopenacct": UI.patAccount = el.dataset.id; UI.view = "patacct"; render(); break;
     case "patback": UI.view = "pat"; UI.patAccount = null; render(); break;
+    case "patbackhome": UI.view = "pathome"; render(); break;
+    case "patmilestones": UI.view = "patmilestones"; render(); break;
     case "pattoggleinactive": UI.patShowInactive = !UI.patShowInactive; render(); break;
     case "pattoggleclosed": {
       const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) break;
