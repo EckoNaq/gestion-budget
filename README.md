@@ -20,6 +20,7 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 - **Indépendance** mesure le patrimoine en années de dépenses, jusqu'aux vingt-cinq ans de la règle des 4 %. **Repères français** confronte le patrimoine aux médianes INSEE 2024 par tranche d'âge — patrimoine brut, résidence principale comprise, ce que les libellés précisent.
 - **Curiosités** ne sert à rien financièrement, et c'est le but : une performance mensuelle à 1,23 % pile, deux décimales identiques, un patrimoine palindrome, un versement un vendredi 13 ou le 1<sup>er</sup> janvier. Des collectibles, pas des objectifs.
 - La progression est affichée pour chaque jalon non atteint, et le plus proche est mis en avant. Un badge grisé sans contexte décourage ; « 62 990 € sur 75 000 € » donne une direction.
+- Une famille **entièrement décrochée change d'allure** : bordure et fond dorés, coupe dans le titre, pastille « Complet » à la place du décompte. Sans récompense visible pour la collection entière, il n'y a aucune raison de viser le dernier badge d'une série.
 - L'écran s'ouvre depuis l'icône coupe, à côté du bouton de rafraîchissement des repères du graphique d'évolution.
 
 ### 2026-08-11 — effort d'épargne
