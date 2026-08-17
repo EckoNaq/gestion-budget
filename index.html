@@ -5378,7 +5378,11 @@ function restoreJSON(text, scope) {
     } else if (scope === "budget") {
       DB.tx = src.tx; DB.rules = src.rules; DB.income = src.income; DB.goals = src.goals;
       DB.imports = src.imports; DB.legacyMap = src.legacyMap; DB.fixed = src.fixed;
-      DB.customCats = src.customCats;
+      /* patRules suit le Budget, comme à l'export et à l'effacement, sans quoi restaurer
+         un fichier « Budget seul » rendrait autre chose que ce qu'il contient. Qu'une règle
+         désigne un compte absent d'ici ne coûte rien : patRuleFor ne la retient que si son
+         compte existe encore. */
+      DB.customCats = src.customCats; DB.patRules = src.patRules;
       Object.keys(src.settings).forEach(k => {
         if (PAT_SETTING_KEYS.indexOf(k) < 0) DB.settings[k] = src.settings[k];
       });
