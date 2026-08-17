@@ -439,6 +439,16 @@ html[data-theme="dark"] .t-plat{--tier:#8A79E4;--tier-l:#B4A8F5}
 .moreline .hr{flex:1;height:1px;background:var(--line)}
 .moreline button{background:none;border:0;color:var(--accent-ink);font-size:12px;cursor:pointer;font-weight:600;padding:2px 6px;border-radius:5px}
 .moreline button:hover{background:var(--accent-soft)}
+/* Destination patrimoine d'un virement interne : un bloc à part, sous les catégories,
+   parce qu'il répond à une autre question et n'a de sens que pour ces opérations-là. */
+.destbox{margin-top:14px;padding:12px 13px 11px;border:1px dashed var(--line);border-radius:12px;background:var(--surface-2)}
+.destbox.on{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}
+.destlab{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:620;color:var(--ink-soft);margin-bottom:8px}
+.destlab svg{width:12px;height:12px}
+.destsum{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--ink-soft);margin-top:9px;line-height:1.45}
+.destsum svg{width:12px;height:12px;flex:none;margin-top:2px}
+.destsum.muted{color:var(--ink-mute)}
+.tag.lnk{display:inline-flex;align-items:center;gap:5px}
 .segbar{display:flex;gap:3px;margin-bottom:14px}
 .segbar i{flex:1;height:4px;border-radius:2px;background:var(--line)}
 .segbar i.done{background:var(--pos)}
@@ -970,21 +980,21 @@ const DEFAULT_SETTINGS = { inflation: 1.9, band: 5, dupWindow: 5, dupTol: 5, the
   patReturn: null, patContribution: null, patTarget: 0, patSafetyTarget: 4 };
 
 function emptyDB() {
-  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [], patAccounts: [], patValues: {}, patMovements: [], patLiabilities: [], patDebtValues: {} };
+  return { v: SCHEMA_VERSION, tx: [], rules: {}, income: {}, goals: {}, imports: [], legacyMap: {}, fixed: {}, settings: { ...DEFAULT_SETTINGS }, customCats: [], patAccounts: [], patValues: {}, patMovements: [], patLiabilities: [], patDebtValues: {}, patRules: {} };
 }
 /* Les deux moitiés de l'application, pour pouvoir en sauvegarder une sans l'autre.
    Les réglages sont partagés : seuls ceux de la projection appartiennent au Patrimoine,
    faute de quoi restaurer un export Patrimoine écraserait l'objectif d'épargne du Budget. */
-const BUDGET_KEYS = ["t", "r", "i", "g", "m", "l", "f", "c"];
+const BUDGET_KEYS = ["t", "r", "i", "g", "m", "l", "f", "c", "pr"];
 const PAT_KEYS = ["pa", "pv", "pm", "pl", "pd"];
 const PAT_SETTING_KEYS = ["patReturn", "patContribution", "patTarget", "patSafetyTarget"];
 
 function serialize(db, scope) {
   const full = {
     v: SCHEMA_VERSION,
-    t: db.tx.map(t => [t.date, t.label, t.merchantRaw || "", t.amount, t.cat || "", t.status, t.imp, t.bankCat || ""]),
+    t: db.tx.map(t => [t.date, t.label, t.merchantRaw || "", t.amount, t.cat || "", t.status, t.imp, t.bankCat || "", t.patMove || 0]),
     r: db.rules, i: db.income, g: db.goals, m: db.imports, l: db.legacyMap, f: db.fixed, s: db.settings,
-    c: db.customCats || [],
+    c: db.customCats || [], pr: db.patRules || {},
     pa: db.patAccounts || [], pv: db.patValues || {}, pm: db.patMovements || [],
     pl: db.patLiabilities || [], pd: db.patDebtValues || {},
   };
@@ -1012,8 +1022,8 @@ function backupSummary(raw) {
 }
 function deserialize(json) {
   const raw = JSON.parse(json), db = emptyDB();
-  db.tx = (raw.t || []).map(a => ({ date: a[0], label: a[1], merchantRaw: a[2], amount: a[3], cat: a[4] || null, status: a[5], imp: a[6], bankCat: a[7] || "" }));
-  db.rules = raw.r || {}; db.income = raw.i || {}; db.goals = raw.g || {};
+  db.tx = (raw.t || []).map(a => ({ date: a[0], label: a[1], merchantRaw: a[2], amount: a[3], cat: a[4] || null, status: a[5], imp: a[6], bankCat: a[7] || "", patMove: a[8] || null }));
+  db.rules = raw.r || {}; db.income = raw.i || {}; db.goals = raw.g || {}; db.patRules = raw.pr || {};
   db.imports = raw.m || []; db.legacyMap = raw.l || {}; db.fixed = raw.f || {};
   db.settings = Object.assign({}, DEFAULT_SETTINGS, raw.s || {});
   db.customCats = raw.c || [];
@@ -1056,6 +1066,7 @@ function isPatView() {
 function reindex() {
   DB.tx.forEach((t, i) => { t.id = i; t.merchantKey = merchantKey(t); });
   MERCHANT_INDEX = buildMerchantIndex(DB.tx.map(t => t.merchantKey));
+  patPruneTxMovements();
 }
 function canonOf(t) { return canonMerchant(t, MERCHANT_INDEX); }
 
@@ -1855,6 +1866,15 @@ function opRow(t) {
   else if (t.status === ST_DUP_MAYBE) tags = '<span class="tag dup">doublon probable</span>';
   else if (ign) tags = '<span class="tag ign">interne</span>';
   else if (!t.cat) tags = '<span class="tag todo">à catégoriser</span>';
+  /* Le virement a nourri un compte : le dire ici, c'est la seule façon de voir d'un coup
+     d'œil ce qui est déjà arrivé dans le patrimoine et ce qui n'y est jamais entré. */
+  const linked = patLinkedMove(t);
+  if (linked) {
+    const la = (DB.patAccounts || []).find(a => a.id === linked.accountId);
+    tags += ' <span class="tag lnk" title="' +
+      esc(fmtEur(linked.amount, { plus: true }) + " enregistré sur ce compte au " + linked.date.split("-").reverse().join("/")) +
+      '">' + (la ? patSwatch(la, 7) : "") + esc(la ? la.name : "patrimoine") + "</span>";
+  }
 
   let actions = "";
   if (dup) {
@@ -2594,6 +2614,10 @@ function importPatrimoineCsv(comptesText, mouvementsText) {
   (DB.patAccounts || []).forEach(a => { prevPerfExcluded[normalize(a.name)] = a.perfExcluded; });
 
   DB.patAccounts = []; DB.patValues = {}; DB.patMovements = [];
+  /* Le tableur remplace tout : les mouvements nés d'un virement du budget aussi, puisqu'ils
+     s'y trouvent déjà. Les opérations qui les désignaient perdent donc leur lien. */
+  DB.tx.forEach(t => { t.patMove = null; });
+  DB.patRules = {};
   const nameToId = {};
   c.accounts.forEach(name => {
     const key = normalize(name);
@@ -3934,7 +3958,8 @@ function patMovementsCard(accounts, onlyAccountId) {
       (onlyAccountId ? "" : "<th>Compte</th>") + '<th style="text-align:right">Montant</th><th></th></tr></thead><tbody>' +
       movs.map(m => {
         const a = accounts.find(x => x.id === m.accountId);
-        return "<tr><td>" + esc(m.date.split("-").reverse().join("/")) + "</td>" +
+        return "<tr><td>" + esc(m.date.split("-").reverse().join("/")) +
+          (m.tx ? ' <span class="tag lnk" title="Créé en classant un virement interne dans le budget">budget</span>' : "") + "</td>" +
           (onlyAccountId ? "" : '<td><span style="display:flex;align-items:center;gap:8px">' +
             (a ? patSwatch(a) : "") + esc(a ? a.name : "—") + "</span></td>") +
           '<td class="num ' + (m.amount >= 0 ? "" : "neg") + '" style="text-align:right;font-weight:600">' +
@@ -4507,12 +4532,90 @@ function commitImport() {
 }
 
 /* =========================================================================
+   Passerelle Budget → Patrimoine.
+
+   Un virement interne ne se volatilise pas : il quitte le compte courant pour un
+   autre compte qui nous appartient. C'est, mot pour mot, un versement au
+   patrimoine. Le classer et l'enregistrer sont donc le même geste, et le tri est
+   le seul moment où l'on a la destination en tête.
+
+   Le lien est porté par l'opération (t.patMove → id du mouvement) et non
+   l'inverse : les identifiants d'opérations sont des positions de tableau que
+   reindex() renumérote à chaque suppression, alors que ceux des mouvements sont
+   stables et sauvegardés. Le mouvement porte tx:1 pour qu'on sache le distinguer
+   d'une saisie manuelle, à laquelle aucun ménage ne doit jamais toucher.
+   ========================================================================= */
+/* Un compte clôturé ne reçoit plus rien ; les autres sont tous proposés, y compris ceux qui
+   n'ont pas encore de valorisation : on alimente souvent avant de valoriser.
+
+   L'ordre compte autant que la liste. Les comptes alimentés sur la fiche de paie passent en
+   dernier — un virement bancaire n'y va jamais — et les autres se rangent par nombre de
+   versements déjà reçus : la bonne réponse est presque toujours dans les deux premiers. */
+function patLinkAccounts() {
+  const uses = a => (DB.patMovements || []).filter(m => m.accountId === a.id).length;
+  return (DB.patAccounts || []).filter(a => !a.closed)
+    .sort((a, b) => ((patIsOffBudget(a) ? 1 : 0) - (patIsOffBudget(b) ? 1 : 0)) || (uses(b) - uses(a)));
+}
+function patLinkedMove(t) {
+  if (!t || !t.patMove) return null;
+  return (DB.patMovements || []).find(m => m.id === t.patMove) || null;
+}
+/* Sortie du compte courant = dépôt sur le compte d'épargne, et réciproquement : le
+   signe s'inverse en passant d'un côté à l'autre du pont. */
+function patLinkAmount(t) { return -t.amount; }
+function patAttachTx(t, accountId) {
+  if (!accountId) { patDetachTx(t); return null; }
+  const existing = patLinkedMove(t);
+  if (existing) {
+    existing.accountId = accountId; existing.date = t.date; existing.amount = patLinkAmount(t);
+    return existing.id;
+  }
+  DB.patMovements = DB.patMovements || [];
+  const id = (DB.patMovements.reduce((m, x) => Math.max(m, x.id), 0) || 0) + 1;
+  DB.patMovements.push({ id, accountId, date: t.date, amount: patLinkAmount(t), tx: 1 });
+  t.patMove = id;
+  return id;
+}
+function patDetachTx(t) {
+  if (!t || !t.patMove) return false;
+  const id = t.patMove;
+  t.patMove = null;
+  DB.patMovements = (DB.patMovements || []).filter(m => !(m.id === id && m.tx));
+  return true;
+}
+/* Ménage : supprimer une opération, vider un mois ou restaurer une sauvegarde ne
+   passe pas par le tri. Un mouvement né du budget dont l'opération n'existe plus est
+   un fantôme, et un fantôme se compte comme de la performance — c'est exactement ce
+   qui gonflait le PEL de 1 404 € en janvier 2024. */
+function patPruneTxMovements() {
+  const live = new Set();
+  DB.tx.forEach(t => { if (t.patMove) live.add(t.patMove); });
+  const before = (DB.patMovements || []).length;
+  DB.patMovements = (DB.patMovements || []).filter(m => !m.tx || live.has(m.id));
+  return before - DB.patMovements.length;
+}
+/* Destination retenue pour ce libellé, à condition que le compte existe encore :
+   une règle qui désigne un compte supprimé ne doit rien présélectionner. */
+function patRuleFor(t) {
+  const rules = DB.patRules || {};
+  const id = rules[canonOf(t)] || rules[labelKey(t)];
+  return id && (DB.patAccounts || []).some(a => a.id === id) ? id : null;
+}
+/* Destination affichée sur une carte de tri : le choix en cours, sinon le lien déjà
+   posé, sinon la règle retenue. "" veut dire « aucun compte », et c'est un choix. */
+function patDestFor(t) {
+  if (REVIEW && REVIEW.dest !== undefined) return REVIEW.dest;
+  const m = patLinkedMove(t);
+  return m ? m.accountId : (patRuleFor(t) || "");
+}
+
+/* =========================================================================
    One-by-one sorting. New operations are never filed automatically: the app
    proposes, the user decides.
    ========================================================================= */
 let REVIEW = null;
 function startReview(ids, title) {
-  REVIEW = { ids: ids.slice(), i: 0, sel: undefined, remember: true, title: title || "Tri des opérations", total: ids.length, history: [] };
+  REVIEW = { ids: ids.slice(), i: 0, sel: undefined, dest: undefined, remember: true, title: title || "Tri des opérations", total: ids.length, history: [] };
   UI.modal = reviewModal; render();
 }
 function reviewCurrent() { return REVIEW && REVIEW.i < REVIEW.ids.length ? DB.tx[REVIEW.ids[REVIEW.i]] : null; }
@@ -4573,6 +4676,39 @@ function reviewModal() {
     }).join("");
   }
 
+  /* Épargne & transferts : l'argent va quelque part, et ce quelque part nous appartient.
+     Le demander ici évite d'aller le ressaisir dans le patrimoine un mois plus tard, de
+     mémoire. « Aucun » reste un choix de plein droit : retrait d'espèces, virement entre
+     deux comptes courants, compte non suivi. */
+  const neutral = sel && catKind(sel) === KIND_NEUTRAL;
+  const destAccounts = patLinkAccounts();
+  let dest = "";
+  if (neutral && destAccounts.length) {
+    const cur = patDestFor(t);
+    const back = t.amount > 0;
+    const destBtn = a => {
+      const col = patAccountColor(a);
+      return '<button class="pick ' + (cur === a.id ? "on" : "") + '" data-act="revdest" data-dest="' + esc(a.id) + '"' +
+        (cur === a.id ? ' style="border-color:' + col + ";background:color-mix(in oklab," + col + ' 12%,transparent)"' : "") +
+        ">" + patSwatch(a, 9) + esc(a.name) + "</button>";
+    };
+    const chosen = destAccounts.find(a => a.id === cur);
+    dest = '<div class="destbox' + (chosen ? " on" : "") + '">' +
+      '<div class="destlab">' + icon("vault", 12) +
+        (back ? "D’où revient cet argent ?" : "Où part cet argent ?") + "</div>" +
+      '<div class="pickrow">' +
+        '<button class="pick ' + (chosen ? "" : "on") + '" data-act="revdest" data-dest=""' +
+          (chosen ? "" : ' style="border-color:var(--ink-mute);color:var(--ink-soft)"') +
+          ' title="Retrait, compte non suivi, virement entre deux comptes courants">Aucun</button>' +
+        destAccounts.map(destBtn).join("") + "</div>" +
+      (chosen
+        ? '<div class="destsum">' + icon("check", 12) + "<span><b>" + esc(fmtEur(patLinkAmount(t), { plus: true })) +
+          "</b> sur <b>" + esc(chosen.name) + "</b> au " + esc(t.date.slice(8, 10) + "/" + t.date.slice(5, 7)) +
+          ", enregistré en même temps que le classement.</span></div>"
+        : '<div class="destsum muted">' + icon("eye", 12) + "<span>Rien ne sera écrit dans le patrimoine.</span></div>") +
+      "</div>";
+  }
+
   const segments = [];
   for (let i = 0; i < Math.min(REVIEW.total, 24); i++) {
     const at = Math.floor(i * REVIEW.total / Math.min(REVIEW.total, 24));
@@ -4596,7 +4732,7 @@ function reviewModal() {
       (!expense ? '<div class="revwhy">' + icon("income", 12) + "montant reçu : revenu, ou remboursement à déduire d\u2019un poste</div>" : "") +
       '<div class="moreline"><span class="hr"></span><button data-act="revexpand">' +
         (REVIEW.expand ? "Réduire" : "Toutes les catégories") + "</button><span class=\"hr\"></span></div>" +
-      picker +
+      picker + dest +
     "</div>" +
     '<div class="revfoot">' +
       '<button class="btn" data-act="revback" ' + (REVIEW.history.length ? "" : "disabled") +
@@ -4621,15 +4757,21 @@ function reviewAct(action) {
   const sug = reviewSuggestion(t);
   const sel = REVIEW.sel === undefined ? sug.cat : REVIEW.sel;
   if (action === "validate" && !sel) { toast("Choisissez une catégorie."); return; }
+  /* Destination patrimoine : le choix de la carte, sinon le lien déjà posé, sinon la règle
+     retenue — et rien du tout dès que la catégorie n'est plus un transfert. */
+  const dest = action === "validate" && catKind(sel) === KIND_NEUTRAL ? patDestFor(t) : "";
+  const before = patLinkedMove(t);
   REVIEW.busy = true;
   /* everything this action touches is recorded, so it can be taken back */
-  const undo = { at: REVIEW.i, id: t.id, action: action, sel: sel,
-                 prevCat: t.cat, prevStatus: t.status, rules: [], siblings: [] };
+  const undo = { at: REVIEW.i, id: t.id, action: action, sel: sel, dest: dest,
+                 prevCat: t.cat, prevStatus: t.status, rules: [], patRules: [], siblings: [],
+                 move: before ? { id: before.id, accountId: before.accountId, date: before.date, amount: before.amount } : null };
   const apply = () => {
     REVIEW.busy = false;
     if (action === "validate") {
       t.cat = sel;
       t.status = catKind(sel) === KIND_NEUTRAL ? ST_IGNORED : ST_OK;
+      patAttachTx(t, dest);                       // "" détache : reclasser en dépense défait le lien
       const key = canonOf(t) || labelKey(t);
       const legacy = CAT_BY_ID[sel] && CAT_BY_ID[sel].legacy;
       if (REVIEW.remember && !legacy && key && key.length > 2 && /[a-z]{3}/.test(key) && !OPAQUE_MERCHANTS.has(key)) {
@@ -4638,25 +4780,35 @@ function reviewAct(action) {
           if (!k || k.length < 3 || OPAQUE_MERCHANTS.has(k) || DB.rules[k] === sel) return;
           undo.rules.push([k, DB.rules[k]]);
           DB.rules[k] = sel;
+          /* La destination se retient comme la catégorie : le prochain virement du même
+             libellé arrivera avec son compte déjà coché. */
+          DB.patRules = DB.patRules || {};
+          if (DB.patRules[k] !== dest) { undo.patRules.push([k, DB.patRules[k]]);
+            if (dest) DB.patRules[k] = dest; else delete DB.patRules[k]; }
         });
-        /* the rest of the batch from the same merchant is settled at the same time */
-        const removals = [];
-        DB.tx.forEach(x => {
-          if (x === t || !isTodo(x) || canonOf(x) !== canonOf(t)) return;
-          const at = REVIEW.ids.indexOf(x.id);
-          if (at <= REVIEW.i) return;
-          undo.siblings.push({ id: x.id, at: at, prevCat: x.cat, prevStatus: x.status });
-          x.cat = sel;
-          if (catKind(sel) === KIND_NEUTRAL) x.status = ST_IGNORED;
-          removals.push(at);
-        });
-        removals.sort((a, b) => b - a).forEach(at => REVIEW.ids.splice(at, 1));
+        /* Le reste du lot du même commerçant est réglé en même temps — sauf si un compte
+           de destination est en jeu. Chacun de ces virements a son montant et sa date, et
+           rien n'entre dans le patrimoine sans un geste : ils restent donc dans la file,
+           où la règle qu'on vient de retenir les présentera déjà remplis, à un Entrée près. */
+        if (!dest) {
+          const removals = [];
+          DB.tx.forEach(x => {
+            if (x === t || !isTodo(x) || canonOf(x) !== canonOf(t)) return;
+            const at = REVIEW.ids.indexOf(x.id);
+            if (at <= REVIEW.i) return;
+            undo.siblings.push({ id: x.id, at: at, prevCat: x.cat, prevStatus: x.status });
+            x.cat = sel;
+            if (catKind(sel) === KIND_NEUTRAL) x.status = ST_IGNORED;
+            removals.push(at);
+          });
+          removals.sort((a, b) => b - a).forEach(at => REVIEW.ids.splice(at, 1));
+        }
       }
     } else if (action === "ignore") {
       t.status = ST_IGNORED; t.cat = t.cat || "c_transfer";
     }
     REVIEW.history.push(undo);
-    REVIEW.i++; REVIEW.sel = undefined;
+    REVIEW.i++; REVIEW.sel = undefined; REVIEW.dest = undefined;
     saveDB(); render();
   };
   if (card && action !== "skip") {
@@ -4670,8 +4822,22 @@ function reviewBack() {
   if (!REVIEW || !REVIEW.history.length || REVIEW.busy) return;
   const u = REVIEW.history.pop();
   const t = DB.tx[u.id];
-  if (t) { t.cat = u.prevCat; t.status = u.prevStatus; }
+  if (t) {
+    t.cat = u.prevCat; t.status = u.prevStatus;
+    /* Le mouvement de patrimoine créé par cette carte repart avec elle, et celui qui
+       existait avant revient tel quel — même identifiant, pour ne pas casser le lien. */
+    patDetachTx(t);
+    if (u.move) {
+      DB.patMovements = DB.patMovements || [];
+      DB.patMovements.push({ id: u.move.id, accountId: u.move.accountId, date: u.move.date, amount: u.move.amount, tx: 1 });
+      t.patMove = u.move.id;
+    }
+  }
   u.rules.forEach(([k, prev]) => { if (prev === undefined) delete DB.rules[k]; else DB.rules[k] = prev; });
+  u.patRules.forEach(([k, prev]) => {
+    DB.patRules = DB.patRules || {};
+    if (prev === undefined) delete DB.patRules[k]; else DB.patRules[k] = prev;
+  });
   u.siblings.slice().sort((a, b) => a.at - b.at).forEach(s => {
     const x = DB.tx[s.id];
     if (x) { x.cat = s.prevCat; x.status = s.prevStatus; }
@@ -4679,6 +4845,7 @@ function reviewBack() {
   });
   REVIEW.i = u.at;
   REVIEW.sel = u.action === "validate" ? u.sel : undefined;   // the previous pick comes back selected
+  REVIEW.dest = u.action === "validate" ? u.dest : undefined;
   saveDB(); render();
 }
 
@@ -4767,6 +4934,14 @@ function restoreJSON(text, scope) {
       DB.patAccounts = src.patAccounts; DB.patValues = src.patValues; DB.patMovements = src.patMovements;
       DB.patLiabilities = src.patLiabilities; DB.patDebtValues = src.patDebtValues;
       PAT_SETTING_KEYS.forEach(k => { DB.settings[k] = src.settings[k]; });
+    }
+    /* Une restauration partielle recolle deux moitiés qui ne se connaissent pas : les liens
+       virement ↔ mouvement de l'une désigneraient au hasard des identifiants de l'autre. On
+       les coupe, sans rien supprimer — les mouvements restent, simplement redevenus des
+       saisies ordinaires. Inventer un rattachement serait pire que n'en garder aucun. */
+    if (scope && scope !== "all") {
+      DB.tx.forEach(t => { t.patMove = null; });
+      (DB.patMovements || []).forEach(m => { delete m.tx; });
     }
     (DB.customCats || []).forEach(registerCat);
     recoverMissingCats(DB);
@@ -4884,6 +5059,7 @@ document.addEventListener("click", e => {
       startReview(ids, "Tri des opérations"); break;
     }
     case "revsel": REVIEW.sel = el.dataset.cat === REVIEW.sel ? null : el.dataset.cat; render(); break;
+    case "revdest": REVIEW.dest = el.dataset.dest || ""; render(); break;
     case "revvalidate": reviewAct("validate"); break;
     case "revignore": reviewAct("ignore"); break;
     case "revskip": reviewAct("skip"); break;
@@ -4946,7 +5122,10 @@ document.addEventListener("click", e => {
       if (!confirm("Supprimer le compte « " + a.name + " » ? Ses valorisations et mouvements seront perdus.")) break;
       DB.patAccounts = DB.patAccounts.filter(x => x.id !== id);
       if (DB.patValues) delete DB.patValues[id];
+      const gone = new Set((DB.patMovements || []).filter(m => m.accountId === id).map(m => m.id));
       DB.patMovements = (DB.patMovements || []).filter(m => m.accountId !== id);
+      DB.tx.forEach(t => { if (gone.has(t.patMove)) t.patMove = null; });
+      Object.keys(DB.patRules || {}).forEach(k => { if (DB.patRules[k] === id) delete DB.patRules[k]; });
       saveDB(); render(); toast("Compte supprimé."); break;
     }
     case "addpatmovement": {
@@ -4962,6 +5141,9 @@ document.addEventListener("click", e => {
     case "delpatmovement": {
       const id = +el.dataset.id;
       DB.patMovements = (DB.patMovements || []).filter(m => m.id !== id);
+      /* Un mouvement issu d'un virement laisse une opération qui le désigne : sans ce
+         nettoyage, l'opération continuerait d'annoncer un versement qui n'existe plus. */
+      DB.tx.forEach(t => { if (t.patMove === id) t.patMove = null; });
       saveDB(); render(); break;
     }
     case "patopenacct": UI.patAccount = el.dataset.id; UI.view = "patacct"; render(); break;
@@ -5033,7 +5215,12 @@ document.addEventListener("change", e => {
     const t = txById(el.dataset.id); if (!t) return;
     t.cat = el.value || null;
     if (t.cat && catKind(t.cat) === KIND_NEUTRAL) t.status = ST_IGNORED;
-    else if (t.status === ST_IGNORED) t.status = ST_OK;
+    else {
+      if (t.status === ST_IGNORED) t.status = ST_OK;
+      /* Ce n'était pas un virement, donc pas un versement : le mouvement s'en va avec
+         la catégorie plutôt que de rester à gonfler le patrimoine. */
+      if (patDetachTx(t)) toast("Le mouvement de patrimoine lié a été retiré.");
+    }
     saveDB();
     const key = canonOf(t);
     if (t.cat && key && DB.rules[key] !== t.cat) {
@@ -5043,7 +5230,11 @@ document.addEventListener("change", e => {
         : "Retenir « " + catName(t.cat) + " » pour les prochaines opérations de « " + (t.merchantRaw || key) + " » ?";
       if (confirm(msg)) {
         DB.rules[key] = t.cat;
-        others.forEach(x => { if (x.status !== ST_DUP) { x.cat = t.cat; x.status = catKind(t.cat) === KIND_NEUTRAL ? ST_IGNORED : x.status; } });
+        others.forEach(x => {
+          if (x.status === ST_DUP) return;
+          x.cat = t.cat;
+          if (catKind(t.cat) === KIND_NEUTRAL) x.status = ST_IGNORED; else patDetachTx(x);
+        });
         saveDB();
       }
     }
@@ -5052,7 +5243,8 @@ document.addEventListener("change", e => {
     const key = el.dataset.key, cat = el.value || null;
     if (!cat) return;
     DB.tx.forEach(t => { if (isTodo(t) && (canonOf(t) || normalize(t.merchantRaw || merchantFromLabel(t.label))) === key) {
-      t.cat = cat; if (catKind(cat) === KIND_NEUTRAL) t.status = ST_IGNORED; } });
+      t.cat = cat;
+      if (catKind(cat) === KIND_NEUTRAL) t.status = ST_IGNORED; else patDetachTx(t); } });
     if (!OPAQUE_MERCHANTS.has(key)) DB.rules[key] = cat;
     saveDB(); render(); toast("Classé, et la règle est retenue.");
   } else if (kind === "showdup") { UI.showDup = el.checked; render(); }

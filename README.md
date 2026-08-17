@@ -12,6 +12,16 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-17 — un virement classé, un versement enregistré
+
+- Ajout : au moment de classer une opération dans **Épargne & transferts**, la carte de tri demande **vers quel compte l'argent part** (ou d'où il revient, pour un montant reçu). Le mouvement de patrimoine est créé dans le même geste, à la date et pour le montant de l'opération, signe inversé : ce qui sort du compte courant entre sur le compte d'épargne. Un virement interne ne se volatilise pas — il va sur un autre compte qui nous appartient, et le tri est le seul moment où l'on a la destination en tête.
+- **« Aucun » reste un choix de plein droit** : retrait d'espèces, virement entre deux comptes courants, compte non suivi. Rien n'entre dans le patrimoine sans une destination désignée, et la carte dit laquelle des deux choses va se produire avant qu'on valide.
+- Les comptes sont proposés **dans l'ordre où ils ont des chances d'être les bons** : ceux qui reçoivent déjà le plus de versements d'abord, ceux qui sont alimentés sur la fiche de paie en dernier, un virement bancaire n'y allant jamais. Les comptes clôturés ne sont pas proposés.
+- **« Mémoriser » retient aussi la destination.** Le prochain virement du même libellé arrive avec son compte déjà coché, à un `Entrée` près. En revanche, choisir une destination **n'entraîne plus les virements jumeaux du même lot** : chacun a son montant et sa date, et rien ne doit entrer dans le patrimoine sans un geste. Ils restent donc dans la file, déjà remplis.
+- Le lien est **réversible et cohérent dans les deux sens** : `Précédent` retire le mouvement créé, reclasser l'opération en dépense le retire aussi, supprimer l'opération l'emporte avec elle, et supprimer le mouvement côté Patrimoine libère l'opération. Un mouvement sans opération se compterait comme de la performance — c'est exactement ce qui gonflait le PEL de 1 404 € en janvier 2024.
+- Les saisies manuelles de l'onglet Comptes ne sont **jamais** concernées par ce ménage. Celles nées d'un virement portent une étiquette « budget » dans la liste des mouvements, et l'opération correspondante affiche le compte qu'elle a alimenté dans le tableau des opérations.
+- Une restauration partielle (Budget seul ou Patrimoine seul) **coupe les liens** au lieu d'en inventer : les deux moitiés viennent de fichiers qui ne se connaissent pas. Les mouvements sont conservés, simplement redevenus des saisies ordinaires.
+
 ### 2026-08-11 — écran des jalons
 
 - Ajout : un écran **Jalons**, sous forme de **badges** — médaillons circulaires, rang bronze / argent / or / platine selon la place du jalon dans sa famille, pastille verte sur les acquis, anneau de progression sur les autres.
