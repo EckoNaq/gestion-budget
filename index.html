@@ -1025,6 +1025,21 @@ function backupSummary(raw) {
     tx, rules, accounts, movements, values, liabilities, imports: (raw.m || []).length,
   };
 }
+/* Le pendant de backupSummary pour les données en place. Effacer emporte les deux moitiés
+   d'un seul geste : avant de le faire, il faut pouvoir chiffrer ce qui part de chaque côté,
+   sinon on croit ne perdre que des relevés bancaires.
+   linkedTx / linkedMoves comptent le pont entre les deux — les virements classés en
+   versement — parce qu'effacer une moitié le rompt, et que ça se dit avant, pas après. */
+function currentSummary() {
+  return {
+    tx: DB.tx.length, imports: (DB.imports || []).length, rules: Object.keys(DB.rules || {}).length,
+    accounts: (DB.patAccounts || []).length, movements: (DB.patMovements || []).length,
+    values: Object.values(DB.patValues || {}).reduce((s, v) => s + Object.keys(v || {}).length, 0),
+    liabilities: (DB.patLiabilities || []).length,
+    linkedTx: DB.tx.filter(t => t.patMove).length,
+    linkedMoves: (DB.patMovements || []).filter(m => m.tx).length,
+  };
+}
 function deserialize(json) {
   const raw = JSON.parse(json), db = emptyDB();
   db.tx = (raw.t || []).map(a => ({ date: a[0], label: a[1], merchantRaw: a[2], amount: a[3], cat: a[4] || null, status: a[5], imp: a[6], bankCat: a[7] || "", patMove: a[8] || null }));
@@ -4738,9 +4753,13 @@ function viewGeneral() {
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn" data-act="import-json">' + icon("up") + "Choisir une sauvegarde…</button>" +
     '<div class="spacer" style="flex:1"></div>' +
-    '<button class="btn danger" data-act="reset">' + icon("trash") + "Tout effacer</button></div>" +
+    /* « Tout effacer » n'était plus exact dès lors que le bouton ouvre un choix : les
+       points de suspension disent qu'il reste une décision à prendre, comme pour la
+       restauration juste à côté. */
+    '<button class="btn danger" data-act="reset">' + icon("trash") + "Effacer…</button></div>" +
     '<p class="tiny muted" style="margin:10px 0 0">Le JSON est la sauvegarde : il se restaure. Le CSV est une sortie de lecture, pour un tableur — il ne se réimporte pas. ' +
-    "À la restauration, l’application montre ce que contient le fichier et vous laisse choisir la partie à reprendre ; l’autre n’est pas touchée.</p>" +
+    "À la restauration, l’application montre ce que contient le fichier et vous laisse choisir la partie à reprendre ; l’autre n’est pas touchée. " +
+    "L’effacement se découpe de la même façon : Budget seul, Patrimoine seul ou tout.</p>" +
     '<p class="tiny muted" style="margin:12px 0 0">Les données vivent uniquement dans le stockage local de ce navigateur, sous la clé <code>' + STORE_KEY +
     "</code>. Rien ne part sur un serveur. Vider les données de navigation les supprime : l’export JSON est la seule sauvegarde.</p></div>";
   return html;
@@ -5385,6 +5404,88 @@ function restoreJSON(text, scope) {
   } catch (e) { toast("Fichier illisible : ce n’est pas une sauvegarde Budget."); }
 }
 
+/* Effacement en deux temps, comme la restauration et pour la même raison : on montre ce
+   qu'on s'apprête à détruire, moitié par moitié, puis l'utilisateur choisit. Le découpage
+   suit celui de l'export — on peut vouloir repartir d'un budget vierge sans y perdre
+   l'historique de ses placements, et le seul chemin qui existait pour ça passait par un
+   export, un effacement total et une restauration. */
+function resetModal() {
+  const s = currentSummary();
+  const hasBudget = s.tx > 0 || s.rules > 0;
+  const hasPat = s.accounts > 0 || s.movements > 0 || s.liabilities > 0;
+  const part = (on, title, detail, link) =>
+    '<div class="note" style="margin-bottom:8px' + (on ? "" : ";opacity:.45") + '"><b>' + esc(title) +
+    '</b><br><span class="tiny muted">' + (on ? esc(detail) : "déjà vide") + "</span>" +
+    (on && link ? '<br><span class="tiny muted">' + esc(link) + "</span>" : "") + "</div>";
+  const btn = (scope, label, on) =>
+    '<button class="btn' + (on ? " danger" : "") + '" data-act="doreset" data-scope="' + scope + '"' +
+    (on ? "" : " disabled") + ">" + esc(label) + "</button>";
+  return '<div class="modal-back" data-act="backdrop"><div class="modal" style="max-width:520px">' +
+    '<div class="mhead"><div><h1>Effacer des données</h1>' +
+    '<div class="tiny muted">' + esc(STORE_KEY) + "</div></div>" +
+    '<div class="spacer" style="flex:1"></div><button class="iconbtn" data-act="closesmall">' + icon("x") + "</button></div>" +
+    part(hasBudget, "Budget", s.tx + " opération(s) · " + s.imports + " import(s) · " + s.rules + " règle(s) vendeur",
+      s.linkedMoves ? "Les " + s.linkedMoves + " mouvement(s) de patrimoine nés d’un virement classé ici restent, " +
+        "redevenus des saisies ordinaires." : "") +
+    part(hasPat, "Patrimoine", s.accounts + " compte(s) · " + s.values + " valorisation(s) · " +
+      s.movements + " mouvement(s)" + (s.liabilities ? " · " + s.liabilities + " crédit(s)" : ""),
+      s.linkedTx ? s.linkedTx + " opération(s) perdent leur marque de versement, sans changer de catégorie." : "") +
+    '<div class="note warn">' + icon("warn") +
+    " Effacé ne se restaure pas : seul un export JSON permet de revenir en arrière.</div>" +
+    '<div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;align-items:center">' +
+    '<button class="btn ghost" data-act="closesmall">Annuler</button>' +
+    '<div class="spacer" style="flex:1"></div>' +
+    btn("budget", "Budget seul", hasBudget) +
+    btn("pat", "Patrimoine seul", hasPat) +
+    btn("all", "Tout", hasBudget || hasPat) +
+    "</div></div></div>";
+}
+function resetScope(scope) {
+  const s = currentSummary();
+  const budget = s.tx + " opération(s), " + s.imports + " import(s), " + s.rules + " règle(s) vendeur";
+  const pat = s.accounts + " compte(s), " + s.values + " valorisation(s), " + s.movements + " mouvement(s)" +
+    (s.liabilities ? ", " + s.liabilities + " crédit(s)" : "");
+  /* La modale a montré les chiffres ; cette dernière question ne sert qu'à obtenir un geste
+     délibéré, là où la restauration peut se contenter d'un clic parce qu'elle, au moins,
+     remet quelque chose à la place. */
+  const what = scope === "budget" ? "la partie Budget (" + budget + ")"
+             : scope === "pat" ? "la partie Patrimoine (" + pat + ")"
+             : "toutes les données (" + budget + " côté Budget, " + pat + " côté Patrimoine)";
+  if (!confirm("Dernière confirmation : effacer " + what + " ?\n\n" +
+               "Rien n’est récupérable ensuite : annulez si vous n’avez pas exporté de sauvegarde.")) return;
+  /* Les valeurs vierges viennent d'emptyDB() comme celles de restoreJSON viennent du
+     fichier : même découpage, même partage des réglages. patRules suit le Budget, où
+     l'export le range déjà — c'est au tri qu'une règle de destination sert. */
+  const src = emptyDB();
+  if (!scope || scope === "all") {
+    DB = src;
+  } else if (scope === "budget") {
+    DB.tx = src.tx; DB.rules = src.rules; DB.income = src.income; DB.goals = src.goals;
+    DB.imports = src.imports; DB.legacyMap = src.legacyMap; DB.fixed = src.fixed;
+    DB.customCats = src.customCats; DB.patRules = src.patRules;
+    Object.keys(src.settings).forEach(k => {
+      if (PAT_SETTING_KEYS.indexOf(k) < 0) DB.settings[k] = src.settings[k];
+    });
+  } else {
+    DB.patAccounts = src.patAccounts; DB.patValues = src.patValues; DB.patMovements = src.patMovements;
+    DB.patLiabilities = src.patLiabilities; DB.patDebtValues = src.patDebtValues;
+    PAT_SETTING_KEYS.forEach(k => { DB.settings[k] = src.settings[k]; });
+  }
+  /* Le lien virement ↔ mouvement enjambe les deux moitiés : effacer l'une laisserait
+     l'autre pleine de renvois dans le vide. On le coupe avant reindex(), sinon
+     patPruneTxMovements() prendrait pour des fantômes les mouvements dont l'opération
+     vient de disparaître et amputerait le Patrimoine qu'on voulait justement garder. */
+  if (scope && scope !== "all") {
+    DB.tx.forEach(t => { t.patMove = null; });
+    (DB.patMovements || []).forEach(m => { delete m.tx; });
+  }
+  reindex(); saveDB();
+  UI.small = null; renderSmall(); render();
+  toast(scope === "budget" ? "Partie Budget effacée, Patrimoine intact."
+      : scope === "pat" ? "Partie Patrimoine effacée, Budget intact."
+      : "Toutes les données ont été effacées.");
+}
+
 /* =========================================================================
    Small modal: create a subcategory
    ========================================================================= */
@@ -5632,12 +5733,8 @@ document.addEventListener("click", e => {
           skipped.slice(0, 3).join(", ") + (skipped.length > 3 ? "…" : "") : ""));
       break;
     }
-    case "reset":
-      if (confirm("Effacer toutes les données de Budget ? Cette action est irréversible.") &&
-          confirm("Dernière confirmation : les " + DB.tx.length + " opérations seront perdues.")) {
-        DB = emptyDB(); reindex(); saveDB(); render(); toast("Données effacées.");
-      }
-      break;
+    case "reset": UI.small = resetModal; renderSmall(); break;
+    case "doreset": resetScope(el.dataset.scope); break;
   }
 });
 
