@@ -1552,7 +1552,52 @@ function catSelect(value, attrs) {
 /* =========================================================================
    Shell
    ========================================================================= */
+/* -------------------------------------------------------------------------
+   render() remplace tout le DOM d'un bloc. Les champs de saisie n'y survivent donc pas,
+   et c'est ainsi qu'une valorisation se perdait : on tape un montant, on clique dans le
+   champ voisin, le `change` du premier part avant que le clic n'aboutisse, le rendu
+   détruit le champ visé, et le focus retombe sur le vide. Les chiffres suivants ne vont
+   nulle part. Ni curseur, ni message : on repart en croyant avoir saisi.
+
+   Deux mesures. D'abord le rendu provoqué par un `change` attend la fin du geste
+   (renderSoon), le temps que le clic ou la tabulation ait désigné sa cible. Ensuite le
+   rendu rend au champ actif son focus, son curseur et ce qui y était tapé — la valeur
+   comprise, car un champ en cours d'édition n'est pas encore dans DB.
+   ------------------------------------------------------------------------- */
+let renderPending = 0;
+function renderSoon() {
+  if (renderPending) return;
+  renderPending = setTimeout(() => { renderPending = 0; render(); }, 0);
+}
+/* L'identité se lit sur les attributs : ce sont les seuls repères qu'un champ garde
+   d'un rendu à l'autre, son nœud étant recréé à chaque fois. */
+function focusKey(el) {
+  if (!el || !el.tagName || !/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return null;
+  if (el.id) return "#" + el.id;
+  const d = el.dataset || {};
+  if (!d.chg) return null;
+  return ["chg", "id", "key", "slot"].filter(k => d[k] != null)
+    .map(k => "[data-" + k + '="' + String(d[k]).replace(/"/g, "") + '"]').join("");
+}
+function captureFocus() {
+  const el = document.activeElement, key = focusKey(el);
+  if (!key) return null;
+  const f = { key: key, value: el.value };
+  /* selectionStart lève sur un input number ou date : là, le curseur ne se restitue pas,
+     mais le focus et la valeur, si. */
+  try { f.start = el.selectionStart; f.end = el.selectionEnd; } catch (e) {}
+  return f;
+}
+function restoreFocus(f) {
+  if (!f) return;
+  const el = document.querySelector(f.key);
+  if (!el || el === document.activeElement) return;
+  if (f.value != null && el.value !== f.value) el.value = f.value;
+  try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+  try { if (f.start != null) el.setSelectionRange(f.start, f.end); } catch (e) {}
+}
 function render() {
+  const keepFocus = captureFocus();
   const todo = DB.tx.filter(isTodo).length;
   /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
      barre latérale n'indiquerait plus où l'on se trouve. */
@@ -1591,6 +1636,7 @@ function render() {
       "</div></aside>" +
     '<main class="main">' + staleBanner() + body + "</main></div>" +
     (UI.modal ? UI.modal() : "");
+  restoreFocus(keepFocus);
 }
 /* Un bandeau collant plutôt qu'un toast : il ne doit pas pouvoir s'effacer avant qu'on ait
    décidé du sort du travail resté dans cette fenêtre. */
@@ -5303,7 +5349,7 @@ document.addEventListener("change", e => {
         saveDB();
       }
     }
-    render();
+    renderSoon();
   } else if (kind === "bulkcat") {
     const key = el.dataset.key, cat = el.value || null;
     if (!cat) return;
@@ -5311,11 +5357,11 @@ document.addEventListener("change", e => {
       t.cat = cat;
       if (catKind(cat) === KIND_NEUTRAL) t.status = ST_IGNORED; else patDetachTx(t); } });
     if (!OPAQUE_MERCHANTS.has(key)) DB.rules[key] = cat;
-    saveDB(); render(); toast("Classé, et la règle est retenue.");
-  } else if (kind === "showdup") { UI.showDup = el.checked; render(); }
-  else if (kind === "showign") { UI.showIgnored = el.checked; render(); }
+    saveDB(); renderSoon(); toast("Classé, et la règle est retenue.");
+  } else if (kind === "showdup") { UI.showDup = el.checked; renderSoon(); }
+  else if (kind === "showign") { UI.showIgnored = el.checked; renderSoon(); }
   else if (kind === "map") { WIZ.mapping[el.dataset.key] = el.value || ""; }
-  else if (kind === "impdup") { WIZ.importDups = el.checked; render(); }
+  else if (kind === "impdup") { WIZ.importDups = el.checked; renderSoon(); }
   else if (kind === "revremember") { REVIEW.remember = el.checked; }
   else if (kind === "income") {
     const key = el.dataset.key, slot = +el.dataset.slot;
@@ -5323,7 +5369,7 @@ document.addEventListener("change", e => {
     a[slot] = parseAmount(el.value) || 0;
     if (a[0] || a[1] || a[2]) DB.income[key] = a; else delete DB.income[key];
     saveDB();
-    if (!WIZ) render();
+    if (!WIZ) renderSoon();
   } else if (kind === "goal") {
     const id = el.dataset.id, slot = el.dataset.slot;
     const g = DB.goals[id] || { m: 0, y: 0 };
@@ -5334,67 +5380,67 @@ document.addEventListener("change", e => {
     const key = el.dataset.key;
     DB.fixed = DB.fixed || {};
     DB.fixed[key] = el.checked ? 1 : 0;
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "catgroup") {
     const c = CAT_BY_ID[el.dataset.id]; if (!c) return;
     c.group = el.value;
     const dc = (DB.customCats || []).find(x => x.id === c.id); if (dc) dc.group = el.value;
-    saveDB(); render(); toast("Catégorie déplacée.");
+    saveDB(); renderSoon(); toast("Catégorie déplacée.");
   } else if (kind === "setting") {
     const v = parseAmount(el.value);
     DB.settings[el.dataset.key] = v == null ? DEFAULT_SETTINGS[el.dataset.key] : v;
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "patvalue") {
     const id = el.dataset.id, v = parseAmount(el.value);
     DB.patValues = DB.patValues || {};
     DB.patValues[id] = DB.patValues[id] || {};
     if (v == null) delete DB.patValues[id][UI.patMonth]; else DB.patValues[id][UI.patMonth] = v;
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "patperfexcluded") {
     const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
     a.perfExcluded = !el.checked;
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "patmonthsel") {
     UI.patMonth = UI.patMonth.slice(0, 5) + pad2(+el.value);
-    render();
+    renderSoon();
   } else if (kind === "patyearsel") {
     UI.patMonth = el.value + UI.patMonth.slice(4);
-    render();
+    renderSoon();
   } else if (kind === "patoffbudget") {
     const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
     /* On écrit la valeur explicitement, y compris quand elle rejoint le défaut du type :
        une décision prise vaut mieux qu'un défaut qui changerait si le type change. */
     a.offBudget = el.checked;
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "pataccounttype") {
     const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
     a.type = el.value;
-    saveDB(); render();
+    saveDB(); renderSoon();
   /* Champ vidé = hypothèse rendue à l'historique, d'où le null plutôt que zéro : un
      rendement de 0 % et « pas d'avis » ne veulent pas dire la même chose. */
   } else if (kind === "patreturn" || kind === "patcontribution") {
     const key = kind === "patreturn" ? "patReturn" : "patContribution";
     DB.settings[key] = el.value.trim() === "" ? null : parseAmount(el.value);
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "pattarget") {
     DB.settings.patTarget = el.value.trim() === "" ? 0 : Math.max(0, parseAmount(el.value) || 0);
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "patsafetytarget") {
     DB.settings.patSafetyTarget = Math.max(0, parseAmount(el.value) || 0);
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "patliab") {
     const l = (DB.patLiabilities || []).find(x => x.id === el.dataset.id); if (!l) return;
     const f = el.dataset.f;
     if (f === "name" || f === "mode" || f === "start") l[f] = el.value;
     else l[f] = parseAmount(el.value) || 0;
-    saveDB(); render();
+    saveDB(); renderSoon();
   } else if (kind === "patdebtvalue") {
     const id = el.dataset.id;
     DB.patDebtValues = DB.patDebtValues || {};
     DB.patDebtValues[id] = DB.patDebtValues[id] || {};
     const v = parseAmount(el.value);
     if (v == null) delete DB.patDebtValues[id][UI.patMonth]; else DB.patDebtValues[id][UI.patMonth] = v;
-    saveDB(); render();
+    saveDB(); renderSoon();
   }
 });
 

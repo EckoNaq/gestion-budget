@@ -12,6 +12,22 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-17 — deux pertes de données silencieuses
+
+Deux défauts sans rapport l'un avec l'autre, qui faisaient tous deux disparaître du travail sans le moindre message.
+
+**Deux fenêtres ouvertes s'écrasaient l'une l'autre.** Chaque fenêtre garde sa copie en mémoire et réécrit la base entière à chaque enregistrement : la dernière à écrire ramenait tout son état et effaçait ce que l'autre avait fait depuis. Pas une fusion ratée — un retour en arrière complet, budget et patrimoine compris. Une fenêtre laissée ouverte la veille portait l'état de la veille, et il suffisait d'y cliquer sur **Thème** (qui enregistre, lui aussi) pour perdre la journée.
+
+- Une **révision** est désormais tenue dans une clé de stockage à part, pour être relue sans déballer 300 Ko de JSON à chaque écriture. Avant d'écrire, une fenêtre vérifie qu'elle part bien de la révision qu'elle a lue ; sinon elle se déclare périmée et n'écrit plus rien.
+- L'événement `storage` la prévient **dès que l'autre enregistre**, avant même qu'on ait touché à quoi que ce soit : un bandeau rouge non escamotable propose de recharger.
+- L'export lisant la mémoire et non le stockage, il reste possible de **sauver le travail d'une fenêtre périmée** avant de recharger. Le bandeau le rappelle.
+
+**Le rendu avalait la saisie suivante.** `render()` remplace tout le DOM d'un bloc. On tapait un montant dans la grille des valorisations, on cliquait dans le champ voisin, et l'événement `change` du premier partait *avant* que le clic n'aboutisse : le rendu détruisait le champ visé et le focus retombait dans le vide. Les chiffres suivants n'allaient nulle part. Même chose en cliquant sur un bouton **Ajouter** juste après une saisie — le bouton disparaissait sous le clic, et rien n'était ajouté.
+
+- Un rendu déclenché par un `change` **attend la fin du geste**, le temps que le clic ou la tabulation ait désigné sa cible.
+- Le rendu **rend au champ actif son focus, son curseur et ce qui y était tapé** — la valeur comprise, un champ en cours d'édition n'étant pas encore enregistré.
+- Corrige d'un coup les vingt champs concernés, dont les deux grilles où l'on enchaîne le plus de saisies : les valorisations mensuelles et les revenus.
+
 ### 2026-08-17 — un virement classé, un versement enregistré
 
 - Ajout : au moment de classer une opération dans **Épargne & transferts**, la carte de tri demande **vers quel compte l'argent part** (ou d'où il revient, pour un montant reçu). Le mouvement de patrimoine est créé dans le même geste, à la date et pour le montant de l'opération, signe inversé : ce qui sort du compte courant entre sur le compte d'épargne. Un virement interne ne se volatilise pas — il va sur un autre compte qui nous appartient, et le tri est le seul moment où l'on a la destination en tête.
