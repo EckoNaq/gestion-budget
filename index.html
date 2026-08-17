@@ -2421,6 +2421,153 @@ function patInvestedIsComplete(accountId) {
   return movs.length > 0 && movs[0] <= firstVal;
 }
 
+/* -------------------------------------------------------------------------
+   Fiscalité — ce que l'impôt prendrait sur la plus-value latente.
+
+   Une plus-value affichée est brute. Un PEA à +6 300 € et un livret A à +200 € se
+   lisent de la même façon dans le tableau du dessus, alors que le premier laisserait
+   18,6 % au fisc le jour du retrait et le second rien : « 46 300 € de patrimoine »
+   n'est pas 46 300 € disponibles, et c'est le genre d'écart qu'on découvre au pire
+   moment. D'où un chiffrage par enveloppe, aux taux en vigueur.
+
+   Rien n'est prélevé sur un gain latent : tout ce qui suit répond à « si je retirais
+   tout aujourd'hui », pas à « ce que je dois ».
+   ------------------------------------------------------------------------- */
+/* Les prélèvements sociaux ne sont plus à un taux unique, et c'est le piège de 2026 :
+   la CSG sur les revenus de placement est passée de 9,2 % à 10,6 %, portant le total à
+   18,6 % — le PFU vaut donc 31,4 % et non plus 30 %. Le taux de 17,2 % reste celui de
+   l'assurance-vie, du PEL, du CEL, du PEP et des plus-values immobilières. Deux
+   constantes, donc, faute de quoi toute l'assurance-vie serait surtaxée de 1,4 point.
+   Vérifié sur service-public.gouv.fr, fiche F2329. */
+const PS_PLACEMENT = 18.6;   // CSG 10,6 + CRDS 0,5 + prélèvement de solidarité 7,5
+const PS_AV_IMMO   = 17.2;   // CSG 9,2 + CRDS 0,5 + prélèvement de solidarité 7,5
+const IR_PFU       = 12.8;   // impôt sur le revenu, taux forfaitaire de droit commun
+
+/* Un régime répond à une seule question : sur un gain, quelle part d'impôt sur le revenu
+   et quelle part de prélèvements sociaux. `rate` reçoit l'ancienneté en années parce que
+   trois enveloppes sur huit en dépendent — c'est le seul paramètre qui change un taux.
+   `why` est la phrase montrée en infobulle : un taux sans son motif ne se vérifie pas. */
+const TAX_REGIMES = [
+  { id: "exempt", name: "Exonéré (livret réglementé)",
+    rate: () => ({ ir: 0, ps: 0, why: "Livret A, LDDS, LEP : ni impôt sur le revenu ni prélèvements sociaux." }) },
+  { id: "pfu", name: "Flat tax (PFU)",
+    rate: () => ({ ir: IR_PFU, ps: PS_PLACEMENT,
+      why: "Flat tax : 12,8 % d’impôt sur le revenu et 18,6 % de prélèvements sociaux." }) },
+  /* Le seuil du PEA est celui du plan, pas du versement : cinq ans après l'ouverture,
+     tout le gain accumulé sort sans impôt sur le revenu. */
+  { id: "pea", name: "PEA", ages: true,
+    rate: age => age != null && age >= 5
+      ? { ir: 0, ps: PS_PLACEMENT, why: "PEA de plus de 5 ans : gain exonéré d’impôt sur le revenu, prélèvements sociaux dus." }
+      : { ir: IR_PFU, ps: PS_PLACEMENT, why: "PEA de moins de 5 ans : la flat tax s’applique encore au gain accumulé." } },
+  /* 7,5 % vaut pour les intérêts des primes n'excédant pas 150 000 €, tous contrats
+     confondus. Au-delà on repasse à 12,8 %, mais le plafond se compte sur le foyer et
+     non sur le compte : le chiffrer ici demanderait ce que l'application ne sait pas. */
+  { id: "av", name: "Assurance-vie", ages: true,
+    rate: age => age != null && age >= 8
+      ? { ir: 7.5, ps: PS_AV_IMMO, why: "Contrat de plus de 8 ans : 7,5 % jusqu’à 150 000 € de primes versées, plus 17,2 % de prélèvements sociaux." }
+      : { ir: IR_PFU, ps: PS_AV_IMMO, why: "Contrat de moins de 8 ans : 12,8 % d’impôt sur le revenu et 17,2 % de prélèvements sociaux." } },
+  { id: "pee", name: "PEE / épargne salariale",
+    rate: () => ({ ir: 0, ps: PS_PLACEMENT,
+      why: "Sommes retirées exonérées d’impôt sur le revenu ; les prélèvements sociaux ne portent que sur les gains du plan." }) },
+  /* Un PER déduit à l'entrée se paie à la sortie : les gains à la flat tax, mais aussi le
+     capital versé, imposé au barème. Cette seconde moitié dépend de la tranche marginale,
+     qu'on ne connaît pas — on ne la chiffre pas, on la signale. */
+  { id: "per", name: "PER (sortie en capital)", warnCapital: true,
+    rate: () => ({ ir: IR_PFU, ps: PS_PLACEMENT,
+      why: "Sortie en capital : les gains à la flat tax. Les versements déduits à l’entrée s’ajoutent au revenu imposable, hors de ce calcul." }) },
+  { id: "immo", name: "Immobilier locatif", ages: true, abatDuree: true,
+    rate: () => ({ ir: 19, ps: PS_AV_IMMO,
+      why: "Plus-value immobilière : 19 % d’impôt sur le revenu et 17,2 % de prélèvements sociaux, avant abattement pour durée de détention." }) },
+  { id: "rp", name: "Résidence principale",
+    rate: () => ({ ir: 0, ps: 0, why: "La vente de la résidence principale est totalement exonérée de plus-value." }) },
+];
+function taxRegime(id) { return TAX_REGIMES.find(r => r.id === id) || TAX_REGIMES[1]; }
+/* Le défaut se lit sur la classe du compte, qui est déjà saisie. Restent deux ambiguïtés
+   que la classe ne tranche pas — un « Livret » peut être réglementé donc exonéré, ou un
+   livret bancaire à 31,4 % ; un bien immobilier peut être la résidence principale, donc
+   exonérée, ou du locatif. C'est ce que le menu Fiscalité permet de corriger. */
+const TAX_BY_TYPE = { courant: "exempt", livret: "exempt", pea: "pea", av: "av",
+  per: "per", pee: "pee", crypto: "pfu", immo: "immo", autre: "pfu" };
+function patTaxRegime(a) {
+  if (!a) return "pfu";
+  return a.taxRegime == null ? (TAX_BY_TYPE[patType(a.type).id] || "pfu") : a.taxRegime;
+}
+/* Trois taux dépendent d'une date d'ouverture qui n'a jamais été demandée. À défaut, la
+   plus ancienne trace connue du compte en tient lieu — mais ce n'est qu'un plancher : un
+   PEA de 2015 dont l'historique commence en 2024 passerait pour un plan de deux ans, et
+   serait surtaxé. D'où `exact`, qui dit s'il faut réclamer la vraie date. */
+function patOpenedMonth(a) {
+  if (a && /^\d{4}-\d{2}$/.test(a.opened || "")) return { mk: a.opened, exact: true };
+  const known = Object.keys((DB.patValues || {})[a.id] || {})
+    .concat((DB.patMovements || []).filter(m => m.accountId === a.id).map(m => monthKey(m.date))).sort();
+  return known.length ? { mk: known[0], exact: false } : { mk: null, exact: false };
+}
+/* Abattement pour durée de détention sur une plus-value immobilière. Contrairement aux
+   4 600 € de l'assurance-vie, il ne dépend que de la durée — donc de rien que l'application
+   ne sache déjà — et il est énorme : à 21 ans de détention, 96 % de l'impôt sur le revenu
+   a disparu. L'ignorer aurait affiché 36,2 % sur un bien qui n'en paiera que 6. Il est donc
+   déduit, et non renvoyé aux notes. Deux calendriers distincts, l'impôt sur le revenu
+   s'éteignant à 22 ans et les prélèvements sociaux seulement à 30 (fiche F10864). */
+function immoAbat(age) {
+  if (age == null) return { ir: 0, ps: 0 };
+  const y = Math.floor(age);                       // années révolues, l'abattement n'étant pas prorata
+  if (y < 6) return { ir: 0, ps: 0 };
+  if (y >= 30) return { ir: 100, ps: 100 };
+  const pleines = Math.min(y, 21) - 5;             // 6ᵉ à 21ᵉ année : 6 % et 1,65 % par an
+  let ir = pleines * 6, ps = pleines * 1.65;
+  if (y >= 22) { ir = 100; ps += 1.6; }            // 22ᵉ année révolue : 4 % et 1,6 %
+  if (y >= 23) ps += Math.min(y - 22, 8) * 9;      // puis 9 % par an jusqu'à extinction
+  return { ir: Math.min(100, ir), ps: Math.min(100, ps) };
+}
+/* Le taux effectif d'un gain, séparé de tout compte : c'est ce qui permet de rejouer le
+   même calcul à une autre ancienneté que celle du jour, et donc de chiffrer l'attente. */
+function taxOn(gain, reg, age) {
+  const r = reg.rate(age);
+  const ab = reg.abatDuree ? immoAbat(age) : { ir: 0, ps: 0 };
+  const ir = r.ir * (1 - ab.ir / 100), ps = r.ps * (1 - ab.ps / 100);
+  const rate = ir + ps;
+  return { ir, ps, rate, tax: gain * rate / 100, abat: ab, why: r.why };
+}
+/* Une moins-value ne doit rien — elle ouvre même un report déficitaire, qu'on ne suit pas
+   ici. On renvoie donc null plutôt qu'un impôt négatif, qui viendrait gonfler le net. */
+function patTax(a, mk) {
+  const u = patUnrealized(a.id, mk);
+  if (!u || u.gain <= 0) return null;
+  const reg = taxRegime(patTaxRegime(a));
+  const open = patOpenedMonth(a);
+  const age = open.mk ? monthDiff(open.mk, mk) / 12 : null;
+  const r = taxOn(u.gain, reg, age);
+  const rate = r.rate, tax = r.tax;
+  return { gain: u.gain, value: u.value, ir: r.ir, ps: r.ps, rate, tax, net: u.value - tax,
+    abat: r.abat, why: r.why, regime: reg, opened: open.mk, exact: open.exact, age,
+    /* Un taux qui dépend de l'ancienneté et une ancienneté seulement devinée : le chiffre
+       reste affiché, mais marqué, sinon il passerait pour établi. */
+    approx: !!reg.ages && !open.exact };
+}
+
+/* Les paliers d'ancienneté qui allègent l'impôt, compte par compte. Un PEA de quatre ans
+   et demi coûte 31,4 % aujourd'hui et 18,6 % dans six mois : le chiffre du jour ne dit pas
+   qu'il suffit d'attendre, et c'est pourtant la seule décision que l'écran peut éclairer.
+   Le gain est figé à sa valeur du jour — pas de rendement supposé : on isole l'effet fiscal,
+   sinon on ne saurait plus ce qui vient du marché et ce qui vient du calendrier. */
+const TAX_MARKS = { pea: [5], av: [8], immo: [6, 10, 15, 21, 22, 25, 30] };
+function patTaxWait(a, mk) {
+  const t = patTax(a, mk);
+  if (!t || !t.regime.ages || !t.opened) return null;
+  const steps = [];
+  let ref = t.tax;
+  for (const y of TAX_MARKS[t.regime.id] || []) {
+    const when = addMonth(t.opened, y * 12);
+    if (when <= mk) continue;                       // palier déjà franchi, il est dans le taux du jour
+    const f = taxOn(t.gain, t.regime, y);
+    if (f.tax >= ref - 0.005) continue;             // un palier qui n'allège rien n'a rien à dire
+    ref = f.tax;
+    steps.push({ years: y, when, months: monthDiff(mk, when), ir: f.ir, ps: f.ps, rate: f.rate,
+      tax: f.tax, abat: f.abat, saved: t.tax - f.tax, net: t.value - f.tax });
+  }
+  return steps.length ? { now: t, steps } : null;
+}
+
 /* Performances mensuelles enchaînées. C'est la mesure comparable à un indice : elle ne
    dépend ni de la taille ni de la date des versements, contrairement au taux d'un seul
    intervalle, qu'un gros apport en cours d'année suffit à fausser. */
@@ -3656,6 +3803,160 @@ function viewPatMilestones() {
 }
 
 /* ---- Analyse ------------------------------------------------------------ */
+/* Une carte à part plutôt que deux colonnes de plus dans « Où en est chaque compte » :
+   ce tableau est déjà à quatre colonnes de chiffres, et un taux ne se lit pas sans son
+   motif — l'ancienneté du plan, le régime retenu, ce que le calcul ne déduit pas. Autant
+   de choses qui ne tiennent pas dans une cellule.
+   `rows` est celui du tableau du dessus : mêmes comptes, même mois, aucun recalcul. */
+/* « dans 54 mois » ne veut rien dire à personne. Au-delà de deux ans on compte en années,
+   en dessous en mois, et le mois même se dit « ce mois-ci » plutôt que « dans 0 mois ». */
+function waitDelay(m) {
+  if (m <= 0) return "ce mois-ci";
+  if (m < 24) return m + " mois";
+  return trim1(m / 12) + " ans";
+}
+function patTaxCard(rows, month) {
+  const taxed = rows.map(r => ({ a: r.a, t: patTax(r.a, month) })).filter(x => x.t);
+  let html = '<div class="card"><div class="chead"><h2>Ce que l’impôt prendrait</h2>' +
+    '<div class="spacer" style="flex:1"></div><span class="tiny muted">si vous retiriez tout en ' +
+    esc(monthLabel(month)) + "</span></div>";
+  if (!taxed.length) {
+    return html + '<div class="empty" style="padding:22px 14px">Aucune plus-value imposable à ce jour. ' +
+      "<b>L’impôt ne porte que sur le gain</b> : sans gain, ou sur une enveloppe exonérée, il n’y a rien à prélever.</div></div>";
+  }
+  /* Les taux différant d'une ligne à l'autre, le total ne peut être qu'une somme de lignes
+     — patUnrealized(null) donnerait bien la plus-value d'ensemble, mais aucun taux auquel
+     l'appliquer. C'est aussi pourquoi la ligne finale dit « les comptes ci-dessus » : son
+     périmètre est celui des comptes imposables, pas celui du tableau du dessus. */
+  const sum = f => taxed.reduce((s, x) => s + f(x.t), 0);
+  const gain = sum(t => t.gain), tax = sum(t => t.tax), value = sum(t => t.value);
+  html += '<div class="kpis" style="grid-template-columns:repeat(3,1fr)">' +
+    kpi("Plus-value latente", fmtEur(gain), "sur les comptes imposables", "pos") +
+    kpi("Impôt estimé", fmtEur(-tax), fmtRate(gain ? tax / gain * 100 : 0) + " du gain", "neg") +
+    kpi("Net après impôt", fmtEur(value - tax), "sur " + fmtEur(value) + " affichés") + "</div>";
+  html += '<div style="overflow-x:auto"><table class="ops patnum"><thead><tr><th>Compte</th>' +
+    '<th style="text-align:right">Plus-value</th><th style="text-align:right">Taux</th>' +
+    '<th style="text-align:right">Impôt</th><th style="text-align:right">Net</th></tr></thead><tbody>';
+  html += taxed.map(({ a, t }) => {
+    /* La ligne sous le nom porte tout ce qui explique le taux : le régime, et l'âge du
+       plan quand il en dépend. Sans elle, « 18,6 % » d'un côté et « 31,4 % » de l'autre
+       sur deux PEA ressembleraient à un bug. */
+    const bits = [t.regime.name];
+    if (t.regime.ages && t.opened) {
+      bits.push("ouvert en " + monthLabel(t.opened) + " · " + trim1(Math.max(0, t.age)) + " ans");
+    } else if (t.regime.ages) {
+      bits.push("ancienneté inconnue");
+    }
+    /* Un taux immobilier tombé de 36,2 % à 8,7 % sans explication passerait pour une erreur :
+       l'abattement déjà acquis se lit sous le nom, au même endroit que l'ancienneté. */
+    if (t.abat && (t.abat.ir || t.abat.ps)) {
+      bits.push("abattement acquis " + trim1(t.abat.ir) + " % / " + trim1(t.abat.ps) + " %");
+    }
+    return '<tr><td><span style="display:flex;align-items:center;gap:8px">' + patSwatch(a) + esc(a.name) +
+        (t.approx ? ' <span class="tiny muted" title="La date d’ouverture n’a pas été saisie : elle est déduite de la plus ancienne donnée connue, ce qui rajeunit le compte et alourdit le taux. Renseignez-la dans Comptes › Réglages des comptes.">≈</span>' : "") +
+        '</span><div class="tiny muted" style="margin-top:2px">' + esc(bits.join(" · ")) + "</div></td>" +
+      '<td class="num pos" style="text-align:right">' + esc(fmtEur(t.gain, { plus: true })) + "</td>" +
+      '<td class="num ' + (t.rate ? "" : "muted") + '" style="text-align:right" title="' + esc(t.why) + '">' +
+        esc(fmtRate(t.rate)) + (t.rate ? ' <span class="tiny muted">(' + esc(trim1(t.ir)) + " + " +
+        esc(trim1(t.ps)) + ")</span>" : "") + "</td>" +
+      '<td class="num ' + (t.tax ? "neg" : "muted") + '" style="text-align:right">' +
+        (t.tax ? esc(fmtEur(-t.tax)) : "—") + "</td>" +
+      '<td class="num" style="text-align:right">' + esc(fmtEur(t.net)) + "</td></tr>";
+  }).join("");
+  html += '<tr><td style="font-weight:650">Les comptes ci-dessus</td>' +
+    '<td class="num pos" style="text-align:right">' + esc(fmtEur(gain, { plus: true })) + "</td>" +
+    '<td class="num muted" style="text-align:right">' + esc(fmtRate(gain ? tax / gain * 100 : 0)) + "</td>" +
+    '<td class="num neg" style="text-align:right;font-weight:650">' + esc(fmtEur(-tax)) + "</td>" +
+    '<td class="num" style="text-align:right;font-weight:650">' + esc(fmtEur(value - tax)) + "</td></tr>";
+  html += "</tbody></table></div>";
+
+  /* --- Si vous attendiez : le même gain, plus tard, moins taxé --------------
+     Le tableau du dessus répond à « si je retirais tout aujourd'hui ». La question qui suit
+     immédiatement est « et si j'attendais ? », et c'est la seule sur laquelle un écran peut
+     encore agir : les paliers d'ancienneté ne coûtent rien d'autre que de la patience. */
+  const waits = taxed.map(x => ({ a: x.a, w: patTaxWait(x.a, month) })).filter(x => x.w);
+  if (waits.length) {
+    /* Économie maximale : chaque compte à son dernier palier. C'est le haut de la fourchette,
+       et le libellé le dit — atteindre le palier de 30 ans d'un bien n'est pas un plan. */
+    const best = waits.reduce((s, x) => s + x.w.steps[x.w.steps.length - 1].saved, 0);
+    const soon = waits.map(x => x.w.steps[0]).sort((p, q) => p.months - q.months)[0];
+    html += '<div class="chead" style="margin-top:22px"><h2 style="font-size:15px">Si vous attendiez</h2>' +
+      '<div class="spacer" style="flex:1"></div><span class="tiny muted">à plus-value inchangée</span></div>' +
+      '<p class="tiny muted" style="margin:0 0 11px">Chaque palier d’ancienneté franchi allège le taux sans rien ' +
+      "changer au placement. À gain constant, il y a <b class='inl'>" + esc(fmtEur(best)) + "</b> d’impôt à " +
+      "ne pas payer en tout, dont le premier allègement dans <b class='inl'>" + esc(waitDelay(soon.months)) +
+      "</b>.</p>";
+    html += '<div style="overflow-x:auto"><table class="ops patnum"><thead><tr><th>Compte</th>' +
+      '<th>Palier</th><th style="text-align:right">Dans</th><th style="text-align:right">Taux</th>' +
+      '<th style="text-align:right">Impôt</th><th style="text-align:right">Économisé</th></tr></thead><tbody>';
+    html += waits.map(({ a, w }) => w.steps.map((s, i) => {
+      /* Le nom n'est répété qu'une fois par compte : un bien immobilier aligne jusqu'à six
+         paliers, et six fois le même nom ferait lire six comptes. */
+      const seuil = w.now.regime.id === "immo"
+        ? (s.years >= 30 ? "30 ans · exonération totale"
+          : s.years > 22 ? s.years + " ans · prélèvements sociaux allégés"
+          : s.years === 22 ? "22 ans · impôt sur le revenu éteint"
+          : s.years + " ans de détention")
+        : s.years + " ans" + (w.now.regime.id === "pea" ? " · impôt sur le revenu éteint" : " · taux réduit à 7,5 %");
+      return '<tr' + (i ? ' class="rowoff"' : "") + '><td>' + (i ? '<span class="tiny muted">↳</span>'
+          : '<span style="display:flex;align-items:center;gap:8px">' + patSwatch(a) + esc(a.name) +
+            (w.now.approx ? '<span class="tiny muted" title="Échéance calculée sur une date d’ouverture déduite, donc repoussée : le vrai palier est probablement plus proche.">≈</span>' : "") +
+            "</span>") + "</td>" +
+        "<td>" + esc(seuil) + '<div class="tiny muted" style="margin-top:2px">' + esc(monthLabel(s.when)) + "</div></td>" +
+        '<td class="num muted" style="text-align:right">' + esc(waitDelay(s.months)) + "</td>" +
+        '<td class="num" style="text-align:right">' + esc(fmtRate(s.rate)) +
+          ' <span class="tiny muted">(' + esc(trim1(s.ir)) + " + " + esc(trim1(s.ps)) + ")</span></td>" +
+        '<td class="num ' + (s.tax ? "neg" : "muted") + '" style="text-align:right">' +
+          (s.tax ? esc(fmtEur(-s.tax)) : "—") + "</td>" +
+        '<td class="num pos" style="text-align:right">' + esc(fmtEur(s.saved, { plus: true })) + "</td></tr>";
+    }).join("")).join("");
+    html += "</tbody></table></div>";
+    html += '<p class="tiny muted" style="margin:11px 0 0">La plus-value est figée à sa valeur du jour, ' +
+      "volontairement : l’écart montré ne vient que du calendrier fiscal, pas d’un rendement supposé. " +
+      "En pratique le gain continue d’évoluer, à la hausse comme à la baisse — un placement qu’on garde " +
+      "pour son seul avantage fiscal reste un placement qu’on garde.</p>";
+  }
+
+  html += '<p class="tiny muted" style="margin:11px 0 0">Rien n’est prélevé sur un gain latent : ' +
+    "l’impôt ne se déclenche <b class='inl'>qu’au retrait</b>, et seulement sur la part de gain retirée. " +
+    "Le barème progressif reste une option, parfois plus favorable que la flat tax selon vos revenus.</p>";
+  /* Un majorant annoncé vaut mieux qu'une précision fausse : les deux abattements qui
+     manquent dépendent du foyer et de l'année de retrait, que l'application ne connaît pas. */
+  const hasAv = taxed.some(x => x.t.regime.id === "av" && x.t.age != null && x.t.age >= 8);
+  const hasImmo = taxed.some(x => x.t.regime.abatDuree);
+  if (hasAv || hasImmo) {
+    html += '<div class="note" style="margin-top:12px">' +
+      (hasImmo ? "L’<b class='inl'>abattement pour durée de détention</b> est déduit des taux immobiliers : " +
+        "il ne dépend que de la durée, donc de rien qu’il faille supposer. Il court dès la 6ᵉ année, éteint " +
+        "l’impôt sur le revenu à 22 ans de détention et les prélèvements sociaux à 30 ans." : "") +
+      (hasAv ? (hasImmo ? " En revanche, l" : "L") + "es <b class='inl'>4 600 € d’abattement annuel</b> de " +
+        "l’assurance-vie ne sont pas déduits : ils se comptent sur le foyer (9 200 € pour un couple) et sur " +
+        "l’ensemble des contrats, tous deux hors de portée de l’application. Après 8 ans, un rachat modeste " +
+        "peut donc ne coûter que les 17,2 % de prélèvements sociaux, et l’étaler sur deux années civiles " +
+        "double l’abattement." : "") +
+      "</div>";
+  }
+  html += '<div class="note" style="margin-top:12px">Taux 2026. Les prélèvements sociaux sur les revenus ' +
+    "de placement sont passés à <b class='inl'>18,6 %</b>, la CSG ayant été portée à 10,6 % : la flat tax " +
+    "vaut donc 31,4 % et non plus 30 %. Le taux de 17,2 % reste celui de l’assurance-vie, du PEL, du CEL, " +
+    "du PEP et des plus-values immobilières.</div>";
+  const vague = taxed.filter(x => x.t.approx);
+  if (vague.length) {
+    html += '<div class="note warn" style="margin-top:12px">' + icon("warn") +
+      " Le taux de <b>" + esc(vague.map(x => x.a.name).join(", ")) + "</b> dépend de l’ancienneté, et " +
+      (vague.length > 1 ? "leurs dates d’ouverture ne sont pas renseignées" : "sa date d’ouverture n’est pas renseignée") +
+      " : elle est déduite de la plus ancienne donnée connue, ce qui rajeunit le compte et alourdit le taux. " +
+      "Corrigez-la dans <b class='inl'>Comptes › Réglages des comptes</b>.</div>";
+  }
+  if (taxed.some(x => x.t.regime.warnCapital)) {
+    html += '<div class="note warn" style="margin-top:12px">' + icon("warn") +
+      " Sur un <b>PER</b>, l’impôt ci-dessus ne couvre que les gains. Les versements, déduits de vos revenus " +
+      "à l’entrée, s’ajouteront à votre revenu imposable au moment de la sortie en capital : cette part-là " +
+      "dépend de votre tranche marginale et n’est pas chiffrée ici.</div>";
+  }
+  return html + "</div>";
+}
+
 function viewPatAnalyse() {
   const accounts = DB.patAccounts || [];
   const month = UI.patMonth, year = yearOf(month + "-01");
@@ -3950,6 +4251,12 @@ function viewPatAnalyse() {
         '<span class="dvval"><b class="num ' + perfClass(x.r) + '">' + esc(fmtPerf(x.r)) + "</b>" +
         '<em class="num">' + (x.eur == null ? "" : esc(fmtEur(x.eur, { plus: true }))) + "</em></span></div>";
     }).join("") + "</div>";
+
+  /* --- Ce que l'impôt prendrait, en dernier ---
+     La fiscalité ne se lit pas en passant : elle ferme l'écran, après que la performance a
+     dit ce que le patrimoine a gagné. C'est aussi la seule carte qui parle d'un montant
+     qu'on ne possède pas encore vraiment. */
+  if (rows.length) html += patTaxCard(rows, month);
   return html;
 }
 
@@ -4011,9 +4318,12 @@ function viewPatrimoine() {
     '<div style="overflow-x:auto"><table class="ops"><thead><tr><th>Nom</th><th>Classe</th>' +
     '<th style="text-align:center" title="Inclure ce compte dans la performance globale">Perf. globale</th>' +
     '<th style="text-align:center" title="Coché si l’argent arrive directement dans l’enveloppe, sans passer par votre compte bancaire — un PEE ou un PER d’entreprise. Ces versements sont alors exclus de la comparaison avec le budget.">Hors budget</th>' +
+    '<th title="Le taux d’imposition dépend de l’ancienneté du plan : 5 ans pour un PEA, 8 ans pour une assurance-vie. Sans cette date, l’application prend la plus ancienne donnée connue, ce qui rajeunit le compte et alourdit le taux.">Ouvert le</th>' +
+    '<th title="Le régime fiscal appliqué à la plus-value. « D’après la classe » suffit dans la plupart des cas ; à corriger pour un livret bancaire fiscalisé, ou pour distinguer une résidence principale (exonérée) d’un bien locatif.">Fiscalité</th>' +
     '<th style="text-align:center">État</th><th></th></tr></thead><tbody>' +
     active.concat(closed).map(a => {
       const isClosed = patIsClosed(a), neverValued = !patIsValued(a);
+      const open = patOpenedMonth(a), auto = taxRegime(TAX_BY_TYPE[patType(a.type).id] || "pfu");
       return '<tr' + (isClosed ? ' class="rowoff"' : "") + '><td><span style="display:flex;align-items:center;gap:8px">' +
         patSwatch(a) + esc(a.name) + "</span></td>" +
       '<td><select data-chg="pataccounttype" data-id="' + a.id + '">' +
@@ -4023,6 +4333,15 @@ function viewPatrimoine() {
         (a.perfExcluded ? "" : "checked") + ' title="Inclure dans le calcul de performance"></td>' +
       '<td style="text-align:center"><input type="checkbox" data-chg="patoffbudget" data-id="' + a.id + '" ' +
         (patIsOffBudget(a) ? "checked" : "") + ' title="Alimenté hors du compte bancaire"></td>' +
+      /* Le mois déduit part en placeholder : l'hypothèse en cours reste visible, sans se
+         faire passer pour une saisie — et vider le champ y ramène. */
+      '<td><input type="month" data-chg="patopened" data-id="' + a.id + '" value="' + esc(a.opened || "") + '"' +
+        (open.mk && !open.exact ? ' placeholder="' + esc(open.mk) + '" title="Déduit de la plus ancienne donnée connue (' +
+          esc(monthLabel(open.mk)) + '). Saisissez la vraie date d’ouverture si elle est antérieure."' : "") + "></td>" +
+      '<td><select data-chg="pattaxregime" data-id="' + a.id + '">' +
+        '<option value=""' + (a.taxRegime == null ? " selected" : "") + ">d’après la classe (" + esc(auto.name) + ")</option>" +
+        TAX_REGIMES.map(r => '<option value="' + r.id + '"' + (a.taxRegime === r.id ? " selected" : "") + ">" +
+          esc(r.name) + "</option>").join("") + "</select></td>" +
       '<td style="text-align:center">' +
         (neverValued
           ? '<span class="tag" title="Aucune valorisation n’a jamais été saisie sur ce compte.">jamais valorisé</span>'
@@ -4034,7 +4353,11 @@ function viewPatrimoine() {
     "</tbody></table></div>" +
     '<p class="tiny muted" style="margin:10px 0 0">La classe détermine la couleur du compte, sa place dans la répartition et son classement en risqué, sécurisé ou bloqué. ' +
     "<b class='inl'>Clôturer</b> retire le compte de la saisie mensuelle sans toucher à son historique : ses performances passées restent comptées. " +
-    "Supprimer, au contraire, efface tout.</p></div>";
+    "Supprimer, au contraire, efface tout.</p>" +
+    '<p class="tiny muted" style="margin:8px 0 0"><b class=\'inl\'>Ouvert le</b> et <b class=\'inl\'>Fiscalité</b> ne servent qu’à l’estimation d’impôt de l’onglet Analyse. ' +
+    "La date compte parce que le taux dépend de l’ancienneté : un PEA franchit ses 5 ans, une assurance-vie ses 8 ans. " +
+    "La fiscalité se déduit de la classe, sauf là où la classe ne tranche pas — un livret réglementé est exonéré, un livret bancaire non ; " +
+    "une résidence principale est exonérée, un bien locatif non.</p></div>";
 
   html += patMovementsCard(accounts, null);
   return html;
@@ -5415,6 +5738,19 @@ document.addEventListener("change", e => {
   } else if (kind === "pataccounttype") {
     const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
     a.type = el.value;
+    saveDB(); renderSoon();
+  /* Un champ vidé veut dire « je ne sais pas », pas « janvier de l'an zéro » : on repose
+     alors sur le mois déduit. Le format est vérifié parce que sur un navigateur sans
+     champ « mois » l'utilisateur tape le texte à la main. */
+  } else if (kind === "patopened") {
+    const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
+    a.opened = /^\d{4}-\d{2}$/.test(el.value) ? el.value : null;
+    saveDB(); renderSoon();
+  } else if (kind === "pattaxregime") {
+    const a = (DB.patAccounts || []).find(x => x.id === el.dataset.id); if (!a) return;
+    /* null, et non l'identifiant du régime déduit : le compte doit suivre sa classe si
+       elle change, comme le fait déjà « hors budget ». */
+    a.taxRegime = el.value || null;
     saveDB(); renderSoon();
   /* Champ vidé = hypothèse rendue à l'historique, d'où le null plutôt que zéro : un
      rendement de 0 % et « pas d'avis » ne veulent pas dire la même chose. */
