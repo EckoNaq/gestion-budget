@@ -449,6 +449,11 @@ html[data-theme="dark"] .t-plat{--tier:#8A79E4;--tier-l:#B4A8F5}
 .destsum svg{width:12px;height:12px;flex:none;margin-top:2px}
 .destsum.muted{color:var(--ink-mute)}
 .tag.lnk{display:inline-flex;align-items:center;gap:5px}
+/* Fenêtre périmée : on emprunte les couleurs du danger, parce que c'en est un. */
+.stale{display:flex;align-items:flex-start;gap:11px;margin-bottom:18px;padding:13px 15px;border-radius:12px;
+  border:1px solid var(--neg);background:var(--neg-soft);color:var(--ink);font-size:13px;line-height:1.5}
+.stale svg{flex:none;color:var(--neg);margin-top:1px}
+.stale button{flex:none;margin-left:auto;align-self:center}
 .segbar{display:flex;gap:3px;margin-bottom:14px}
 .segbar i{flex:1;height:4px;border-radius:2px;background:var(--line)}
 .segbar i.done{background:var(--pos)}
@@ -1031,19 +1036,67 @@ function deserialize(json) {
   db.patLiabilities = raw.pl || []; db.patDebtValues = raw.pd || {};
   return db;
 }
+/* -------------------------------------------------------------------------
+   Deux fenêtres ouvertes sur l'application, et rien ne les séparait. Chacune garde sa
+   copie en mémoire et réécrit la base entière à chaque enregistrement : la dernière à
+   écrire ramenait donc tout son état, effaçant sans un mot ce que l'autre avait fait
+   depuis — un import, une soirée de saisie, trois ans de valorisations. Il suffisait
+   d'un clic sur « Thème » dans l'onglet resté ouvert la veille, puisque lui aussi
+   enregistre. Ce n'était pas une fusion ratée mais un retour en arrière complet.
+
+   D'où une révision, tenue dans une clé à part pour être relue sans déballer 300 Ko de
+   JSON à chaque écriture. Avant d'écrire, une fenêtre vérifie qu'elle part bien de la
+   révision qu'elle a lue ; sinon elle se déclare périmée et n'écrit plus rien. En prime
+   l'événement `storage` la prévient dès que l'autre enregistre, avant même qu'on ait
+   touché à quoi que ce soit. Au pire on perd la modification en cours dans la fenêtre
+   périmée — et comme l'export ne passe pas par le stockage, il reste possible d'en
+   sauver le contenu avant de recharger.
+   ------------------------------------------------------------------------- */
+const REV_KEY = STORE_KEY + ".rev";
+let REV = 0;                 // révision du stockage telle que cette fenêtre l'a lue
+let STALE = false;           // une autre fenêtre a écrit depuis : celle-ci n'écrit plus
+/* Les deux seuls points de contact avec le stockage. Une lecture qui échoue (navigation
+   privée, fichier ouvert sans origine) vaut « rien enregistré » ; une écriture qui échoue
+   doit remonter, c'est ainsi qu'on apprend que le quota est plein. */
+function readStore(key) {
+  try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+function writeStore(key, value) { localStorage.setItem(key, value); }
+function storedRev() { return +readStore(REV_KEY) || 0; }
+function markStale() {
+  if (STALE) return;
+  STALE = true;
+  render();
+  toast("Cette fenêtre n’est plus à jour : ce que vous y faites n’est plus enregistré.");
+}
 function loadDB() {
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    REV = storedRev();
+    const raw = readStore(STORE_KEY);
     if (raw) return deserialize(raw);
   } catch (e) { console.warn("Lecture du stockage impossible", e); }
   return emptyDB();
 }
 let saveFailed = false;
 function saveDB() {
-  try { localStorage.setItem(STORE_KEY, serialize(DB)); saveFailed = false; }
-  catch (e) { saveFailed = true; toast("Sauvegarde impossible : le stockage du navigateur est plein ou bloqué."); }
+  if (STALE) return;
+  if (storedRev() > REV) { markStale(); return; }
+  try {
+    writeStore(STORE_KEY, serialize(DB));
+    /* La révision part après les données : si le quota casse l'écriture, mieux vaut une
+       révision en retard — qui fera réécrire — qu'une révision en avance, qui figerait
+       toutes les fenêtres sur des données qui n'ont jamais été enregistrées. */
+    REV++;
+    writeStore(REV_KEY, String(REV));
+    saveFailed = false;
+  } catch (e) { saveFailed = true; toast("Sauvegarde impossible : le stockage du navigateur est plein ou bloqué."); }
 }
-function storageBytes() { try { return (localStorage.getItem(STORE_KEY) || "").length * 2; } catch (e) { return 0; } }
+/* Le navigateur ne notifie que les autres fenêtres, jamais celle qui vient d'écrire. */
+window.addEventListener("storage", e => {
+  if (e.key !== null && e.key !== REV_KEY && e.key !== STORE_KEY) return;
+  if (storedRev() > REV) markStale();
+});
+function storageBytes() { return (readStore(STORE_KEY) || "").length * 2; }
 
 /* =========================================================================
    Derived indexes — rebuilt whenever the set of operations changes.
@@ -1536,8 +1589,19 @@ function render() {
         '<button class="btn primary" data-act="import" style="justify-content:center">' + icon("down") + "Importer</button>" +
         '<button class="btn" data-act="theme" style="justify-content:center">' + icon("eye") + "Thème</button>" +
       "</div></aside>" +
-    '<main class="main">' + body + "</main></div>" +
+    '<main class="main">' + staleBanner() + body + "</main></div>" +
     (UI.modal ? UI.modal() : "");
+}
+/* Un bandeau collant plutôt qu'un toast : il ne doit pas pouvoir s'effacer avant qu'on ait
+   décidé du sort du travail resté dans cette fenêtre. */
+function staleBanner() {
+  if (!STALE) return "";
+  return '<div class="stale">' + icon("warn", 18) +
+    "<div><b>Cette fenêtre n’est plus à jour.</b> Une autre fenêtre de Budget a enregistré " +
+    "depuis, et ce que vous faites ici n’est plus enregistré. Rechargez pour repartir de la " +
+    "version courante. Si cette fenêtre contient du travail à garder, exportez-le d’abord " +
+    "depuis <b>Données</b> : l’export lit la mémoire, il fonctionne encore.</div>" +
+    '<button class="btn sm" data-act="reload">' + icon("undo", 14) + "Recharger</button></div>";
 }
 
 function periodBar(label, unit) {
@@ -5002,6 +5066,7 @@ document.addEventListener("click", e => {
       UI.openCat = UI.openCat === el.dataset.cat ? null : el.dataset.cat; render(); break;
     case "batch": UI.batch = el.dataset.batch; render(); break;
     case "theme": cycleTheme(); break;
+    case "reload": location.reload(); break;
     case "import": openImport(DB.tx.length ? "month" : "history"); break;
     case "wizard": openImport("history"); break;
     case "undup": setStatus(el.dataset.id, ST_OK); toast("Opération réintégrée dans les totaux."); break;
