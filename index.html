@@ -533,7 +533,34 @@ html[data-theme="dark"] .v2{
 /* ---------- barre de période et sous-onglets ---------- */
 .v2 .top{display:flex;align-items:flex-end;gap:18px;margin-bottom:18px;flex-wrap:wrap}
 .v2 .per{display:flex;align-items:baseline;gap:11px}
-.v2 .per h1{margin:0;font-size:15px;font-variation-settings:"wght" 700,"wdth" 100;text-transform:uppercase;letter-spacing:.15em}
+/* Largeur fixe : sans elle, les flèches se décalaient à chaque mois — « mai »
+   et « septembre » n'ont pas la même chasse — et l'on ne pouvait pas cliquer
+   plusieurs fois de suite sans repointer. La barre d'origine réglait déjà le
+   problème ainsi ; v2 avait perdu le réglage en route. */
+.v2 .per h1{margin:0;font-size:15px;font-variation-settings:"wght" 700,"wdth" 100;text-transform:uppercase;letter-spacing:.15em;min-width:184px;text-align:center;background:none;border:0;color:inherit;cursor:pointer;padding:3px 8px;border-radius:7px;font-family:inherit}
+.v2 .per h1:hover{background:var(--surface)}
+.v2 .per h1[aria-expanded="true"]{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+.v2 .per{position:relative}
+
+/* Sélecteur de période : l'année d'abord, puis le mois. Les mois qui portent
+   des opérations sont marqués d'un point — sauter sur un mois vide est le
+   seul faux pas que ce panneau puisse faire commettre. */
+.v2 .mpick{position:absolute;top:100%;left:0;margin-top:6px;z-index:40;width:268px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px;box-shadow:0 14px 34px -12px rgba(0,0,0,.34)}
+.v2 .mpick .yr{display:flex;align-items:center;gap:6px;margin-bottom:9px}
+.v2 .mpick .yr b{flex:1;text-align:center;font-size:14px;font-variation-settings:"wght" 700,"wdth" 100;font-variant-numeric:tabular-nums}
+.v2 .mpick .yr button{background:none;border:1px solid var(--line);border-radius:6px;width:26px;height:26px;cursor:pointer;color:var(--ink-2);font:inherit;line-height:1}
+.v2 .mpick .yr button:hover:not([disabled]){border-color:var(--ink);color:var(--ink)}
+.v2 .mpick .yr button[disabled]{opacity:.3;cursor:not-allowed}
+.v2 .mpick .ms{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.v2 .mpick .ms button{position:relative;background:var(--surface-2);border:1px solid transparent;border-radius:7px;padding:7px 4px;cursor:pointer;color:var(--ink-2);font:inherit;font-size:12px;font-variation-settings:"wght" 580,"wdth" 100;text-transform:capitalize}
+.v2 .mpick .ms button:hover{background:var(--sunk);color:var(--ink)}
+.v2 .mpick .ms button.has::after{content:"";position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--ink-4)}
+.v2 .mpick .ms button.on{background:var(--ink);color:var(--bg);font-variation-settings:"wght" 700,"wdth" 100}
+.v2 .mpick .ms button.on.has::after{background:var(--bg)}
+.v2 .mpick .ms button.now{box-shadow:inset 0 0 0 1px var(--ink-3)}
+.v2 .mpick .ft{margin-top:9px;display:flex}
+.v2 .mpick .ft button{flex:1;background:none;border:1px solid var(--line);border-radius:7px;padding:5px;cursor:pointer;color:var(--ink-2);font:inherit;font-size:12px;font-variation-settings:"wght" 580,"wdth" 100}
+.v2 .mpick .ft button:hover{border-color:var(--ink);color:var(--ink)}
 .v2 .per .st{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:var(--ink-3);font-variation-settings:"wght" 640,"wdth" 100;border:1px solid var(--line);border-radius:20px;padding:2px 9px}
 .v2 .per button{background:none;border:0;padding:2px 5px;cursor:pointer;color:var(--ink-3);font:inherit;font-size:15px;line-height:1}
 .v2 .per button:hover{color:var(--ink)}
@@ -1488,6 +1515,7 @@ const UI = {
   view: "month", month: monthKey(todayISO()), year: yearOf(todayISO()),
   showDup: false, showIgnored: false, showCand: false, batch: "all", openGroup: null, openCat: null, modal: null, small: null, cmpMode: "pct",
   v2tab: "mois", v2goal: null, v2group: null, v2cat: null, v2cmp: "pct", v2ops: "all", v2batch: "all", v2anim: "all",
+  v2pick: false, v2pickYear: null,
   patMonth: monthKey(todayISO()),
   patAccount: null, patShowInactive: false, patMovFilter: "all", patRange: "all",
   patHlSeed: 1, patYearUnit: "pct",
@@ -2512,14 +2540,40 @@ function viewMonthV2() {
 
   let html = '<div class="v2"><div class="top"><div class="per">' +
     '<button data-act="prev" aria-label="Mois précédent">‹</button>' +
-    "<h1>" + esc(monthLabel(key)) + "</h1>" +
+    '<h1 data-act="v2pick" aria-expanded="' + !!UI.v2pick + '" title="Choisir une période">' +
+      esc(monthLabel(key)) + "</h1>" +
     '<button data-act="next" aria-label="Mois suivant">›</button>' +
+    (UI.v2pick ? v2Picker(key) : "") +
     '<button class="v2today" data-act="today" title="Revenir au mois en cours" hidden></button><span class="st">' + (running ? "en cours · " + day + "/" + days : "clos") + "</span></div>" +
     '<div class="tabs" role="tablist">' + tab("mois", "Le mois") + tab("ou", "Où ça part") + tab("ops", "Opérations") + "</div></div>";
 
   html += UI.v2tab === "ou" ? v2Ou(ctx) : UI.v2tab === "ops" ? v2Ops(ctx) : v2Month(ctx);
   UI.v2anim = null;
   return html + "</div>";
+}
+
+/* Se promener de mois en mois à coups de flèches devient vite pénible sur deux
+   ans d'historique : le panneau ouvre l'année, puis le mois. */
+function v2Picker(key) {
+  const cur = monthKey(todayISO());
+  const y = UI.v2pickYear || +key.slice(0, 4);
+  const years = yearsWithData();
+  const lo = Math.min(years.length ? years[0] : y, y, +cur.slice(0, 4));
+  const hi = Math.max(years.length ? years[years.length - 1] : y, y, +cur.slice(0, 4));
+  const months = MONTHS.map((name, i) => {
+    const k = y + "-" + pad2(i + 1);
+    return '<button data-act="v2pickmonth" data-month="' + k + '" class="' +
+      (k === key ? "on " : "") + (k === cur ? "now " : "") + (opsOfMonth(k).length ? "has" : "") + '">' +
+      esc(name) + "</button>";
+  }).join("");
+  return '<div class="mpick"><div class="yr">' +
+    '<button data-act="v2pickyear" data-y="' + (y - 1) + '" aria-label="Année précédente"' +
+      (y <= lo ? " disabled" : "") + ">‹</button>" +
+    "<b>" + y + "</b>" +
+    '<button data-act="v2pickyear" data-y="' + (y + 1) + '" aria-label="Année suivante"' +
+      (y >= hi ? " disabled" : "") + ">›</button></div>" +
+    '<div class="ms">' + months + "</div>" +
+    '<div class="ft"><button data-act="v2pickmonth" data-month="' + cur + '">Mois en cours</button></div></div>';
 }
 
 /* ---------------- onglet « Le mois » ---------------- */
@@ -6426,6 +6480,11 @@ function setStatus(id, status) {
 
 document.addEventListener("click", e => {
   const el = e.target.closest("[data-act]");
+  /* Un panneau ouvert se referme au premier clic ailleurs, sans quoi il faudrait
+     revenir sur le titre pour s'en débarrasser. */
+  if (UI.v2pick && !e.target.closest(".mpick") && !(el && el.dataset.act === "v2pick")) {
+    UI.v2pick = false; render();
+  }
   if (!el) return;
   const act = el.dataset.act;
   if (act === "backdrop" && e.target !== el) return;
@@ -6454,6 +6513,12 @@ document.addEventListener("click", e => {
     /* Mois v2. L'animation ne se rejoue que sur un changement de contexte :
        la relancer à chaque dépliement donnait un battement d'écran insupportable
        quand on analyse. */
+    case "v2pick": UI.v2pick = !UI.v2pick; UI.v2pickYear = +UI.month.slice(0, 4); render(); break;
+    case "v2pickyear": UI.v2pickYear = +el.dataset.y; render(); break;
+    case "v2pickmonth":
+      UI.month = el.dataset.month; UI.v2pick = false;
+      UI.v2anim = "all"; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2batch = "all";
+      render(); break;
     case "v2tab": UI.v2tab = el.dataset.tab; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2anim = "all"; render(); break;
     case "v2goal": UI.v2goal = UI.v2goal === el.dataset.goal ? null : el.dataset.goal; UI.v2anim = null; render(); break;
     case "v2group": {
@@ -6821,7 +6886,8 @@ document.addEventListener("drop", e => {
 });
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") {
-    if (UI.small) { UI.small = null; renderSmall(); }
+    if (UI.v2pick) { UI.v2pick = false; render(); }
+    else if (UI.small) { UI.small = null; renderSmall(); }
     else if (REVIEW) { REVIEW = null; UI.modal = null; render(); }
     else if (UI.modal) closeModal();
     return;
