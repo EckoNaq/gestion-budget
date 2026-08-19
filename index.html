@@ -646,38 +646,81 @@ html[data-theme="dark"] .v2{
 .v2 .vrow .pico{width:21px;height:21px;border-radius:6px}
 
 /* ---------- grille d'objectifs ---------- */
-.v2 .gg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.v2 .objcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 14px 13px;min-width:0;position:relative;text-align:left;font:inherit;color:inherit;display:block;width:100%}
-.v2 .objcard.win{background:var(--win-bg);border-color:var(--win-line)}
-.v2 .objcard.hot{background:var(--hot-bg);border-color:var(--hot-line)}
-.v2 .objcard.bad{background:var(--bad-bg);border-color:var(--bad-line)}
-.v2 .objcard.clk{cursor:pointer;padding-bottom:23px;transition:border-color .12s,box-shadow .12s,transform .12s}
-.v2 .objcard.clk:hover,.v2 .objcard.clk:focus-visible{border-color:var(--bad);box-shadow:0 3px 12px -5px rgba(0,0,0,.35);transform:translateY(-1px)}
-.v2 .objcard .more{position:absolute;left:14px;right:14px;bottom:8px;display:flex;align-items:center;gap:3px;font-size:10.5px;letter-spacing:.005em;color:var(--bad-ink);opacity:.78;font-variation-settings:"wght" 560,"wdth" 96}
-.v2 .objcard.clk:hover .more{opacity:1}
-.v2 .objcard .more .ch{transition:transform .12s}
-.v2 .objcard.clk:hover .more .ch{transform:translateX(3px)}
-.v2 .objcard .r1{display:flex;align-items:center;gap:7px;margin-bottom:6px}
-.v2 .objcard .nm{font-size:9px;text-transform:uppercase;letter-spacing:.035em;color:var(--ink-3);font-variation-settings:"wght" 720,"wdth" 87;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v2 .objcard.win .nm{color:var(--win-ink)} .v2 .objcard.bad .nm{color:var(--bad-ink)} .v2 .objcard.hot .nm{color:var(--hot-ink)}
-.v2 .objcard .bdg{flex:none;width:20px;height:20px;display:block;margin-left:auto}
-.v2 .objcard.win .bdg{color:var(--win)} .v2 .objcard.hot .bdg{color:var(--hot)} .v2 .objcard.bad .bdg{color:var(--bad)}
-.v2 .objcard .r2{display:flex;align-items:baseline;gap:5px;margin-bottom:8px}
-.v2 .objcard .v{font-size:19px;font-variation-settings:"wght" 680,"wdth" 88;letter-spacing:-.02em}
-.v2 .objcard.win .v{color:var(--win-ink)} .v2 .objcard.bad .v{color:var(--bad-ink)} .v2 .objcard.hot .v{color:var(--hot-ink)}
-.v2 .objcard .of{font-size:11.5px;color:var(--ink-4);font-variation-settings:"wght" 470,"wdth" 92}
-.v2 .objcard .fl{margin-left:auto;font-size:11px;font-variation-settings:"wght" 660,"wdth" 100;white-space:nowrap;color:var(--ink-3)}
-.v2 .objcard.bad .fl{color:var(--bad-ink)} .v2 .objcard.hot .fl{color:var(--hot-ink)}
-.v2 .g{position:relative;height:8px;border-radius:4px;background:var(--sunk);overflow:visible}
-.v2 .g .fx{position:absolute;top:0;bottom:0;left:0;background:var(--ink-4);border-radius:4px 0 0 4px}
-.v2 .g .vr{position:absolute;top:0;bottom:0;background:var(--ink-2)}
-.v2 .objcard.win .g .vr{background:var(--win)} .v2 .objcard.win .g .fx{background:var(--win-line)}
-.v2 .objcard.hot .g .vr{background:var(--hot)} .v2 .objcard.hot .g .fx{background:var(--hot-line)}
-.v2 .objcard.bad .g .vr{background:var(--bad)} .v2 .objcard.bad .g .fx{background:var(--bad-line)}
-.v2 .g .cap-r{border-radius:0 4px 4px 0}
-/* Le repère de rythme garde la même abscisse dans toutes les cellules : sur une
-   grille à colonnes égales, les repères s'alignent en verticales. */
-.v2 .g .pace{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.45;border-radius:1px}
+/* Des anneaux plutôt que des tuiles larges. Le reproche portait autant sur la
+   forme que sur la couleur : une tuile de 278 sur 100 est trois fois plus large
+   que haute, et neuf d'entre elles remplies de teinte faisaient un patchwork.
+   Une vignette de 116 px, fond papier, avec la couleur au seul état, tient de
+   ce que Tufte appelle un « small multiple » : même forme, même échelle, la
+   comparaison se fait toute seule. */
+.v2 .gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:8px}
+.v2 .objcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:11px 8px 10px;min-width:0;position:relative;text-align:center;font:inherit;color:inherit;
+  display:block;width:100%}
+.v2 .objcard.clk{cursor:pointer}
+.v2 .objcard:hover,.v2 .objcard:focus-within,.v2 .objcard:focus-visible{border-color:var(--ink-4);z-index:30}
+.v2 .ringwrap2{width:64px;height:64px;margin:0 auto 7px;position:relative}
+.v2 .ringwrap2>svg{width:64px;height:64px;transform:rotate(-90deg)}
+.v2 .ringwrap2>svg circle{fill:none;stroke-width:7}
+.v2 .ringwrap2 .rt2{stroke:var(--sunk)}
+.v2 .ringwrap2 .rp2{stroke-linecap:round}
+.v2 .objcard.win .rp2{stroke:var(--win)}
+.v2 .objcard.hot .rp2{stroke:var(--hot)}
+.v2 .objcard.bad .rp2{stroke:var(--bad)}
+/* Le repère de rythme sur un arc : une encoche posée à l'angle du mois écoulé.
+   J'avais cru qu'un anneau ne savait pas le porter — il le fait très bien. */
+.v2 .ringwrap2 .pace2{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;opacity:.5}
+.v2 .objcard .mid{position:absolute;inset:0;display:grid;place-items:center}
+.v2 .objcard .mid svg{width:24px;height:24px;display:block}
+.v2 .objcard.win .mid{color:var(--win)}
+.v2 .objcard.hot .mid{color:var(--hot)}
+.v2 .objcard.bad .mid{color:var(--bad)}
+/* La pastille de forme reste : sans elle, un cœur entier et un cœur fendu à
+   24 px, en gris, ne se distinguent plus. */
+.v2 .objcard .bdg{position:absolute;right:calc(50% - 40px);top:52px;width:17px;height:17px;
+  background:var(--surface);border-radius:50%;display:grid;place-items:center}
+.v2 .objcard .bdg svg{width:15px;height:15px;display:block}
+.v2 .objcard.win .bdg{color:var(--win)}
+.v2 .objcard.hot .bdg{color:var(--hot)}
+.v2 .objcard.bad .bdg{color:var(--bad)}
+.v2 .objcard .nm{font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);
+  font-variation-settings:"wght" 720,"wdth" 87;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;display:block}
+.v2 .objcard .v{font-size:14px;font-variation-settings:"wght" 680,"wdth" 88;display:block;margin-top:3px}
+.v2 .objcard .of{font-size:10px;color:var(--ink-4);font-variation-settings:"wght" 470,"wdth" 92;display:block}
+
+/* Carte de survol. Tout en CSS : aucun état à tenir, donc rien à reconstruire
+   au rendu, et elle survit au fait que render() refasse le DOM entier. */
+.v2 .tip{
+  position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%) translateY(-4px);
+  width:238px;background:var(--surface);border:1px solid var(--ink-4);border-radius:10px;
+  padding:11px 13px 12px;text-align:left;z-index:40;
+  box-shadow:0 16px 34px -14px rgba(0,0,0,.4);
+  opacity:0;visibility:hidden;transition:opacity .13s,transform .13s;pointer-events:none;
+}
+.v2 .objcard:hover .tip,.v2 .objcard:focus-within .tip,.v2 .objcard:focus-visible .tip{
+  opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);
+}
+/* En bord de grille, la carte s'aligne sur le côté de sa vignette au lieu de
+   déborder du contenu — à gauche sur la barre latérale, à droite hors écran. */
+.v2 .objcard.tipL .tip{left:0;transform:translateY(-4px)}
+.v2 .objcard.tipL:hover .tip,.v2 .objcard.tipL:focus-within .tip,.v2 .objcard.tipL:focus-visible .tip{transform:translateY(0)}
+.v2 .objcard.tipR .tip{left:auto;right:0;transform:translateY(-4px)}
+.v2 .objcard.tipR:hover .tip,.v2 .objcard.tipR:focus-within .tip,.v2 .objcard.tipR:focus-visible .tip{transform:translateY(0)}
+.v2 .tip .th{font-size:9.5px;text-transform:uppercase;letter-spacing:.11em;color:var(--ink-3);
+  font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:2px}
+.v2 .tip .ts{font-family:var(--prose);font-size:12.5px;color:var(--ink-2);margin-bottom:9px;line-height:1.35}
+.v2 .tip table{width:100%;border-collapse:collapse}
+.v2 .tip th{text-align:left;font-size:11.5px;font-variation-settings:"wght" 500,"wdth" 100;
+  color:var(--ink-2);padding:2.5px 0}
+.v2 .tip td{text-align:right;font-size:12px;font-variation-settings:"wght" 660,"wdth" 92;
+  padding:2.5px 0;white-space:nowrap}
+.v2 .tip tr.gap th,.v2 .tip tr.gap td{border-top:1px solid var(--line-2);padding-top:6px}
+.v2 .tip tr.sum th,.v2 .tip tr.sum td{border-top:1px solid var(--ink);padding-top:6px}
+.v2 .tip tr.sum th{font-variation-settings:"wght" 660,"wdth" 100;color:var(--ink)}
+.v2 .tip td.up{color:var(--bad-ink)}
+.v2 .tip td.down{color:var(--win-ink)}
+.v2 .tip td.q{color:var(--ink-3);font-variation-settings:"wght" 470,"wdth" 92}
+.v2 .tip .note{margin-top:8px;font-family:var(--prose);font-size:12px;color:var(--ink-3);line-height:1.4}
 
 /* ---------- détail d'un dépassement ---------- */
 .v2 .detail{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px}
@@ -859,7 +902,6 @@ html[data-theme="dark"] .v2{
   .v2 .vhead,.v2 .vrow{grid-template-columns:minmax(0,1fr) 96px 52px 76px;gap:11px}
   .v2 .vhead .c2,.v2 .vhead .sp6,.v2 .vrow .pbar,.v2 .vrow .dbar,.v2 .vrow .spark{display:none}
   .v2 .vrow .dv{grid-column:4}
-  .v2 .gg{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:940px){
   .v2 .board{grid-template-columns:1fr}
@@ -871,7 +913,7 @@ html[data-theme="dark"] .v2{
   .v2 .ohead span:nth-child(3),.v2 .ohead span:nth-child(5),.v2 .orow .otag,.v2 .orow .dest,.v2 .orow .acts,.v2 .orow .raw{display:none}
 }
 @media(max-width:720px){.v2 .dgrid{grid-template-columns:1fr;gap:16px}}
-@media(max-width:660px){.v2{margin:-22px -16px -60px;padding:18px 16px 60px}.v2 .gg{grid-template-columns:1fr}}
+@media(max-width:660px){.v2{margin:-22px -16px -60px;padding:18px 16px 60px}}
 @media(prefers-reduced-motion:reduce){.v2 *{transition:none!important;animation:none!important}}
 
 </style>
@@ -2471,6 +2513,89 @@ function v2Poste(groupId, size) {
   return '<span class="pico" style="color:' + c + ";background:" + c + '1F">' + icon(g.icon, size || 15) + "</span>";
 }
 
+/* Variantes de détresse : un poste dépassé change d'icône. Ce qui compte, la
+   planche d'essai l'a montré, est que la silhouette change — un petit motif
+   ajouté au coin devient une tache illisible à 14 px. D'où la maison qui brûle,
+   le panier renversé, le cœur fendu, le signal barré, le ticket coupé. */
+const V2_HURT = {
+  home:'<path d="M2.4 8.4 8 4.2l5.6 4.2V14.2H2.4z"/><path d="M6.4 14.2v-3.6h3.2v3.6"/>' +
+       '<path d="M8 3.4c-1-.7-1-1.9.1-2.8-.1.9.5 1.1.9.7.2-.8-.3-1.6-.7-2 1.9.5 3 2.1 2.3 3.5"/>' +
+       '<path d="M4.6 4.2c-.6-.5-.6-1.3 0-1.9-.1.6.3.8.6.5.1-.5-.2-1.1-.5-1.3 1.3.3 2 1.4 1.5 2.3"/>',
+  cart:'<g transform="translate(8,8) rotate(28) scale(.86) translate(-8,-8)">' +
+       '<path d="M1.6 2.5h1.9l1.6 7.2h6.6l1.5-5.2H4.3"/><circle cx="6.2" cy="12.6" r="1"/>' +
+       '<circle cx="11" cy="12.6" r="1"/></g>' +
+       '<circle cx="3" cy="13.6" r=".85" fill="currentColor" stroke="none"/>' +
+       '<circle cx="6.4" cy="14.6" r=".7" fill="currentColor" stroke="none"/>',
+  car:'<path d="M1.8 11.4h12M3.3 11.4 4.5 7.6a1.4 1.4 0 0 1 1.3-1h3.4a1.4 1.4 0 0 1 1.3 1l1.2 3.8M2.8 11.4v1.9M12.8 11.4v1.9"/>' +
+      '<circle cx="4.8" cy="11.6" r=".85"/><circle cx="10.6" cy="11.6" r=".85"/>' +
+      '<path d="M9.9 6.2c1.9-1.2 2.2-3.2 1.3-4.6 2.7 1 4.2 3.4 3 5.4"/>' +
+      '<path d="M12.9 6.6c.8-.6.9-1.5.5-2.2 1.2.5 1.8 1.5 1.3 2.4"/>',
+  heart:'<path d="M8 13.2S2.4 9.9 2.4 6.3A2.9 2.9 0 0 1 8 5a2.9 2.9 0 0 1 5.6 1.3c0 3.6-5.6 6.9-5.6 6.9z"/>' +
+        '<path d="M8.6 5.4 7.1 8.2h2L7.6 11"/>',
+  bag:'<path d="M3 5.2h10l-.8 8.3H3.8z"/><path d="M5.6 5.2V4a2.4 2.4 0 0 1 4.8 0v1.2"/>' +
+      '<path d="M5.4 9.2 6.6 10.4 5.4 11.6 6.6 12.8"/>',
+  signal:'<path d="M8 13.2v.1M4.6 10a4.8 4.8 0 0 1 6.8 0M2.2 7.4a8.2 8.2 0 0 1 11.6 0"/><path d="M3 3 13 13"/>',
+  ticket:'<path d="M2 6.2V4h5.2v8H2V9.4a1.6 1.6 0 0 0 0-3.2z"/><path d="M14 6.2V4H8.8v8H14V9.4a1.6 1.6 0 0 1 0-3.2z"/>' +
+         '<path d="M8 3.4 7.4 5l1.2 1.4-1.2 1.4 1.2 1.4-1.2 1.4.6 1.6"/>',
+  receipt:'<path d="M4 1.8h8.4v5.1l-1.4.8-1.4-.8-1.4.8-1.4-.8-1.4.8-1.4-.8z"/><path d="M6.2 4.2h4"/>' +
+          '<path d="M2.8 10.1 4.2 9.3l1.4.8 1.4-.8 1.4.8 1.4-.8v5.1H2.8z"/><path d="M5 12.5h3.4"/>',
+  dots:'<circle cx="4" cy="8" r="1.1"/><circle cx="8" cy="8" r="1.1"/><circle cx="12" cy="8" r="1.1"/>'
+};
+/* Le glyphe central : l'icône du poste, dans la teinte de son état, et sa
+   variante meurtrie quand le plafond est franchi. */
+function v2Glyph(groupId, state) {
+  const g = GROUP_BY_ID[groupId];
+  if (!g) return "";
+  const d = state === "bad" ? (V2_HURT[g.icon] || ICONS[g.icon]) : ICONS[g.icon];
+  return '<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + "</svg>";
+}
+/* Ce que le survol ajoute : le rythme attendu à ce jour, l'écart, et surtout la
+   projection de fin de mois — la seule chose qui dise si le plafond tiendra. */
+function v2Tip(r, c) {
+  const p = c.running ? c.day / c.days : 1;
+  const head = '<span class="tip"><span class="th">' + esc(r.name) + "</span>";
+  if (!c.running) {
+    const over = r.spent > r.target;
+    return head + '<span class="ts">Mois clos — plus de rythme à tenir, seul le résultat compte.</span>' +
+      "<table><tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
+      '<tr class="sum"><th>' + (over ? "Dépassement" : "Marge gardée") + "</th>" +
+      '<td class="num ' + (over ? "up" : "down") + '">' +
+      esc(over ? fmtEur(r.spent - r.target) : fmtEur(r.target - r.spent)) +
+      "</td></tr></table></span>";
+  }
+  if (r.heavy) {
+    return head + '<span class="ts">Poste presque entièrement engagé : le rythme ne s’y applique pas.</span>' +
+      "<table><tr><th>Dépensé au " + c.day + "</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
+      '<tr class="sum"><th>' + (r.spent > r.target ? "Dépassement" : "Reste") + '</th>' +
+      '<td class="num ' + (r.spent > r.target ? "up" : "down") + '">' +
+      esc(r.spent > r.target ? fmtEur(r.spent - r.target) : fmtEur(r.target - r.spent)) +
+      "</td></tr></table>" +
+      '<span class="note">Ses prélèvements tombent en début de mois : comparer au calendrier ferait ' +
+      "crier au dépassement dès le 4.</span></span>";
+  }
+  const attendu = r.target * p, ecart = r.spent - attendu, proj = r.spent / p;
+  return head + '<span class="ts">Au ' + c.day + " du mois, <b>" + Math.round(p * 100) +
+      " %</b> du mois est écoulé.</span>" +
+    "<table>" +
+      "<tr><th>Rythme attendu</th><td class=\"num q\">" + esc(fmtEur(attendu)) + "</td></tr>" +
+      "<tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      '<tr class="gap"><th>Écart au rythme</th><td class="num ' + (ecart > 0 ? "up" : "down") + '">' +
+        esc(fmtEur(ecart, { plus: true })) + "</td></tr>" +
+      "<tr><th>&nbsp;</th><td class=\"num q\">" + esc(attendu ? fmtPct(ecart / attendu * 100) : "—") + "</td></tr>" +
+      '<tr class="sum"><th>Fin de mois estimée</th><td class="num ' + (proj > r.target ? "up" : "down") + '">' +
+        esc(fmtEur(proj)) + "</td></tr>" +
+      "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
+    "</table>" +
+    '<span class="note">' + (proj > r.target
+      ? "À ce rythme, le plafond serait dépassé de " + fmtEur(proj - r.target) + " à la fin du mois."
+      : "À ce rythme, le mois finirait " + fmtEur(r.target - proj) + " sous le plafond.") +
+    " Il reste " + (c.days - c.day) + " jours." +
+    (r.st === "bad" ? " Cliquez pour voir d’où ça vient." : "") + "</span></span>";
+}
+
 /* Trois silhouettes, trois états : cercle tenu, carré en avance, triangle
    dépassé. La forme porte le sens, la couleur ne fait que l'appuyer — un
    lecteur qui ne distingue pas le vert du rouge lit la silhouette. */
@@ -2647,33 +2772,37 @@ function v2Month(c) {
     html += '<div class="todo"><div class="tx">Aucun objectif mensuel défini. Les objectifs se règlent dans <b>Réglages</b>.</div>' +
       '<button class="act" data-act="view" data-view="settings">Régler</button></div>';
   } else {
+    const R = 27, CIRC = 2 * Math.PI * R;
+    const gw = 116 + 8;
+    const availW = Math.max((document.querySelector(".main") || {}).clientWidth - 60 || window.innerWidth - 280, 240);
+    const cols = Math.max(Math.floor(availW / gw), 1);
     const cells = rows.map((r, i) => {
       const canOpen = r.st === "bad";
-      const w = Math.min(r.spent / r.target, 1) * 100;
-      const fxw = Math.min(r.fx / r.target, 1) * 100, vrw = Math.max(w - fxw, 0);
-      const flag = r.spent > r.target ? fmtEur(r.spent - r.target, {}) + " au-dessus"
-        : c.running ? "reste " + fmtEur(r.target - r.spent, {}) : "";
-      return "<" + (canOpen ? "button" : "div") + ' class="objcard ' + r.st + (canOpen ? " clk" : "") +
+      const frac = Math.min(r.spent / r.target, 1);
+      /* L'encoche de rythme : un tiret très court, décalé à l'angle voulu. */
+      const notch = c.running && !r.heavy
+        ? '<circle class="pace2" cx="32" cy="32" r="' + R + '" fill="none" stroke-dasharray="2.4 ' +
+          (CIRC - 2.4).toFixed(2) + '" stroke-dashoffset="' + (-pace * CIRC).toFixed(2) + '"></circle>'
+        : "";
+      const edge = cols > 1 ? (i % cols === 0 ? " tipL" : i % cols === cols - 1 ? " tipR" : "") : "";
+      return "<" + (canOpen ? "button" : "div") + ' class="objcard ' + r.st + (canOpen ? " clk" : "") + edge +
           '" style="animation-delay:' + (i * 26) + 'ms"' +
-          (canOpen ? ' data-act="v2goal" data-goal="' + esc(r.id) + '"' : "") + ">" +
-        '<div class="r1">' + v2Poste(r.grp) + '<span class="nm">' + esc(r.name) + "</span>" +
-          '<span class="bdg">' + V2_BADGE[r.st] + "</span></div>" +
-        '<div class="r2"><span class="v num">' + esc(fmtEur(r.spent, {})) + '</span>' +
-          '<span class="of num">/ ' + esc(fmtEur(r.target)) + "</span>" +
-          (flag ? '<span class="fl num">' + esc(flag) + "</span>" : "") + "</div>" +
-        '<div class="g"><span class="fx" style="width:' + fxw.toFixed(1) + '%"></span>' +
-          '<span class="vr' + (w >= 99.5 ? " cap-r" : "") + '" style="left:' + fxw.toFixed(1) + "%;width:" + vrw.toFixed(1) + '%"></span>' +
-          (c.running && !r.heavy ? '<span class="pace" style="left:' + (pace * 100).toFixed(2) + '%"></span>' : "") +
-        "</div>" +
-        (canOpen ? '<span class="more">' + (UI.v2goal === r.id ? "Masquer" : "Voir le détail") +
-          '<span class="ch">' + V2_CHEV + "</span></span>" : "") +
+          (canOpen ? ' data-act="v2goal" data-goal="' + esc(r.id) + '"' : ' tabindex="0"') + ">" +
+        '<span class="ringwrap2"><svg viewBox="0 0 64 64" aria-hidden="true">' +
+          '<circle class="rt2" cx="32" cy="32" r="' + R + '"></circle>' +
+          '<circle class="rp2" cx="32" cy="32" r="' + R + '" stroke-dasharray="' + CIRC.toFixed(1) +
+            '" stroke-dashoffset="' + (CIRC * (1 - frac)).toFixed(1) + '"></circle>' + notch + "</svg>" +
+          '<span class="mid">' + v2Glyph(r.grp, r.st) + "</span></span>" +
+        '<span class="bdg">' + V2_BADGE[r.st] + "</span>" +
+        '<span class="nm">' + esc(r.name) + "</span>" +
+        '<span class="v num">' + esc(fmtEurShort(r.spent)) + "</span>" +
+        '<span class="of num">sur ' + esc(fmtEurShort(r.target)) + " €</span>" +
+        v2Tip(r, c) +
         "</" + (canOpen ? "button" : "div") + ">";
     });
     const open = rows.findIndex(r => r.id === UI.v2goal);
-    if (open >= 0) {
-      const cols = window.innerWidth <= 660 ? 1 : window.innerWidth <= 1000 ? 2 : 3;
-      cells.splice(Math.min((Math.floor(open / cols) + 1) * cols, cells.length), 0, v2GoalDetail(rows[open], s));
-    }
+    /* Le panneau se glisse sous la rangée de la vignette ouverte. */
+    if (open >= 0) cells.splice(Math.min((Math.floor(open / cols) + 1) * cols, cells.length), 0, v2GoalDetail(rows[open], s));
     html += '<div class="gg' + v2AnimClass("all") + '">' + cells.join("") + "</div>";
   }
   html += "</div>";
