@@ -984,6 +984,123 @@ html[data-theme="dark"] .v2{
 @media(max-width:660px){.v2{margin:-22px -16px -60px;padding:18px 16px 60px}}
 @media(prefers-reduced-motion:reduce){.v2 *{transition:none!important;animation:none!important}}
 
+
+/* =========================================================================
+   TROPHÉES
+   -------------------------------------------------------------------------
+   Échelle de rareté propre au Budget : ni bronze, ni argent, ni or — de la
+   pierre à la braise, en passant par le bleu, l'indigo et l'améthyste. Les
+   jalons du Patrimoine gardent leurs médaillons ronds et leurs métaux ; on ne
+   confond jamais les deux collections.
+
+   La forme de l'emblème dit la famille, la couleur ne parle que de rareté, et
+   l'ornement s'enrichit à chaque rang — liseré, rayons, laurier, couronne
+   fermée et gemme. Un point de plus ne se sent pas ; une couronne, si. Comme
+   l'ornement porte le rang autant que la teinte, l'échelle survit au
+   daltonisme.
+   ========================================================================= */
+.v2{
+  --r1:#8A9082; --r1b:#EDEFEA;
+  --r2:#3E6E93; --r2b:#E4EDF3;
+  --r3:#4B4FA8; --r3b:#E7E8F6;
+  --r4:#8A46A8; --r4b:#F1E6F5;
+  --r5:#C25A1E; --r5b:#FBE9DC;
+}
+html[data-theme="dark"] .v2{
+  --r1:#9AA294; --r1b:#22271F;
+  --r2:#6FA8CE; --r2b:#152631;
+  --r3:#8B8EEA; --r3b:#1B1C34;
+  --r4:#C98BE4; --r4b:#2A1A31;
+  --r5:#F0904A; --r5b:#33200F;
+}
+.v2 .tro{display:flex;flex-direction:column;align-items:center;text-align:center;width:118px;position:relative}
+.v2 .tw{position:relative;width:84px;height:90px}
+.v2 .tw svg{display:block;width:84px;height:90px;overflow:visible}
+.v2 .frame{fill:var(--sunk);stroke:var(--line);stroke-width:2}
+.v2 .inner{fill:none;stroke:none}
+.v2 .em{fill:none;stroke:var(--ink-4);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.v2 .orn{fill:none;stroke:var(--line);stroke-width:1.6;stroke-linecap:round}
+.v2 .leaf{fill:var(--line);stroke:none}
+.v2 .gem{fill:var(--line);stroke:none}
+.v2 .halo{fill:none;stroke:var(--line);stroke-width:6;opacity:.16}
+.v2 .prog{fill:none;stroke:var(--ink-4);stroke-width:2.4;stroke-linecap:round;opacity:.9}
+.v2 .tro.on .frame{fill:var(--rb);stroke:var(--rc)}
+.v2 .tro.on .inner{stroke:var(--rc);stroke-width:1.1;opacity:.5}
+.v2 .tro.on .em{stroke:var(--rc)}
+.v2 .tro.on .orn{stroke:var(--rc)}
+.v2 .tro.on .leaf{fill:var(--rc)}
+.v2 .tro.on .gem{fill:var(--rc)}
+.v2 .tro.on .halo{stroke:var(--rc);opacity:.2}
+.v2 .tro .rk{font-size:8.5px;text-transform:uppercase;letter-spacing:.11em;color:var(--ink-4);
+  font-variation-settings:"wght" 700,"wdth" 100;margin-top:2px}
+.v2 .tro.on .rk{color:var(--rc)}
+.v2 .tro .tn{font-size:11px;font-variation-settings:"wght" 660,"wdth" 94;color:var(--ink-3);
+  line-height:1.25;margin-top:2px}
+.v2 .tro.on .tn{color:var(--ink)}
+.v2 .tro .ts2{font-size:9.5px;color:var(--ink-4);line-height:1.25;
+  font-variation-settings:"wght" 500,"wdth" 100;margin-top:1px}
+.v2 .tro .seal{position:absolute;right:2px;top:5px;width:19px;height:19px;border-radius:50%;
+  background:var(--win);display:grid;place-items:center;box-shadow:0 1px 4px -1px rgba(0,0,0,.35)}
+.v2 .tro .seal svg{width:12px;height:12px;stroke:var(--on);stroke-width:2.7;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+
+/* carte de survol du trophée */
+.v2 .tro .ttip{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%) translateY(-4px);
+  width:216px;background:var(--surface);border:1px solid var(--ink-4);border-radius:10px;
+  padding:10px 12px 11px;text-align:left;z-index:45;box-shadow:0 14px 30px -12px rgba(0,0,0,.4);
+  opacity:0;visibility:hidden;transition:opacity .12s,transform .12s;pointer-events:none}
+.v2 .tro:hover .ttip,.v2 .tro:focus-within .ttip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.v2 .tro .ttip .d{font-family:var(--prose);font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.v2 .tro .ttip .w{margin-top:7px;padding-top:7px;border-top:1px solid var(--line-2);font-size:11px;
+  color:var(--ink-3);font-variation-settings:"wght" 560,"wdth" 100}
+.v2 .tro .ttip .w b{font-variation-settings:"wght" 700,"wdth" 100;color:var(--rc)}
+
+/* l'écran */
+.v2 .trohead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:16px}
+.v2 .trohead .big{font-size:31px;font-variation-settings:"wght" 720,"wdth" 86;letter-spacing:-.028em}
+.v2 .trohead .big span{font-size:17px;color:var(--ink-3);font-variation-settings:"wght" 560,"wdth" 92}
+.v2 .trohead .sub{font-family:var(--prose);font-size:13px;color:var(--ink-2);margin-top:2px}
+.v2 .rbars{display:flex;gap:12px;flex-wrap:wrap}
+.v2 .rbar{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:64px}
+.v2 .rbar .n{font-size:15px;font-variation-settings:"wght" 700,"wdth" 90}
+.v2 .rbar .l{font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;
+  font-variation-settings:"wght" 700,"wdth" 100}
+.v2 .rbar .t{height:3px;width:100%;border-radius:2px;background:var(--line-2);overflow:hidden}
+.v2 .rbar .t i{display:block;height:100%;border-radius:2px}
+.v2 .famsec{background:var(--surface);border:1px solid var(--line);border-radius:11px;
+  padding:14px 14px 16px;margin-bottom:10px}
+.v2 .famsec.full{border-color:var(--r5);background:var(--r5b)}
+.v2 .famhead{display:flex;align-items:baseline;gap:9px;margin:0 0 10px;flex-wrap:wrap}
+.v2 .famhead .fn{font-size:11px;text-transform:uppercase;letter-spacing:.11em;
+  font-variation-settings:"wght" 700,"wdth" 100}
+.v2 .famhead .fc{font-size:10.5px;color:var(--ink-3)}
+.v2 .famhead .fd{font-family:var(--prose);font-size:12px;color:var(--ink-3);margin-left:auto}
+.v2 .trorow{display:flex;gap:4px;flex-wrap:wrap;align-items:flex-start}
+
+/* le bandeau annonçant un trophée du mois */
+.v2 .newban{display:flex;align-items:center;gap:16px;background:var(--surface);
+  border:1px solid var(--rc);border-radius:12px;padding:13px 18px;margin-bottom:26px;
+  position:relative;overflow:hidden}
+.v2 .newban::before{content:"";position:absolute;inset:0;background:var(--rb);opacity:.5}
+.v2 .newban>*{position:relative}
+.v2 .newban .tw{width:70px;height:75px;flex:none}
+.v2 .newban .tw svg{width:70px;height:75px}
+.v2 .newban .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--rc);
+  font-variation-settings:"wght" 700,"wdth" 100}
+.v2 .newban .n{font-size:17px;font-variation-settings:"wght" 720,"wdth" 90;letter-spacing:-.018em;margin-top:1px}
+.v2 .newban .d{font-family:var(--prose);font-size:13px;color:var(--ink-2);margin-top:2px}
+.v2 .newban .more{font-size:11px;color:var(--ink-3);margin-top:3px}
+.v2 .newban .go{margin-left:auto;flex:none;background:var(--rc);border:0;border-radius:8px;
+  color:var(--on);padding:7px 15px;cursor:pointer;font:inherit;font-size:12.5px;
+  font-variation-settings:"wght" 640,"wdth" 100;white-space:nowrap}
+.v2 .newban .go:hover{opacity:.88}
+@media(max-width:760px){
+  .v2 .trohead{grid-template-columns:1fr}
+  .v2 .newban{flex-wrap:wrap}
+  .v2 .newban .go{margin-left:0;width:100%}
+}
+
 </style>
 </head>
 <body>
@@ -2141,7 +2258,7 @@ function render() {
     '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
-    ["month", "cal", "Mois"], ["monthv2", "cal", "Mois v2"], ["year", "chart", "Année"],
+    ["month", "cal", "Mois"], ["monthv2", "cal", "Mois v2"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
   const patNav = [["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
@@ -2153,6 +2270,7 @@ function render() {
 
   const body = UI.view === "month" ? viewMonth()
     : UI.view === "monthv2" ? viewMonthV2()
+    : UI.view === "trophees" ? viewTrophies()
     : UI.view === "year" ? viewYear()
     : UI.view === "todo" ? viewTodo()
     : UI.view === "pathome" ? viewPatrimoineHome()
@@ -2829,6 +2947,11 @@ function v2Month(c) {
   const held = rows.filter(r => r.spent <= r.target).length;
   html += '<div class="chips' + v2AnimClass("all") + '">' + v2Chips(c, rows, held) + "</div>";
 
+  /* Un trophée décroché dans le mois consulté s'annonce ici, entre les
+     pastilles et les objectifs : c'est le moment de la lecture où l'on vient
+     de comprendre comment le mois s'est passé. */
+  html += v2TroBanner(c.key);
+
   html += '<div class="sect"><div class="shead"><span class="t">Objectifs</span>';
   if (rows.length) {
     html += '<span class="c">' + held + " tenus sur " + rows.length + "</span><span class=\"sp\"></span>" +
@@ -3294,6 +3417,362 @@ function v2Ops(c) {
   else msg = "Toutes les opérations sont classées : le débit du relevé est intégralement compté.";
   return html + '<div class="ofoot"><span>' + esc(msg) + '</span><span class="sp"></span><span>' +
     shown.length + " ligne" + (shown.length > 1 ? "s" : "") + " affichée" + (shown.length > 1 ? "s" : "") + "</span></div>";
+}
+
+
+/* =========================================================================
+   Trophées — catalogue et moteur
+   -------------------------------------------------------------------------
+   Tout se calcule sur l'historique complet : un succès mérité ne devrait pas
+   dépendre de la date d'installation. Chaque trophée porte donc le mois où il
+   a été gagné, pas celui où on le découvre. En contrepartie, les paliers hauts
+   sont calibrés pour rester hors d'atteinte des années durant.
+
+   Réserve honnête : les objectifs mensuels sont ceux d'aujourd'hui, appliqués
+   au passé — l'application ne conserve pas l'historique des plafonds. Les
+   familles Discipline et Régularité s'en trouvent légèrement optimistes.
+   ========================================================================= */
+const V2_HEX = "M44 14 66 27 66 53 44 66 22 53 22 27Z";
+const V2_HEXIN = "M44 19 61.5 29.4 61.5 50.6 44 61 26.5 50.6 26.5 29.4Z";
+const V2_HEXLEN = 152;
+const V2_RANK = ["Commun", "Peu commun", "Rare", "Très rare", "Exceptionnel"];
+
+const V2_FAM = {
+  epargne: { n: "Épargne", d: "ce que vous mettez de côté",
+    em: '<path d="M32 38v5.4c0 3.4 5.4 6.2 12 6.2s12-2.8 12-6.2V38"/>' +
+        '<path d="M32 31.5c0-3.4 5.4-6.2 12-6.2s12 2.8 12 6.2-5.4 6.2-12 6.2-12-2.8-12-6.2z"/>' },
+  regularite: { n: "Régularité", d: "tenir dans la durée",
+    em: '<rect x="28" y="33" width="18" height="14" rx="7"/><rect x="42" y="33" width="18" height="14" rx="7"/>' },
+  discipline: { n: "Discipline", d: "des objectifs tenus",
+    em: '<path d="M44 25c4 2.6 8.4 3.6 12 3.6v9.6c0 6.6-5 11.4-12 14.2-7-2.8-12-7.6-12-14.2v-9.6c3.6 0 8-1 12-3.6z"/>' +
+        '<path d="M39.5 39.5 43 43l6-7"/>' },
+  sobriete: { n: "Sobriété", d: "dépenser moins qu'avant",
+    em: '<path d="M56 25c0 13-7 21-16 21-3 0-5-1-5-1s-1-14 7-19 14-1 14-1z"/><path d="M32 54c2-6 6-11 12-15"/>' },
+  loufoque: { n: "Défis loufoques", d: "aucun rapport avec la bonne gestion",
+    em: '<rect x="30" y="27" width="28" height="26" rx="5" transform="rotate(-8 44 40)"/>' +
+        '<circle cx="38" cy="35" r="2.2" fill="currentColor" stroke="none"/>' +
+        '<circle cx="50" cy="45" r="2.2" fill="currentColor" stroke="none"/>' +
+        '<circle cx="44" cy="40" r="2.2" fill="currentColor" stroke="none"/>' },
+};
+
+/* L'ornement s'enrichit à chaque rang. C'est là que se joue la rareté : un
+   point de plus ne se sent pas, une couronne si. */
+function v2Rays() {
+  const a = [[44,8],[70.5,23],[70.5,57],[44,72],[17.5,57],[17.5,23]];
+  const b = [[44,2],[75.5,20],[75.5,60],[44,78],[12.5,60],[12.5,20]];
+  return a.map((p, i) => '<line class="orn" x1="' + p[0] + '" y1="' + p[1] +
+    '" x2="' + b[i][0] + '" y2="' + b[i][1] + '"/>').join("");
+}
+function v2Laurel(closed) {
+  const branch = side => {
+    const stem = side > 0 ? "M62 70 C74 62 78 48 74 34" : "M26 70 C14 62 10 48 14 34";
+    const xs = side > 0 ? [72, 75.5, 77, 76.5] : [16, 12.5, 11, 11.5];
+    const ys = [58, 50, 42, 34];
+    return '<path class="orn" d="' + stem + '"/>' + xs.map((x, i) =>
+      '<ellipse class="leaf" cx="' + x + '" cy="' + ys[i] + '" rx="5" ry="2.4" transform="rotate(' +
+      ((side > 0 ? -1 : 1) * (34 - i * 10)) + " " + x + " " + ys[i] + ')"/>').join("");
+  };
+  return branch(1) + branch(-1) + (closed
+    ? '<path class="orn" d="M74 34 C70 24 60 18 52 17"/><path class="orn" d="M14 34 C18 24 28 18 36 17"/>' : "");
+}
+function v2TroSvg(fam, tier, on, pct, size) {
+  let deco = "";
+  if (tier >= 3) deco += v2Rays();
+  if (tier === 4) deco += v2Laurel(false);
+  if (tier >= 5) deco += v2Laurel(true);
+  const prog = !on && pct > 0
+    ? '<path class="prog" d="' + V2_HEX + '" stroke-dasharray="' + (V2_HEXLEN * pct / 100).toFixed(1) +
+      " " + V2_HEXLEN + '"/>' : "";
+  return '<svg viewBox="0 0 88 82" aria-hidden="true"' + (size ? ' style="width:' + size + 'px;height:' + (size * 82 / 88) + 'px"' : "") + ">" +
+    (tier >= 5 ? '<path class="halo" d="' + V2_HEX + '"/>' : "") + deco +
+    '<path class="frame" d="' + V2_HEX + '"/>' + prog +
+    (tier >= 2 ? '<path class="inner" d="' + V2_HEXIN + '"/>' : "") +
+    '<g class="em">' + V2_FAM[fam].em + "</g>" +
+    (tier >= 5 ? '<path class="gem" d="M44 3 49.5 9.5 44 16 38.5 9.5Z"/>' : "") + "</svg>";
+}
+
+/* -------------------------------------------------------------------------
+   Résumé mensuel, calculé une seule fois et partagé par les soixante succès.
+   ------------------------------------------------------------------------- */
+let V2_MS_CACHE = null, V2_MS_STAMP = "";
+function v2MonthSeries() {
+  const stamp = DB.tx.length + "|" + Object.keys(DB.goals).join() + "|" + (DB.settings.savingsGoal || 0);
+  if (V2_MS_CACHE && V2_MS_STAMP === stamp) return V2_MS_CACHE;
+  const keys = Array.from(new Set(DB.tx.map(t => monthKey(t.date)))).sort();
+  const goalIds = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0);
+  V2_MS_CACHE = keys.map(k => {
+    const s = monthStats(k);
+    const held = goalIds.filter(id => spentOn(id, s.ops) <= DB.goals[id].m);
+    const byDay = {};
+    s.ops.filter(isExpense).forEach(t => { byDay[dayOf(t.date)] = (byDay[dayOf(t.date)] || 0) + 1; });
+    return {
+      k, s, exp: s.expense, bal: s.balance, rate: savingsRate(s.income, s.expense),
+      groups: s.groups, cats: s.cats, todo: s.todoCount,
+      goalTotal: goalIds.length, held: held.length, heldIds: held,
+      nOps: s.ops.filter(isExpense).length, maxDay: Object.keys(byDay).reduce((m, d) => Math.max(m, byDay[d]), 0),
+    };
+  });
+  V2_MS_STAMP = stamp;
+  return V2_MS_CACHE;
+}
+
+/* -------------------------------------------------------------------------
+   Le catalogue
+   ------------------------------------------------------------------------- */
+function v2Trophies() {
+  const ms = v2MonthSeries(), out = [];
+  const goal = DB.settings.savingsGoal || 0;
+  const add = (fam, tier, name, desc, at, cur, tgt) =>
+    out.push({ fam, tier, name, desc, at: at || null, cur: cur || 0, tgt: tgt || 1,
+      pct: tgt > 0 ? Math.min(100, Math.max(0, (cur || 0) / tgt * 100)) : (at ? 100 : 0) });
+  /* premier mois satisfaisant une condition, et le meilleur score atteint */
+  const first = pred => { for (const m of ms) if (pred(m)) return m.k; return null; };
+  const best = val => ms.reduce((a, m) => Math.max(a, val(m) || 0), 0);
+  /* premier mois qui clôt une série de n mois consécutifs, et la plus longue série */
+  const streak = (pred, n) => {
+    let r = 0;
+    for (const m of ms) { r = pred(m) ? r + 1 : 0; if (r >= n) return m.k; }
+    return null;
+  };
+  const longest = pred => {
+    let r = 0, mx = 0;
+    for (const m of ms) { r = pred(m) ? r + 1 : 0; mx = Math.max(mx, r); }
+    return mx;
+  };
+  /* mois où un cumul franchit un seuil */
+  const cumAt = (val, tgt) => {
+    let c = 0;
+    for (const m of ms) { c += val(m) || 0; if (c >= tgt) return m.k; }
+    return null;
+  };
+  const cumTotal = val => ms.reduce((a, m) => a + (val(m) || 0), 0);
+
+  /* ---------- Épargne ---------- */
+  [[1, 10], [2, 20], [3, 30], [4, 40], [5, 50]].forEach(([t, p]) =>
+    add("epargne", t, p + " % épargnés", "Un mois où vous mettez de côté au moins " + p + " % de vos revenus.",
+      first(m => m.rate != null && m.rate >= p), best(m => m.rate), p));
+  [[1, 1000], [2, 5000], [3, 10000], [4, 25000], [5, 50000]].forEach(([t, c]) =>
+    add("epargne", t, fmtEurShort(c) + " de côté", "Épargne cumulée depuis le début de votre historique.",
+      cumAt(m => Math.max(m.bal, 0), c), Math.max(cumTotal(m => Math.max(m.bal, 0)), 0), c));
+  [[1, 500], [2, 1000], [3, 1500], [4, 2500]].forEach(([t, c]) =>
+    add("epargne", t, fmtEurShort(c) + " en un mois", "Un seul mois à " + fmtEurShort(c) + " épargnés.",
+      first(m => m.bal >= c), best(m => m.bal), c));
+
+  /* ---------- Régularité ---------- */
+  if (goal > 0) [[1, 3], [2, 6], [3, 12], [4, 24], [5, 36]].forEach(([t, n]) =>
+    add("regularite", t, n + " mois d’affilée", n + " mois consécutifs au-dessus de votre objectif d’épargne.",
+      streak(m => m.rate != null && m.rate >= goal, n), longest(m => m.rate != null && m.rate >= goal), n));
+  [[1, 6], [2, 12], [3, 24]].forEach(([t, n]) =>
+    add("regularite", t, n + " mois dans le vert", n + " mois consécutifs terminés avec un solde positif.",
+      streak(m => m.bal > 0, n), longest(m => m.bal > 0), n));
+  [[1, 12], [2, 24], [3, 36], [5, 60]].forEach(([t, n]) =>
+    add("regularite", t, n + " mois suivis", n + " mois d’affilée avec au moins une opération enregistrée.",
+      streak(() => true, n), ms.length, n));
+
+  /* ---------- Discipline ---------- */
+  const sansFaute = m => m.goalTotal > 0 && m.held === m.goalTotal;
+  [[1, 1], [2, 3], [3, 6], [4, 12], [5, 24]].forEach(([t, n]) =>
+    add("discipline", t, n === 1 ? "Un mois sans faute" : n + " mois sans faute",
+      n === 1 ? "Un mois où aucun objectif n’est dépassé." : n + " mois consécutifs sans le moindre dépassement.",
+      streak(sansFaute, n), longest(sansFaute), n));
+  [[1, 1], [2, 6], [3, 12]].forEach(([t, n]) =>
+    add("discipline", t, n === 1 ? "Tout est classé" : "Tout classé " + n + " mois",
+      n === 1 ? "Un mois dont chaque opération porte une catégorie."
+              : n + " mois consécutifs sans une seule opération en attente.",
+      streak(m => m.todo === 0 && m.nOps > 0, n), longest(m => m.todo === 0 && m.nOps > 0), n));
+  [[2, 12], [4, 24]].forEach(([t, n]) => {
+    /* un même objectif tenu n mois d'affilée, quel qu'il soit */
+    let at = null, mx = 0;
+    const ids = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0);
+    ids.forEach(id => {
+      let r = 0;
+      ms.forEach(m => {
+        r = m.heldIds.indexOf(id) >= 0 ? r + 1 : 0;
+        mx = Math.max(mx, r);
+        if (r === n && !at) at = m.k;
+      });
+    });
+    add("discipline", t, "Un poste tenu " + (n === 12 ? "un an" : "deux ans"),
+      "Un même objectif respecté " + n + " mois consécutifs.", at, mx, n);
+  });
+
+  /* ---------- Sobriété ---------- */
+  /* Dépense du mois comparée à la médiane des douze mois qui le précèdent. */
+  const medPrev = i => {
+    const w = ms.slice(Math.max(0, i - 12), i).map(m => m.exp).filter(v => v > 0).sort((a, b) => a - b);
+    if (w.length < 6) return null;
+    const h = w.length >> 1;
+    return w.length % 2 ? w[h] : (w[h - 1] + w[h]) / 2;
+  };
+  const lighter = ratio => {
+    for (let i = 0; i < ms.length; i++) {
+      const md = medPrev(i);
+      if (md && ms[i].exp > 0 && ms[i].exp <= md * ratio) return ms[i].k;
+    }
+    return null;
+  };
+  const bestLight = () => {
+    let b = 0;
+    for (let i = 0; i < ms.length; i++) {
+      const md = medPrev(i);
+      if (md && ms[i].exp > 0) b = Math.max(b, (1 - ms[i].exp / md) * 100);
+    }
+    return b;
+  };
+  [[1, 0.95, 5], [2, 0.8, 20], [4, 0.7, 30]].forEach(([t, r, p]) =>
+    add("sobriete", t, "Un mois à −" + p + " %", "Un mois dont les dépenses tombent " + p +
+      " % sous votre médiane des douze mois précédents.", lighter(r), bestLight(), p));
+  const noCat = id => m => !(m.cats[id] > 0) && m.nOps > 0;
+  [[1, 1], [2, 3], [4, 12]].forEach(([t, n]) =>
+    add("sobriete", t, n === 1 ? "Sans livraison" : n + " mois sans livraison",
+      n === 1 ? "Un mois sans une seule livraison de repas." : n + " mois consécutifs sans livraison de repas.",
+      streak(noCat("c_delivery"), n), longest(noCat("c_delivery")), n));
+  add("sobriete", 3, "Ni resto ni livraison", "Un mois sans restaurant ni livraison de repas.",
+    first(m => !(m.cats.c_resto > 0) && !(m.cats.c_delivery > 0) && m.nOps > 0),
+    first(m => !(m.cats.c_resto > 0) && !(m.cats.c_delivery > 0) && m.nOps > 0) ? 1 : 0, 1);
+  /* un poste dont les douze derniers mois pèsent nettement moins que les douze d'avant */
+  const postePlonge = ratio => {
+    let at = null, bestDrop = 0;
+    GROUPS.filter(g => g.kind === KIND_EXPENSE).forEach(g => {
+      for (let i = 24; i <= ms.length; i++) {
+        const recent = ms.slice(i - 12, i).reduce((a, m) => a + (m.groups[g.id] || 0), 0);
+        const older = ms.slice(i - 24, i - 12).reduce((a, m) => a + (m.groups[g.id] || 0), 0);
+        if (older < 240) continue;                       // trop petit pour conclure
+        bestDrop = Math.max(bestDrop, (1 - recent / older) * 100);
+        if (recent <= older * ratio && !at) at = ms[i - 1].k;
+      }
+    });
+    return { at, bestDrop };
+  };
+  [[3, 0.8, 20], [5, 0.5, 50]].forEach(([t, r, p]) => {
+    const x = postePlonge(r);
+    add("sobriete", t, "Un poste à −" + p + " %",
+      "Un poste dont les douze derniers mois pèsent " + p + " % de moins que les douze précédents.",
+      x.at, x.bestDrop, p);
+  });
+
+  /* ---------- Défis loufoques ---------- */
+  const ops = DB.tx.filter(isExpense);
+  const cents = n => Math.round(Math.abs(n) * 100);
+  add("loufoque", 1, "Compte rond", "Terminer un mois sur un total de dépenses pile à l’euro.",
+    first(m => m.exp > 0 && cents(m.exp) % 100 === 0), 1, 1);
+  add("loufoque", 1, "Chiffre rond", "Une opération d’au moins 100 € tombant sur un montant pile.",
+    ops.some(t => cents(t.amount) >= 10000 && cents(t.amount) % 10000 === 0)
+      ? monthKey(ops.find(t => cents(t.amount) >= 10000 && cents(t.amount) % 10000 === 0).date) : null, 1, 1);
+  [[2, 10], [3, 15], [4, 20]].forEach(([t, n]) =>
+    add("loufoque", t, n + " opérations en un jour", "Enchaîner " + n + " dépenses dans la même journée.",
+      first(m => m.maxDay >= n), best(m => m.maxDay), n));
+  add("loufoque", 2, "La réponse", "Une opération à exactement 42,00 €.",
+    ops.some(t => cents(t.amount) === 4200) ? monthKey(ops.find(t => cents(t.amount) === 4200).date) : null, 1, 1);
+  const palin = t => { const s = String(cents(t.amount)); return s.length >= 3 && s === s.split("").reverse().join(""); };
+  add("loufoque", 3, "Palindrome", "Un montant qui se lit pareil dans les deux sens, comme 12,21 €.",
+    ops.some(palin) ? monthKey(ops.find(palin).date) : null, 1, 1);
+  /* la plus longue traversée sans la moindre dépense, à l'intérieur d'un mois */
+  const vide = n => {
+    for (const m of ms) {
+      const days = new Set(m.s.ops.filter(isExpense).map(t => dayOf(t.date)));
+      const dim = new Date(+m.k.slice(0, 4), +m.k.slice(5, 7), 0).getDate();
+      let run = 0;
+      for (let d = 1; d <= dim; d++) { run = days.has(d) ? 0 : run + 1; if (run >= n) return m.k; }
+    }
+    return null;
+  };
+  const videMax = () => {
+    let mx = 0;
+    for (const m of ms) {
+      const days = new Set(m.s.ops.filter(isExpense).map(t => dayOf(t.date)));
+      const dim = new Date(+m.k.slice(0, 4), +m.k.slice(5, 7), 0).getDate();
+      let run = 0;
+      for (let d = 1; d <= dim; d++) { run = days.has(d) ? 0 : run + 1; mx = Math.max(mx, run); }
+    }
+    return mx;
+  };
+  [[3, 7], [4, 14]].forEach(([t, n]) =>
+    add("loufoque", t, n + " jours sans rien", n + " jours consécutifs sans la moindre dépense.",
+      vide(n), videMax(), n));
+  add("loufoque", 4, "Jumeaux parfaits", "Deux mois de suite dépensés au centime près.",
+    (() => { for (let i = 1; i < ms.length; i++) if (ms[i].exp > 0 && cents(ms[i].exp) === cents(ms[i - 1].exp)) return ms[i].k; return null; })(), 1, 1);
+  add("loufoque", 2, "Triplés", "Trois opérations du même montant dans un même mois.",
+    first(m => { const c = {}; return m.s.ops.filter(isExpense).some(t => (c[cents(t.amount)] = (c[cents(t.amount)] || 0) + 1) >= 3); }), 1, 1);
+  add("loufoque", 5, "Année bissextile", "Dépenser un 29 février.",
+    ops.some(t => t.date.slice(5) === "02-29") ? monthKey(ops.find(t => t.date.slice(5) === "02-29").date) : null, 1, 1);
+  add("loufoque", 4, "Le mois à cent", "Cent opérations ou plus dans un seul mois.",
+    first(m => m.nOps >= 100), best(m => m.nOps), 100);
+
+  return out;
+}
+
+/* Le plus rare des trophées gagnés dans un mois donné. */
+function v2TrophyOfMonth(key) {
+  const won = v2Trophies().filter(t => t.at === key);
+  if (!won.length) return null;
+  won.sort((a, b) => b.tier - a.tier);
+  return { top: won[0], n: won.length };
+}
+
+/* -------------------------------------------------------------------------
+   Écran
+   ------------------------------------------------------------------------- */
+function v2TroCard(t) {
+  const on = !!t.at;
+  return '<div class="tro' + (on ? " on" : "") + '" style="--rc:var(--r' + t.tier + ');--rb:var(--r' + t.tier + 'b)" tabindex="0">' +
+    '<span class="tw">' + v2TroSvg(t.fam, t.tier, on, t.pct) +
+    (on ? '<span class="seal"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>' : "") + "</span>" +
+    '<span class="rk">' + V2_RANK[t.tier - 1] + "</span>" +
+    '<span class="tn">' + esc(t.name) + "</span>" +
+    '<span class="ts2">' + (on ? monthLabel(t.at) : Math.round(t.pct) + " %") + "</span>" +
+    '<span class="ttip"><span class="d">' + esc(t.desc) + "</span>" +
+      '<span class="w">' + (on ? "Décroché en <b>" + esc(monthLabel(t.at)) + "</b>"
+        : "Progression <b>" + Math.round(t.pct) + " %</b>") + "</span></span></div>";
+}
+
+function viewTrophies() {
+  const all = v2Trophies(), won = all.filter(t => t.at);
+  let html = '<div class="v2"><div class="top"><div class="per"><h1>Trophées</h1>' +
+    '<span class="st">' + won.length + " sur " + all.length + "</span></div></div>";
+
+  const byRank = [1, 2, 3, 4, 5].map(r => {
+    const g = all.filter(t => t.tier === r);
+    return { r, n: g.filter(t => t.at).length, tot: g.length };
+  });
+  html += '<div class="trohead"><div><div class="big num">' + won.length +
+    ' <span class="num">sur ' + all.length + "</span></div>" +
+    '<div class="sub">' + (won.length === all.length
+      ? "La collection est complète. Il n’y a plus rien à décrocher."
+      : "Tout se calcule sur votre historique complet : un trophée porte le mois où il a été gagné.") +
+    "</div></div><div class=\"rbars\">" +
+    byRank.map(b => '<div class="rbar" style="--rc:var(--r' + b.r + ')">' +
+      '<span class="n num" style="color:var(--r' + b.r + ')">' + b.n + "/" + b.tot + "</span>" +
+      '<span class="t"><i style="width:' + (b.tot ? b.n / b.tot * 100 : 0) + "%;background:var(--r" + b.r + ')"></i></span>' +
+      '<span class="l" style="color:var(--r' + b.r + ')">' + V2_RANK[b.r - 1] + "</span></div>").join("") +
+    "</div></div>";
+
+  Object.keys(V2_FAM).forEach(f => {
+    const g = all.filter(t => t.fam === f).sort((a, b) => a.tier - b.tier || (a.at ? 0 : 1) - (b.at ? 0 : 1));
+    if (!g.length) return;
+    const n = g.filter(t => t.at).length, full = n === g.length;
+    html += '<div class="famsec' + (full ? " full" : "") + '"><div class="famhead">' +
+      '<span class="fn">' + V2_FAM[f].n + "</span>" +
+      '<span class="fc">' + n + " sur " + g.length + "</span>" +
+      '<span class="fd">' + V2_FAM[f].d + "</span></div>" +
+      '<div class="trorow">' + g.map(v2TroCard).join("") + "</div></div>";
+  });
+  return html + "</div>";
+}
+
+/* Le bandeau qui annonce un trophée décroché dans le mois consulté. */
+function v2TroBanner(key) {
+  const w = v2TrophyOfMonth(key);
+  if (!w) return "";
+  const t = w.top;
+  return '<div class="newban" style="--rc:var(--r' + t.tier + ');--rb:var(--r' + t.tier + 'b)">' +
+    '<span class="tw tro on" style="--rc:var(--r' + t.tier + ')">' + v2TroSvg(t.fam, t.tier, true, 100) + "</span>" +
+    '<div><div class="k">Nouveau trophée · ' + V2_RANK[t.tier - 1] + "</div>" +
+    '<div class="n">' + esc(t.name) + "</div>" +
+    '<div class="d">' + esc(t.desc) + "</div>" +
+    (w.n > 1 ? '<div class="more">et ' + (w.n - 1) + " autre" + (w.n > 2 ? "s" : "") + " ce mois-ci</div>" : "") +
+    "</div>" +
+    '<button class="go" data-act="view" data-view="trophees">Voir la collection</button></div>';
 }
 
 /* =========================================================================

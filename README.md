@@ -12,6 +12,18 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-18 — une collection de trophées
+
+Ajout : une entrée **Trophées** dans la barre latérale, et **58 succès** répartis en cinq familles. Le Patrimoine avait ses jalons ; le Budget a désormais les siens, avec sa propre langue.
+
+- **La rareté se voit.** Cinq rangs — commun, peu commun, rare, très rare, exceptionnel — et c’est **l’ornement** qui les porte : le liseré arrive au deuxième, six rayons au troisième, un laurier ouvert au quatrième, la couronne fermée et une gemme au cinquième. Un premier essai faisait varier un simple compteur de points, et l’on ne sentait rien : un point de plus n’est pas une récompense, une couronne si.
+- La couleur suit le même mouvement, **de la pierre à la braise** en passant par le bleu, l’indigo et l’améthyste. Ni bronze, ni argent, ni or : l’échelle n’appartient qu’au Budget et ne se confond jamais avec les médaillons ronds du Patrimoine. Comme l’ornement dit le rang autant que la teinte, elle survit au daltonisme.
+- **La forme de l’emblème dit la famille**, la couleur ne parle que de rareté. Un seul système de couleur par badge au lieu de deux : jetons pour l’Épargne, maillon pour la Régularité, écu pour la Discipline, feuille pour la Sobriété, dé pour les **défis loufoques** — cette dernière famille n’ayant volontairement aucun rapport avec la bonne gestion, ce qui empêche l’ensemble de devenir moralisateur. On y trouve le compte rond, la journée à vingt opérations, le palindrome à 12,21 €, les jumeaux parfaits et le 29 février.
+- **Tout se calcule sur l’historique complet** : un succès mérité ne devrait pas dépendre de la date d’installation, et chaque trophée porte le mois où il a été gagné, pas celui où on le découvre. Les paliers hauts sont calibrés en conséquence — sur deux ans de données de test, 26 trophées sur 58 se débloquent, mais **aucun exceptionnel et seulement deux très rares**.
+- Réserve honnête, inscrite dans le code : les objectifs mensuels appliqués au passé sont ceux d’aujourd’hui, l’application ne conservant pas l’historique des plafonds. Discipline et Régularité s’en trouvent légèrement optimistes.
+- Un trophée non acquis garde **son emblème en creux et son arc de progression** sur le contour de l’hexagone, avec le pourcentage parcouru. Il reste une cible, pas un échec — et le survol donne la définition exacte ainsi que le mois du déblocage.
+- Sur **Le mois**, un trophée décroché dans le mois consulté s’annonce entre les pastilles et les objectifs, **dans la couleur de sa rareté** : un exceptionnel ne s’annonce pas comme un commun. Le plus rare passe devant, les autres se comptent d’une ligne.
+
 ### 2026-08-18 — un second écran mensuel
 
 Ajout : un onglet **Mois v2** dans la barre latérale, à côté de **Mois** laissé intact au pixel près. Même mois consulté, mêmes données — `monthStats`, `baseCost`, `comparisonRows`, `merchantsOfCat`, `patLinkedMove` — et aucun calcul refait autrement : seule la mise en forme change. Les deux coexistent le temps de trancher ; si v2 l'emporte, v1 disparaît.
