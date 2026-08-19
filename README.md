@@ -12,6 +12,15 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-19 — les deux rangées s’alignent
+
+Le partage entre les objectifs et **Où en est le mois** ne tombait pas sur celui des deux pastilles du dessus : une colonne souple suivie d’un panneau de 296 px d’un côté, deux moitiés égales de l’autre. Deux bordures verticales séparées de quelques dizaines de pixels se remarquent immédiatement.
+
+- Les deux grilles partagent désormais **les mêmes colonnes et la même gouttière**. Le panneau gagne près du double de largeur, la grille d’objectifs passe de six vignettes par rangée à quatre — et la bordure du panneau prolonge exactement celle de la pastille qui le surmonte.
+- **La courbe s’étire en largeur sans grandir en hauteur.** À rapport constant elle serait passée de 104 à 238 px et aurait écrasé le tableau ; sur la mise en page repliée, elle aurait dépassé 500 px. Hauteur fixée à 148 px, étirement horizontal assumé, épaisseur des traits préservée par `non-scaling-stroke`. Le point du jour, qui se serait ovalisé, est devenu un segment de longueur nulle à bout rond.
+- **Un seul seuil de repli**, à 940 px, au lieu de 940 pour les pastilles et 1080 pour le partage : entre les deux, les rangées cessaient d’être alignées alors que c’est justement ce qu’on venait de leur demander.
+- Corrigé au passage : le nombre de colonnes qui décide du côté d’ouverture des cartes de survol était mesuré sur **toute la colonne centrale**, alors que la grille n’en occupe qu’une part — neuf colonnes annoncées pour quatre réelles. Les vignettes de bord droit n’étaient pas repérées, leur carte sortait de l’écran et ouvrait une barre de défilement horizontale. Et sur une seule colonne, la carte, plus large que sa vignette, s’aligne maintenant sur ses deux côtés.
+
 ### 2026-08-18 — une collection de trophées
 
 Ajout : une entrée **Trophées** dans la barre latérale, et **60 succès** répartis en cinq familles. Le Patrimoine avait ses jalons ; le Budget a désormais les siens, avec sa propre langue.

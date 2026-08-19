@@ -741,17 +741,26 @@ html[data-theme="dark"] .v2{
 /* La grille d'objectifs se termine en dents de scie et laissait un vide en bas
    à droite. Un panneau fixe referme la composition — et il n'est pas là pour
    combler : c'est la seule chose qui dise si le mois entier dérape. */
-.v2 .gsplit{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:12px;align-items:start}
+/* Mêmes colonnes et même gouttière que .chips : les deux rangées se lisent
+   comme un seul appareil, et la bordure du panneau prolonge celle de la
+   pastille qui le surmonte au lieu de la manquer de quelques dizaines de
+   pixels. Toute retouche ici doit se faire des deux côtés. */
+.v2 .gsplit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
 .v2 .pulse{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px 14px}
 .v2 .pulse .ph{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);
   font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:10px}
-.v2 .pulse svg{display:block;width:100%;height:auto;overflow:visible}
+/* Hauteur fixe, largeur libre. À rapport constant, la courbe doublait de
+   hauteur en même temps que le panneau et écrasait le tableau ; elle aurait
+   dépassé 500 px sur la mise en page repliée. L'étirement horizontal est
+   assumé — les traits gardent leur épaisseur grâce à non-scaling-stroke. */
+.v2 .pulse svg{display:block;width:100%;height:148px;overflow:visible}
+.v2 .pulse svg *{vector-effect:non-scaling-stroke}
 .v2 .pulse .axis{stroke:var(--line);stroke-width:1}
 .v2 .pulse .usual{fill:none;stroke:var(--ink-4);stroke-width:1.6;stroke-dasharray:none;opacity:.75}
 .v2 .pulse .now{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
 .v2 .pulse .proj{fill:none;stroke-width:1.8;stroke-dasharray:3 3;stroke-linecap:round}
 .v2 .pulse .proj.up{stroke:var(--bad)} .v2 .pulse .proj.down{stroke:var(--win)}
-.v2 .pulse .dot{fill:var(--ink)}
+.v2 .pulse .dot{stroke:var(--ink);stroke-width:5.2;stroke-linecap:round}
 .v2 .pulse .dayline{stroke:var(--ink);stroke-width:1;opacity:.25;stroke-dasharray:2 3}
 .v2 .pulse .lg{display:flex;gap:12px;flex-wrap:wrap;margin:9px 0 11px;font-size:10px;color:var(--ink-3)}
 .v2 .pulse .lg i{display:inline-block;width:14px;height:0;border-top-width:2px;border-top-style:solid;
@@ -787,7 +796,7 @@ html[data-theme="dark"] .v2{
   font-family:var(--prose);font-size:12px;color:var(--ink-3);line-height:1.45}
 .v2 .pulse .soon b{font-family:var(--disp);font-variation-settings:"wght" 640,"wdth" 100;
   font-size:11.5px;color:var(--ink-2)}
-@media(max-width:1080px){.v2 .gsplit{grid-template-columns:1fr}}
+
 
 /* ---------- détail d'un dépassement ---------- */
 .v2 .detail{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px}
@@ -974,14 +983,24 @@ html[data-theme="dark"] .v2{
 @media(max-width:940px){
   .v2 .board{grid-template-columns:1fr}
   .v2 .gauge{border-left:0;border-top:1px solid var(--line)}
-  .v2 .chips{grid-template-columns:1fr}
+  /* Les pastilles et le partage du dessous se replient ensemble : décalés, ils
+     laissaient une bande de largeurs où les deux rangées ne s'alignaient plus.
+     v2GoalCells() interroge ce même seuil pour compter ses colonnes. */
+  .v2 .chips,.v2 .gsplit{grid-template-columns:1fr}
 }
 @media(max-width:900px){
   .v2 .ohead,.v2 .orow{grid-template-columns:44px minmax(0,1fr) 96px;gap:10px}
   .v2 .ohead span:nth-child(3),.v2 .ohead span:nth-child(5),.v2 .orow .otag,.v2 .orow .dest,.v2 .orow .acts,.v2 .orow .raw{display:none}
 }
 @media(max-width:720px){.v2 .dgrid{grid-template-columns:1fr;gap:16px}}
-@media(max-width:660px){.v2{margin:-22px -16px -60px;padding:18px 16px 60px}}
+@media(max-width:660px){
+  .v2{margin:-22px -16px -60px;padding:18px 16px 60px}
+  /* Sur une seule colonne, la carte est plus large que la vignette : centrée
+     sur elle, elle passait le bord de l'écran. Elle s'aligne alors sur ses
+     deux côtés plutôt que de garder une largeur fixe. */
+  .v2 .tip{left:0;right:0;width:auto;transform:translateY(-4px)}
+  .v2 .objwrap:hover .tip,.v2 .objwrap:focus-within .tip{transform:translateY(0)}
+}
 @media(prefers-reduced-motion:reduce){.v2 *{transition:none!important;animation:none!important}}
 
 
@@ -2968,7 +2987,14 @@ function v2Month(c) {
   } else {
     const R = 27, CIRC = 2 * Math.PI * R;
     const gw = 116 + 8;
-    const availW = Math.max((document.querySelector(".main") || {}).clientWidth - 60 || window.innerWidth - 280, 240);
+    const inner = Math.max((document.querySelector(".main") || {}).clientWidth - 60 || window.innerWidth - 280, 240);
+    /* La grille ne prend que la moitié de la colonne dès que « Où en est le
+       mois » se range à côté — le seuil est celui de .gsplit, interrogé plutôt
+       que recopié. Compter sur la largeur entière annonçait neuf colonnes pour
+       quatre, si bien que les vignettes de bord droit n'étaient pas repérées et
+       que leur carte de survol sortait de l'écran. */
+    const cote = !window.matchMedia("(max-width:940px)").matches;   // cf. .v2 .gsplit
+    const availW = Math.max(cote ? (inner - 10) / 2 : inner, 240);
     const cols = Math.max(Math.floor(availW / gw), 1);
     const cells = rows.map((r, i) => {
       const canOpen = r.st === "bad", isOpen = UI.v2goal === r.id;
@@ -3136,7 +3162,8 @@ function v2Pulse(c) {
   const Y = v => H - (v / top) * H;
   const path = (arr, upto) => arr.slice(0, upto).map((v, i) => (i ? "L" : "M") + X(i + 1).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
 
-  html += '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" role="img" aria-label="Dépenses cumulées du mois">' +
+  html += '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" preserveAspectRatio="none"' +
+    ' role="img" aria-label="Dépenses cumulées du mois">' +
     '<line class="axis" x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '"></line>';
   if (usual) html += '<path class="usual" d="' + path(usual, dim) + '"></path>';
   html += '<path class="now" d="' + path(cur, day) + '"></path>';
@@ -3145,7 +3172,10 @@ function v2Pulse(c) {
       X(day).toFixed(1) + " " + Y(spent).toFixed(1) + "L" + X(dim).toFixed(1) + " " + Y(proj).toFixed(1) + '"></path>' +
       '<line class="dayline" x1="' + X(day).toFixed(1) + '" y1="0" x2="' + X(day).toFixed(1) + '" y2="' + H + '"></line>';
   }
-  html += '<circle class="dot" cx="' + X(day).toFixed(1) + '" cy="' + Y(spent).toFixed(1) + '" r="2.6"></circle></svg>';
+  /* Un cercle s'ovaliserait sous l'étirement horizontal. Un segment de longueur
+     nulle à bout rond reste rond : son épaisseur échappe à la transformation. */
+  const dx = X(day).toFixed(1), dy = Y(spent).toFixed(1);
+  html += '<line class="dot" x1="' + dx + '" y1="' + dy + '" x2="' + dx + '" y2="' + dy + '"></line></svg>';
 
   html += '<div class="lg"><span class="l1"><i></i>ce mois</span>' +
     (usual ? '<span class="l2"><i></i>habituellement</span>' : "") + "</div>";
