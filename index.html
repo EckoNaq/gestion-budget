@@ -2818,7 +2818,7 @@ function v2Month(c) {
           '<span class="bdg">' + V2_BADGE[r.st] + "</span>" +
           '<span class="nm">' + esc(r.name) + "</span>" +
           '<span class="v num">' + esc(fmtEurShort(r.spent)) + "</span>" +
-          '<span class="of num">sur ' + esc(fmtEurShort(r.target)) + " €</span>" +
+          '<span class="of num">sur ' + esc(fmtEurShort(r.target)) + "</span>" +
         "</" + tag + ">" + v2Tip(r, c) + "</div>";
     });
     const open = rows.findIndex(r => r.id === UI.v2goal);
