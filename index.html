@@ -738,6 +738,41 @@ html[data-theme="dark"] .v2{
 .v2 .tip .note{display:block;margin-top:9px;padding-top:9px;border-top:1px solid var(--line-2);
   font-family:var(--prose);font-size:12px;color:var(--ink-3);line-height:1.45}
 
+/* La grille d'objectifs se termine en dents de scie et laissait un vide en bas
+   à droite. Un panneau fixe referme la composition — et il n'est pas là pour
+   combler : c'est la seule chose qui dise si le mois entier dérape. */
+.v2 .gsplit{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:12px;align-items:start}
+.v2 .pulse{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px 14px}
+.v2 .pulse .ph{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);
+  font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:10px}
+.v2 .pulse svg{display:block;width:100%;height:auto;overflow:visible}
+.v2 .pulse .axis{stroke:var(--line);stroke-width:1}
+.v2 .pulse .usual{fill:none;stroke:var(--ink-4);stroke-width:1.6;stroke-dasharray:none;opacity:.75}
+.v2 .pulse .now{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.v2 .pulse .proj{fill:none;stroke-width:1.8;stroke-dasharray:3 3;stroke-linecap:round}
+.v2 .pulse .proj.up{stroke:var(--bad)} .v2 .pulse .proj.down{stroke:var(--win)}
+.v2 .pulse .dot{fill:var(--ink)}
+.v2 .pulse .dayline{stroke:var(--ink);stroke-width:1;opacity:.25;stroke-dasharray:2 3}
+.v2 .pulse .lg{display:flex;gap:12px;flex-wrap:wrap;margin:9px 0 11px;font-size:10px;color:var(--ink-3)}
+.v2 .pulse .lg i{display:inline-block;width:14px;height:0;border-top-width:2px;border-top-style:solid;
+  margin-right:5px;vertical-align:3px}
+.v2 .pulse .lg .l1 i{border-color:var(--ink)}
+.v2 .pulse .lg .l2 i{border-color:var(--ink-4)}
+.v2 .pulse table{width:100%;border-collapse:collapse}
+.v2 .pulse th{text-align:left;font-size:11.5px;font-variation-settings:"wght" 500,"wdth" 100;
+  color:var(--ink-2);padding:3px 0;white-space:nowrap}
+.v2 .pulse td{text-align:right;font-size:12.5px;font-variation-settings:"wght" 660,"wdth" 92;
+  padding:3px 0;white-space:nowrap}
+.v2 .pulse td.q{color:var(--ink-3);font-variation-settings:"wght" 470,"wdth" 92}
+.v2 .pulse td.up{color:var(--bad-ink)} .v2 .pulse td.down{color:var(--win-ink)}
+.v2 .pulse tr.sum th,.v2 .pulse tr.sum td{border-top:1px solid var(--ink);padding-top:7px}
+.v2 .pulse tr.sum th{font-variation-settings:"wght" 660,"wdth" 100;color:var(--ink)}
+.v2 .pulse .soon{margin-top:11px;padding-top:10px;border-top:1px solid var(--line-2);
+  font-family:var(--prose);font-size:12px;color:var(--ink-3);line-height:1.45}
+.v2 .pulse .soon b{font-family:var(--disp);font-variation-settings:"wght" 640,"wdth" 100;
+  font-size:11.5px;color:var(--ink-2)}
+@media(max-width:1080px){.v2 .gsplit{grid-template-columns:1fr}}
+
 /* ---------- détail d'un dépassement ---------- */
 .v2 .detail{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px}
 .v2 .detail .dh{display:flex;align-items:baseline;gap:10px;margin-bottom:11px}
@@ -2824,7 +2859,8 @@ function v2Month(c) {
     const open = rows.findIndex(r => r.id === UI.v2goal);
     /* Le panneau se glisse sous la rangée de la vignette ouverte. */
     if (open >= 0) cells.splice(Math.min((Math.floor(open / cols) + 1) * cols, cells.length), 0, v2GoalDetail(rows[open], s));
-    html += '<div class="gg' + v2AnimClass("all") + '">' + cells.join("") + "</div>";
+    html += '<div class="gsplit"><div class="gg' + v2AnimClass("all") + '">' + cells.join("") + "</div>" +
+      v2Pulse(c) + "</div>";
   }
   html += "</div>";
 
@@ -2892,6 +2928,95 @@ function v2GoalDetail(r, s) {
       : "<tr><th>Aucune dépense</th><td></td></tr>") +
     "</tbody></table>";
   return html + "</div></div>";
+}
+
+/* Cumul des dépenses jour par jour sur un mois. */
+function v2Cumul(key) {
+  const dim = new Date(+key.slice(0, 4), +key.slice(5, 7), 0).getDate();
+  const byDay = new Array(dim).fill(0);
+  opsOfMonth(key).filter(isExpense).forEach(t => { byDay[dayOf(t.date) - 1] += -t.amount; });
+  const out = []; let run = 0;
+  for (let i = 0; i < dim; i++) { run += byDay[i]; out.push(run); }
+  return out;
+}
+/* La même chose, moyennée sur les mois précédents. L'échantillonnage se fait à
+   fraction de mois égale et non à jour égal, sans quoi un février de 28 jours
+   se comparerait mal à un mois de 31. */
+function v2Usual(key, n) {
+  const series = [];
+  for (let i = 1; i <= n; i++) {
+    const k = addMonth(key, -i);
+    if (opsOfMonth(k).filter(isExpense).length) series.push(v2Cumul(k));
+  }
+  if (!series.length) return null;
+  const dim = new Date(+key.slice(0, 4), +key.slice(5, 7), 0).getDate(), out = [];
+  for (let d = 1; d <= dim; d++) {
+    const vals = series.map(x => x[Math.min(Math.ceil(d / dim * x.length), x.length) - 1]);
+    out.push(vals.reduce((a, b) => a + b, 0) / vals.length);
+  }
+  return out;
+}
+
+/* Le panneau « Où en est le mois ». Les anneaux répondent poste par poste ;
+   celui-ci répond pour le mois entier, et surtout dit depuis quand ça dérape. */
+function v2Pulse(c) {
+  const key = c.key, dim = c.days, day = c.day;
+  const cur = v2Cumul(key), usual = v2Usual(key, 3);
+  const spent = cur[day - 1] || 0;
+  const p = c.running ? day / dim : 1;
+  const proj = p > 0 ? spent / p : spent;
+  const W = 268, H = 104;
+
+  let html = '<div class="pulse"><div class="ph">Où en est le mois</div>';
+
+  if (!cur.length || (!usual && !spent)) {
+    return html + '<div class="soon">Pas encore assez d’historique pour situer ce mois.</div></div>';
+  }
+
+  const top = Math.max(cur[day - 1] || 0, usual ? usual[dim - 1] : 0, c.running ? proj : 0, 1) * 1.06;
+  const X = d => ((d - 1) / (dim - 1)) * W;
+  const Y = v => H - (v / top) * H;
+  const path = (arr, upto) => arr.slice(0, upto).map((v, i) => (i ? "L" : "M") + X(i + 1).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+
+  html += '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" role="img" aria-label="Dépenses cumulées du mois">' +
+    '<line class="axis" x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '"></line>';
+  if (usual) html += '<path class="usual" d="' + path(usual, dim) + '"></path>';
+  html += '<path class="now" d="' + path(cur, day) + '"></path>';
+  if (c.running && day < dim) {
+    html += '<path class="proj ' + (usual && proj > usual[dim - 1] ? "up" : "down") + '" d="M' +
+      X(day).toFixed(1) + " " + Y(spent).toFixed(1) + "L" + X(dim).toFixed(1) + " " + Y(proj).toFixed(1) + '"></path>' +
+      '<line class="dayline" x1="' + X(day).toFixed(1) + '" y1="0" x2="' + X(day).toFixed(1) + '" y2="' + H + '"></line>';
+  }
+  html += '<circle class="dot" cx="' + X(day).toFixed(1) + '" cy="' + Y(spent).toFixed(1) + '" r="2.6"></circle></svg>';
+
+  html += '<div class="lg"><span class="l1"><i></i>ce mois</span>' +
+    (usual ? '<span class="l2"><i></i>habituellement</span>' : "") + "</div>";
+
+  const ecart = usual ? spent - usual[day - 1] : null;
+  html += "<table><tbody>" +
+    "<tr><th>" + (c.running ? "Dépensé au " + day : "Dépensé") + "</th><td class=\"num\">" + esc(fmtEur(spent)) + "</td></tr>";
+  if (usual) html += "<tr><th>Habituellement</th><td class=\"num q\">" + esc(fmtEur(usual[day - 1])) + "</td></tr>" +
+    '<tr><th>Écart</th><td class="num ' + (ecart > 0 ? "up" : "down") + '">' + esc(fmtEur(ecart, { plus: true })) + "</td></tr>";
+  if (c.running) html += '<tr class="sum"><th>Fin de mois estimée</th><td class="num ' +
+    (usual && proj > usual[dim - 1] ? "up" : "down") + '">' + esc(fmtEur(proj)) + "</td></tr>";
+  /* Sur un mois clos, le dernier jour et le total sont la même valeur : la
+     répéter ne dit rien de plus. */
+  if (usual && c.running) html += "<tr><th>Mois habituel</th><td class=\"num q\">" +
+    esc(fmtEur(usual[dim - 1])) + "</td></tr>";
+  html += "</tbody></table>";
+
+  /* Ce qu'il reste à encaisser d'ici la fin du mois : sans ça, un mois calme au
+     20 peut réserver 200 € de prélèvements le 28. */
+  if (c.running) {
+    const soon = baseCost().kept.filter(r => r.period === 1 && r.months[key] == null && r.day > day);
+    const tot = soon.reduce((a, r) => a + r.monthly, 0);
+    html += '<div class="soon">' + (soon.length
+      ? "Encore <b>" + soon.length + " charge" + (soon.length > 1 ? "s" : "") + "</b> à passer d’ici la fin du mois, " +
+        "<b>" + fmtEur(tot) + "</b> — " + soon.slice(0, 3).map(r => esc(r.name) + " le " + r.day).join(", ") +
+        (soon.length > 3 ? "…" : "") + "."
+      : "Toutes les charges fixes du mois sont passées.") + "</div>";
+  }
+  return html + "</div>";
 }
 
 /* ---------------- onglet « Où ça part » ---------------- */
