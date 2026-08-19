@@ -3496,9 +3496,15 @@ function v2TroSvg(fam, tier, on, pct, size) {
    ------------------------------------------------------------------------- */
 let V2_MS_CACHE = null, V2_MS_STAMP = "";
 function v2MonthSeries() {
-  const stamp = DB.tx.length + "|" + Object.keys(DB.goals).join() + "|" + (DB.settings.savingsGoal || 0);
+  const stamp = DB.tx.length + "|" + Object.keys(DB.goals).join() + "|" +
+    (DB.settings.savingsGoal || 0) + "|" + monthKey(todayISO());
   if (V2_MS_CACHE && V2_MS_STAMP === stamp) return V2_MS_CACHE;
-  const keys = Array.from(new Set(DB.tx.map(t => monthKey(t.date)))).sort();
+  /* Seuls les mois clos comptent. Un mois en cours porte un salaire entier et
+     des dépenses partielles : son taux d'épargne est flatteur et son total
+     tronqué. Un trophée décroché là-dessus ne voudrait rien dire — il apparaît
+     donc quand le mois se ferme, pas avant. */
+  const running = monthKey(todayISO());
+  const keys = Array.from(new Set(DB.tx.map(t => monthKey(t.date)))).filter(k => k < running).sort();
   const goalIds = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0);
   V2_MS_CACHE = keys.map(k => {
     const s = monthStats(k);
@@ -3548,39 +3554,38 @@ function v2Trophies() {
   const cumTotal = val => ms.reduce((a, m) => a + (val(m) || 0), 0);
 
   /* ---------- Épargne ---------- */
-  [[1, 10], [2, 20], [3, 30], [4, 40], [5, 50]].forEach(([t, p]) =>
+  [[1, 20], [2, 30], [3, 40], [4, 50], [5, 60]].forEach(([t, p]) =>
     add("epargne", t, p + " % épargnés", "Un mois où vous mettez de côté au moins " + p + " % de vos revenus.",
       first(m => m.rate != null && m.rate >= p), best(m => m.rate), p));
-  [[1, 1000], [2, 5000], [3, 10000], [4, 25000], [5, 50000]].forEach(([t, c]) =>
+  [[1, 5000], [2, 15000], [3, 30000], [4, 60000], [5, 120000]].forEach(([t, c]) =>
     add("epargne", t, fmtEurShort(c) + " de côté", "Épargne cumulée depuis le début de votre historique.",
       cumAt(m => Math.max(m.bal, 0), c), Math.max(cumTotal(m => Math.max(m.bal, 0)), 0), c));
-  [[1, 500], [2, 1000], [3, 1500], [4, 2500]].forEach(([t, c]) =>
+  [[1, 800], [2, 1400], [3, 2000], [4, 3000]].forEach(([t, c]) =>
     add("epargne", t, fmtEurShort(c) + " en un mois", "Un seul mois à " + fmtEurShort(c) + " épargnés.",
       first(m => m.bal >= c), best(m => m.bal), c));
 
   /* ---------- Régularité ---------- */
-  if (goal > 0) [[1, 3], [2, 6], [3, 12], [4, 24], [5, 36]].forEach(([t, n]) =>
+  if (goal > 0) [[1, 6], [2, 12], [3, 24], [4, 36], [5, 48]].forEach(([t, n]) =>
     add("regularite", t, n + " mois d’affilée", n + " mois consécutifs au-dessus de votre objectif d’épargne.",
       streak(m => m.rate != null && m.rate >= goal, n), longest(m => m.rate != null && m.rate >= goal), n));
-  [[1, 6], [2, 12], [3, 24]].forEach(([t, n]) =>
+  [[1, 12], [2, 24], [3, 36]].forEach(([t, n]) =>
     add("regularite", t, n + " mois dans le vert", n + " mois consécutifs terminés avec un solde positif.",
       streak(m => m.bal > 0, n), longest(m => m.bal > 0), n));
-  [[1, 12], [2, 24], [3, 36], [5, 60]].forEach(([t, n]) =>
+  [[1, 24], [2, 36], [3, 60], [5, 96]].forEach(([t, n]) =>
     add("regularite", t, n + " mois suivis", n + " mois d’affilée avec au moins une opération enregistrée.",
       streak(() => true, n), ms.length, n));
 
   /* ---------- Discipline ---------- */
   const sansFaute = m => m.goalTotal > 0 && m.held === m.goalTotal;
-  [[1, 1], [2, 3], [3, 6], [4, 12], [5, 24]].forEach(([t, n]) =>
+  [[1, 1], [2, 6], [3, 12], [4, 24], [5, 36]].forEach(([t, n]) =>
     add("discipline", t, n === 1 ? "Un mois sans faute" : n + " mois sans faute",
       n === 1 ? "Un mois où aucun objectif n’est dépassé." : n + " mois consécutifs sans le moindre dépassement.",
       streak(sansFaute, n), longest(sansFaute), n));
-  [[1, 1], [2, 6], [3, 12]].forEach(([t, n]) =>
-    add("discipline", t, n === 1 ? "Tout est classé" : "Tout classé " + n + " mois",
-      n === 1 ? "Un mois dont chaque opération porte une catégorie."
-              : n + " mois consécutifs sans une seule opération en attente.",
+  [[1, 3], [2, 12], [3, 24]].forEach(([t, n]) =>
+    add("discipline", t, "Tout classé " + n + " mois",
+      n + " mois consécutifs sans une seule opération en attente.",
       streak(m => m.todo === 0 && m.nOps > 0, n), longest(m => m.todo === 0 && m.nOps > 0), n));
-  [[2, 12], [4, 24]].forEach(([t, n]) => {
+  [[2, 18], [4, 30]].forEach(([t, n]) => {
     /* un même objectif tenu n mois d'affilée, quel qu'il soit */
     let at = null, mx = 0;
     const ids = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0);
@@ -3592,7 +3597,7 @@ function v2Trophies() {
         if (r === n && !at) at = m.k;
       });
     });
-    add("discipline", t, "Un poste tenu " + (n === 12 ? "un an" : "deux ans"),
+    add("discipline", t, "Un poste tenu " + n + " mois",
       "Un même objectif respecté " + n + " mois consécutifs.", at, mx, n);
   });
 
@@ -3619,13 +3624,13 @@ function v2Trophies() {
     }
     return b;
   };
-  [[1, 0.95, 5], [2, 0.8, 20], [4, 0.7, 30]].forEach(([t, r, p]) =>
+  [[1, 0.9, 10], [2, 0.75, 25], [4, 0.65, 35]].forEach(([t, r, p]) =>
     add("sobriete", t, "Un mois à −" + p + " %", "Un mois dont les dépenses tombent " + p +
       " % sous votre médiane des douze mois précédents.", lighter(r), bestLight(), p));
   const noCat = id => m => !(m.cats[id] > 0) && m.nOps > 0;
-  [[1, 1], [2, 3], [4, 12]].forEach(([t, n]) =>
-    add("sobriete", t, n === 1 ? "Sans livraison" : n + " mois sans livraison",
-      n === 1 ? "Un mois sans une seule livraison de repas." : n + " mois consécutifs sans livraison de repas.",
+  [[1, 2], [2, 6], [4, 18]].forEach(([t, n]) =>
+    add("sobriete", t, n + " mois sans livraison",
+      n + " mois consécutifs sans une seule livraison de repas.",
       streak(noCat("c_delivery"), n), longest(noCat("c_delivery")), n));
   add("sobriete", 3, "Ni resto ni livraison", "Un mois sans restaurant ni livraison de repas.",
     first(m => !(m.cats.c_resto > 0) && !(m.cats.c_delivery > 0) && m.nOps > 0),
@@ -3644,7 +3649,7 @@ function v2Trophies() {
     });
     return { at, bestDrop };
   };
-  [[3, 0.8, 20], [5, 0.5, 50]].forEach(([t, r, p]) => {
+  [[3, 0.75, 25], [5, 0.5, 50]].forEach(([t, r, p]) => {
     const x = postePlonge(r);
     add("sobriete", t, "Un poste à −" + p + " %",
       "Un poste dont les douze derniers mois pèsent " + p + " % de moins que les douze précédents.",
@@ -3659,7 +3664,7 @@ function v2Trophies() {
   add("loufoque", 1, "Chiffre rond", "Une opération d’au moins 100 € tombant sur un montant pile.",
     ops.some(t => cents(t.amount) >= 10000 && cents(t.amount) % 10000 === 0)
       ? monthKey(ops.find(t => cents(t.amount) >= 10000 && cents(t.amount) % 10000 === 0).date) : null, 1, 1);
-  [[2, 10], [3, 15], [4, 20]].forEach(([t, n]) =>
+  [[2, 12], [3, 18], [4, 25]].forEach(([t, n]) =>
     add("loufoque", t, n + " opérations en un jour", "Enchaîner " + n + " dépenses dans la même journée.",
       first(m => m.maxDay >= n), best(m => m.maxDay), n));
   add("loufoque", 2, "La réponse", "Une opération à exactement 42,00 €.",
@@ -3687,7 +3692,7 @@ function v2Trophies() {
     }
     return mx;
   };
-  [[3, 7], [4, 14]].forEach(([t, n]) =>
+  [[3, 8], [4, 16]].forEach(([t, n]) =>
     add("loufoque", t, n + " jours sans rien", n + " jours consécutifs sans la moindre dépense.",
       vide(n), videMax(), n));
   add("loufoque", 4, "Jumeaux parfaits", "Deux mois de suite dépensés au centime près.",
@@ -3696,8 +3701,8 @@ function v2Trophies() {
     first(m => { const c = {}; return m.s.ops.filter(isExpense).some(t => (c[cents(t.amount)] = (c[cents(t.amount)] || 0) + 1) >= 3); }), 1, 1);
   add("loufoque", 5, "Année bissextile", "Dépenser un 29 février.",
     ops.some(t => t.date.slice(5) === "02-29") ? monthKey(ops.find(t => t.date.slice(5) === "02-29").date) : null, 1, 1);
-  add("loufoque", 4, "Le mois à cent", "Cent opérations ou plus dans un seul mois.",
-    first(m => m.nOps >= 100), best(m => m.nOps), 100);
+  add("loufoque", 4, "Le mois à cent vingt", "Cent vingt opérations ou plus dans un seul mois.",
+    first(m => m.nOps >= 120), best(m => m.nOps), 120);
 
   return out;
 }
@@ -3739,7 +3744,7 @@ function viewTrophies() {
     ' <span class="num">sur ' + all.length + "</span></div>" +
     '<div class="sub">' + (won.length === all.length
       ? "La collection est complète. Il n’y a plus rien à décrocher."
-      : "Tout se calcule sur votre historique complet : un trophée porte le mois où il a été gagné.") +
+      : "Seuls les mois clos comptent, et un trophée porte le mois où il a été gagné.") +
     "</div></div><div class=\"rbars\">" +
     byRank.map(b => '<div class="rbar" style="--rc:var(--r' + b.r + ')">' +
       '<span class="n num" style="color:var(--r' + b.r + ')">' + b.n + "/" + b.tot + "</span>" +
