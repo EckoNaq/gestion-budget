@@ -767,6 +767,22 @@ html[data-theme="dark"] .v2{
 .v2 .pulse td.up{color:var(--bad-ink)} .v2 .pulse td.down{color:var(--win-ink)}
 .v2 .pulse tr.sum th,.v2 .pulse tr.sum td{border-top:1px solid var(--ink);padding-top:7px}
 .v2 .pulse tr.sum th{font-variation-settings:"wght" 660,"wdth" 100;color:var(--ink)}
+/* Point d'aide : l'explication ne mérite pas d'occuper l'écran en permanence,
+   mais « habituellement » ne se devine pas. */
+.v2 .pulse .help{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  width:13px;height:13px;margin-left:5px;padding:0;border-radius:50%;border:1px solid var(--ink-4);
+  background:none;color:var(--ink-4);font:inherit;font-size:9px;line-height:1;
+  font-variation-settings:"wght" 700,"wdth" 100;cursor:help;vertical-align:1px;flex:none}
+.v2 .pulse .help:hover,.v2 .pulse .help:focus-visible{border-color:var(--ink-2);color:var(--ink-2)}
+.v2 .pulse .hbox{position:absolute;bottom:calc(100% + 8px);right:-9px;width:252px;
+  background:var(--surface);border:1px solid var(--ink-4);border-radius:9px;padding:10px 12px;
+  font-family:var(--prose);font-size:12px;line-height:1.45;color:var(--ink-2);text-align:left;
+  white-space:normal;text-transform:none;letter-spacing:0;font-variation-settings:normal;
+  box-shadow:0 14px 30px -12px rgba(0,0,0,.38);z-index:50;
+  opacity:0;visibility:hidden;transition:opacity .12s;pointer-events:none}
+.v2 .pulse .help:hover .hbox,.v2 .pulse .help:focus-visible .hbox{opacity:1;visibility:visible}
+.v2 .pulse .hbox b{font-family:var(--disp);font-variation-settings:"wght" 640,"wdth" 100;
+  font-size:11.5px;color:var(--ink)}
 .v2 .pulse .soon{margin-top:11px;padding-top:10px;border-top:1px solid var(--line-2);
   font-family:var(--prose);font-size:12px;color:var(--ink-3);line-height:1.45}
 .v2 .pulse .soon b{font-family:var(--disp);font-variation-settings:"wght" 640,"wdth" 100;
@@ -2939,15 +2955,21 @@ function v2Cumul(key) {
   for (let i = 0; i < dim; i++) { run += byDay[i]; out.push(run); }
   return out;
 }
+/* Les mois effectivement retenus pour la référence : ceux qui portent au moins
+   une dépense. Un mois vide fausserait la moyenne vers le bas. */
+function v2UsualKeys(key, n) {
+  const out = [];
+  for (let i = 1; i <= n; i++) {
+    const k = addMonth(key, -i);
+    if (opsOfMonth(k).filter(isExpense).length) out.push(k);
+  }
+  return out;
+}
 /* La même chose, moyennée sur les mois précédents. L'échantillonnage se fait à
    fraction de mois égale et non à jour égal, sans quoi un février de 28 jours
    se comparerait mal à un mois de 31. */
 function v2Usual(key, n) {
-  const series = [];
-  for (let i = 1; i <= n; i++) {
-    const k = addMonth(key, -i);
-    if (opsOfMonth(k).filter(isExpense).length) series.push(v2Cumul(k));
-  }
+  const series = v2UsualKeys(key, n).map(v2Cumul);
   if (!series.length) return null;
   const dim = new Date(+key.slice(0, 4), +key.slice(5, 7), 0).getDate(), out = [];
   for (let d = 1; d <= dim; d++) {
@@ -2955,6 +2977,19 @@ function v2Usual(key, n) {
     out.push(vals.reduce((a, b) => a + b, 0) / vals.length);
   }
   return out;
+}
+
+/* Ce que « habituellement » veut dire, en clair et avec les mois retenus. */
+function v2UsualHelp(key) {
+  const ks = v2UsualKeys(key, 3);
+  if (!ks.length) return "";
+  const noms = ks.map(k => monthLabel(k));
+  const liste = noms.length > 1 ? noms.slice(0, -1).join(", ") + " et " + noms[noms.length - 1] : noms[0];
+  return '<button class="help" type="button" aria-label="Comment est calculé ce chiffre">?' +
+    '<span class="hbox"><b>Moyenne des ' + ks.length + " mois précédents</b> — " + esc(liste) +
+    ". Les mois sans dépense sont écartés. La comparaison se fait à <b>fraction de mois égale</b> " +
+    "et non à jour égal, pour qu\u2019un février de 28 jours se compare correctement à un mois de 31." +
+    "</span></button>";
 }
 
 /* Le panneau « Où en est le mois ». Les anneaux répondent poste par poste ;
@@ -2995,7 +3030,8 @@ function v2Pulse(c) {
   const ecart = usual ? spent - usual[day - 1] : null;
   html += "<table><tbody>" +
     "<tr><th>" + (c.running ? "Dépensé au " + day : "Dépensé") + "</th><td class=\"num\">" + esc(fmtEur(spent)) + "</td></tr>";
-  if (usual) html += "<tr><th>Habituellement</th><td class=\"num q\">" + esc(fmtEur(usual[day - 1])) + "</td></tr>" +
+  if (usual) html += "<tr><th>Habituellement" + v2UsualHelp(key) + "</th><td class=\"num q\">" +
+    esc(fmtEur(usual[day - 1])) + "</td></tr>" +
     '<tr><th>Écart</th><td class="num ' + (ecart > 0 ? "up" : "down") + '">' + esc(fmtEur(ecart, { plus: true })) + "</td></tr>";
   if (c.running) html += '<tr class="sum"><th>Fin de mois estimée</th><td class="num ' +
     (usual && proj > usual[dim - 1] ? "up" : "down") + '">' + esc(fmtEur(proj)) + "</td></tr>";
