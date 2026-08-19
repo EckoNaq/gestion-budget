@@ -722,9 +722,8 @@ html[data-theme="dark"] .v2{
 .v2 .objwrap.open .tip{display:none}
 .v2 .tip .th{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.11em;
   color:var(--ink-3);font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:3px}
-.v2 .tip .ts{display:block;font-family:var(--prose);font-size:12.5px;color:var(--ink-2);
-  margin-bottom:10px;line-height:1.4}
-.v2 .tip .ts b{font-family:var(--disp);font-variation-settings:"wght" 660,"wdth" 100;font-size:12px;color:var(--ink)}
+/* Quand la carte n'a pas de sous-titre, le tableau reprend l'air perdu. */
+.v2 .tip .th + table{margin-top:8px}
 .v2 .tip table{width:100%;border-collapse:collapse}
 .v2 .tip th{text-align:left;font-size:11.5px;font-variation-settings:"wght" 500,"wdth" 100;
   color:var(--ink-2);padding:3px 0;white-space:nowrap}
@@ -2575,8 +2574,9 @@ function v2Tip(r, c) {
   const head = '<div class="tip"><span class="th">' + esc(r.name) + "</span>";
   if (!c.running) {
     const over = r.spent > r.target;
-    return head + '<span class="ts">Mois clos — plus de rythme à tenir, seul le résultat compte.</span>' +
-      "<table><tbody>" +
+    /* Pas de phrase d'introduction : que le mois soit clos, l'utilisateur le
+       sait déjà — le dire lui prendrait une ligne pour rien. */
+    return head + "<table><tbody>" +
       "<tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
       "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
       '<tr class="sum"><th>' + (over ? "Dépassement" : "Marge gardée") + "</th>" +
@@ -2586,8 +2586,7 @@ function v2Tip(r, c) {
   }
   if (r.heavy) {
     const over = r.spent > r.target;
-    return head + '<span class="ts">Poste presque entièrement engagé : le rythme ne s’y applique pas.</span>' +
-      "<table><tbody>" +
+    return head + "<table><tbody>" +
       "<tr><th>Dépensé au " + c.day + "</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
       "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
       '<tr class="sum"><th>' + (over ? "Dépassement" : "Reste") + "</th>" +
@@ -2598,10 +2597,11 @@ function v2Tip(r, c) {
       "crier au dépassement dès le 4.</span></div>";
   }
   const attendu = r.target * p, ecart = r.spent - attendu, proj = r.spent / p;
-  return head + '<span class="ts">Au ' + c.day + " du mois, <b>" + Math.round(p * 100) +
-      " %</b> du mois est écoulé.</span>" +
+  /* Pas de phrase d'introduction non plus ici : le jour se dit dans le libellé
+     de la ligne qu'il qualifie, ce qui économise une ligne entière. */
+  return head +
     "<table><tbody>" +
-      "<tr><th>Rythme attendu</th><td class=\"num q\">" + esc(fmtEur(attendu)) + "</td></tr>" +
+      "<tr><th>Rythme attendu au " + c.day + "</th><td class=\"num q\">" + esc(fmtEur(attendu)) + "</td></tr>" +
       "<tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
       '<tr class="gap"><th>Écart au rythme</th><td class="num ' + (ecart > 0 ? "up" : "down") + '">' +
         esc(fmtEur(ecart, { plus: true })) + " · " + esc(attendu ? fmtPct(ecart / attendu * 100) : "—") + "</td></tr>" +
