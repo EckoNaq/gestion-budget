@@ -652,33 +652,45 @@ html[data-theme="dark"] .v2{
    Une vignette de 116 px, fond papier, avec la couleur au seul état, tient de
    ce que Tufte appelle un « small multiple » : même forme, même échelle, la
    comparaison se fait toute seule. */
+/* Des anneaux plutôt que des tuiles larges : une tuile de 278 sur 100 est
+   presque trois fois plus large que haute, et neuf d'entre elles remplies de
+   teinte faisaient un patchwork. Vignette de 116 px, fond papier, couleur au
+   seul état — un « small multiple » au sens de Tufte. */
 .v2 .gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:8px}
+/* La carte de survol est la sœur de la vignette, pas sa fille : un <button> ne
+   peut pas contenir de tableau, et le navigateur démontait la structure. */
+.v2 .objwrap{position:relative;min-width:0}
 .v2 .objcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;
-  padding:11px 8px 10px;min-width:0;position:relative;text-align:center;font:inherit;color:inherit;
-  display:block;width:100%}
+  padding:11px 8px 10px;width:100%;position:relative;text-align:center;font:inherit;color:inherit;display:block}
 .v2 .objcard.clk{cursor:pointer}
-.v2 .objcard:hover,.v2 .objcard:focus-within,.v2 .objcard:focus-visible{border-color:var(--ink-4);z-index:30}
-.v2 .ringwrap2{width:64px;height:64px;margin:0 auto 7px;position:relative}
-.v2 .ringwrap2>svg{width:64px;height:64px;transform:rotate(-90deg)}
-.v2 .ringwrap2>svg circle{fill:none;stroke-width:7}
-.v2 .ringwrap2 .rt2{stroke:var(--sunk)}
-.v2 .ringwrap2 .rp2{stroke-linecap:round}
+.v2 .objwrap:hover .objcard,.v2 .objcard:focus-visible{border-color:var(--ink-4)}
+/* La vignette qu'on est en train de consulter se distingue de ses voisines :
+   sans quoi, le panneau ouvert plus bas ne se rattache visuellement à rien. */
+.v2 .objcard.on{background:var(--surface-2);border-color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
+.v2 .objcard.on::after{content:"";position:absolute;left:50%;bottom:-9px;width:12px;height:12px;
+  margin-left:-6px;background:var(--surface-2);border-right:1px solid var(--bad);
+  border-bottom:1px solid var(--bad);transform:rotate(45deg)}
+
+.v2 .ringbox{display:block;position:relative;width:64px;height:64px;margin:0 auto 8px}
+.v2 .ringbox>svg{display:block;width:64px;height:64px;transform:rotate(-90deg)}
+.v2 .ringbox>svg circle{fill:none;stroke-width:7}
+.v2 .ringbox .rt2{stroke:var(--sunk)}
+.v2 .ringbox .rp2{stroke-linecap:round}
 .v2 .objcard.win .rp2{stroke:var(--win)}
 .v2 .objcard.hot .rp2{stroke:var(--hot)}
 .v2 .objcard.bad .rp2{stroke:var(--bad)}
-/* Le repère de rythme sur un arc : une encoche posée à l'angle du mois écoulé.
-   J'avais cru qu'un anneau ne savait pas le porter — il le fait très bien. */
-.v2 .ringwrap2 .pace2{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;opacity:.5}
-.v2 .objcard .mid{position:absolute;inset:0;display:grid;place-items:center}
-.v2 .objcard .mid svg{width:24px;height:24px;display:block}
+/* Le repère de rythme sur un arc : une encoche à l'angle du mois écoulé. */
+.v2 .ringbox .pace2{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;opacity:.5}
+.v2 .ringbox .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.v2 .ringbox .mid svg{display:block;width:24px;height:24px}
 .v2 .objcard.win .mid{color:var(--win)}
 .v2 .objcard.hot .mid{color:var(--hot)}
 .v2 .objcard.bad .mid{color:var(--bad)}
-/* La pastille de forme reste : sans elle, un cœur entier et un cœur fendu à
-   24 px, en gris, ne se distinguent plus. */
-.v2 .objcard .bdg{position:absolute;right:calc(50% - 40px);top:52px;width:17px;height:17px;
-  background:var(--surface);border-radius:50%;display:grid;place-items:center}
-.v2 .objcard .bdg svg{width:15px;height:15px;display:block}
+/* La pastille de forme se range dans le coin de la vignette : posée sur
+   l'anneau, elle en mangeait le tracé. Elle reste indispensable — un cœur
+   entier et un cœur fendu à 24 px, en gris, ne se distinguent plus. */
+.v2 .objcard .bdg{position:absolute;top:7px;right:7px;width:17px;height:17px;display:block}
+.v2 .objcard .bdg svg{display:block;width:17px;height:17px}
 .v2 .objcard.win .bdg{color:var(--win)}
 .v2 .objcard.hot .bdg{color:var(--hot)}
 .v2 .objcard.bad .bdg{color:var(--bad)}
@@ -688,39 +700,44 @@ html[data-theme="dark"] .v2{
 .v2 .objcard .v{font-size:14px;font-variation-settings:"wght" 680,"wdth" 88;display:block;margin-top:3px}
 .v2 .objcard .of{font-size:10px;color:var(--ink-4);font-variation-settings:"wght" 470,"wdth" 92;display:block}
 
-/* Carte de survol. Tout en CSS : aucun état à tenir, donc rien à reconstruire
-   au rendu, et elle survit au fait que render() refasse le DOM entier. */
+/* Carte de survol : tout en CSS, aucun état à tenir, donc rien à reconstruire
+   au rendu — elle survit au fait que render() refasse le DOM entier. */
 .v2 .tip{
   position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%) translateY(-4px);
-  width:238px;background:var(--surface);border:1px solid var(--ink-4);border-radius:10px;
-  padding:11px 13px 12px;text-align:left;z-index:40;
+  width:246px;background:var(--surface);border:1px solid var(--ink-4);border-radius:10px;
+  padding:12px 14px 13px;text-align:left;z-index:40;
   box-shadow:0 16px 34px -14px rgba(0,0,0,.4);
   opacity:0;visibility:hidden;transition:opacity .13s,transform .13s;pointer-events:none;
 }
-.v2 .objcard:hover .tip,.v2 .objcard:focus-within .tip,.v2 .objcard:focus-visible .tip{
+.v2 .objwrap:hover .tip,.v2 .objwrap:focus-within .tip{
   opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);
 }
 /* En bord de grille, la carte s'aligne sur le côté de sa vignette au lieu de
-   déborder du contenu — à gauche sur la barre latérale, à droite hors écran. */
-.v2 .objcard.tipL .tip{left:0;transform:translateY(-4px)}
-.v2 .objcard.tipL:hover .tip,.v2 .objcard.tipL:focus-within .tip,.v2 .objcard.tipL:focus-visible .tip{transform:translateY(0)}
-.v2 .objcard.tipR .tip{left:auto;right:0;transform:translateY(-4px)}
-.v2 .objcard.tipR:hover .tip,.v2 .objcard.tipR:focus-within .tip,.v2 .objcard.tipR:focus-visible .tip{transform:translateY(0)}
-.v2 .tip .th{font-size:9.5px;text-transform:uppercase;letter-spacing:.11em;color:var(--ink-3);
-  font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:2px}
-.v2 .tip .ts{font-family:var(--prose);font-size:12.5px;color:var(--ink-2);margin-bottom:9px;line-height:1.35}
+   déborder — à gauche sur la barre latérale, à droite hors écran. */
+.v2 .objwrap.tipL .tip{left:0;transform:translateY(-4px)}
+.v2 .objwrap.tipL:hover .tip,.v2 .objwrap.tipL:focus-within .tip{transform:translateY(0)}
+.v2 .objwrap.tipR .tip{left:auto;right:0;transform:translateY(-4px)}
+.v2 .objwrap.tipR:hover .tip,.v2 .objwrap.tipR:focus-within .tip{transform:translateY(0)}
+/* Vignette ouverte : le panneau de détail dit déjà tout, la carte se tait. */
+.v2 .objwrap.open .tip{display:none}
+.v2 .tip .th{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.11em;
+  color:var(--ink-3);font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:3px}
+.v2 .tip .ts{display:block;font-family:var(--prose);font-size:12.5px;color:var(--ink-2);
+  margin-bottom:10px;line-height:1.4}
+.v2 .tip .ts b{font-family:var(--disp);font-variation-settings:"wght" 660,"wdth" 100;font-size:12px;color:var(--ink)}
 .v2 .tip table{width:100%;border-collapse:collapse}
 .v2 .tip th{text-align:left;font-size:11.5px;font-variation-settings:"wght" 500,"wdth" 100;
-  color:var(--ink-2);padding:2.5px 0}
+  color:var(--ink-2);padding:3px 0;white-space:nowrap}
 .v2 .tip td{text-align:right;font-size:12px;font-variation-settings:"wght" 660,"wdth" 92;
-  padding:2.5px 0;white-space:nowrap}
-.v2 .tip tr.gap th,.v2 .tip tr.gap td{border-top:1px solid var(--line-2);padding-top:6px}
-.v2 .tip tr.sum th,.v2 .tip tr.sum td{border-top:1px solid var(--ink);padding-top:6px}
+  padding:3px 0;white-space:nowrap}
+.v2 .tip tr.gap th,.v2 .tip tr.gap td{border-top:1px solid var(--line-2);padding-top:7px}
+.v2 .tip tr.sum th,.v2 .tip tr.sum td{border-top:1px solid var(--ink);padding-top:7px}
 .v2 .tip tr.sum th{font-variation-settings:"wght" 660,"wdth" 100;color:var(--ink)}
 .v2 .tip td.up{color:var(--bad-ink)}
 .v2 .tip td.down{color:var(--win-ink)}
 .v2 .tip td.q{color:var(--ink-3);font-variation-settings:"wght" 470,"wdth" 92}
-.v2 .tip .note{margin-top:8px;font-family:var(--prose);font-size:12px;color:var(--ink-3);line-height:1.4}
+.v2 .tip .note{display:block;margin-top:9px;padding-top:9px;border-top:1px solid var(--line-2);
+  font-family:var(--prose);font-size:12px;color:var(--ink-3);line-height:1.45}
 
 /* ---------- détail d'un dépassement ---------- */
 .v2 .detail{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px}
@@ -742,12 +759,13 @@ html[data-theme="dark"] .v2{
 
 /* ---------- à traiter ---------- */
 .v2 .todo{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
-.v2 .todo.clean{background:var(--win-bg);border-color:var(--win-line)}
+/* Rien à signaler ne mérite pas d'être peint : la coche suffit. */
+.v2 .todo.clean{background:var(--surface);border-color:var(--line)}
 .v2 .todo .n{font-size:23px;font-variation-settings:"wght" 700,"wdth" 84;letter-spacing:-.02em;color:var(--hot-ink)}
 .v2 .todo .ic{width:24px;height:24px;color:var(--win);flex:none}
 .v2 .todo .ic svg{width:24px;height:24px;display:block}
 .v2 .todo .tx{font-size:13.5px;color:var(--ink-2)}
-.v2 .todo.clean .tx{color:var(--win-ink);font-variation-settings:"wght" 600,"wdth" 100}
+.v2 .todo.clean .tx{color:var(--ink-2)}
 .v2 .todo .tx b{font-variation-settings:"wght" 680,"wdth" 100;color:var(--ink)}
 .v2 .act{margin-left:auto;background:var(--ink);color:var(--bg);border:0;border-radius:7px;padding:7px 15px;cursor:pointer;font:inherit;font-size:12.5px;font-variation-settings:"wght" 640,"wdth" 100;white-space:nowrap}
 .v2 .act:hover{opacity:.86}
@@ -2554,46 +2572,48 @@ function v2Glyph(groupId, state) {
    projection de fin de mois — la seule chose qui dise si le plafond tiendra. */
 function v2Tip(r, c) {
   const p = c.running ? c.day / c.days : 1;
-  const head = '<span class="tip"><span class="th">' + esc(r.name) + "</span>";
+  const head = '<div class="tip"><span class="th">' + esc(r.name) + "</span>";
   if (!c.running) {
     const over = r.spent > r.target;
     return head + '<span class="ts">Mois clos — plus de rythme à tenir, seul le résultat compte.</span>' +
-      "<table><tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      "<table><tbody>" +
+      "<tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
       "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
       '<tr class="sum"><th>' + (over ? "Dépassement" : "Marge gardée") + "</th>" +
       '<td class="num ' + (over ? "up" : "down") + '">' +
       esc(over ? fmtEur(r.spent - r.target) : fmtEur(r.target - r.spent)) +
-      "</td></tr></table></span>";
+      "</td></tr></tbody></table></div>";
   }
   if (r.heavy) {
+    const over = r.spent > r.target;
     return head + '<span class="ts">Poste presque entièrement engagé : le rythme ne s’y applique pas.</span>' +
-      "<table><tr><th>Dépensé au " + c.day + "</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      "<table><tbody>" +
+      "<tr><th>Dépensé au " + c.day + "</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
       "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
-      '<tr class="sum"><th>' + (r.spent > r.target ? "Dépassement" : "Reste") + '</th>' +
-      '<td class="num ' + (r.spent > r.target ? "up" : "down") + '">' +
-      esc(r.spent > r.target ? fmtEur(r.spent - r.target) : fmtEur(r.target - r.spent)) +
-      "</td></tr></table>" +
+      '<tr class="sum"><th>' + (over ? "Dépassement" : "Reste") + "</th>" +
+      '<td class="num ' + (over ? "up" : "down") + '">' +
+      esc(over ? fmtEur(r.spent - r.target) : fmtEur(r.target - r.spent)) +
+      "</td></tr></tbody></table>" +
       '<span class="note">Ses prélèvements tombent en début de mois : comparer au calendrier ferait ' +
-      "crier au dépassement dès le 4.</span></span>";
+      "crier au dépassement dès le 4.</span></div>";
   }
   const attendu = r.target * p, ecart = r.spent - attendu, proj = r.spent / p;
   return head + '<span class="ts">Au ' + c.day + " du mois, <b>" + Math.round(p * 100) +
       " %</b> du mois est écoulé.</span>" +
-    "<table>" +
+    "<table><tbody>" +
       "<tr><th>Rythme attendu</th><td class=\"num q\">" + esc(fmtEur(attendu)) + "</td></tr>" +
       "<tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
       '<tr class="gap"><th>Écart au rythme</th><td class="num ' + (ecart > 0 ? "up" : "down") + '">' +
-        esc(fmtEur(ecart, { plus: true })) + "</td></tr>" +
-      "<tr><th>&nbsp;</th><td class=\"num q\">" + esc(attendu ? fmtPct(ecart / attendu * 100) : "—") + "</td></tr>" +
+        esc(fmtEur(ecart, { plus: true })) + " · " + esc(attendu ? fmtPct(ecart / attendu * 100) : "—") + "</td></tr>" +
       '<tr class="sum"><th>Fin de mois estimée</th><td class="num ' + (proj > r.target ? "up" : "down") + '">' +
         esc(fmtEur(proj)) + "</td></tr>" +
       "<tr><th>Plafond</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
-    "</table>" +
+    "</tbody></table>" +
     '<span class="note">' + (proj > r.target
       ? "À ce rythme, le plafond serait dépassé de " + fmtEur(proj - r.target) + " à la fin du mois."
       : "À ce rythme, le mois finirait " + fmtEur(r.target - proj) + " sous le plafond.") +
     " Il reste " + (c.days - c.day) + " jours." +
-    (r.st === "bad" ? " Cliquez pour voir d’où ça vient." : "") + "</span></span>";
+    (r.st === "bad" ? " Cliquez pour voir d’où ça vient." : "") + "</span></div>";
 }
 
 /* Trois silhouettes, trois états : cercle tenu, carré en avance, triangle
@@ -2777,7 +2797,7 @@ function v2Month(c) {
     const availW = Math.max((document.querySelector(".main") || {}).clientWidth - 60 || window.innerWidth - 280, 240);
     const cols = Math.max(Math.floor(availW / gw), 1);
     const cells = rows.map((r, i) => {
-      const canOpen = r.st === "bad";
+      const canOpen = r.st === "bad", isOpen = UI.v2goal === r.id;
       const frac = Math.min(r.spent / r.target, 1);
       /* L'encoche de rythme : un tiret très court, décalé à l'angle voulu. */
       const notch = c.running && !r.heavy
@@ -2785,20 +2805,21 @@ function v2Month(c) {
           (CIRC - 2.4).toFixed(2) + '" stroke-dashoffset="' + (-pace * CIRC).toFixed(2) + '"></circle>'
         : "";
       const edge = cols > 1 ? (i % cols === 0 ? " tipL" : i % cols === cols - 1 ? " tipR" : "") : "";
-      return "<" + (canOpen ? "button" : "div") + ' class="objcard ' + r.st + (canOpen ? " clk" : "") + edge +
-          '" style="animation-delay:' + (i * 26) + 'ms"' +
-          (canOpen ? ' data-act="v2goal" data-goal="' + esc(r.id) + '"' : ' tabindex="0"') + ">" +
-        '<span class="ringwrap2"><svg viewBox="0 0 64 64" aria-hidden="true">' +
-          '<circle class="rt2" cx="32" cy="32" r="' + R + '"></circle>' +
-          '<circle class="rp2" cx="32" cy="32" r="' + R + '" stroke-dasharray="' + CIRC.toFixed(1) +
-            '" stroke-dashoffset="' + (CIRC * (1 - frac)).toFixed(1) + '"></circle>' + notch + "</svg>" +
-          '<span class="mid">' + v2Glyph(r.grp, r.st) + "</span></span>" +
-        '<span class="bdg">' + V2_BADGE[r.st] + "</span>" +
-        '<span class="nm">' + esc(r.name) + "</span>" +
-        '<span class="v num">' + esc(fmtEurShort(r.spent)) + "</span>" +
-        '<span class="of num">sur ' + esc(fmtEurShort(r.target)) + " €</span>" +
-        v2Tip(r, c) +
-        "</" + (canOpen ? "button" : "div") + ">";
+      const tag = canOpen ? "button" : "div";
+      return '<div class="objwrap' + edge + (isOpen ? " open" : "") +
+          '" style="animation-delay:' + (i * 26) + 'ms">' +
+        "<" + tag + ' class="objcard ' + r.st + (canOpen ? " clk" : "") + (isOpen ? " on" : "") + '"' +
+          (canOpen ? ' data-act="v2goal" data-goal="' + esc(r.id) + '" aria-expanded="' + isOpen + '"' : "") + ">" +
+          '<span class="ringbox"><svg viewBox="0 0 64 64" aria-hidden="true">' +
+            '<circle class="rt2" cx="32" cy="32" r="' + R + '"></circle>' +
+            '<circle class="rp2" cx="32" cy="32" r="' + R + '" stroke-dasharray="' + CIRC.toFixed(1) +
+              '" stroke-dashoffset="' + (CIRC * (1 - frac)).toFixed(1) + '"></circle>' + notch + "</svg>" +
+            '<span class="mid">' + v2Glyph(r.grp, r.st) + "</span></span>" +
+          '<span class="bdg">' + V2_BADGE[r.st] + "</span>" +
+          '<span class="nm">' + esc(r.name) + "</span>" +
+          '<span class="v num">' + esc(fmtEurShort(r.spent)) + "</span>" +
+          '<span class="of num">sur ' + esc(fmtEurShort(r.target)) + " €</span>" +
+        "</" + tag + ">" + v2Tip(r, c) + "</div>";
     });
     const open = rows.findIndex(r => r.id === UI.v2goal);
     /* Le panneau se glisse sous la rangée de la vignette ouverte. */
