@@ -747,9 +747,6 @@ html[data-theme="dark"] .v2{
    pixels. Toute retouche ici doit se faire des deux côtés. */
 .v2 .gsplit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
 .v2 .pulse{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px 14px}
-/* La colonne de droite porte deux blocs empilés, à la largeur de la pastille
-   qui les surmonte : où en est le mois, puis ce qui se rapproche. */
-.v2 .prail{display:grid;gap:10px;align-content:start;min-width:0}
 .v2 .pbody{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 .v2 .pbody .pnum{min-width:0}
 /* Le pied du panneau : ce qui reste à venir sur un mois en cours, ce qui a
@@ -770,22 +767,6 @@ html[data-theme="dark"] .v2{
   font-variation-settings:"wght" 620,"wdth" 92}
 .v2 .pfoot .ptl td.a.up{color:var(--bad-ink)}
 .v2 .pfoot .ptl td.a.down{color:var(--win-ink)}
-/* Bientôt : l'emblème porte déjà son arc de progression, une barre de plus
-   ferait doublon. */
-.v2 .nextro .nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:11px;
-  align-items:center;padding:5px 0}
-.v2 .nextro .nw{position:relative;width:38px}
-.v2 .nextro .nw svg{display:block;overflow:visible}
-.v2 .nextro .nx{min-width:0;display:block}
-.v2 .nextro .nx .n{display:block;font-size:12.5px;color:var(--ink);
-  font-variation-settings:"wght" 620,"wdth" 94;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v2 .nextro .nx .k{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--rc);font-variation-settings:"wght" 660,"wdth" 100;margin-top:1px}
-.v2 .nextro .p{font-size:12.5px;color:var(--ink-3);font-variation-settings:"wght" 620,"wdth" 92}
-.v2 .nextro .go{margin-top:9px;width:100%;background:none;border:1px solid var(--line);
-  border-radius:7px;padding:6px 10px;font:inherit;font-size:11.5px;color:var(--ink-2);
-  font-variation-settings:"wght" 560,"wdth" 96;cursor:pointer}
-.v2 .nextro .go:hover{border-color:var(--ink-4);color:var(--ink)}
 .v2 .pulse .ph{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);
   font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:10px}
 /* La courbe ne prend plus que la moitié du panneau, et retrouve donc à peu
@@ -3077,7 +3058,7 @@ function v2Month(c) {
     /* Le panneau se glisse sous la rangée de la vignette ouverte. */
     if (open >= 0) cells.splice(Math.min((Math.floor(open / cols) + 1) * cols, cells.length), 0, v2GoalDetail(rows[open], s));
     html += '<div class="gsplit"><div class="gg' + v2AnimClass("all") + '">' + cells.join("") + "</div>" +
-      '<div class="prail">' + v2Pulse(c, rows) + v2Next() + "</div></div>";
+      v2Pulse(c, rows) + "</div>";
   }
   html += "</div>";
 
@@ -3173,8 +3154,22 @@ function v2Usual(key, n) {
   const series = v2UsualKeys(key, n).map(v2Cumul);
   if (!series.length) return null;
   const dim = new Date(+key.slice(0, 4), +key.slice(5, 7), 0).getDate(), out = [];
+  /* Cumul d'un mois de référence après p jours, p réel. Un cumul est une
+     fonction en escalier : il ne bouge qu'aux frontières de journée, donc on
+     interpole entre les deux marches qui encadrent p. Arrondir à la marche
+     supérieure faisait entrer une journée entière trop tôt — au 1er d'un mois
+     de 30 jours, un mois de référence de 31 était compté jusqu'à son 2, et le
+     loyer figurait dans « habituellement » avant d'exister nulle part. À la fin
+     du mois p vaut exactement la longueur de la référence : le total, lui, ne
+     change pas. */
+  const at = (x, p) => {
+    const i = Math.max(0, Math.min(Math.floor(p), x.length));
+    const lo = i === 0 ? 0 : x[i - 1];
+    const hi = i >= x.length ? x[x.length - 1] : x[i];
+    return lo + (hi - lo) * Math.max(0, Math.min(p - i, 1));
+  };
   for (let d = 1; d <= dim; d++) {
-    const vals = series.map(x => x[Math.min(Math.ceil(d / dim * x.length), x.length) - 1]);
+    const vals = series.map(x => at(x, d / dim * x.length));
     out.push(vals.reduce((a, b) => a + b, 0) / vals.length);
   }
   return out;
@@ -3318,29 +3313,6 @@ function v2PulseBilan(key) {
     : '<div class="st q">Aucun poste ne s’écarte nettement de son habitude.</div>') + "</div>";
 }
 
-/* Ce qui se rapproche. Une collection ne se visite que si l'écran principal en
-   parle : trois trophées non acquis, les plus avancés. C'est la seule chose de
-   l'écran qui regarde devant — tout le reste constate. */
-function v2Next() {
-  /* Un seul par famille. Les paliers d'une même famille tombent ensemble, si
-     bien que les trois premiers du classement brut disaient trois fois la même
-     chose à un mot près. Trois promesses distinctes valent mieux qu'une répétée. */
-  const best = {};
-  v2Trophies().filter(t => !t.at && t.pct > 0).forEach(t => {
-    const k = best[t.fam];
-    if (!k || t.pct > k.pct || (t.pct === k.pct && t.tier > k.tier)) best[t.fam] = t;
-  });
-  const near = Object.keys(best).map(f => best[f])
-    .sort((a, b) => b.pct - a.pct || b.tier - a.tier).slice(0, 3);
-  if (!near.length) return "";
-  return '<div class="pulse nextro"><div class="ph">Bientôt</div>' +
-    near.map(t => '<div class="nrow" style="--rc:var(--r' + t.tier + ')">' +
-      '<span class="nw">' + v2TroSvg(t.fam, t.tier, false, t.pct, 38) + "</span>" +
-      '<span class="nx"><span class="n">' + esc(t.name) + "</span>" +
-      '<span class="k">' + esc(V2_RANK[t.tier - 1]) + "</span></span>" +
-      '<span class="p num">' + Math.round(t.pct) + " %</span></div>").join("") +
-    '<button class="go" data-act="view" data-view="trophees">Voir la collection</button></div>';
-}
 
 /* ---------------- onglet « Où ça part » ---------------- */
 function v2DeltaBar(frac, bandFrac) {

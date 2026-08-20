@@ -12,14 +12,22 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
-### 2026-08-20 — la courbe retrouve sa pente, la colonne de droite se remplit
+### 2026-08-20 — le début du mois mentait
+
+**« Habituellement » démarrait trop haut.** Sur avril 2026 — 30 jours, références mars (31 j) et février (28 j) — la courbe grise partait à **500 € au 1er** quand le mois consulté était encore à zéro, d’où un mur vertical au bord gauche du graphique.
+
+- La cause : l’échantillonnage à fraction de mois égale arrondissait **au jour supérieur**. `ceil(1/30 × 31) = 2` — mars était donc compté jusqu’à son 2, loyer inclus, et le loyer figurait dans « habituellement » avant d’exister nulle part. Le défaut n’apparaît que si un mois de référence est plus long que le mois consulté, ce qui explique qu’il passait inaperçu la plupart du temps.
+- La correction : un cumul est une **fonction en escalier**, il ne bouge qu’aux frontières de journée. On interpole désormais entre les deux marches qui encadrent la position demandée au lieu de sauter à la suivante. Le 1er avril passe de 500 € à **17 €**, et la série reste monotone.
+- **Les totaux ne bougent pas** : à la fin du mois la position demandée vaut exactement la longueur de la référence, et l’interpolation rend la dernière marche. « Habituellement » et « Écart » affichent les mêmes chiffres qu’avant — vérifié sur trois mois de longueurs différentes.
+- Retiré : le bloc **« Bientôt »** et ses trophées à venir, essayés la veille. La colonne de droite ne porte plus que « Où en est le mois », et son enveloppe disparaît avec lui plutôt que de rester à n’envelopper qu’un seul enfant.
+
+### 2026-08-20 — la courbe retrouve sa pente
 
 Élargie à la moitié de l’écran, la courbe des dépenses cumulées se lisait moins bien qu’avant. Ce n’était pas l’écart entre les deux tracés — identique au pixel près — mais **la pente** : à hauteur constante, doubler la largeur divise l’inclinaison par deux, et deux lignes presque plates se confondent. C’est le *banking to 45°* de Cleveland, appliqué à l’envers.
 
 - **La courbe ne prend plus que la moitié du panneau** et retrouve les proportions qu’elle avait quand celui-ci faisait 296 px. Les chiffres se rangent à côté plutôt qu’en dessous.
 - **Le mois habituel devient une plage** au lieu d’une seconde ligne. Deux traits de même nature se confondent dès que la pente faiblit ; un trait posé sur une aire, jamais.
 - **Le pied du panneau change de sujet avec l’état du mois.** Tant qu’il court : ce qu’il reste sous les plafonds, ce qui en est déjà réservé par des prélèvements à venir, et ce qui reste vraiment disponible par jour — sans le deuxième terme, un mois calme au 20 paraît confortable alors que 200 € de charges attendent le 28. Une fois clos, la question n’a plus de sens : le pied montre alors **ce qui a bougé**, poste par poste, contre la même référence de trois mois. Le chiffre d’écart affiché juste au-dessus cesse d’être un verdict sans explication.
-- **Un second bloc, « Bientôt »**, montre trois trophées non acquis — un par famille, les plus avancés. C’est la seule chose de l’écran qui regarde devant ; tout le reste constate. Une collection ne se visite que si l’écran principal en parle. Le classement brut donnait trois fois la même promesse (« 36 mois suivis », « Tout classé 36 mois », « Un poste tenu 36 mois »), les paliers d’une même famille tombant ensemble.
 - Écarté en chemin : **un score de mois** à la manière des applications de sommeil. Il aurait comprimé en un nombre vague quatre faits que l’écran énonce déjà précisément, ses pondérations auraient été un jugement de valeur déguisé en arithmétique, et il aurait contredit les trophées — qui sont déjà un système de notation, en mieux, puisque chacun nomme ce qui a été fait.
 - Corrigé au passage : le compte de colonnes se trompait **encore** d’une piste. `auto-fill` en loge n dès que `n*116 + (n-1)*8` tient dans la largeur — il y a une gouttière de moins que de colonnes — et la marge du conteneur était devinée à 60 px au lieu d’être lue. Quatre colonnes annoncées pour cinq réelles, et la vignette de bord ouvrait sa carte hors de l’écran.
 
