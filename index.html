@@ -131,11 +131,6 @@ h3{font-size:13px}
 
 /* ---------- comparison strip (signature) ---------- */
 .cmp{display:flex;flex-direction:column}
-.cmprow{display:grid;grid-template-columns:172px 96px 84px 1fr 130px;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line-2)}
-.cmprow:first-child{border-top:0}
-.cmpname{display:flex;align-items:center;gap:8px;min-width:0}
-.cmpname .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:520}
-.cmpdelta{display:flex;align-items:center;gap:5px;font-weight:620;font-size:13px}
 .track{position:relative;height:22px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line-2);overflow:hidden}
 .track .band{position:absolute;top:0;bottom:0;background:var(--line);opacity:.75}
 .track .zero{position:absolute;top:0;bottom:0;width:1px;background:var(--ink-mute);opacity:.5}
@@ -143,20 +138,11 @@ h3{font-size:13px}
 .track .fill.over{background:var(--neg)}
 .track .fill.under{background:var(--pos)}
 .track .fill.flat{background:var(--ink-mute)}
-.cmpprev{text-align:right;font-size:12px;color:var(--ink-soft)}
 .legendline{display:flex;gap:16px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-soft);flex-wrap:wrap}
 .chip{display:inline-flex;align-items:center;gap:5px}
 .chip .sw{width:11px;height:11px;border-radius:3px;flex:none}
-
-/* ---------- category rows ---------- */
-.catrow{display:grid;grid-template-columns:26px 1fr 108px 74px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line-2);cursor:pointer}
-.catrow:first-of-type{border-top:0}
-.catrow:hover{background:var(--surface-2)}
-.catrow .bar{height:6px;border-radius:3px;background:var(--line-2);overflow:hidden;margin-top:4px}
-.catrow .bar>i{display:block;height:100%;border-radius:3px}
 .icon-badge{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;flex:none}
 .icon-badge svg{width:14px;height:14px}
-.subrow{display:grid;grid-template-columns:1fr 100px 70px;gap:10px;padding:4px 0 4px 36px;font-size:13px;color:var(--ink-2);border-top:1px solid var(--line-2)}
 
 /* ---------- operations table ---------- */
 .ops{width:100%;border-collapse:collapse}
@@ -168,11 +154,6 @@ h3{font-size:13px}
 .ops tr:hover td{background:var(--surface-2)}
 .ops tr.is-dup td{opacity:.62}
 .ops tr.is-ign td{opacity:.62}
-.ops .c-date{width:66px;color:var(--ink-soft);font-size:12.5px}
-.ops .c-amt{width:108px;text-align:right;font-weight:600;white-space:nowrap}
-.ops .c-cat{width:200px}
-.ops .c-imp{width:104px}
-.ops .c-act{width:96px;text-align:right;white-space:nowrap}
 .merchant{font-weight:550}
 .rawlabel{font-size:11.5px;color:var(--ink-mute);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px;display:block}
 .tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface-2);white-space:nowrap}
@@ -187,9 +168,6 @@ h3{font-size:13px}
 .iconbtn{border:1px solid transparent;background:none;border-radius:6px;padding:3px;cursor:pointer;color:var(--ink-mute);display:inline-flex}
 .iconbtn:hover{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
 .iconbtn.danger:hover{color:var(--neg);border-color:var(--neg)}
-
-/* ---------- controls ---------- */
-.controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
 .check{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
 .check input{accent-color:var(--accent);width:14px;height:14px;margin:0}
 .field{display:flex;flex-direction:column;gap:4px}
@@ -242,13 +220,6 @@ textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:12px}
 .incgrid td{padding:3px 6px;border-top:1px solid var(--line-2)}
 .incgrid input{width:104px;padding:4px 7px}
 
-/* ---------- category tag ---------- */
-.tag-cat{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:560;padding:2px 8px 2px 5px;border-radius:20px;
-  border:1px solid transparent;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
-.tag-cat svg{flex:none;opacity:.9}
-.tag-cat:hover{filter:brightness(.96);border-color:currentColor}
-.tag-cat.none{background:var(--neg-soft);color:var(--neg);font-style:italic}
-
 /* ---------- goals ---------- */
 .goalgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:14px}
 .goal{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:var(--surface-2)}
@@ -262,30 +233,6 @@ textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:12px}
 .gfoot{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11.5px}
 .state-ok{color:var(--pos)} .state-watch{color:var(--warn)} .state-over{color:var(--neg)}
 .bg-ok{background:var(--pos)} .bg-watch{background:var(--warn)} .bg-over{background:var(--neg)}
-
-/* ---------- comparison ---------- */
-.cmprow{display:grid;grid-template-columns:210px 104px 92px 1fr 132px;gap:12px;align-items:center;padding:8px 10px;border-top:1px solid var(--line-2);border-radius:7px}
-.cmprow.over{background:linear-gradient(90deg,var(--neg-soft),transparent 62%)}
-.cmprow.under{background:linear-gradient(90deg,var(--pos-soft),transparent 62%)}
-.cmprow.over .nm{color:var(--neg);font-weight:640}
-.cmprow.under .nm{color:var(--pos);font-weight:640}
-
-/* ---------- drill-down ---------- */
-.merchrow{display:grid;grid-template-columns:1fr 62px 104px;gap:10px;padding:4px 0 4px 52px;font-size:12.5px;border-top:1px dashed var(--line-2);color:var(--ink-2)}
-.warn-txt{color:var(--warn)}
-.basegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
-.basegrid>div{background:var(--surface-2);padding:12px 14px}
-.basegrid .v{font-size:20px;font-weight:600;margin:4px 0 2px;letter-spacing:-.02em}
-.fixlist{display:flex;flex-direction:column}
-.fixrow{display:grid;grid-template-columns:26px 1fr 190px 150px 96px 78px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line-2);font-size:13px}
-.fixrow:first-child{border-top:0}
-.fixrow:hover{background:var(--surface-2)}
-.fixrow .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:560}
-.fixrow.off{opacity:.62}
-.fixrow.off .nm{text-decoration:line-through;text-decoration-thickness:1px}
-.subrow.open{background:var(--surface-2)}
-.subrow{cursor:pointer}
-.subrow:hover{background:var(--surface-2)}
 
 /* ---------- review (tri des opérations) ---------- */
 .rev{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--surface-2);transition:transform .28s ease,opacity .28s ease}
@@ -412,6 +359,7 @@ html[data-theme="dark"] .t-plat{--tier:#8A79E4;--tier-l:#B4A8F5}
    a pas besoin et faisait déborder le tableau pour quelques pixels. */
 .patnum.narrow td:first-child{min-width:0}
 @media (max-width:1080px){.pathero,.patgrid{grid-template-columns:1fr}}
+
 .catgrid{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 .catchip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:3px 10px;font-size:12.5px;cursor:pointer;color:var(--ink-2);display:inline-flex;align-items:center;gap:5px}
 .catchip:hover{border-color:var(--ink-mute)}
@@ -473,8 +421,6 @@ html[data-theme="dark"] .t-plat{--tier:#8A79E4;--tier-l:#B4A8F5}
 .seg button{padding:3px 11px;background:none;border:0;cursor:pointer;font-size:12px;color:var(--ink-2);font-family:var(--mono)}
 .seg button:hover{background:var(--surface-2)}
 .seg button.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
-.cmpprev{opacity:0;transition:opacity .12s}
-.cmprow:hover .cmpprev,.cmprow:focus-within .cmpprev{opacity:1}
 
 /* ---------- misc ---------- */
 .ops thead th{position:sticky;top:0;background:var(--surface);z-index:2}
@@ -830,7 +776,6 @@ html[data-theme="dark"] .v2{
 .v2 .pulse .soon b{font-family:var(--disp);font-variation-settings:"wght" 640,"wdth" 100;
   font-size:11.5px;color:var(--ink-2)}
 
-
 /* ---------- détail d'un dépassement ---------- */
 .v2 .detail{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px}
 .v2 .detail .dh{display:flex;align-items:baseline;gap:10px;margin-bottom:11px}
@@ -937,6 +882,17 @@ html[data-theme="dark"] .v2{
 .v2 .imp .fig .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);font-variation-settings:"wght" 660,"wdth" 100}
 .v2 .imp .fig .v{font-size:17px;font-variation-settings:"wght" 660,"wdth" 90;letter-spacing:-.015em}
 .v2 .imp .fig .v.in{color:var(--win-ink)}
+/* Les deux gestes hérités de l'ancien écran. Vider le mois est destructeur :
+   il se distingue par la couleur et demande confirmation avant d'agir.
+   Pas .acts : ce nom porte déjà les actions révélées au survol d'une ligne
+   d'opération, et son opacité nulle rendait ces boutons invisibles. */
+.v2 .imp .impbtns{display:flex;gap:8px;flex-wrap:wrap}
+.v2 .imp .obtn{background:none;border:1px solid var(--line);border-radius:7px;padding:6px 12px;
+  cursor:pointer;font:inherit;font-size:12px;color:var(--ink-2);white-space:nowrap;
+  font-variation-settings:"wght" 580,"wdth" 96}
+.v2 .imp .obtn:hover{border-color:var(--ink-4);color:var(--ink)}
+.v2 .imp .obtn.danger{color:var(--bad-ink)}
+.v2 .imp .obtn.danger:hover{border-color:var(--bad);color:var(--bad-ink)}
 /* Des filtres nommés et comptés plutôt que des cases à cocher : le travail
    restant se voit au lieu de se cacher. */
 .v2 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -1020,6 +976,7 @@ html[data-theme="dark"] .v2{
   .v2 .vhead .c2,.v2 .vhead .sp6,.v2 .vrow .pbar,.v2 .vrow .dbar,.v2 .vrow .spark{display:none}
   .v2 .vrow .dv{grid-column:4}
 }
+
 @media(max-width:940px){
   .v2 .board{grid-template-columns:1fr}
   .v2 .gauge{border-left:0;border-top:1px solid var(--line)}
@@ -1028,10 +985,12 @@ html[data-theme="dark"] .v2{
      v2GoalCells() interroge ce même seuil pour compter ses colonnes. */
   .v2 .chips,.v2 .gsplit{grid-template-columns:1fr}
 }
+
 @media(max-width:900px){
   .v2 .ohead,.v2 .orow{grid-template-columns:44px minmax(0,1fr) 96px;gap:10px}
   .v2 .ohead span:nth-child(3),.v2 .ohead span:nth-child(5),.v2 .orow .otag,.v2 .orow .dest,.v2 .orow .acts,.v2 .orow .raw{display:none}
 }
+
 @media(max-width:660px){
   .v2{margin:-22px -16px -60px;padding:18px 16px 60px}
   /* Sur une seule colonne, la carte est plus large que la vignette : centrée
@@ -1040,8 +999,8 @@ html[data-theme="dark"] .v2{
   .v2 .tip{left:0;right:0;width:auto;transform:translateY(-4px)}
   .v2 .objwrap:hover .tip,.v2 .objwrap:focus-within .tip{transform:translateY(0)}
 }
-@media(prefers-reduced-motion:reduce){.v2 *{transition:none!important;animation:none!important}}
 
+@media(prefers-reduced-motion:reduce){.v2 *{transition:none!important;animation:none!important}}
 
 /* =========================================================================
    TROPHÉES
@@ -1798,7 +1757,7 @@ let DB = emptyDB();
 let MERCHANT_INDEX = {};
 const UI = {
   view: "month", month: monthKey(todayISO()), year: yearOf(todayISO()),
-  showDup: false, showIgnored: false, showCand: false, batch: "all", openGroup: null, openCat: null, modal: null, small: null, cmpMode: "pct",
+  modal: null, small: null,
   v2tab: "mois", v2goal: null, v2group: null, v2cat: null, v2cmp: "pct", v2ops: "all", v2batch: "all", v2anim: "all",
   v2pick: false, v2pickYear: null,
   patMonth: monthKey(todayISO()),
@@ -2316,7 +2275,7 @@ function render() {
     '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
-    ["month", "cal", "Mois"], ["monthv2", "cal", "Mois v2"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
+    ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
   const patNav = [["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
@@ -2327,7 +2286,6 @@ function render() {
     '<div class="navlabel">Général</div>' + dataNav.map(navItem).join("");
 
   const body = UI.view === "month" ? viewMonth()
-    : UI.view === "monthv2" ? viewMonthV2()
     : UI.view === "trophees" ? viewTrophies()
     : UI.view === "year" ? viewYear()
     : UI.view === "todo" ? viewTodo()
@@ -2374,106 +2332,16 @@ function periodBar(label, unit) {
 }
 
 /* =========================================================================
-   Month view
+   Shared cards and helpers
+   -------------------------------------------------------------------------
+   Ce qui reste de l'ancien écran mensuel, supprimé une fois « Mois v2 » adopté :
+   ces quatre fonctions servent ailleurs — les objectifs annuels et les KPI de
+   l'Année, le nom du lot dans l'export CSV.
    ========================================================================= */
-function viewMonth() {
-  const s = monthStats(UI.month);
-  const prev = monthStats(addMonth(UI.month, -1));
-  const cmp = comparisonRows(UI.month);
-
-  let html = periodBar(monthLabel(UI.month), "month");
-
-  const dm = s.expense - prev.expense;
-  const rate = savingsRate(s.income, s.expense);
-  const sgoal = DB.settings.savingsGoal || 0;
-  const running = UI.month === monthKey(todayISO());
-  const w12 = savingsRateWindow(12);
-  html += '<div class="kpis k5">' +
-    kpi("Revenus", fmtEur(s.income), s.incomeOps ? fmtEur(s.incomeOps) + " depuis le relevé" : (manualIncome(UI.month) ? "saisis à la main" : "aucun revenu saisi"), s.income ? "" : "warn") +
-    kpi("Dépenses", fmtEur(s.expense), (dm >= 0 ? "▲ " : "▼ ") + fmtEur(Math.abs(dm)) + " vs " + MONTHS[+addMonth(UI.month, -1).slice(5) - 1]) +
-    kpi("Balance", fmtEur(s.balance), s.balance >= 0 ? "épargne du mois" : "déficit du mois", s.balance >= 0 ? "pos" : "neg") +
-    kpi("Taux d\u2019épargne",
-        rate == null ? "—" : fmtRate(rate),
-        rate == null ? "revenus du mois non saisis"
-          : sgoal ? savingsVerdict(rate, sgoal)
-          : w12.months ? "moyenne 12 mois : " + fmtRate(w12.rate) : "aucun objectif défini",
-        rate == null ? "warn" : sgoal ? SAVINGS_CLASS[savingsState(rate, sgoal)] : (rate >= 0 ? "" : "neg"),
-        rateTooltip(s, rate, running)) +
-    kpi("À catégoriser", String(s.todoCount), s.todoCount ? fmtEur(s.todoAmount) + " hors calcul" : "tout est classé", s.todoCount ? "warn" : "") +
-    "</div>";
-
-  if (s.incomeOps > 0 && manualIncome(UI.month) > 0)
-    html += '<div class="note warn" style="margin-bottom:16px">' + icon("warn") +
-      " Ce mois compte " + esc(fmtEur(manualIncome(UI.month))) + " de revenus saisis à la main <b>et</b> " +
-      esc(fmtEur(s.incomeOps)) + " de revenus repérés dans le relevé. Si c\u2019est le même salaire, il est compté deux fois : " +
-      '<button class="btn sm" data-act="view" data-view="settings" style="margin-left:6px">ajuster la saisie</button></div>';
-  if (s.todoCount) html += '<div class="note warn" style="margin-bottom:16px">' + icon("warn") + " " + s.todoCount +
-    " opération" + (s.todoCount > 1 ? "s" : "") + " de ce mois " + (s.todoCount > 1 ? "ne sont" : "n'est") + " pas comptée" + (s.todoCount > 1 ? "s" : "") +
-    ' dans les totaux, faute de catégorie. <button class="btn sm" data-act="view" data-view="todo" style="margin-left:8px">Les classer</button></div>';
-
-  html += goalCard(s.ops, "m", monthPace(UI.month));
-  html += fixedCard(s);
-  html += catCard(s);
-  html += comparisonCard(UI.month, cmp);
-  html += opsCard(s);
-  return html;
-}
-
-function monthPace(key) {
-  if (key !== monthKey(todayISO())) return 1;
-  const [y, m] = key.split("-").map(Number);
-  return dayOf(todayISO()) / new Date(y, m, 0).getDate();
-}
-
-function comparisonCard(key, cmp) {
-  const pct = UI.cmpMode !== "eur";
-  let html = '<div class="card"><div class="chead"><h2>Écart avec ' + monthLabel(addMonth(key, -12)) + "</h2>" +
-    '<div class="spacer"></div><span class="tiny muted" style="margin-right:10px">' +
-    (key === monthKey(todayISO()) ? "arrêté au " + dayOf(todayISO()) + " des deux mois" : "mois complets") + "</span>" +
-    '<span class="seg"><button class="' + (pct ? "on" : "") + '" data-act="cmpmode" data-mode="pct">%</button>' +
-    '<button class="' + (pct ? "" : "on") + '" data-act="cmpmode" data-mode="eur">€</button></span></div>';
-  if (!cmp.length) return html + '<div class="empty">Pas encore de dépenses sur ce mois ni sur le même mois un an plus tôt.</div></div>';
-  html += '<div class="cmp">' + cmp.map(r => {
-    const scale = 60, pp = Math.max(-scale, Math.min(scale, r.pct));
-    const half = 50, w = Math.abs(pp) / scale * half;
-    const bandW = DB.settings.band / scale * half;
-    const arrow = r.verdict === "over" ? "▲" : r.verdict === "under" ? "▼" : "＝";
-    const cls = r.verdict === "over" ? "neg" : r.verdict === "under" ? "pos" : "muted";
-    const fillCls = r.verdict === "over" ? "over" : r.verdict === "under" ? "under" : "flat";
-    return '<div class="cmprow ' + r.verdict + '">' +
-      '<div class="cmpname">' + groupBadge(r.group) + '<span class="nm">' + esc(r.group.name) + "</span></div>" +
-      '<div class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(r.now)) + "</div>" +
-      '<div class="cmpdelta ' + cls + '" title="' + esc("référence " + fmtEur(r.ref) + " · " + monthLabel(addMonth(key, -12)) + " revalorisé") + '"><span>' + arrow +
-        '</span><span class="num">' + esc(pct ? (r.ref >= 20 ? fmtPct(r.pct) : "n.s.") : fmtEur(r.delta, { plus: true })) + "</span></div>" +
-      '<div class="track">' +
-        '<div class="band" style="left:' + (half - bandW) + "%;width:" + (bandW * 2) + '%"></div>' +
-        '<div class="zero" style="left:' + half + '%"></div>' +
-        '<div class="fill ' + fillCls + '" style="' + (pp >= 0 ? "left:" + half + "%;" : "left:" + (half - w) + "%;") + "width:" + Math.max(w, 0.6) + '%"></div>' +
-      "</div>" +
-      '<div class="cmpprev">réf. ' + esc(fmtEur(r.ref)) + "</div>" +
-      "</div>";
-  }).join("") + "</div>";
-  return html + '<div class="legendline"><span class="chip"><span class="sw" style="background:var(--pos)"></span>▼ moins dépensé</span>' +
-    '<span class="chip"><span class="sw" style="background:var(--neg)"></span>▲ plus dépensé</span>' +
-    '<span class="chip"><span class="sw" style="background:var(--line)"></span>＝ zone neutre ±' + DB.settings.band + " %</span>" +
-    '<span class="muted">survolez une ligne pour voir la référence : ' + esc(monthLabel(addMonth(key, -12))) +
-    " revalorisé de " + String(DB.settings.inflation).replace(".", ",") + " % d'inflation</span></div></div>";
-}
-
 function kpi(label, value, sub, cls, title) {
   return '<div class="kpi"' + (title ? ' title="' + esc(title) + '"' : "") + '><div class="eyebrow">' + esc(label) + "</div>" +
     '<div class="v num ' + (cls === "pos" || cls === "neg" || cls === "warn" ? cls : "") + '">' + esc(value) + "</div>" +
     '<div class="s ' + (cls === "warn" ? "" : "") + '">' + esc(sub) + "</div></div>";
-}
-
-/* The rate is honest only if the month is closed and everything is classified. */
-function rateTooltip(s, rate, running) {
-  if (rate == null) return "Le taux se calcule sur les revenus : saisissez-les dans Réglages.";
-  let t = "(revenus − dépenses) ÷ revenus = (" + fmtEur(s.income) + " − " + fmtEur(s.expense) + ") ÷ " + fmtEur(s.income) +
-    ". Les virements vers l\u2019épargne ne sont pas des dépenses : ils restent dans la part épargnée.";
-  if (running) t += " Mois en cours : le salaire est saisi en entier alors que les dépenses ne le sont pas encore, le taux paraît donc plus élevé qu\u2019il ne finira.";
-  if (s.todoCount) t += " " + s.todoCount + " opération(s) sans catégorie ne sont pas comptées dans les dépenses : le taux est optimiste tant qu\u2019elles ne sont pas classées.";
-  return t;
 }
 
 function goalState(spent, target, pace) {
@@ -2516,217 +2384,18 @@ function goalCard(ops, mode, pace) {
     (mode === "m" && (pace || 1) < 1 ? '<div class="tiny muted" style="margin-top:10px">Le repère vertical marque le rythme attendu au ' + dayOf(todayISO()) + " du mois.</div>" : "") + "</div>";
 }
 
-/* Group breakdown, drilling down to subcategories then to merchants. */
-function fixedTag(catId) {
-  const c = CAT_BY_ID[catId], g = catGroup(catId);
-  if (!g) return "";
-  return '<span class="tag-cat" style="background:' + g.color + '1A;color:' + g.color + ';cursor:default">' +
-    icon(g.icon, 12) + esc(c ? c.name : g.name) + "</span>";
-}
-function fixedRow(r, key) {
-  const seen = r.months[key] != null;
-  const rhythm = PERIOD_NAME[r.period] + (r.period === 1 ? " · vers le " + r.day : " · " + fmtEurShort(r.amount));
-  const status = r.on
-    ? (seen ? '<span class="tiny muted">passée</span>' : r.period === 1 ? '<span class="tiny warn-txt">▲ absente</span>' : '<span class="tiny muted">—</span>')
-    : '<span class="tiny muted" title="' + esc(r.manual ? "vous l\u2019avez écartée des charges fixes" : r.why) + '">' +
-      esc(r.manual ? "écartée" : r.flag) + "</span>";
-  return '<div class="fixrow' + (r.on ? "" : " off") + '">' +
-    '<label class="check" title="' + (r.on ? "Retirer des charges fixes" : "Compter dans les charges fixes") + '"><input type="checkbox" data-chg="fixed" data-key="' +
-      esc(r.key) + '" ' + (r.on ? "checked" : "") + "></label>" +
-    '<span class="nm" style="text-transform:capitalize" title="' +
-      esc(r.count + " prélèvements depuis " + monthLabel(r.firstMonth) + " · régularité " + Math.round(r.regular * 100) + " % · variation " + Math.round(r.spread * 100) + " %") +
-      '">' + esc(r.name) + "</span>" +
-    "<span>" + fixedTag(r.cat) + "</span>" +
-    '<span class="tiny muted">' + esc(rhythm) + "</span>" +
-    '<span class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(r.monthly)) + "</span>" +
-    '<span style="text-align:right">' + status + "</span>" +
-    "</div>";
-}
-function fixedCard(s) {
-  const bc = baseCost();
-  let html = '<div class="card"><div class="chead"><h2>Charges fixes</h2><div class="spacer"></div>' +
-    '<span class="tiny muted">charges repérées sur les ' + FIXED_WINDOW + " derniers mois</span></div>";
-  if (!bc.list.length)
-    return html + '<div class="empty"><b>Rien de récurrent détecté pour l\u2019instant</b>' +
-      "Il faut au moins trois passages d\u2019un même commerçant, à un rythme et pour un montant stables. Importez plus d\u2019historique et la liste se remplira seule.</div></div>";
-
-  const income = s.income || avgIncome12();
-  const fromAvg = !s.income && income > 0;
-  const share = income > 0 ? bc.monthly / income * 100 : null;
-  const left = income > 0 ? income - bc.monthly : null;
-  const goal = DB.settings.savingsGoal || 0;
-  const toSave = goal && income > 0 ? income * goal / 100 : 0;
-
-  html += '<div class="basegrid">' +
-    '<div><div class="eyebrow">Total mensuel</div><div class="v num">' + esc(fmtEur(bc.monthly)) + "</div>" +
-      '<div class="tiny muted">' + bc.kept.length + " charge" + (bc.kept.length > 1 ? "s" : "") + " retenue" + (bc.kept.length > 1 ? "s" : "") +
-      ", en équivalent mensuel</div></div>" +
-    '<div><div class="eyebrow">Part engagée d\u2019avance</div><div class="v num' + (share == null ? "" : share > 60 ? " neg" : share > 45 ? " warn" : "") + '">' +
-      (share == null ? "—" : esc(fmtRate(share))) + "</div>" +
-      '<div class="tiny muted">' + (share == null ? "revenus non saisis" : "de vos revenus part sans décision") + "</div></div>" +
-    '<div><div class="eyebrow">Reste à vivre</div><div class="v num' + (left == null ? "" : left < 0 ? " neg" : "") + '">' +
-      (left == null ? "—" : esc(fmtEur(left))) + "</div>" +
-      '<div class="tiny muted">' + (left == null ? "revenus non saisis"
-        : fromAvg ? "sur un revenu moyen de " + fmtEur(income)
-        : toSave ? "dont " + fmtEur(toSave) + " à épargner pour tenir " + fmtRate(goal)
-        : "revenus du mois − charges fixes") + "</div></div>" +
-    "</div>";
-
-  const miss = missingFixed(bc.kept, UI.month);
-  if (miss.length) html += '<div class="note warn" style="margin:0 0 12px">' + icon("warn") + " " +
-    (miss.length > 1 ? miss.length + " charges habituelles ne sont pas passées" : "Une charge habituelle n\u2019est pas passée") +
-    " en " + esc(monthLabel(UI.month)) + " : " + esc(miss.map(r => r.name).join(", ")) +
-    ". Soit elle est en retard, soit elle a cessé — dans ce cas, décochez-la.</div>";
-
-  html += '<div class="fixlist">' + bc.kept.map(r => fixedRow(r, UI.month)).join("") + "</div>";
-  if (bc.out.length)
-    html += '<div class="legendline" style="justify-content:space-between">' +
-      '<span class="muted">' + bc.out.length + " autre" + (bc.out.length > 1 ? "s" : "") + " détectée" + (bc.out.length > 1 ? "s" : "") +
-      ", écartée" + (bc.out.length > 1 ? "s" : "") + " des charges fixes</span>" +
-      '<button class="btn sm ghost" data-act="showcand">' + (UI.showCand ? "Masquer" : "Voir et arbitrer") + "</button></div>" +
-      (UI.showCand ? '<div class="fixlist">' + bc.out.map(r => fixedRow(r, UI.month)).join("") + "</div>" : "");
-  return html + '<p class="tiny muted" style="margin:12px 0 0">Une charge est retenue quand elle revient au même rythme pour un montant stable. ' +
-    "Les charges fixes forment le plancher de dépense d\u2019un mois où vous ne décidez de rien : elles donnent la marge de manœuvre réelle et servent de base au matelas de sécurité (3 à 6 mois).</p></div>";
-}
-
-/* Group breakdown, drilling down to subcategories then to merchants. */
-function catCard(s) {
-  const rows = GROUPS.filter(g => g.kind === KIND_EXPENSE).map(g => ({ g, v: s.groups[g.id] || 0 }))
-    .filter(r => r.v !== 0).sort((a, b) => b.v - a.v);
-  const total = rows.reduce((a, r) => a + Math.max(r.v, 0), 0) || 1;
-  let html = '<div class="card"><div class="chead"><h2>Dépenses par groupe</h2><div class="spacer"></div>' +
-    '<span class="tiny muted">' + esc(fmtEur(s.expense)) + " · cliquez pour déplier</span></div>";
-  if (!rows.length) return html + '<div class="empty">Aucune dépense classée sur ce mois.</div></div>';
-  html += rows.map(r => {
-    const share = Math.max(r.v, 0) / total * 100;
-    const open = UI.openGroup === r.g.id;
-    let sub = "";
-    if (open) {
-      const cats = CATS.filter(c => c.group === r.g.id).map(c => ({ c, v: s.cats[c.id] || 0 })).filter(x => x.v !== 0).sort((a, b) => b.v - a.v);
-      sub = cats.map(x => {
-        const openCat = UI.openCat === x.c.id;
-        let merch = "";
-        if (openCat) {
-          const list = merchantsOfCat(s.ops, x.c.id);
-          merch = list.map(m => '<div class="merchrow"><span style="text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(m.name) + "</span>" +
-            '<span class="num muted" style="text-align:right">' + m.n + " ×</span>" +
-            '<span class="num" style="text-align:right">' + esc(fmtEur(m.v)) + "</span></div>").join("");
-        }
-        return '<div class="subrow ' + (openCat ? "open" : "") + '" data-act="togglecat" data-cat="' + x.c.id + '">' +
-          "<span>" + (openCat ? "▾ " : "▸ ") + esc(x.c.name) + '</span><span class="num" style="text-align:right">' + esc(fmtEur(x.v)) +
-          '</span><span class="num muted" style="text-align:right">' + Math.round(x.v / r.v * 100) + " %</span></div>" + merch;
-      }).join("");
-    }
-    return '<div class="catrow" data-act="togglegroup" data-group="' + r.g.id + '">' +
-      groupBadge(r.g) +
-      "<div><div>" + (open ? "▾ " : "▸ ") + esc(r.g.name) + '</div><div class="bar"><i style="width:' + share.toFixed(1) + "%;background:" + r.g.color + '"></i></div></div>' +
-      '<div class="num" style="text-align:right;font-weight:600">' + esc(fmtEur(r.v)) + "</div>" +
-      '<div class="num muted" style="text-align:right">' + Math.round(share) + " %</div></div>" + sub;
-  }).join("");
-  return html + "</div>";
-}
-
-/* =========================================================================
-   Operations table
-   ========================================================================= */
 function importLabel(id) {
   const imp = DB.imports.find(i => i.id === id);
   return imp ? imp.name : "—";
 }
-function importDate(id) {
-  const imp = DB.imports.find(i => i.id === id);
-  return imp ? imp.date : "";
-}
-function opsCard(s) {
-  const batches = Array.from(new Set(s.ops.map(t => t.imp)));
-  let ops = s.ops.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
-  if (UI.batch !== "all") ops = ops.filter(t => String(t.imp) === UI.batch);
-  const shown = ops.filter(t => {
-    if (t.status === ST_DUP || t.status === ST_DUP_MAYBE) return UI.showDup;
-    if (t.status === ST_IGNORED) return UI.showIgnored;
-    return true;
-  });
-
-  let html = '<div class="card"><div class="chead"><h2>Opérations</h2><div class="spacer"></div>' +
-    '<button class="btn sm" data-act="addop">' + icon("plus") + "Ajouter</button>" +
-    (s.ops.length ? ' <button class="btn sm danger" data-act="delmonth" title="Vide le mois pour rejouer un import">' + icon("trash") + "Vider le mois</button>" : "") + "</div>";
-
-  html += '<div class="controls">' +
-    '<label class="check"><input type="checkbox" data-chg="showdup" ' + (UI.showDup ? "checked" : "") + "> Afficher les doublons" +
-      (s.dupCount ? ' <span class="tag dup">' + s.dupCount + "</span>" : "") + "</label>" +
-    '<label class="check"><input type="checkbox" data-chg="showign" ' + (UI.showIgnored ? "checked" : "") + "> Afficher les virements internes" +
-      (s.ignoredCount ? ' <span class="tag ign">' + s.ignoredCount + "</span>" : "") + "</label>";
-  if (batches.length > 1 || UI.batch !== "all") {
-    html += '<span class="spacer" style="flex:1"></span><span class="tiny muted">Lot d\u2019import :</span><div class="pillrow">' +
-      '<span class="pill ' + (UI.batch === "all" ? "on" : "") + '" data-act="batch" data-batch="all">Tous</span>' +
-      batches.map(b => '<span class="pill ' + (String(b) === UI.batch ? "on" : "") + '" data-act="batch" data-batch="' + b + '">' + esc(importLabel(b)) + "</span>").join("") + "</div>";
-  }
-  html += "</div>";
-
-  if (!shown.length) return html + '<div class="empty"><b>Rien à afficher</b>Importez un relevé pour remplir ce mois.</div></div>';
-
-  html += '<table class="ops"><thead><tr><th class="c-date">Date</th><th>Opération</th><th class="c-cat">Catégorie</th>' +
-    '<th class="c-imp">Importé le</th><th class="c-amt">Montant</th><th class="c-act"></th></tr></thead><tbody>';
-  html += shown.map(t => opRow(t)).join("");
-  html += "</tbody></table>";
-  const hidden = ops.length - shown.length;
-  if (hidden > 0) html += '<div class="tiny muted" style="margin-top:8px">' + hidden + " opération" + (hidden > 1 ? "s" : "") + " masquée" + (hidden > 1 ? "s" : "") + " (doublons ou virements internes).</div>";
-  return html + "</div>";
-}
-
-function catTag(t) {
-  if (!t.cat) return '<button class="tag-cat none" data-act="editcat" data-id="' + t.id + '">' + icon("plus", 13) + "choisir…</button>";
-  const g = catGroup(t.cat);
-  return '<button class="tag-cat" data-act="editcat" data-id="' + t.id + '" style="background:' + g.color + '1A;color:' + g.color + '" title="' +
-    esc(g.name + " · " + catName(t.cat)) + '">' + icon(g.icon, 13) + esc(catName(t.cat)) + "</button>";
-}
-function opRow(t) {
-  const dup = t.status === ST_DUP || t.status === ST_DUP_MAYBE;
-  const ign = t.status === ST_IGNORED;
-  const cls = dup ? "is-dup" : ign ? "is-ign" : "";
-  let tags = "";
-  if (t.status === ST_DUP) tags = '<span class="tag dup">doublon</span>';
-  else if (t.status === ST_DUP_MAYBE) tags = '<span class="tag dup">doublon probable</span>';
-  else if (ign) tags = '<span class="tag ign">interne</span>';
-  else if (!t.cat) tags = '<span class="tag todo">à catégoriser</span>';
-  /* Le virement a nourri un compte : le dire ici, c'est la seule façon de voir d'un coup
-     d'œil ce qui est déjà arrivé dans le patrimoine et ce qui n'y est jamais entré. */
-  const linked = patLinkedMove(t);
-  if (linked) {
-    const la = (DB.patAccounts || []).find(a => a.id === linked.accountId);
-    tags += ' <span class="tag lnk" title="' +
-      esc(fmtEur(linked.amount, { plus: true }) + " enregistré sur ce compte au " + linked.date.split("-").reverse().join("/")) +
-      '">' + (la ? patSwatch(la, 7) : "") + esc(la ? la.name : "patrimoine") + "</span>";
-  }
-
-  let actions = "";
-  if (dup) {
-    actions = '<button class="iconbtn" title="Ce n\u2019est pas un doublon" data-act="undup" data-id="' + t.id + '">' + icon("undo", 14) + "</button>" +
-      '<button class="iconbtn danger" title="Supprimer" data-act="del" data-id="' + t.id + '">' + icon("trash", 14) + "</button>";
-  } else {
-    actions = ign
-      ? '<button class="iconbtn" title="Recompter cette opération" data-act="unignore" data-id="' + t.id + '">' + icon("undo", 14) + "</button>"
-      : '<button class="iconbtn" title="Ignorer (virement interne)" data-act="ignore" data-id="' + t.id + '">' + icon("vault", 14) + "</button>";
-    actions += '<button class="iconbtn" title="Marquer comme doublon" data-act="mkdup" data-id="' + t.id + '">' + icon("warn", 14) + "</button>" +
-      '<button class="iconbtn danger" title="Supprimer" data-act="del" data-id="' + t.id + '">' + icon("trash", 14) + "</button>";
-  }
-  const merchant = t.merchantRaw || merchantFromLabel(t.label) || "—";
-  return '<tr class="' + cls + '"><td class="c-date num">' + t.date.slice(8, 10) + "/" + t.date.slice(5, 7) + "</td>" +
-    "<td><div class=\"merchant\">" + esc(merchant) + " " + tags + '</div><span class="rawlabel">' + esc(t.label) + "</span></td>" +
-    '<td class="c-cat">' + catTag(t) + "</td>" +
-    '<td class="c-imp tiny muted">' + esc(importDate(t.imp)) + "</td>" +
-    '<td class="c-amt num ' + (t.amount > 0 ? "pos" : "") + '">' + esc(fmtEur(t.amount)) + "</td>" +
-    '<td class="c-act">' + actions + "</td></tr>";
-}
-
-
 /* =========================================================================
-   Mois v2 — refonte visuelle
+   Mois
    -------------------------------------------------------------------------
-   Un second écran mensuel, posé à côté de l'ancien le temps de trancher. Il lit
-   exactement les mêmes données : rien n'est recalculé autrement, seule la mise
-   en forme change. Tout son balisage vit sous .v2, dont les styles sont
-   cloisonnés — « Mois » reste intact tant que les deux coexistent.
+   L'écran mensuel. Né comme refonte posée à côté de l'ancienne le temps de
+   trancher, il l'a remplacée. Il lit les mêmes données que le reste de
+   l'application : rien n'est recalculé autrement ici. Tout son balisage vit
+   sous .v2 — un simple espace de noms désormais, mais qui reste utile : les
+   règles de l'Année et du Patrimoine ne peuvent pas y entrer par accident.
    ========================================================================= */
 
 /* Gamme d'identification des postes : huit teintes régulières prises dans l'arc
@@ -2899,7 +2568,7 @@ function v2History(groupId, n) {
 /* -------------------------------------------------------------------------
    Écran
    ------------------------------------------------------------------------- */
-function viewMonthV2() {
+function viewMonth() {
   const key = UI.month;
   const running = key === monthKey(todayISO());
   const [yy, mm] = key.split("-").map(Number);
@@ -3510,6 +3179,12 @@ function v2Ops(c) {
       '<div><span class="k">Opérations</span><span class="v num">' + ops.length + "</span></div>" +
       '<div><span class="k">Encaissé</span><span class="v in num">' + esc(fmtEur(inc)) + "</span></div>" +
       '<div><span class="k">Débité</span><span class="v num">' + esc(fmtEur(deb)) + "</span></div>" +
+    "</div>" +
+    /* Repris de l'ancien écran mensuel : ce sont les deux seuls gestes qu'il
+       portait et qu'on ne trouve nulle part ailleurs. */
+    '<div class="impbtns"><button class="obtn" data-act="addop">Ajouter</button>' +
+    (s.ops.length ? '<button class="obtn danger" data-act="delmonth"' +
+      ' title="Vide le mois pour rejouer un import">Vider le mois</button>' : "") +
     "</div></div>";
 
   const f = [["all", "Toutes", ops.length, ""]];
@@ -6948,7 +6623,6 @@ function commitImport() {
   const todo = fresh.filter(t => t.status === ST_OK && !t.cat).length;
   saveDB(); reindex();
   WIZ.result = { added, dup: dupCount, todo, ignored, rules: learned, name: label };
-  UI.showDup = false;
   const dates = fresh.map(t => t.date).sort();
   if (dates.length) { UI.month = monthKey(dates[dates.length - 1]); UI.year = yearOf(dates[dates.length - 1]); }
   if (history) { WIZ.step = 4; render(); }
@@ -7517,12 +7191,6 @@ document.addEventListener("click", e => {
     case "prevyear": UI.year--; render(); break;
     case "nextyear": UI.year++; render(); break;
     case "openmonth": UI.month = el.dataset.month; UI.view = "month"; render(); break;
-    case "togglegroup":
-      UI.openGroup = UI.openGroup === el.dataset.group ? null : el.dataset.group; UI.openCat = null; render(); break;
-    case "togglecat":
-      e.stopPropagation();
-      UI.openCat = UI.openCat === el.dataset.cat ? null : el.dataset.cat; render(); break;
-    case "batch": UI.batch = el.dataset.batch; render(); break;
     /* Mois v2. L'animation ne se rejoue que sur un changement de contexte :
        la relancer à chaque dépliement donnait un battement d'écran insupportable
        quand on analyse. */
@@ -7559,7 +7227,6 @@ document.addEventListener("click", e => {
       DB.tx.splice(+el.dataset.id, 1); reindex(); saveDB(); render(); toast("Opération supprimée."); break;
     }
     case "addop": addManual(); break;
-    case "cmpmode": UI.cmpMode = el.dataset.mode; render(); break;
     case "revexpand": REVIEW.expand = !REVIEW.expand; render(); break;
     case "delmonth": {
       const ops = opsOfMonth(UI.month);
@@ -7629,7 +7296,6 @@ document.addEventListener("click", e => {
       saveDB(); UI.view = "settings"; render(); toast("Objectifs proposés appliqués — ajustez-les à votre guise.");
       break;
     }
-    case "showcand": UI.showCand = !UI.showCand; render(); break;
     case "usesaverate": {
       const v = +el.dataset.v;
       DB.settings.savingsGoal = DB.settings.savingsGoal === v ? 0 : v;
@@ -7788,8 +7454,7 @@ document.addEventListener("change", e => {
       if (catKind(cat) === KIND_NEUTRAL) t.status = ST_IGNORED; else patDetachTx(t); } });
     if (!OPAQUE_MERCHANTS.has(key)) DB.rules[key] = cat;
     saveDB(); renderSoon(); toast("Classé, et la règle est retenue.");
-  } else if (kind === "showdup") { UI.showDup = el.checked; renderSoon(); }
-  else if (kind === "showign") { UI.showIgnored = el.checked; renderSoon(); }
+  }
   else if (kind === "map") { WIZ.mapping[el.dataset.key] = el.value || ""; }
   else if (kind === "impdup") { WIZ.importDups = el.checked; renderSoon(); }
   else if (kind === "revremember") { REVIEW.remember = el.checked; }

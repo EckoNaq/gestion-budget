@@ -12,6 +12,17 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-20 — « Mois v2 » devient « Mois »
+
+L’essai est concluant : la refonte remplace l’écran mensuel d’origine, qui disparaît. Une seule entrée **Mois** dans la barre latérale.
+
+- **Ce qui est supprimé** : douze fonctions (`viewMonth`, la fiche comparée, les cartes de postes et de charges fixes, la table d’opérations d’origine), six actions devenues sans émetteur, sept champs d’état que plus rien ne lisait, et 44 règles de style dont le sélecteur ne pouvait plus correspondre. Environ 370 lignes.
+- **Ce qui est conservé bien qu’écrit pour l’ancien écran** : `kpi()`, `goalCard()`, `goalState()` et `importLabel()`. Ils vivaient dans sa zone mais servent à l’Année et à l’export CSV.
+- **Ce qui est rapatrié** : l’ancien écran portait deux gestes qu’on ne trouvait nulle part ailleurs — **Ajouter** une opération à la main et **Vider le mois** pour rejouer un import. Les supprimer avec lui aurait fait perdre des fonctions et pas seulement du code : ils reviennent dans l’en-tête de l’onglet **Opérations**.
+- **Ce qui n’est pas rapatrié, délibérément** : les cases « Afficher les doublons » et « Afficher les virements internes ». Le nouvel écran ne les masque plus — il les montre avec leur état et un filtre dédié — si bien qu’il n’y a plus rien à démasquer.
+- **Vérifications.** Aucune fonction conservée n’appelle une fonction supprimée ; les dix-huit classes retirées n’apparaissent plus nulle part dans le script et aucune concaténation ne peut les reconstruire, préfixe par préfixe ; les 42 sélecteurs disparus citent tous une classe morte ; les onze vues et les trois sous-onglets se rendent sans erreur.
+- Une collision de noms rattrapée au passage : les deux boutons rapatriés portaient d’abord la classe `.acts`, qui désigne déjà les actions révélées au survol d’une ligne d’opération — opacité nulle par défaut. Ils étaient dans le document, corrects au calcul, et invisibles à l’écran.
+
 ### 2026-08-20 — l’origine, le débordement, et l’emboîtement des objectifs
 
 - **La courbe partait en l’air.** L’axe courait du 1er au dernier jour, si bien que le premier point portait déjà le cumul de la journée entière à l’abscisse zéro : la dépense du 1er n’avait nulle part où monter et la surface démarrait par un mur vertical, d’autant plus visible qu’un loyer tombe souvent le 1er ou le 2. L’axe part maintenant du **jour 0**, où un cumul vaut zéro par définition, et la première journée occupe la largeur qui lui revient. C’est le second défaut du début de mois, indépendant de l’échantillonnage corrigé plus haut.
@@ -64,7 +75,7 @@ Ajout : une entrée **Trophées** dans la barre latérale, et **60 succès** ré
 
 ### 2026-08-18 — un second écran mensuel
 
-Ajout : un onglet **Mois v2** dans la barre latérale, à côté de **Mois** laissé intact au pixel près. Même mois consulté, mêmes données — `monthStats`, `baseCost`, `comparisonRows`, `merchantsOfCat`, `patLinkedMove` — et aucun calcul refait autrement : seule la mise en forme change. Les deux coexistent le temps de trancher ; si v2 l'emporte, v1 disparaît.
+Ajout : un onglet **Mois v2** dans la barre latérale, à côté de **Mois** laissé intact au pixel près. Même mois consulté, mêmes données — `monthStats`, `baseCost`, `comparisonRows`, `merchantsOfCat`, `patLinkedMove` — et aucun calcul refait autrement : seule la mise en forme change. Les deux coexistent le temps de trancher ; si v2 l'emporte, v1 disparaît. *(C'est ce qui est arrivé — voir l'entrée du 20 août.)*
 
 Ce que l'écran d'origine posait comme problème : six cartes de poids visuel identique, empilées sur cinq écrans de défilement. Même bordure, même titre, même carte — rien n'y disait ce qui compte, et le chiffre des dépenses revenait sous cinq angles différents. Un écran qui ne hiérarchise pas laisse le lecteur faire le tri à chaque visite.
 
