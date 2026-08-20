@@ -12,6 +12,13 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-20 — l’origine, le débordement, et l’emboîtement des objectifs
+
+- **La courbe partait en l’air.** L’axe courait du 1er au dernier jour, si bien que le premier point portait déjà le cumul de la journée entière à l’abscisse zéro : la dépense du 1er n’avait nulle part où monter et la surface démarrait par un mur vertical, d’autant plus visible qu’un loyer tombe souvent le 1er ou le 2. L’axe part maintenant du **jour 0**, où un cumul vaut zéro par définition, et la première journée occupe la largeur qui lui revient. C’est le second défaut du début de mois, indépendant de l’échantillonnage corrigé plus haut.
+- **Le panneau de détail débordait.** Il tient deux tableaux côte à côte et son texte est insécable ; depuis que la grille d’objectifs ne fait plus que la moitié de la colonne, il n’avait plus la place et les colonnes se chevauchaient. Le repli ne se décide plus sur la largeur de la fenêtre — qui ne dit rien de la place réelle — mais sur celle du conteneur, et un nom de commerçant trop long se coupe au lieu de pousser le tableau dehors.
+- **Un objectif de sous-catégorie n’a pas de ventilation interne** : le panneau affichait un tableau « Pas de sous-catégorie » et une colonne de catégorie qui répétait le titre à chaque ligne. Il se réduit désormais aux plus grosses dépenses, ce qui est tout ce qu’il avait à dire.
+- **Un poste et ses sous-catégories ne se distinguaient pas.** Avec un objectif sur *Abonnements* et deux autres sur *Mobile* et *Internet*, trois vignettes portaient la même icône sans que rien n’indique que la première contient les deux autres — trois choses semblables affichant des chiffres différents. Une **ligne de rattachement** l’établit : le nom du poste au-dessus d’une sous-catégorie, la mention « tout le poste » au-dessus d’un poste qui en contient. L’icône partagée devient alors une information juste — c’est bien le même poste — au lieu d’une confusion. La ligne n’apparaît que si un tel emboîtement existe, et alors sur toutes les vignettes, faute de quoi les chiffres ne s’aligneraient plus d’une vignette à l’autre.
+
 ### 2026-08-20 — le début du mois mentait
 
 **« Habituellement » démarrait trop haut.** Sur avril 2026 — 30 jours, références mars (31 j) et février (28 j) — la courbe grise partait à **500 € au 1er** quand le mois consulté était encore à zéro, d’où un mur vertical au bord gauche du graphique.

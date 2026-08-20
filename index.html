@@ -694,6 +694,13 @@ html[data-theme="dark"] .v2{
 .v2 .objcard.win .bdg{color:var(--win)}
 .v2 .objcard.hot .bdg{color:var(--hot)}
 .v2 .objcard.bad .bdg{color:var(--bad)}
+/* La ligne de rattachement : le poste au-dessus d'une sous-catégorie, la
+   mention « tout le poste » au-dessus d'un poste qui en contient. Vide, elle
+   garde sa place pour que les chiffres restent alignés d'une vignette à
+   l'autre. */
+.v2 .objcard .tie{display:block;font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--ink-4);font-variation-settings:"wght" 620,"wdth" 92;line-height:1.35;
+  min-height:1.35em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:1px}
 .v2 .objcard .nm{font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);
   font-variation-settings:"wght" 720,"wdth" 87;overflow:hidden;text-overflow:ellipsis;
   white-space:nowrap;display:block}
@@ -831,11 +838,18 @@ html[data-theme="dark"] .v2{
 .v2 .detail .dh .s{font-size:12.5px;color:var(--bad-ink);font-variation-settings:"wght" 660,"wdth" 100}
 .v2 .detail .dh .x{margin-left:auto;background:none;border:1px solid var(--line);border-radius:5px;color:var(--ink-3);cursor:pointer;font:inherit;font-size:11px;padding:3px 9px}
 .v2 .detail .dh .x:hover{border-color:var(--ink);color:var(--ink)}
-.v2 .dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:24px}
+/* La grille d'objectifs ne fait plus que la moitié de la colonne, et le
+   panneau qu'elle contient avec elle : les colonnes se règlent sur la place
+   disponible et non sur la largeur de la fenêtre, sinon les deux tableaux
+   restent côte à côte dans 560 px et leur texte se chevauche. */
+.v2 .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:24px}
 .v2 .dt{width:100%;border-collapse:collapse}
 .v2 .dt caption{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-3);font-variation-settings:"wght" 680,"wdth" 100;padding-bottom:5px}
 .v2 .dt th,.v2 .dt td{padding:4px 8px;font-size:12.5px;border-bottom:1px solid var(--line-2);white-space:nowrap}
-.v2 .dt th{text-align:left;font-variation-settings:"wght" 540,"wdth" 100;width:99%}
+/* Un nom de commerçant peut dépasser la colonne : il se coupe au lieu de
+   pousser le tableau hors de son panneau. */
+.v2 .dt th{text-align:left;font-variation-settings:"wght" 540,"wdth" 100;width:99%;
+  max-width:0;overflow:hidden;text-overflow:ellipsis}
 .v2 .dt td{text-align:right;font-variation-settings:"wght" 620,"wdth" 92;width:1%}
 .v2 .dt td.q{color:var(--ink-3);font-variation-settings:"wght" 470,"wdth" 92}
 .v2 .dt td.d{text-align:left;color:var(--ink-4);font-variation-settings:"wght" 560,"wdth" 100}
@@ -1018,7 +1032,6 @@ html[data-theme="dark"] .v2{
   .v2 .ohead,.v2 .orow{grid-template-columns:44px minmax(0,1fr) 96px;gap:10px}
   .v2 .ohead span:nth-child(3),.v2 .ohead span:nth-child(5),.v2 .orow .otag,.v2 .orow .dest,.v2 .orow .acts,.v2 .orow .raw{display:none}
 }
-@media(max-width:720px){.v2 .dgrid{grid-template-columns:1fr;gap:16px}}
 @media(max-width:660px){
   .v2{margin:-22px -16px -60px;padding:18px 16px 60px}
   /* Sur une seule colonne, la carte est plus large que la vignette : centrée
@@ -2975,9 +2988,23 @@ function v2Month(c) {
   const ids = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0);
   const fixedBy = v2FixedByGroup();
   const pace = c.running ? c.day / c.days : 1;
+  /* Un objectif peut porter sur un poste entier et un autre sur l'une de ses
+     sous-catégories — Abonnements d'un côté, Mobile et Internet de l'autre. Les
+     deux partagent alors l'icône du poste, ce qui est juste puisque c'est le
+     même poste, mais rien ne disait que le premier contient les seconds : deux
+     vignettes semblables affichant des chiffres différents. Une ligne de rappel
+     l'établit. Elle n'apparaît que si un tel emboîtement existe, et alors sur
+     toutes les vignettes, faute de quoi les hauteurs ne s'accorderaient plus. */
+  const idSet = new Set(ids);
+  const parentOf = id => { const c = CAT_BY_ID[id]; return c && idSet.has(c.group) ? c.group : null; };
+  const hasKids = id => GROUP_BY_ID[id] && ids.some(x => (CAT_BY_ID[x] || {}).group === id);
+  const nested = ids.some(id => parentOf(id) || hasKids(id));
+
   const rows = ids.map(id => {
     const g = GROUP_BY_ID[id], cat = CAT_BY_ID[id];
     const grp = g || (cat ? GROUP_BY_ID[cat.group] : null);
+    const par = parentOf(id);
+    const tie = !nested ? null : par ? GROUP_BY_ID[par].name : hasKids(id) ? "tout le poste" : "";
     const target = DB.goals[id].m, spent = spentOn(id, s.ops);
     const fx = g ? Math.min(fixedBy[id] || 0, spent) : 0;
     /* Sur un poste majoritairement engagé, comparer au rythme du mois n'a pas de
@@ -2986,7 +3013,7 @@ function v2Month(c) {
     const st = spent > target ? "bad"
       : c.running && !heavy && spent / target > pace ? "hot" : "win";
     return { id, name: grp && g ? g.name : (cat ? cat.name : id), grp: grp ? grp.id : "g_legacy",
-             target, spent, fx, st, heavy };
+             target, spent, fx, st, heavy, tie };
   }).sort((a, b) => (a.st === b.st ? b.spent - a.spent : a.st === "bad" ? -1 : b.st === "bad" ? 1 : a.st === "hot" ? -1 : 1));
 
   const held = rows.filter(r => r.spent <= r.target).length;
@@ -3049,6 +3076,7 @@ function v2Month(c) {
               '" stroke-dashoffset="' + (CIRC * (1 - frac)).toFixed(1) + '"></circle>' + notch + "</svg>" +
             '<span class="mid">' + v2Glyph(r.grp, r.st) + "</span></span>" +
           '<span class="bdg">' + V2_BADGE[r.st] + "</span>" +
+          (r.tie == null ? "" : '<span class="tie">' + esc(r.tie) + "</span>") +
           '<span class="nm">' + esc(r.name) + "</span>" +
           '<span class="v num">' + esc(fmtEurShort(r.spent)) + "</span>" +
           '<span class="of num">sur ' + esc(fmtEurShort(r.target)) + "</span>" +
@@ -3110,7 +3138,10 @@ function v2GoalDetail(r, s) {
     '<span class="s num">▲ ' + esc(fmtEur(r.spent - r.target)) + " au-dessus du plafond</span>" +
     '<button class="x" data-act="v2goal" data-goal="' + esc(r.id) + '">Fermer</button></div><div class="dgrid">';
 
-  html += '<table class="dt"><caption>Par sous-catégorie</caption><tbody>' +
+  /* Sur un objectif de sous-catégorie, la ventilation interne n'existe pas et la
+     colonne de catégorie répète le titre à chaque ligne. Le panneau se réduit
+     alors aux plus grosses dépenses, ce qui est tout ce qu'il avait à dire. */
+  if (g) html += '<table class="dt"><caption>Par sous-catégorie</caption><tbody>' +
     (cats.length
       ? cats.map(x => "<tr><th>" + esc(x.n) + '</th><td class="num">' + esc(fmtEur(x.v, {})) +
           '</td><td class="q num">' + esc(fmtRate(x.v / tot * 100)) + "</td></tr>").join("") +
@@ -3121,8 +3152,9 @@ function v2GoalDetail(r, s) {
   html += '<table class="dt"><caption>Plus grosses dépenses</caption><tbody>' +
     (ops.length
       ? ops.map(t => '<tr><td class="d num">' + t.date.slice(8, 10) + "</td><th>" +
-          esc(t.merchantRaw || merchantFromLabel(t.label) || "—") + '</th><td class="q">' + esc(catName(t.cat)) +
-          '</td><td class="num">' + esc(fmtEur(-t.amount, {})) + "</td></tr>").join("")
+          esc(t.merchantRaw || merchantFromLabel(t.label) || "—") + "</th>" +
+          (g ? '<td class="q">' + esc(catName(t.cat)) + "</td>" : "") +
+          '<td class="num">' + esc(fmtEur(-t.amount, {})) + "</td></tr>").join("")
       : "<tr><th>Aucune dépense</th><td></td></tr>") +
     "</tbody></table>";
   return html + "</div></div>";
@@ -3205,16 +3237,22 @@ function v2Pulse(c, rows) {
   }
 
   const top = Math.max(cur[day - 1] || 0, usual ? usual[dim - 1] : 0, c.running ? proj : 0, 1) * 1.06;
-  const X = d => ((d - 1) / (dim - 1)) * W;
+  /* L'axe court du jour 0 au dernier jour, pas du 1er au dernier. Un cumul vaut
+     zéro avant que le mois commence ; en plaçant le 1er à l'abscisse zéro, la
+     dépense de la première journée n'avait nulle part où monter et la courbe
+     démarrait en l'air — un mur vertical au bord gauche de la surface, d'autant
+     plus visible qu'un loyer tombe souvent le 1er ou le 2. */
+  const X = d => (d / dim) * W;
   const Y = v => H - (v / top) * H;
-  const path = (arr, upto) => arr.slice(0, upto).map((v, i) => (i ? "L" : "M") + X(i + 1).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+  const path = (arr, upto) => "M0 " + Y(0).toFixed(1) +
+    arr.slice(0, upto).map((v, i) => "L" + X(i + 1).toFixed(1) + " " + Y(v).toFixed(1)).join("");
 
   html += '<div class="pbody"><div class="pchart">' +
     '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" preserveAspectRatio="none"' +
     ' role="img" aria-label="Dépenses cumulées du mois">' +
     '<line class="axis" x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '"></line>';
   if (usual) html += '<path class="usualfill" d="' + path(usual, dim) +
-    "L" + X(dim).toFixed(1) + " " + H + "L" + X(1).toFixed(1) + " " + H + 'Z"></path>' +
+    "L" + X(dim).toFixed(1) + " " + H + "L0 " + H + 'Z"></path>' +
     '<path class="usual" d="' + path(usual, dim) + '"></path>';
   html += '<path class="now" d="' + path(cur, day) + '"></path>';
   if (c.running && day < dim) {
