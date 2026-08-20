@@ -12,6 +12,17 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-20 — la courbe retrouve sa pente, la colonne de droite se remplit
+
+Élargie à la moitié de l’écran, la courbe des dépenses cumulées se lisait moins bien qu’avant. Ce n’était pas l’écart entre les deux tracés — identique au pixel près — mais **la pente** : à hauteur constante, doubler la largeur divise l’inclinaison par deux, et deux lignes presque plates se confondent. C’est le *banking to 45°* de Cleveland, appliqué à l’envers.
+
+- **La courbe ne prend plus que la moitié du panneau** et retrouve les proportions qu’elle avait quand celui-ci faisait 296 px. Les chiffres se rangent à côté plutôt qu’en dessous.
+- **Le mois habituel devient une plage** au lieu d’une seconde ligne. Deux traits de même nature se confondent dès que la pente faiblit ; un trait posé sur une aire, jamais.
+- **Le pied du panneau change de sujet avec l’état du mois.** Tant qu’il court : ce qu’il reste sous les plafonds, ce qui en est déjà réservé par des prélèvements à venir, et ce qui reste vraiment disponible par jour — sans le deuxième terme, un mois calme au 20 paraît confortable alors que 200 € de charges attendent le 28. Une fois clos, la question n’a plus de sens : le pied montre alors **ce qui a bougé**, poste par poste, contre la même référence de trois mois. Le chiffre d’écart affiché juste au-dessus cesse d’être un verdict sans explication.
+- **Un second bloc, « Bientôt »**, montre trois trophées non acquis — un par famille, les plus avancés. C’est la seule chose de l’écran qui regarde devant ; tout le reste constate. Une collection ne se visite que si l’écran principal en parle. Le classement brut donnait trois fois la même promesse (« 36 mois suivis », « Tout classé 36 mois », « Un poste tenu 36 mois »), les paliers d’une même famille tombant ensemble.
+- Écarté en chemin : **un score de mois** à la manière des applications de sommeil. Il aurait comprimé en un nombre vague quatre faits que l’écran énonce déjà précisément, ses pondérations auraient été un jugement de valeur déguisé en arithmétique, et il aurait contredit les trophées — qui sont déjà un système de notation, en mieux, puisque chacun nomme ce qui a été fait.
+- Corrigé au passage : le compte de colonnes se trompait **encore** d’une piste. `auto-fill` en loge n dès que `n*116 + (n-1)*8` tient dans la largeur — il y a une gouttière de moins que de colonnes — et la marge du conteneur était devinée à 60 px au lieu d’être lue. Quatre colonnes annoncées pour cinq réelles, et la vignette de bord ouvrait sa carte hors de l’écran.
+
 ### 2026-08-19 — les deux rangées s’alignent
 
 Le partage entre les objectifs et **Où en est le mois** ne tombait pas sur celui des deux pastilles du dessus : une colonne souple suivie d’un panneau de 296 px d’un côté, deux moitiés égales de l’autre. Deux bordures verticales séparées de quelques dizaines de pixels se remarquent immédiatement.

@@ -747,16 +747,61 @@ html[data-theme="dark"] .v2{
    pixels. Toute retouche ici doit se faire des deux côtés. */
 .v2 .gsplit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
 .v2 .pulse{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px 14px}
+/* La colonne de droite porte deux blocs empilés, à la largeur de la pastille
+   qui les surmonte : où en est le mois, puis ce qui se rapproche. */
+.v2 .prail{display:grid;gap:10px;align-content:start;min-width:0}
+.v2 .pbody{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.v2 .pbody .pnum{min-width:0}
+/* Le pied du panneau : ce qui reste à venir sur un mois en cours, ce qui a
+   bougé sur un mois clos. */
+.v2 .pfoot{margin-top:12px;padding-top:11px;border-top:1px solid var(--line-2)}
+.v2 .pfoot .fh{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);
+  font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:8px}
+.v2 .pfoot .st{font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-bottom:9px}
+.v2 .pfoot .st:last-child{margin-bottom:0}
+.v2 .pfoot .st b{font-variation-settings:"wght" 660,"wdth" 92;color:var(--ink)}
+.v2 .pfoot .st.q{color:var(--ink-4)}
+.v2 .pfoot .ptl{width:100%;border-collapse:collapse}
+.v2 .pfoot .ptl td{font-size:12.5px;padding:2.5px 0;color:var(--ink-2);text-align:left;
+  font-variation-settings:"wght" 470,"wdth" 96}
+.v2 .pfoot .ptl td.d{width:26px;color:var(--ink-4);font-variation-settings:"wght" 560,"wdth" 92}
+.v2 .pfoot .ptl td.q{color:var(--ink-4)}
+.v2 .pfoot .ptl td.a{text-align:right;white-space:nowrap;color:var(--ink);
+  font-variation-settings:"wght" 620,"wdth" 92}
+.v2 .pfoot .ptl td.a.up{color:var(--bad-ink)}
+.v2 .pfoot .ptl td.a.down{color:var(--win-ink)}
+/* Bientôt : l'emblème porte déjà son arc de progression, une barre de plus
+   ferait doublon. */
+.v2 .nextro .nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:11px;
+  align-items:center;padding:5px 0}
+.v2 .nextro .nw{position:relative;width:38px}
+.v2 .nextro .nw svg{display:block;overflow:visible}
+.v2 .nextro .nx{min-width:0;display:block}
+.v2 .nextro .nx .n{display:block;font-size:12.5px;color:var(--ink);
+  font-variation-settings:"wght" 620,"wdth" 94;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v2 .nextro .nx .k{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--rc);font-variation-settings:"wght" 660,"wdth" 100;margin-top:1px}
+.v2 .nextro .p{font-size:12.5px;color:var(--ink-3);font-variation-settings:"wght" 620,"wdth" 92}
+.v2 .nextro .go{margin-top:9px;width:100%;background:none;border:1px solid var(--line);
+  border-radius:7px;padding:6px 10px;font:inherit;font-size:11.5px;color:var(--ink-2);
+  font-variation-settings:"wght" 560,"wdth" 96;cursor:pointer}
+.v2 .nextro .go:hover{border-color:var(--ink-4);color:var(--ink)}
 .v2 .pulse .ph{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);
   font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:10px}
-/* Hauteur fixe, largeur libre. À rapport constant, la courbe doublait de
-   hauteur en même temps que le panneau et écrasait le tableau ; elle aurait
-   dépassé 500 px sur la mise en page repliée. L'étirement horizontal est
-   assumé — les traits gardent leur épaisseur grâce à non-scaling-stroke. */
-.v2 .pulse svg{display:block;width:100%;height:148px;overflow:visible}
-.v2 .pulse svg *{vector-effect:non-scaling-stroke}
+/* La courbe ne prend plus que la moitié du panneau, et retrouve donc à peu
+   près le rapport qu'elle avait quand celui-ci faisait 296 px. Étirée sur
+   toute la largeur, sa pente s'aplatissait et les deux tracés se lisaient
+   comme une seule bande — c'est l'inclinaison, pas l'écart vertical, qui
+   permet de suivre une ligne. Hauteur fixe pour que la mise en page repliée,
+   où le panneau reprend toute la largeur, ne la fasse pas enfler. */
+.v2 .pchart svg{display:block;width:100%;height:120px;overflow:visible}
+.v2 .pchart svg *{vector-effect:non-scaling-stroke}
 .v2 .pulse .axis{stroke:var(--line);stroke-width:1}
-.v2 .pulse .usual{fill:none;stroke:var(--ink-4);stroke-width:1.6;stroke-dasharray:none;opacity:.75}
+/* Le mois habituel est une plage, pas une seconde ligne. Deux traits de même
+   nature se confondent dès que la pente faiblit ; un trait posé sur une aire,
+   jamais. */
+.v2 .pulse .usualfill{fill:var(--ink-4);opacity:.28;stroke:none}
+.v2 .pulse .usual{fill:none;stroke:var(--ink-4);stroke-width:1.3;stroke-dasharray:none;opacity:.85}
 .v2 .pulse .now{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
 .v2 .pulse .proj{fill:none;stroke-width:1.8;stroke-dasharray:3 3;stroke-linecap:round}
 .v2 .pulse .proj.up{stroke:var(--bad)} .v2 .pulse .proj.down{stroke:var(--win)}
@@ -2986,16 +3031,23 @@ function v2Month(c) {
       '<button class="act" data-act="view" data-view="settings">Régler</button></div>';
   } else {
     const R = 27, CIRC = 2 * Math.PI * R;
-    const gw = 116 + 8;
-    const inner = Math.max((document.querySelector(".main") || {}).clientWidth - 60 || window.innerWidth - 280, 240);
-    /* La grille ne prend que la moitié de la colonne dès que « Où en est le
-       mois » se range à côté — le seuil est celui de .gsplit, interrogé plutôt
-       que recopié. Compter sur la largeur entière annonçait neuf colonnes pour
-       quatre, si bien que les vignettes de bord droit n'étaient pas repérées et
-       que leur carte de survol sortait de l'écran. */
+    /* De quel côté s'ouvre la carte de survol dépend du nombre de colonnes, qu'il
+       faut donc retrouver exactement — une piste d'écart et c'est la vignette de
+       bord qui ouvre sa carte hors de l'écran. Trois pièges : la grille ne prend
+       que la moitié de la colonne dès que « Où en est le mois » se range à côté
+       (seuil interrogé plutôt que recopié), la marge du conteneur se lit au lieu
+       de se deviner, et auto-fill loge n pistes dès que n*116 + (n-1)*8 tient —
+       il y a une gouttière de moins que de colonnes, d'où le +8. */
+    const GAP = 8, gw = 116 + GAP;
+    const main = document.querySelector(".main");
+    let inner = window.innerWidth - 280;
+    if (main) {
+      const cs = getComputedStyle(main);
+      inner = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    }
     const cote = !window.matchMedia("(max-width:940px)").matches;   // cf. .v2 .gsplit
-    const availW = Math.max(cote ? (inner - 10) / 2 : inner, 240);
-    const cols = Math.max(Math.floor(availW / gw), 1);
+    const availW = Math.max(cote ? (Math.max(inner, 240) - 10) / 2 : inner, 240);
+    const cols = Math.max(Math.floor((availW + GAP) / gw), 1);
     const cells = rows.map((r, i) => {
       const canOpen = r.st === "bad", isOpen = UI.v2goal === r.id;
       const frac = Math.min(r.spent / r.target, 1);
@@ -3025,7 +3077,7 @@ function v2Month(c) {
     /* Le panneau se glisse sous la rangée de la vignette ouverte. */
     if (open >= 0) cells.splice(Math.min((Math.floor(open / cols) + 1) * cols, cells.length), 0, v2GoalDetail(rows[open], s));
     html += '<div class="gsplit"><div class="gg' + v2AnimClass("all") + '">' + cells.join("") + "</div>" +
-      v2Pulse(c) + "</div>";
+      '<div class="prail">' + v2Pulse(c, rows) + v2Next() + "</div></div>";
   }
   html += "</div>";
 
@@ -3143,7 +3195,7 @@ function v2UsualHelp(key) {
 
 /* Le panneau « Où en est le mois ». Les anneaux répondent poste par poste ;
    celui-ci répond pour le mois entier, et surtout dit depuis quand ça dérape. */
-function v2Pulse(c) {
+function v2Pulse(c, rows) {
   const key = c.key, dim = c.days, day = c.day;
   const cur = v2Cumul(key), usual = v2Usual(key, 3);
   const spent = cur[day - 1] || 0;
@@ -3162,10 +3214,13 @@ function v2Pulse(c) {
   const Y = v => H - (v / top) * H;
   const path = (arr, upto) => arr.slice(0, upto).map((v, i) => (i ? "L" : "M") + X(i + 1).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
 
-  html += '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" preserveAspectRatio="none"' +
+  html += '<div class="pbody"><div class="pchart">' +
+    '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" preserveAspectRatio="none"' +
     ' role="img" aria-label="Dépenses cumulées du mois">' +
     '<line class="axis" x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '"></line>';
-  if (usual) html += '<path class="usual" d="' + path(usual, dim) + '"></path>';
+  if (usual) html += '<path class="usualfill" d="' + path(usual, dim) +
+    "L" + X(dim).toFixed(1) + " " + H + "L" + X(1).toFixed(1) + " " + H + 'Z"></path>' +
+    '<path class="usual" d="' + path(usual, dim) + '"></path>';
   html += '<path class="now" d="' + path(cur, day) + '"></path>';
   if (c.running && day < dim) {
     html += '<path class="proj ' + (usual && proj > usual[dim - 1] ? "up" : "down") + '" d="M' +
@@ -3178,7 +3233,9 @@ function v2Pulse(c) {
   html += '<line class="dot" x1="' + dx + '" y1="' + dy + '" x2="' + dx + '" y2="' + dy + '"></line></svg>';
 
   html += '<div class="lg"><span class="l1"><i></i>ce mois</span>' +
-    (usual ? '<span class="l2"><i></i>habituellement</span>' : "") + "</div>";
+    (usual ? '<span class="l2"><i></i>habituellement</span>' : "") + "</div></div>";
+
+  html += '<div class="pnum">';
 
   const ecart = usual ? spent - usual[day - 1] : null;
   html += "<table><tbody>" +
@@ -3192,20 +3249,97 @@ function v2Pulse(c) {
      répéter ne dit rien de plus. */
   if (usual && c.running) html += "<tr><th>Mois habituel</th><td class=\"num q\">" +
     esc(fmtEur(usual[dim - 1])) + "</td></tr>";
-  html += "</tbody></table>";
+  html += "</tbody></table></div></div>";
 
-  /* Ce qu'il reste à encaisser d'ici la fin du mois : sans ça, un mois calme au
-     20 peut réserver 200 € de prélèvements le 28. */
-  if (c.running) {
-    const soon = baseCost().kept.filter(r => r.period === 1 && r.months[key] == null && r.day > day);
-    const tot = soon.reduce((a, r) => a + r.monthly, 0);
-    html += '<div class="soon">' + (soon.length
-      ? "Encore <b>" + soon.length + " charge" + (soon.length > 1 ? "s" : "") + "</b> à passer d’ici la fin du mois, " +
-        "<b>" + fmtEur(tot) + "</b> — " + soon.slice(0, 3).map(r => esc(r.name) + " le " + r.day).join(", ") +
-        (soon.length > 3 ? "…" : "") + "."
-      : "Toutes les charges fixes du mois sont passées.") + "</div>";
-  }
+  /* Le pied change de sujet avec l'état du mois. Tant qu'il court, la seule
+     question qui vaille est ce qu'il reste ; une fois clos, elle n'a plus de
+     sens et c'est l'écart affiché juste au-dessus qu'il faut expliquer. */
+  html += c.running ? v2PulseAvenir(c, rows, key, dim, day) : v2PulseBilan(key);
   return html + "</div>";
+}
+
+/* Ce qui reste : la marge encore libre sous les plafonds, ce qui en est déjà
+   réservé par des prélèvements à venir, et ce qui reste vraiment disponible.
+   Sans le deuxième terme, un mois calme au 20 paraît confortable alors que
+   200 € de charges attendent le 28. */
+function v2PulseAvenir(c, rows, key, dim, day) {
+  const soon = baseCost().kept
+    .filter(r => r.period === 1 && r.months[key] == null && r.day > day)
+    .sort((a, b) => a.day - b.day);
+  const engage = soon.reduce((a, r) => a + r.monthly, 0);
+  /* Un plafond déjà dépassé ne rend pas de marge aux autres : on somme les
+     marges positives, pas leur solde net. */
+  const marge = (rows || []).reduce((a, r) => a + Math.max(r.target - r.spent, 0), 0);
+  const jours = Math.max(dim - day, 0), libre = marge - engage;
+
+  let html = '<div class="pfoot"><div class="fh">Ce qu’il reste</div>';
+  if (rows && rows.length) {
+    html += '<div class="st">Il reste <b>' + fmtEur(marge) + "</b> sous vos plafonds" +
+      (engage > 0 ? ", dont <b>" + fmtEur(engage) + "</b> déjà réservés par " + soon.length +
+        " charge" + (soon.length > 1 ? "s" : "") + " à venir" : "") + "." +
+      (jours > 0 && libre > 0
+        ? " Soit <b>" + fmtEur(libre / jours) + "</b> par jour sur les " + jours + " jours restants."
+        : libre <= 0 ? " Les charges à venir absorbent toute la marge." : "") + "</div>";
+  } else if (engage > 0) {
+    html += '<div class="st"><b>' + fmtEur(engage) + "</b> de charges fixes à passer d’ici la fin du mois.</div>";
+  }
+  html += soon.length
+    ? '<table class="ptl"><tbody>' + soon.slice(0, 4).map(r =>
+        '<tr><td class="d num">' + r.day + "</td><td>" + esc(r.name) +
+        '</td><td class="a num">' + esc(fmtEur(r.monthly)) + "</td></tr>").join("") +
+      (soon.length > 4 ? '<tr><td class="d"></td><td class="q">et ' + (soon.length - 4) +
+        " autre" + (soon.length - 4 > 1 ? "s" : "") + "</td><td></td></tr>" : "") + "</tbody></table>"
+    : '<div class="st q">Toutes les charges fixes du mois sont passées.</div>';
+  return html + "</div>";
+}
+
+/* Sur un mois clos, « ce qu'il reste » ne veut plus rien dire. La question
+   devient d'où vient l'écart affiché juste au-dessus : on le décompose par
+   poste, contre la même référence de trois mois, sans quoi le chiffre reste un
+   verdict sans explication. */
+function v2PulseBilan(key) {
+  const refs = v2UsualKeys(key, 3);
+  if (!refs.length) return "";
+  const now = groupTotals(opsOfMonth(key)), av = {};
+  const posts = GROUPS.filter(x => x.kind === KIND_EXPENSE);
+  refs.forEach(k => {
+    const g = groupTotals(opsOfMonth(k));
+    posts.forEach(x => { av[x.id] = (av[x.id] || 0) + (g[x.id] || 0) / refs.length; });
+  });
+  /* Sous 5 €, l'écart relève du bruit d'arrondi entre trois mois. */
+  const mv = posts.map(x => ({ n: x.name, d: (now[x.id] || 0) - (av[x.id] || 0) }))
+    .filter(x => Math.abs(x.d) >= 5)
+    .sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, 4);
+
+  return '<div class="pfoot"><div class="fh">Ce qui a bougé</div>' + (mv.length
+    ? '<table class="ptl"><tbody>' + mv.map(x => "<tr><td>" + esc(x.n) +
+        '</td><td class="a num ' + (x.d > 0 ? "up" : "down") + '">' +
+        esc(fmtEur(x.d, { plus: true })) + "</td></tr>").join("") + "</tbody></table>"
+    : '<div class="st q">Aucun poste ne s’écarte nettement de son habitude.</div>') + "</div>";
+}
+
+/* Ce qui se rapproche. Une collection ne se visite que si l'écran principal en
+   parle : trois trophées non acquis, les plus avancés. C'est la seule chose de
+   l'écran qui regarde devant — tout le reste constate. */
+function v2Next() {
+  /* Un seul par famille. Les paliers d'une même famille tombent ensemble, si
+     bien que les trois premiers du classement brut disaient trois fois la même
+     chose à un mot près. Trois promesses distinctes valent mieux qu'une répétée. */
+  const best = {};
+  v2Trophies().filter(t => !t.at && t.pct > 0).forEach(t => {
+    const k = best[t.fam];
+    if (!k || t.pct > k.pct || (t.pct === k.pct && t.tier > k.tier)) best[t.fam] = t;
+  });
+  const near = Object.keys(best).map(f => best[f])
+    .sort((a, b) => b.pct - a.pct || b.tier - a.tier).slice(0, 3);
+  if (!near.length) return "";
+  return '<div class="pulse nextro"><div class="ph">Bientôt</div>' +
+    near.map(t => '<div class="nrow" style="--rc:var(--r' + t.tier + ')">' +
+      '<span class="nw">' + v2TroSvg(t.fam, t.tier, false, t.pct, 38) + "</span>" +
+      '<span class="nx"><span class="n">' + esc(t.name) + "</span>" +
+      '<span class="k">' + esc(V2_RANK[t.tier - 1]) + "</span></span>" +
+      '<span class="p num">' + Math.round(t.pct) + " %</span></div>").join("") +
+    '<button class="go" data-act="view" data-view="trophees">Voir la collection</button></div>';
 }
 
 /* ---------------- onglet « Où ça part » ---------------- */
