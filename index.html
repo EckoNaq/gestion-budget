@@ -1288,6 +1288,11 @@ html[data-theme="dark"] .v2{
 .v2 .yabars .b:hover{opacity:.78}
 .v2 .yabars .lb{fill:var(--ink-4);font-size:9px;text-anchor:middle;
   font-variation-settings:"wght" 560,"wdth" 92}
+/* Le taux du mois, sous son nom : plus discret que la barre, qui reste le
+   sujet, mais lisible sans survoler. */
+.v2 .yabars .tx{fill:var(--ink-3);font-size:8.5px;text-anchor:middle;
+  font-family:var(--mono);font-variation-settings:"wght" 620,"wdth" 88}
+.v2 .yabars .tx.encours{opacity:.5}
 .v2 .yalg{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:var(--ink-3)}
 .v2 .yalg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;
   vertical-align:-1px}
@@ -1378,6 +1383,28 @@ html[data-theme="dark"] .v2{
 .v2 .yaecard .yaef .num:first-child{font-size:13px;font-variation-settings:"wght" 660,"wdth" 90}
 .v2 .yaecard .yaef .up{color:var(--bad-ink);font-size:11.5px;font-variation-settings:"wght" 620,"wdth" 92}
 .v2 .yaecard .yaef .down{color:var(--win-ink);font-size:11.5px;font-variation-settings:"wght" 620,"wdth" 92}
+
+/* ---------- aide « ? » des cartes ---------- */
+/* Ces règles vivent ici, avec le balisage qu'elles habillent. Logées dans la
+   section de l'écran mensuel, elles ont été perdues au premier report d'une
+   branche à l'autre : le bouton s'affichait nu et sa bulle, faute d'être
+   masquée, se déversait en clair sous le titre de la carte. */
+.v2 .yacard .help{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  width:13px;height:13px;margin-left:6px;padding:0;border-radius:50%;border:1px solid var(--ink-4);
+  background:none;color:var(--ink-4);font:inherit;font-size:9px;line-height:1;letter-spacing:0;
+  font-variation-settings:"wght" 700,"wdth" 100;cursor:help;vertical-align:1px;flex:none}
+.v2 .yacard .help:hover,.v2 .yacard .help:focus-visible{border-color:var(--ink-2);color:var(--ink-2)}
+/* Le point d'interrogation étant en haut de sa carte, la bulle s'ouvre vers le
+   bas : au-dessus, elle sortirait par le plafond. */
+.v2 .yacard .hbox{position:absolute;top:calc(100% + 8px);left:-9px;width:300px;
+  background:var(--surface);border:1px solid var(--ink-4);border-radius:9px;padding:10px 12px;
+  font-family:var(--prose);font-size:12px;line-height:1.45;color:var(--ink-2);text-align:left;
+  white-space:normal;text-transform:none;letter-spacing:0;font-variation-settings:normal;
+  box-shadow:0 14px 30px -12px rgba(0,0,0,.38);z-index:60;
+  opacity:0;visibility:hidden;transition:opacity .12s;pointer-events:none}
+.v2 .yacard .help:hover .hbox,.v2 .yacard .help:focus-visible .hbox{opacity:1;visibility:visible}
+.v2 .yacard .hbox b{font-family:var(--disp);font-variation-settings:"wght" 640,"wdth" 100;
+  font-size:11.5px;color:var(--ink)}
 
 /* ---------- un mois typique ---------- */
 /* Le diagramme occupe sa carte. Le brider laissait du vide à sa droite et le
@@ -7736,7 +7763,8 @@ function yaAnnee(c) {
       "non le couple revenus contre dépenses. Le trait pointillé marque ce qu’il faudrait mettre " +
       "de côté chaque mois pour tenir l’objectif annuel, calculé sur le revenu moyen des mois " +
       "connus. Un mois entamé reste en demi-teinte : il porte un salaire entier et des dépenses " +
-      "partielles, sa barre flatte.") + "</div>" + yaBarres(c) +
+      "partielles, sa barre flatte. Sous chaque mois, son <b>taux d’épargne</b> — " +
+      "ce que la balance représente rapportée au revenu du mois.") + "</div>" + yaBarres(c) +
     '<div class="yalg"><span class="l1"><i></i>au-dessus de l’objectif</span>' +
     '<span class="l2"><i></i>en dessous</span><span class="l3"><i></i>mois déficitaire</span>' +
     (c.goal > 0 && c.income > 0
@@ -7766,7 +7794,7 @@ function yaBarres(c) {
   const lo = Math.min(0, ...vus.map(m => m.bal));
   const span = (hi - lo) || 1, zero = H * hi / span;
   const pas = W / 12, larg = pas * 0.52;
-  let out = '<svg viewBox="-4 -12 ' + (W + 8) + " " + (H + 36) + '" class="yabars" role="img" ' +
+  let out = '<svg viewBox="-4 -12 ' + (W + 8) + " " + (H + 47) + '" class="yabars" role="img" ' +
     'aria-label="Balance mois par mois">' +
     '<line class="zero" x1="0" y1="' + zero.toFixed(1) + '" x2="' + W + '" y2="' + zero.toFixed(1) + '"></line>';
   /* Le montant de l'objectif est passé dans la légende : posé sur le tracé, il
@@ -7789,11 +7817,20 @@ function yaBarres(c) {
       out += '<rect class="b ' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) +
         '" width="' + larg.toFixed(1) + '" height="' + Math.max(h, 1.5).toFixed(1) + '" rx="2">' +
         "<title>" + esc(monthLabel(m.key) + " : " + fmtEur(m.bal) + " épargnés" +
+          (savingsRate(m.inc, m.exp) != null ? " · " + fmtRate(savingsRate(m.inc, m.exp)) +
+            " de " + fmtEur(m.inc) : "") +
           (m.clos ? "" : " — mois en cours, le salaire est entier mais les dépenses non")) +
         "</title></rect>";
     }
     out += '<text class="lb" x="' + (i * pas + pas / 2).toFixed(1) + '" y="' + (H + 16) +
       '">' + esc(MONTHS_SHORT[i]) + "</text>";
+    /* Le taux sous le nom du mois. La balance dit combien il est resté, le taux
+       dit ce que cela représente : deux mois à 900 € ne se valent pas si l'un
+       gagnait 2 000 € et l'autre 3 500. */
+    const tx = m.avenir ? null : savingsRate(m.inc, m.exp);
+    if (tx != null) out += '<text class="tx' + (m.clos ? "" : " encours") +
+      '" x="' + (i * pas + pas / 2).toFixed(1) + '" y="' + (H + 27) + '">' +
+      esc(fmtRate(tx)) + "</text>";
   });
   return out + "</svg>";
 }
@@ -8021,9 +8058,7 @@ function yaOu(c) {
   const band = (DB.settings.band || 5) / 100;
   const mois = c.running ? Math.max(c.nClos + 1, 1) : 12;
 
-  let html = yaFlux(c);
-
-  html += '<div class="split"><div class="vhead yarow">' +
+  let html = '<div class="split"><div class="vhead yarow">' +
     "<span>Poste</span><span class=\"r\">Sur l’année</span><span class=\"r\">Part</span>" +
     "<span class=\"r\">Par mois</span><span class=\"r\">vs " + (c.year - 1) + "</span>" +
     "<span>Saisonnalité</span></div><div class=\"vbody\">";
@@ -8066,9 +8101,12 @@ function yaOu(c) {
     });
   });
 
+  /* Le diagramme vient après le tableau : on descend d'abord les postes ligne à
+     ligne, et la forme résume ensuite ce qu'on vient de lire. */
   return html + '</div><div class="vrow yarow tot"><span class="nm">Total des dépenses</span>' +
     '<span class="r num">' + esc(fmtEur(tot)) + '</span><span class="r num">100 %</span>' +
-    '<span class="r num q">' + esc(fmtEur(tot / mois)) + "</span><span></span><span></span></div></div>";
+    '<span class="r num q">' + esc(fmtEur(tot / mois)) + "</span><span></span><span></span></div></div>" +
+    yaFlux(c);
 }
 
 function yaSpark(vals) {
