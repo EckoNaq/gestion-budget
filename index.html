@@ -1289,9 +1289,13 @@ html[data-theme="dark"] .v2{
 .v2 .yabars .lb{fill:var(--ink-4);font-size:9px;text-anchor:middle;
   font-variation-settings:"wght" 560,"wdth" 92}
 /* Le taux du mois, sous son nom : plus discret que la barre, qui reste le
-   sujet, mais lisible sans survoler. */
+   sujet, mais lisible sans survoler. Arrondi à l'entier — douze nombres à la
+   virgule alignés se lisent comme un tableau, alors qu'on ne cherche ici qu'un
+   ordre de grandeur. */
 .v2 .yabars .tx{fill:var(--ink-3);font-size:8.5px;text-anchor:middle;
   font-family:var(--mono);font-variation-settings:"wght" 620,"wdth" 88}
+/* Le mois qui tient l'objectif de taux se signale d'un vert léger. */
+.v2 .yabars .tx.ok{fill:var(--win-ink);opacity:.82}
 .v2 .yabars .tx.encours{opacity:.5}
 .v2 .yalg{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:var(--ink-3)}
 .v2 .yalg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;
@@ -7829,8 +7833,9 @@ function yaBarres(c) {
        gagnait 2 000 € et l'autre 3 500. */
     const tx = m.avenir ? null : savingsRate(m.inc, m.exp);
     if (tx != null) out += '<text class="tx' + (m.clos ? "" : " encours") +
+      (c.goal > 0 && tx >= c.goal ? " ok" : "") +
       '" x="' + (i * pas + pas / 2).toFixed(1) + '" y="' + (H + 27) + '">' +
-      esc(fmtRate(tx)) + "</text>";
+      esc((tx < 0 ? "−" : "") + Math.round(Math.abs(tx)) + " %") + "</text>";
   });
   return out + "</svg>";
 }
