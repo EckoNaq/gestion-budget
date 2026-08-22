@@ -425,6 +425,14 @@ html[data-theme="dark"] .t-plat{--tier:#8A79E4;--tier-l:#B4A8F5}
 /* ---------- misc ---------- */
 .ops thead th{position:sticky;top:0;background:var(--surface);z-index:2}
 .suggestrow td{color:var(--ink-soft)}
+/* Constat sur un plafond mal réglé, sous le nom de la catégorie. Le montant
+   proposé s'adopte d'un clic mais rien ne s'applique tout seul. */
+.plafnote{font-size:11.5px;font-weight:400;color:var(--ink-soft);line-height:1.5;margin-top:3px;max-width:46ch}
+.plafnote b{font-weight:650;color:inherit}
+.plafnote .adopt{background:none;border:1px solid var(--line);border-radius:5px;
+  padding:3px 9px;margin-left:3px;font:inherit;font-size:11px;font-weight:620;
+  color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+.plafnote .adopt:hover{border-color:var(--accent);color:var(--accent)}
 .dupbox{border:1px solid var(--warn);background:var(--warn-soft);border-radius:var(--radius-sm);padding:10px 12px;margin-top:12px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -787,6 +795,11 @@ html[data-theme="dark"] .v2{
    panneau qu'elle contient avec elle : les colonnes se règlent sur la place
    disponible et non sur la largeur de la fenêtre, sinon les deux tableaux
    restent côte à côte dans 560 px et leur texte se chevauche. */
+/* Le constat sur un plafond mal réglé. Discret : il ne concerne qu'une
+   poignée de postes et ne se lit qu'une fois par an. */
+.v2 .plafnote{font-size:12px;color:var(--ink-3);line-height:1.5;margin:6px 0 2px;
+  font-variation-settings:"wght" 470,"wdth" 96}
+.v2 .plafnote b{color:var(--ink);font-variation-settings:"wght" 660,"wdth" 92}
 .v2 .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:24px}
 .v2 .dt{width:100%;border-collapse:collapse}
 .v2 .dt caption{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-3);font-variation-settings:"wght" 680,"wdth" 100;padding-bottom:5px}
@@ -2805,7 +2818,11 @@ function v2GoalDetail(r, s) {
 
   let html = '<div class="detail"><div class="dh"><span class="t">' + esc(r.name) + "</span>" +
     '<span class="s num">▲ ' + esc(fmtEur(r.spent - r.target)) + " au-dessus du plafond</span>" +
-    '<button class="x" data-act="v2goal" data-goal="' + esc(r.id) + '">Fermer</button></div><div class="dgrid">';
+    '<button class="x" data-act="v2goal" data-goal="' + esc(r.id) + '">Fermer</button></div>' +
+    /* Si le plafond n'a jamais tenu, c'est la première chose à savoir : la
+       ventilation qui suit expliquerait un dépassement dont la cause est
+       ailleurs. Le réglage se fait dans Réglages, pas d'un clic depuis ici. */
+    v2VerdictNote(r.id, false) + '<div class="dgrid">';
 
   /* Sur un objectif de sous-catégorie, la ventilation interne n'existe pas et la
      colonne de catégorie répète le titre à chaque ligne. Le panneau se réduit
@@ -3020,6 +3037,78 @@ function v2PulseBilan(key) {
     : '<div class="st q">Aucun poste ne s’écarte nettement de son habitude.</div>') + "</div>";
 }
 
+
+/* -------------------------------------------------------------------------
+   Plafonds mal réglés
+   -------------------------------------------------------------------------
+   Un objectif jamais tenu depuis un an n'apprend plus rien : ou bien le
+   plafond était faux, ou bien la dépense a dérapé. Deux défauts symétriques
+   — celui qu'on ne tient jamais, celui qu'on n'approche jamais — mais qui ne
+   se traitent pas de la même façon.
+
+   Le premier demande de la prudence. Proposer de relever un plafond chaque
+   fois qu'il est dépassé ferait du budget un cliquet : la limite suivrait la
+   dépense au lieu de la contraindre, et au bout d'un an chaque objectif
+   vaudrait ce qu'on dépense, c'est-à-dire plus rien. On ne le signale donc
+   que s'il n'a jamais été tenu ET que le dépassement ne se réduit pas : un
+   poste qui se redresse n'a pas besoin qu'on relâche sa laisse au moment où
+   la contrainte commence à mordre.
+
+   Le second est sans risque : resserrer un plafond ne dérègle rien. Il compte
+   pourtant autant, car une coche verte jamais disputée gonfle le « tenus sur
+   douze » d'une victoire qui n'en était pas une.
+
+   Les plafonds appliqués au passé sont ceux d'aujourd'hui, faute d'historique.
+   Ailleurs c'est une limite ; ici c'est la bonne méthode, puisque la question
+   porte précisément sur le plafond actuel. Elle se corrige d'elle-même : un
+   plafond qu'on vient de relever redevient tenable, et l'application se tait.
+   ------------------------------------------------------------------------- */
+const V2_VERDICT_N = 6;                    // mois clos examinés
+function v2Med(arr) {
+  const a = arr.slice().sort((x, y) => x - y), h = a.length >> 1;
+  return a.length % 2 ? a[h] : (a[h - 1] + a[h]) / 2;
+}
+function v2GoalVerdict(id) {
+  const ceil = (DB.goals[id] || {}).m || 0;
+  if (!ceil) return null;
+  const ms = v2MonthSeries();
+  if (ms.length < V2_VERDICT_N) return null;
+  const last = ms.slice(-V2_VERDICT_N).map(m => spentOn(id, m.s.ops));
+  /* Un poste où rien n'a jamais été dépensé n'est pas « trop lâche » : il
+     n'est pas suivi du tout, ce qui est une autre affaire. */
+  if (!last.some(v => v > 0)) return null;
+  const mid = v2Med(last);
+
+  if (last.every(v => v > ceil) && mid >= ceil * 1.2) {
+    const recent = v2Med(last.slice(-3)), avant = v2Med(last.slice(0, 3));
+    if (avant > 0 && recent <= avant * 0.9) return null;   // le poste se redresse
+    return { kind: "serre", n: V2_VERDICT_N, med: mid, ceil,
+             prop: Math.max(Math.round(mid / 10) * 10, 10) };
+  }
+  if (last.every(v => v <= ceil * 0.6)) {
+    /* Un plafond doit se poser au-dessus de la fourchette habituelle, pas au
+       milieu : on part du mois le plus coûteux, avec un peu de marge. */
+    const haut = Math.max.apply(null, last);
+    return { kind: "lache", n: V2_VERDICT_N, med: mid, ceil, haut,
+             prop: Math.max(Math.round(haut * 1.1 / 10) * 10, 10) };
+  }
+  return null;
+}
+/* La phrase, et le montant à adopter d'un clic — jamais appliqué tout seul. */
+function v2VerdictNote(id, bouton) {
+  const v = v2GoalVerdict(id);
+  if (!v) return "";
+  /* Les centimes n'apportent rien à un constat qui porte sur des années. */
+  const txt = v.kind === "serre"
+    ? "Jamais tenu ces " + v.n + " derniers mois : ce poste coûte <b>" + fmtEurShort(v.med) +
+      "</b> par mois en médiane, pour un plafond à " + fmtEurShort(v.ceil) + "."
+    : "Jamais approché ces " + v.n + " derniers mois : au plus haut <b>" + fmtEurShort(v.haut) +
+      "</b>, pour un plafond à " + fmtEurShort(v.ceil) + ".";
+  return '<div class="plafnote ' + v.kind + '">' + txt +
+    (bouton ? ' <button class="adopt num" data-act="usesugg" data-id="' + esc(id) +
+      '" data-v="' + v.prop + '" title="Adopter ce montant">' + esc(fmtEurShort(v.prop)) +
+      "</button>" : "") + "</div>";
+}
 
 /* ---------------- onglet « Où ça part » ---------------- */
 function v2DeltaBar(frac, bandFrac) {
@@ -6309,7 +6398,8 @@ function viewSettings() {
   GROUPS.forEach(g => {
     if (g.kind !== KIND_EXPENSE) return;
     const gg = goalOf(g.id);
-    html += '<tr><td style="font-weight:620"><span style="display:inline-flex;gap:8px;align-items:center">' + groupBadge(g) + esc(g.name) + "</span></td>" +
+    html += '<tr><td style="font-weight:620"><span style="display:inline-flex;gap:8px;align-items:center">' + groupBadge(g) + esc(g.name) + "</span>" +
+      v2VerdictNote(g.id, true) + "</td>" +
       suggestCell(sg, g.id) +
       '<td style="text-align:right"><input type="number" step="10" value="' + (gg.m || "") + '" data-chg="goal" data-id="' + g.id + '" data-slot="m"></td>' +
       '<td style="text-align:right"><input type="number" step="100" value="' + (gg.y || "") + '" data-chg="goal" data-id="' + g.id + '" data-slot="y"></td></tr>';
@@ -6320,7 +6410,7 @@ function viewSettings() {
         (c.custom ? ' <select class="tiny" data-chg="catgroup" data-id="' + c.id + '" title="Déplacer vers un autre groupe">' +
           GROUPS.filter(gr => gr.kind === KIND_EXPENSE).map(gr =>
             '<option value="' + gr.id + '"' + (gr.id === c.group ? " selected" : "") + ">" + esc(gr.name) + "</option>").join("") +
-          "</select>" : "") + "</td>" +
+          "</select>" : "") + v2VerdictNote(c.id, true) + "</td>" +
         suggestCell(sg, c.id) +
         '<td style="text-align:right"><input type="number" step="10" value="' + (cg.m || "") + '" data-chg="goal" data-id="' + c.id + '" data-slot="m"></td>' +
         '<td style="text-align:right"><input type="number" step="100" value="' + (cg.y || "") + '" data-chg="goal" data-id="' + c.id + '" data-slot="y"></td></tr>';
