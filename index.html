@@ -982,7 +982,13 @@ html[data-theme="dark"] .v2{
 .v2 .anim-all .fx,.v2 .anim-all .vr,.v2 .anim-all .dbar .f{transform-origin:left center;animation:v2grow .52s cubic-bezier(.22,1,.36,1) both}
 .v2 .anim-all .dbar .f{transform-origin:center}
 .v2 .anim-all .spark i{transform-origin:center bottom;animation:v2growy .52s cubic-bezier(.22,1,.36,1) both}
-.v2 .ringmark.cheer{animation:v2pop .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:.62s}
+/* L'anneau se remplit au lieu d'apparaître plein. La règle ne déclare que le
+   départ : l'arrivée est la valeur calculée de l'élément, posée en ligne par le
+   rendu, si bien qu'elle vaut pour n'importe quel taux sans que le style ait à
+   le connaître. La coche arrive une fois le tour presque bouclé. */
+@keyframes v2ring{from{stroke-dashoffset:var(--circ)}}
+.v2 .gauge.anim-all .ring .rp{animation:v2ring .95s cubic-bezier(.25,.9,.3,1) both}
+.v2 .ringmark.cheer{animation:v2pop .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:.78s}
 
 @media(max-width:1000px){
   .v2 .vhead,.v2 .vrow{grid-template-columns:minmax(0,1fr) 96px 52px 76px;gap:11px}
@@ -1227,6 +1233,197 @@ html[data-theme="dark"] .v2{
   .v2 .newban{flex-wrap:wrap}
   .v2 .newban .go{margin-left:0;width:100%}
 }
+
+/* =========================================================================
+   ANNÉE
+   -------------------------------------------------------------------------
+   Tout est préfixé « ya » et scopé sous .v2. Le préfixe n'est pas une
+   coquetterie : .acts et .orow étaient déjà pris ailleurs, et une classe
+   homonyme entre dans .v2 sans prévenir — le cloisonnement ne protège que
+   dans un sens.
+   ========================================================================= */
+.v2 .yacard{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px 15px;margin-bottom:10px;min-width:0}
+.v2 .yacard .ph{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);
+  font-variation-settings:"wght" 700,"wdth" 100;margin-bottom:12px}
+.v2 .yanote{font-size:12.5px;color:var(--ink-3);line-height:1.55;margin-top:11px;
+  padding-top:10px;border-top:1px solid var(--line-2)}
+.v2 .yanote b{color:var(--ink);font-variation-settings:"wght" 660,"wdth" 92}
+.v2 .yahead{margin:0 0 14px;padding:0;border:0;font-size:13.5px;color:var(--ink-2)}
+
+/* ---------- objectifs annuels ---------- */
+/* Une liste dense plutôt que des vignettes : sur douze plafonds annuels, douze
+   anneaux referaient le patchwork qu'on a écarté sur l'écran mensuel. */
+.v2 .yaogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:0 34px}
+.v2 .yaorow{display:grid;grid-template-columns:minmax(0,1fr) 88px 132px 14px;gap:12px;
+  align-items:center;padding:6px 0;border-top:1px solid var(--line-2)}
+.v2 .yaorow .yaon{font-size:12.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;font-variation-settings:"wght" 520,"wdth" 96}
+.v2 .yaorow.bad .yaon{color:var(--ink);font-variation-settings:"wght" 620,"wdth" 96}
+.v2 .yaorow .yaob{display:flex;height:7px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.v2 .yaorow .yaob i{display:block;height:100%;background:var(--win);border-radius:4px}
+.v2 .yaorow.bad .yaob i{background:var(--bad)}
+/* Le débordement se voit : on veut savoir de combien, pas seulement que oui. */
+.v2 .yaorow .yaob u{display:block;height:100%;background:var(--bad);opacity:.4;
+  border-left:1.5px solid var(--surface)}
+.v2 .yaorow .yaov{text-align:right;font-size:12.5px;font-variation-settings:"wght" 640,"wdth" 90}
+.v2 .yaorow .yaoc{font-size:11px;color:var(--ink-4);font-variation-settings:"wght" 470,"wdth" 90}
+.v2 .yaorow .yaok{text-align:center;font-size:12px;color:var(--win-ink);
+  font-variation-settings:"wght" 700,"wdth" 100}
+.v2 .yaorow.bad .yaok{color:var(--bad-ink)}
+
+/* ---------- les douze mois ---------- */
+.v2 .yabars{display:block;width:100%;height:190px;overflow:visible}
+.v2 .yabars .zero{stroke:var(--ink);stroke-width:1;opacity:.45}
+.v2 .yabars .obj{stroke:var(--win);stroke-width:1;stroke-dasharray:3 3;opacity:.6}
+.v2 .yabars .ob{fill:var(--win-ink);font-size:8px;font-variation-settings:"wght" 620,"wdth" 96}
+.v2 .yabars .b.up{fill:var(--win)}
+.v2 .yabars .b.mid{fill:var(--ink-4)}
+.v2 .yabars .b.down{fill:var(--bad)}
+/* Un mois à venir n'est pas un mois à zéro : il n'a pas encore eu lieu. */
+.v2 .yabars .b.futur{fill:var(--ink-4);opacity:.22}
+/* Le mois en cours porte un salaire entier et des dépenses partielles : sa
+   barre flatte, elle le dit en restant en demi-teinte. */
+.v2 .yabars .b.encours{opacity:.45}
+.v2 .yabars .b:hover{opacity:.78}
+.v2 .yabars .lb{fill:var(--ink-4);font-size:9px;text-anchor:middle;
+  font-variation-settings:"wght" 560,"wdth" 92}
+.v2 .yalg{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:var(--ink-3)}
+.v2 .yalg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;
+  vertical-align:-1px}
+.v2 .yalg .l1 i{background:var(--win)}
+.v2 .yalg .l2 i{background:var(--ink-4)}
+.v2 .yalg .l3 i{background:var(--bad)}
+
+/* ---------- épargne cumulée ---------- */
+.v2 .yacurve{display:block;width:100%;height:120px;overflow:visible}
+.v2 .yacurve *{vector-effect:non-scaling-stroke}
+.v2 .yacurve .axis{stroke:var(--line);stroke-width:1}
+.v2 .yacurve .usualfill{fill:var(--ink-4);opacity:.28;stroke:none}
+.v2 .yacurve .usual{fill:none;stroke:var(--ink-4);stroke-width:1.3;opacity:.85}
+.v2 .yacurve .now{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.v2 .yacurve .proj{fill:none;stroke-width:1.8;stroke-dasharray:3 3;stroke-linecap:round}
+.v2 .yacurve .proj.up{stroke:var(--bad)}
+.v2 .yacurve .proj.down{stroke:var(--win)}
+.v2 .yacurve .dot{stroke:var(--ink);stroke-width:5.2;stroke-linecap:round}
+
+/* ---------- récurrent contre exceptionnel ---------- */
+.v2 .yasplit{display:flex;height:9px;border-radius:5px;overflow:hidden;margin-bottom:9px}
+.v2 .yasplit .rec{background:var(--ink-3)}
+.v2 .yasplit .exc{background:var(--hot)}
+.v2 .yakeys{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink-3);margin-bottom:11px}
+.v2 .yakeys b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+.v2 .yakeys b.rec{background:var(--ink-3)}
+.v2 .yakeys b.exc{background:var(--hot)}
+.v2 .yakeys b.v{width:auto;height:auto;border-radius:0;margin:0 0 0 5px;color:var(--ink);
+  font-variation-settings:"wght" 660,"wdth" 92}
+
+/* ---------- où ça part ---------- */
+.v2 .yarow{grid-template-columns:minmax(0,1fr) 104px 62px 92px 82px 78px}
+/* La colonne d'écart est la seule qui porte un jugement : elle seule prend une
+   couleur, le reste du tableau restant en encre pour ne pas se charger. */
+.v2 .yarow .num.up{color:var(--bad-ink)}
+.v2 .yarow .num.down{color:var(--win-ink)}
+.v2 .yarow .num.flat{color:var(--ink-4)}
+.v2 .yasp{display:flex;align-items:flex-end;gap:1.5px;height:20px}
+.v2 .yasp i{flex:1;background:var(--ink-4);opacity:.5;border-radius:1px}
+
+/* ---------- une année après l'autre ---------- */
+.v2 .yaline{display:grid;grid-template-columns:66px minmax(0,1fr) 104px 108px;gap:12px;
+  align-items:center;padding:8px 0;border-top:1px solid var(--line-2)}
+.v2 .yaline.on{background:var(--surface-2);margin:0 -8px;padding-left:8px;padding-right:8px;
+  border-radius:7px}
+.v2 .yaline .y{font-size:13px;color:var(--ink-3);font-variation-settings:"wght" 620,"wdth" 96}
+.v2 .yaline.on .y{color:var(--ink);font-variation-settings:"wght" 720,"wdth" 96}
+.v2 .yaline .bar{display:block;height:10px;background:var(--sunk);border-radius:5px;overflow:hidden}
+.v2 .yaline .bar i{display:block;height:100%;background:var(--win);border-radius:5px}
+.v2 .yaline .bar i.neg{background:var(--bad)}
+.v2 .yaline .v{text-align:right;font-size:13.5px;font-variation-settings:"wght" 660,"wdth" 90}
+.v2 .yaline .t{display:flex;align-items:baseline;justify-content:flex-end;gap:8px}
+.v2 .yaline .t .r1{font-size:12.5px;font-variation-settings:"wght" 620,"wdth" 92}
+.v2 .yaline .t .r1.hot{color:var(--hot-ink)}
+/* Le mouvement du taux, seule grandeur qui change d'une ligne à l'autre. */
+.v2 .yaline .t .r2{font-size:10.5px;min-width:44px;text-align:right;
+  font-variation-settings:"wght" 620,"wdth" 92}
+.v2 .yaline .t .r2.up{color:var(--win-ink)}
+.v2 .yaline .t .r2.down{color:var(--bad-ink)}
+.v2 .yaline .t .r2.nil{color:transparent}
+
+/* ---------- saisonnalité ---------- */
+.v2 .yaseason{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px}
+.v2 .yascell{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.v2 .yascell .m{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-4);
+  font-variation-settings:"wght" 620,"wdth" 92}
+.v2 .yascell .bar{display:flex;align-items:flex-end;width:100%;height:64px;background:var(--sunk);
+  border-radius:4px;overflow:hidden}
+.v2 .yascell .bar i{width:100%;background:var(--ink-4);opacity:.55;border-radius:3px}
+.v2 .yascell.hot .bar i{background:var(--hot);opacity:.85}
+.v2 .yascell .v{font-size:9.5px;color:var(--ink-4);font-variation-settings:"wght" 580,"wdth" 88}
+.v2 .yascell.hot .v{color:var(--hot-ink);font-variation-settings:"wght" 680,"wdth" 88}
+
+/* ---------- évolution des postes ---------- */
+.v2 .yaegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.v2 .yaecard{border:1px solid var(--line);border-radius:9px;padding:10px 11px 9px;min-width:0}
+.v2 .yaecard .yaen{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);
+  font-variation-settings:"wght" 700,"wdth" 88;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;margin-bottom:8px}
+.v2 .yadev{display:block;width:100%;height:auto;overflow:visible}
+.v2 .yadev .mid{stroke:var(--ink-3);stroke-width:1;opacity:.85}
+.v2 .yadev .b.up{fill:var(--bad)}
+.v2 .yadev .b.down{fill:var(--win)}
+.v2 .yadev .b.base{fill:var(--ink-3)}
+.v2 .yadev .b:hover{opacity:.75}
+.v2 .yadev .hb{fill:none;stroke:var(--surface);stroke-width:1.6;stroke-linejoin:round}
+.v2 .yaecard .yaef{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px}
+.v2 .yaecard .yaef .num:first-child{font-size:13px;font-variation-settings:"wght" 660,"wdth" 90}
+.v2 .yaecard .yaef .up{color:var(--bad-ink);font-size:11.5px;font-variation-settings:"wght" 620,"wdth" 92}
+.v2 .yaecard .yaef .down{color:var(--win-ink);font-size:11.5px;font-variation-settings:"wght" 620,"wdth" 92}
+
+/* ---------- un mois typique ---------- */
+/* Le diagramme occupe sa carte. Le brider laissait du vide à sa droite et le
+   faisait paraître petit ; c'est le rapport interne qui tient la hauteur, pas
+   une largeur maximale. */
+.v2 .yafwrap{width:100%}
+.v2 .yaflux{display:block;width:100%;height:auto;overflow:visible}
+.v2 .yaflux .nd{stroke:none}
+.v2 .yaflux .nd.src{fill:var(--ink-4);opacity:.55}
+/* Un dégradé plutôt qu'un aplat : le ruban part du gris de la source et prend
+   la couleur du poste en arrivant. Neuf aplats pastel côte à côte faisaient une
+   bouillie ; un dégradé donne le sens de la lecture, de la source vers l'usage. */
+.v2 .yaflux .rb{stroke:none}
+.v2 .yaflux .rb:hover{filter:brightness(.94) saturate(1.25)}
+.v2 .yaflux .lb{fill:var(--ink-2);font-size:12px;dominant-baseline:middle;
+  font-variation-settings:"wght" 600,"wdth" 94}
+.v2 .yaflux .lb.fils{fill:var(--ink-3);font-size:11px;font-variation-settings:"wght" 520,"wdth" 92}
+.v2 .yaflux .lb.open{font-variation-settings:"wght" 720,"wdth" 94;font-size:11px;
+  text-transform:uppercase;letter-spacing:.08em;fill:var(--ink-3)}
+.v2 .yaflux .lb.src{fill:var(--ink-3);font-size:9.5px;dominant-baseline:auto;
+  text-transform:uppercase;letter-spacing:.12em;font-variation-settings:"wght" 700,"wdth" 100}
+.v2 .yaflux .lb.win{fill:var(--win-ink);font-variation-settings:"wght" 700,"wdth" 94}
+.v2 .yaflux .amt{fill:var(--ink-3);font-family:var(--mono);font-size:11px;text-anchor:end;
+  dominant-baseline:middle;font-variation-settings:"wght" 620,"wdth" 90}
+.v2 .yaflux .amt2{fill:var(--ink-4);font-family:var(--mono);font-size:10px;letter-spacing:0;
+  text-transform:none;font-variation-settings:"wght" 600,"wdth" 90}
+.v2 .yaflux .chev{fill:var(--ink-4);font-size:9px}
+.v2 .yaflux .ck{cursor:pointer}
+.v2 .yaflux .ck:hover .lb{fill:var(--ink)}
+.v2 .yaflux .ck:hover .chev{fill:var(--ink-2)}
+.v2 .yaflux .nd.fils{opacity:.62}
+/* L'apparition ne se rejoue qu'au changement d'onglet ou d'année : la relancer
+   à chaque dépliement rendrait l'analyse pénible. */
+@keyframes yaflow{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+@keyframes yapop{from{opacity:0;transform:scaleY(.2)}to{opacity:1;transform:none}}
+.v2 .yaflux.anim .rb{animation:yaflow .5s cubic-bezier(.22,1,.36,1) both}
+.v2 .yaflux.anim .nd:not(.src){animation:yapop .42s cubic-bezier(.22,1,.36,1) both;
+  transform-box:fill-box;transform-origin:center}
+.v2 .yaflux.anim .lb:not(.src),.v2 .yaflux.anim .amt{animation:yaflow .5s cubic-bezier(.22,1,.36,1) both}
+
+@media(max-width:940px){
+  .v2 .yaseason{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+}
+@media(max-width:1000px){
+  .v2 .yarow{grid-template-columns:minmax(0,1fr) 96px 56px 82px 74px}
+  .v2 .vhead.yarow span:last-child,.v2 .yarow .yasp{display:none}
 
 </style>
 </head>
@@ -1873,6 +2070,7 @@ const UI = {
   /* L’écran annuel garde ses propres dépliements : ouvrir un poste dans l’Année ne
      doit rien changer à ce qui est ouvert dans le Mois, et inversement. */
   y2tab: "annee", y2goal: null, y2group: null, y2cat: null, y2cmp: "pct", y2pick: false,
+  ytab: "annee", ygroup: null, ycat: null, yflux: null, yanim: true,
   patMonth: monthKey(todayISO()),
   patAccount: null, patShowInactive: false, patMovFilter: "all", patRange: "all",
   patHlSeed: 1, patYearUnit: "pct",
@@ -1881,7 +2079,9 @@ const UI = {
    Comptes ne doit pas ramener au mois en cours. */
 /* Les deux écrans annuels partagent UI.year : passer de l’un à l’autre ne doit pas
    ramener à l’année en cours, et les flèches doivent bouger la même chose. */
-function isYearView() { return UI.view === "year" || UI.view === "year2"; }
+function isYearView() {
+  return UI.view === "year" || UI.view === "year2" || UI.view === "year3";
+}
 function isPatView() {
   return ["pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
 }
@@ -2392,7 +2592,7 @@ function render() {
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
-    ["year2", "chart", "Année v2"],
+    ["year2", "chart", "Année v2"], ["year3", "chart", "Année v3"],
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
   const patNav = [["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
@@ -2406,6 +2606,7 @@ function render() {
     : UI.view === "trophees" ? viewTrophies()
     : UI.view === "year" ? viewYear()
     : UI.view === "year2" ? viewYear2()
+    : UI.view === "year3" ? viewYear3()
     : UI.view === "todo" ? viewTodo()
     : UI.view === "pathome" ? viewPatrimoineHome()
     : UI.view === "patanalyse" ? viewPatAnalyse()
@@ -2751,10 +2952,11 @@ function v2Month(c) {
       '<tr class="run"><th>Cumul depuis janvier</th><td class="num">' + esc(fmtEur(v2Ytd(c.key))) + "</td></tr>" +
     "</tbody></table></div>";
 
-  html += '<div class="gauge' + (done ? " done" : "") + '"><div class="ringwrap">' +
+  html += '<div class="gauge' + (done ? " done" : "") + v2AnimClass("all") + '"><div class="ringwrap">' +
     '<svg class="ring" viewBox="0 0 154 154" aria-hidden="true">' +
       '<circle class="rt" cx="77" cy="77" r="63"></circle>' +
-      '<circle class="rp" cx="77" cy="77" r="63" stroke-dasharray="' + C.toFixed(1) +
+      '<circle class="rp" cx="77" cy="77" r="63" style="--circ:' + C.toFixed(1) +
+        '" stroke-dasharray="' + C.toFixed(1) +
         '" stroke-dashoffset="' + (C * (1 - prog)).toFixed(1) + '"></circle></svg>' +
     '<div class="rlabel"><div class="rv num">' + (rate == null ? "—" : esc(fmtRate(rate))) +
       '</div><div class="rk">d’épargne</div></div>' +
@@ -4227,7 +4429,8 @@ function y2Annee(c) {
   html += '<div class="gauge' + (done ? " done" : "") + '"><div class="ringwrap">' +
     '<svg class="ring" viewBox="0 0 154 154" aria-hidden="true">' +
       '<circle class="rt" cx="77" cy="77" r="63"></circle>' +
-      '<circle class="rp" cx="77" cy="77" r="63" stroke-dasharray="' + C.toFixed(1) +
+      '<circle class="rp" cx="77" cy="77" r="63" style="--circ:' + C.toFixed(1) +
+        '" stroke-dasharray="' + C.toFixed(1) +
         '" stroke-dashoffset="' + (C * (1 - prog)).toFixed(1) + '"></circle></svg>' +
     '<div class="rlabel"><div class="rv num">' + (rate == null ? "—" : esc(fmtRate(rate))) +
       '</div><div class="rk">d’épargne</div></div>' +
@@ -7312,6 +7515,755 @@ function viewPatCredits() {
 }
 
 /* =========================================================================
+   Année v3
+   -------------------------------------------------------------------------
+   Un troisième écran annuel, posé à côté des deux autres le temps de trancher.
+   Il lit les mêmes données et n'en recalcule aucune autrement ; son balisage
+   vit sous .v2 et ses noms sous le préfixe « ya », là où le second écran
+   emploie « y2 » — les deux ne peuvent donc pas se marcher dessus.
+
+   Il reprend la langue de l'écran mensuel : mêmes tokens, mêmes
+   blocs, mêmes sous-onglets. Il ne recalcule rien autrement — monthStats,
+   ytdTotals, baseCost et spentOn font le travail, comme partout ailleurs.
+
+   Trois onglets, un par horizon : l'année elle-même, sa composition, son
+   histoire. C'est ce troisième qui porte l'analyse pluriannuelle qu'on avait
+   volontairement sortie de l'écran mensuel.
+   ========================================================================= */
+
+/* Le résumé d'une année, calculé une fois et partagé par les trois onglets. */
+function yearCtx(year) {
+  const courant = monthKey(todayISO());
+  const months = [];
+  for (let m = 1; m <= 12; m++) {
+    const key = year + "-" + pad2(m), s = monthStats(key);
+    months.push({ key, m, s, bal: s.balance, exp: s.expense, inc: s.income,
+                  clos: key < courant, avenir: key > courant });
+  }
+  const t = ytdTotals(year), proj = yearProjection(year);
+  return { year, running: year === yearOf(todayISO()), months, proj,
+           ops: DB.tx.filter(x => yearOf(x.date) === year),
+           income: t.income, expense: t.expense, balance: t.balance, groups: t.groups,
+           rate: savingsRate(t.income, t.expense), goal: DB.settings.savingsGoal || 0,
+           nClos: months.filter(x => x.clos).length };
+}
+
+/* Épargne cumulée mois après mois. Sur une année en cours, la série s'arrête
+   au dernier mois entamé : prolonger à zéro dessinerait un plateau qui n'existe
+   pas. */
+function yaCumul(year) {
+  const courant = monthKey(todayISO());
+  const out = []; let r = 0;
+  for (let m = 1; m <= 12; m++) {
+    const key = year + "-" + pad2(m);
+    if (key > courant) break;
+    r += monthStats(key).balance;
+    out.push(r);
+  }
+  return out;
+}
+/* La référence de comparaison : l'année complète juste avant, et non la moyenne
+   des précédentes. Un salaire qui monte d'année en année rend la moyenne
+   trompeuse — elle mélange des niveaux de revenu qui n'existent plus, et
+   l'écart affiché mesure alors autant l'augmentation que l'effort. L'année
+   d'avant partage à peu près le même revenu : la comparaison porte sur ce
+   qu'on en a fait. */
+function yaRef(year) {
+  const pleines = yaAnneesPleines().filter(y => y < year);
+  if (!pleines.length) return null;
+  const an = pleines[pleines.length - 1];
+  const vals = yaCumul(an);
+  return vals.length ? { an, vals } : null;
+}
+
+/* Les objectifs annuels, dépassements en tête comme dans la grille du mois. */
+function yaGoals(c) {
+  return Object.keys(DB.goals).filter(id => (DB.goals[id].y || 0) > 0).map(id => {
+    const g = GROUP_BY_ID[id], cat = CAT_BY_ID[id];
+    const cible = DB.goals[id].y, spent = spentOn(id, c.ops);
+    return { id, nom: g ? g.name : (cat ? cat.name : id), cible, spent,
+             ecart: spent - cible, bad: spent > cible };
+  }).sort((a, b) => (a.bad === b.bad ? b.spent - a.spent : a.bad ? -1 : 1));
+}
+
+/* Ce qui était inévitable et ce qui relevait du choix. Les charges récurrentes
+   sont détectées sur l'historique entier ; ramenées à l'année, elles disent
+   quelle part de la dépense ne se discutait pas. */
+function yaSocle(c) {
+  const mois = c.running ? Math.max(c.nClos + 1, 1) : 12;
+  const rec = Math.min(baseCost().monthly * mois, c.expense);
+  return { rec, reste: Math.max(c.expense - rec, 0), mois };
+}
+/* Les plus grosses dépenses isolées de l'année : ce sont elles qui expliquent
+   un mois qui sort du rang. */
+function yaCoups(c, n) {
+  /* Une charge récurrente est repérée par son marchand, ou par le couple
+     marchand + catégorie quand un même marchand porte deux contrats. Ne tester
+     que la première forme laissait passer le loyer — et savoir qu'on a payé son
+     loyer n'explique rien. */
+  const fixes = new Set(baseCost().kept.map(r => r.key));
+  const fixe = t => { const k = canonOf(t); return fixes.has(k) || fixes.has(k + "|" + (t.cat || "")); };
+  return c.ops.filter(t => isExpense(t) && !fixe(t))
+    .sort((a, b) => a.amount - b.amount).slice(0, n)
+    .map(t => ({ nom: t.merchantRaw || merchantFromLabel(t.label) || "—",
+                 jour: t.date.slice(8, 10), mois: MONTHS_SHORT[+t.date.slice(5, 7) - 1],
+                 v: -t.amount }));
+}
+
+/* Les années sur lesquelles une comparaison a un sens. Une année où le suivi a
+   commencé en septembre pèse trois mois : la prendre pour base fait afficher
+   +4000 % au poste qui la suit, et la classer par balance la met dernière sans
+   qu'elle ait démérité. On tolère un mois vide, pas un début en cours de route.
+   L'année en cours reste toujours du lot : elle est incomplète par nature, et
+   chaque bloc la ramène à douze mois quand il en a besoin. */
+function yaAnneesPleines() {
+  const encours = yearOf(todayISO());
+  return yearsWithData().filter(y => y <= encours).filter(y => {
+    if (y === encours) return true;
+    let n = 0;
+    for (let m = 1; m <= 12; m++) if (monthStats(y + "-" + pad2(m)).expense > 0) n++;
+    return n >= 11;
+  });
+}
+
+/* Le rang de l'année parmi les autres, sur la balance. Un rang ne suppose
+   aucune pondération : il se lit tel quel. */
+function yaRang(year) {
+  const ys = yaAnneesPleines();
+  const bal = ys.map(y => ({ y, v: yearProjection(y).balanceYear }))
+    .sort((a, b) => b.v - a.v);
+  const i = bal.findIndex(x => x.y === year);
+  /* L'écart à l'année juste devant, ou juste derrière pour la dernière : dire
+     « seule année suivie » à la quatrième sur quatre serait faux. */
+  return i < 0 ? null : { rang: i + 1, sur: bal.length,
+                          suivant: bal[i + 1] ? bal[i].v - bal[i + 1].v : null,
+                          precedent: bal[i - 1] ? bal[i - 1].v - bal[i].v : null };
+}
+
+/* ---------------- onglet « L'année » ---------------- */
+function yaAnnee(c) {
+  const done = c.goal > 0 && c.rate != null && c.rate >= c.goal;
+  const prog = c.goal > 0 && c.rate != null ? Math.min(Math.max(c.rate, 0) / c.goal, 1) : 0;
+  const C = 2 * Math.PI * 63;
+
+  let html = '<div class="board"><div class="fiche">' +
+    '<div class="cap">' + (c.running ? "Année en cours · " + c.nClos + " mois clos" : "Année close") + "</div>" +
+    '<table class="ftab"><tbody>' +
+      "<tr><th>Revenus</th><td class=\"num\">" + esc(fmtEur(c.income)) + "</td></tr>" +
+      "<tr><th>Dépenses</th><td class=\"num\"><span class=\"op\">−</span>" + esc(fmtEur(c.expense)) + "</td></tr>" +
+      '<tr class="sum' + (c.balance < 0 ? " down" : "") + '"><th>Épargne</th><td class="num">' +
+        esc(fmtEur(c.balance)) + "</td></tr>" +
+      '<tr class="run"><th>' + (c.running ? "Fin d’année estimée" : "Soit par mois") + '</th><td class="num">' +
+        esc(fmtEur(c.running ? c.proj.balanceYear : c.balance / 12)) + "</td></tr>" +
+    "</tbody></table></div>";
+
+  html += '<div class="gauge' + (done ? " done" : "") + (UI.yanim ? " anim-all" : "") +
+    '"><div class="ringwrap">' +
+    '<svg class="ring" viewBox="0 0 154 154" aria-hidden="true">' +
+      '<circle class="rt" cx="77" cy="77" r="63"></circle>' +
+      '<circle class="rp" cx="77" cy="77" r="63" style="--circ:' + C.toFixed(1) +
+        '" stroke-dasharray="' + C.toFixed(1) +
+        '" stroke-dashoffset="' + (C * (1 - prog)).toFixed(1) + '"></circle></svg>' +
+    '<div class="rlabel"><div class="rv num">' + (c.rate == null ? "—" : esc(fmtRate(c.rate))) +
+      '</div><div class="rk">d’épargne</div></div>' +
+    (done ? '<div class="ringmark">' + V2_WIN + "</div>" : "") + "</div>" +
+    '<div class="gverdict">' +
+      (!c.goal ? "Aucun objectif d’épargne défini"
+        : c.rate == null ? "Revenus de l’année non saisis"
+        : done ? "Objectif de " + fmtRate(c.goal) + " atteint" : "Objectif de " + fmtRate(c.goal) + " non atteint") +
+    "</div><div class=\"gsub\">" +
+      (!c.goal ? "À régler dans Réglages"
+        : c.rate == null ? "Le taux se calcule sur les revenus"
+        : (done ? v2Pts(c.rate - c.goal) + " au-dessus" : "il manque " + v2Pts(c.goal - c.rate)) +
+          (c.running ? " — sur " + c.nClos + " mois clos" : " — sur l’année complète")) +
+    "</div></div></div>";
+
+  /* --- pastilles --- */
+  const goals = yaGoals(c), tenus = goals.filter(g => !g.bad).length;
+  const rang = yaRang(c.year);
+  const chips = [];
+  /* Un rang n'est pas un verdict : deuxième sur quatre n'est pas un échec. La
+     moitié haute du classement se lit en réussite, comme un objectif manqué
+     d'un seul poste se lit encore comme une bonne année sur l'écran mensuel. */
+  const bonRang = rang && rang.rang <= Math.ceil(rang.sur / 2);
+  if (rang) chips.push({
+    cls: bonRang ? "win" : "hot", ic: bonRang ? V2_WIN : V2_HOT,
+    v: rang.rang === 1 ? "Meilleure année sur " + rang.sur
+      : rang.rang + "ᵉ meilleure année sur " + rang.sur,
+    k: rang.suivant != null ? "+" + fmtEur(rang.suivant) + " sur la suivante"
+      : rang.precedent != null ? fmtEur(-rang.precedent) + " sur la précédente"
+      : "seule année suivie",
+  });
+  const bonsObj = goals.length && tenus >= goals.length - 1;
+  if (goals.length) chips.push({
+    cls: bonsObj ? "win" : "hot", ic: bonsObj ? V2_WIN : V2_HOT,
+    v: tenus + " objectif" + (tenus > 1 ? "s" : "") + " annuel" + (tenus > 1 ? "s" : "") +
+       " sur " + goals.length + " tenu" + (tenus > 1 ? "s" : ""),
+    k: tenus === goals.length ? "sans faute"
+      : (goals.length - tenus) + " dépassement" + (goals.length - tenus > 1 ? "s" : "") +
+        ", " + fmtEur(goals.filter(g => g.bad).reduce((a, g) => a + g.ecart, 0)),
+  });
+  if (chips.length) html += '<div class="chips">' + chips.map(x =>
+    '<div class="chip ' + x.cls + '"><span class="ic">' + x.ic + "</span>" +
+    '<span class="tx"><span class="v">' + esc(x.v) + '</span><span class="k">' + esc(x.k) +
+    "</span></span></div>").join("") + "</div>";
+
+  /* --- objectifs annuels --- */
+  if (goals.length) {
+    const rates = goals.filter(g => g.bad).reduce((a, g) => a + g.ecart, 0);
+    html += '<div class="yacard yawide"><div class="ph">Objectifs de l’année' + yaAide(
+      "<b>Plafonds annuels</b> — ils se règlent dans Réglages, colonne « Objectif / an », et sont " +
+      "distincts des plafonds mensuels. La barre se remplit à hauteur du dépensé ; un dépassement " +
+      "la prolonge d’un segment plus clair, pour qu’on voie de combien et pas seulement que oui.") +
+      '</div><div class="yaogrid">' +
+      goals.map(g =>
+        '<div class="yaorow' + (g.bad ? " bad" : "") + '"><span class="yaon">' + esc(g.nom) + "</span>" +
+        '<span class="yaob"><i style="width:' + Math.min(g.spent / g.cible * 100, 100).toFixed(1) + '%"></i>' +
+          (g.bad ? '<u style="width:' + Math.min(g.ecart / g.cible * 100, 40).toFixed(1) + '%"></u>' : "") + "</span>" +
+        '<span class="yaov num">' + esc(fmtEurShort(g.spent)) +
+          '<span class="yaoc"> / ' + esc(fmtEurShort(g.cible)) + "</span></span>" +
+        '<span class="yaok">' + (g.bad ? "✕" : "✓") + "</span></div>").join("") +
+      "</div>" +
+      (rates > 0 ? '<div class="yanote">' + (goals.length - tenus) + " dépassement" +
+        (goals.length - tenus > 1 ? "s" : "") + " pour <b>" + fmtEur(rates) + "</b>" +
+        (c.balance > 0 ? " — soit " + fmtRate(rates / c.balance * 100) + " de l’épargne de l’année." : ".") +
+        "</div>" : "") + "</div>";
+  }
+
+  /* --- les douze mois, en balance --- */
+  html += '<div class="yacard yawide"><div class="ph">Les douze mois' + yaAide(
+      "Chaque barre est la <b>balance du mois</b> — ce qui est resté, revenus moins dépenses — et " +
+      "non le couple revenus contre dépenses. Le trait pointillé marque ce qu’il faudrait mettre " +
+      "de côté chaque mois pour tenir l’objectif annuel, calculé sur le revenu moyen des mois " +
+      "connus. Un mois entamé reste en demi-teinte : il porte un salaire entier et des dépenses " +
+      "partielles, sa barre flatte.") + "</div>" + yaBarres(c) +
+    '<div class="yalg"><span class="l1"><i></i>au-dessus de l’objectif</span>' +
+    '<span class="l2"><i></i>en dessous</span><span class="l3"><i></i>mois déficitaire</span>' +
+    (c.goal > 0 && c.income > 0
+      ? '<span class="l4"><i></i>objectif ' + esc(fmtEurShort(yaObjMois(c))) + " / mois</span>" : "") +
+    "</div>" +
+    yaMoisNote(c) + "</div>";
+
+  /* --- courbe et socle --- */
+  html += '<div class="gsplit">' + yaCourbe(c) + yaSocleCard(c) + "</div>";
+  return html;
+}
+
+/* Ce qu'il faudrait mettre de côté chaque mois pour tenir l'objectif annuel,
+   calculé sur le revenu moyen des mois déjà connus. */
+function yaObjMois(c) {
+  if (!(c.goal > 0 && c.income > 0)) return 0;
+  return c.income / Math.max(c.nClos + (c.running ? 1 : 0), 1) * c.goal / 100;
+}
+
+/* Une barre par mois, en balance et non en revenus contre dépenses : ce qu'on
+   veut savoir est ce qui est resté, pas ce qui est entré puis sorti. */
+function yaBarres(c) {
+  const W = 592, H = 132;
+  const objM = yaObjMois(c);
+  const vus = c.months.filter(m => !m.avenir);
+  const hi = Math.max(0, ...vus.map(m => m.bal), objM);
+  const lo = Math.min(0, ...vus.map(m => m.bal));
+  const span = (hi - lo) || 1, zero = H * hi / span;
+  const pas = W / 12, larg = pas * 0.52;
+  let out = '<svg viewBox="-4 -12 ' + (W + 8) + " " + (H + 36) + '" class="yabars" role="img" ' +
+    'aria-label="Balance mois par mois">' +
+    '<line class="zero" x1="0" y1="' + zero.toFixed(1) + '" x2="' + W + '" y2="' + zero.toFixed(1) + '"></line>';
+  /* Le montant de l'objectif est passé dans la légende : posé sur le tracé, il
+     se superposait aux premières barres, d'autant plus qu'un objectif élevé
+     place la ligne haut, là où les barres sont les plus grandes. */
+  if (objM > 0) {
+    const yo = zero - objM / span * H;
+    out += '<line class="obj" x1="0" y1="' + yo.toFixed(1) + '" x2="' + W + '" y2="' + yo.toFixed(1) + '"></line>';
+  }
+  c.months.forEach((m, i) => {
+    const x = i * pas + (pas - larg) / 2;
+    if (m.avenir) {
+      out += '<rect class="b futur" x="' + x.toFixed(1) + '" y="' + (zero - 5).toFixed(1) +
+        '" width="' + larg.toFixed(1) + '" height="5" rx="2"></rect>';
+    } else {
+      const h = Math.abs(m.bal) / span * H;
+      const y = m.bal >= 0 ? zero - h : zero;
+      const cls = (objM > 0 && m.bal >= objM ? "up" : m.bal >= 0 ? "mid" : "down") +
+        (m.clos ? "" : " encours");
+      out += '<rect class="b ' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) +
+        '" width="' + larg.toFixed(1) + '" height="' + Math.max(h, 1.5).toFixed(1) + '" rx="2">' +
+        "<title>" + esc(monthLabel(m.key) + " : " + fmtEur(m.bal) + " épargnés" +
+          (m.clos ? "" : " — mois en cours, le salaire est entier mais les dépenses non")) +
+        "</title></rect>";
+    }
+    out += '<text class="lb" x="' + (i * pas + pas / 2).toFixed(1) + '" y="' + (H + 16) +
+      '">' + esc(MONTHS_SHORT[i]) + "</text>";
+  });
+  return out + "</svg>";
+}
+
+/* La phrase sous les barres : le mois le plus lourd et le plus léger, ce qui
+   situe l'année sans qu'on ait à lire douze valeurs. */
+function yaMoisNote(c) {
+  /* Un mois entamé n'a pas encore tranché : on ne le compte ni au numérateur ni
+     au dénominateur, sans quoi la phrase dirait « 7 sur 8 » un 3 du mois. */
+  const vus = c.months.filter(m => m.clos && (m.exp > 0 || m.inc > 0));
+  if (vus.length < 2) return "";
+  const objM = c.goal > 0 && c.income > 0 ? c.income / Math.max(vus.length, 1) * c.goal / 100 : 0;
+  const bons = objM > 0 ? vus.filter(m => m.bal >= objM).length : vus.filter(m => m.bal > 0).length;
+  const pire = vus.slice().sort((a, b) => a.bal - b.bal)[0];
+  const best = vus.slice().sort((a, b) => b.bal - a.bal)[0];
+  return '<div class="yanote"><b>' + bons + " mois sur " + vus.length + "</b> " +
+    (objM > 0 ? "au-dessus de l’objectif" : "en positif") + ". " +
+    "Le meilleur est <b>" + esc(monthLabel(best.key).split(" ")[0]) + "</b> avec " +
+    esc(fmtEur(best.bal)) + " mis de côté" +
+    (pire.bal < 0 ? ", le plus lourd <b>" + esc(monthLabel(pire.key).split(" ")[0]) + "</b> qui creuse de " +
+      esc(fmtEur(-pire.bal)) : ", le plus juste <b>" + esc(monthLabel(pire.key).split(" ")[0]) +
+      "</b> avec " + esc(fmtEur(pire.bal))) + ".</div>";
+}
+
+/* L'épargne cumulée, contre celle des années précédentes. Même lecture que le
+   panneau du mois, à l'échelle de l'année. */
+function yaCourbe(c) {
+  const cur = yaCumul(c.year), ref = yaRef(c.year), usuel = ref && ref.vals;
+  let html = '<div class="pulse"><div class="ph">Où en est l’année</div>';
+  if (!cur.length) return html + '<div class="soon">Pas encore de mois clos sur cette année.</div></div>';
+
+  const W = 268, H = 104;
+  const proj = c.running ? c.proj.balanceYear : cur[cur.length - 1];
+  const top = Math.max(...cur, usuel ? Math.max(...usuel) : 0, proj, 1) * 1.06;
+  const bas = Math.min(0, ...cur, usuel ? Math.min(...usuel) : 0);
+  const ech = top - bas;
+  const X = d => d / 12 * W, Y = v => H - (v - bas) / ech * H;
+  const trace = arr => "M0 " + Y(0).toFixed(1) +
+    arr.map((v, i) => "L" + X(i + 1).toFixed(1) + " " + Y(v).toFixed(1)).join("");
+
+  html += '<div class="pbody"><div class="pchart">' +
+    '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" preserveAspectRatio="none" class="yacurve" ' +
+    'role="img" aria-label="Épargne cumulée de l’année">' +
+    '<line class="axis" x1="0" y1="' + Y(0).toFixed(1) + '" x2="' + W + '" y2="' + Y(0).toFixed(1) + '"></line>';
+  if (usuel) html += '<path class="usualfill" d="' + trace(usuel) + "L" + X(usuel.length).toFixed(1) + " " +
+    Y(0).toFixed(1) + "L0 " + Y(0).toFixed(1) + 'Z"></path><path class="usual" d="' + trace(usuel) + '"></path>';
+  html += '<path class="now" d="' + trace(cur) + '"></path>';
+  if (c.running && cur.length < 12) html += '<path class="proj ' +
+    (usuel && usuel.length === 12 && proj > usuel[11] ? "down" : "up") + '" d="M' +
+    X(cur.length).toFixed(1) + " " + Y(cur[cur.length - 1]).toFixed(1) + "L" + X(12).toFixed(1) + " " +
+    Y(proj).toFixed(1) + '"></path>';
+  html += '<line class="dot" x1="' + X(cur.length).toFixed(1) + '" y1="' + Y(cur[cur.length - 1]).toFixed(1) +
+    '" x2="' + X(cur.length).toFixed(1) + '" y2="' + Y(cur[cur.length - 1]).toFixed(1) + '"></line></svg>' +
+    '<div class="lg"><span class="l1"><i></i>' + c.year + "</span>" +
+    (ref ? '<span class="l2"><i></i>' + ref.an + "</span>" : "") + "</div></div>";
+
+  const ecart = usuel && usuel.length >= cur.length ? cur[cur.length - 1] - usuel[cur.length - 1] : null;
+  html += '<div class="pnum"><table><tbody>' +
+    "<tr><th>Épargné</th><td class=\"num\">" + esc(fmtEur(cur[cur.length - 1])) + "</td></tr>" +
+    (ref ? "<tr><th>En " + ref.an + " au même stade</th><td class=\"num q\">" +
+      esc(fmtEur(usuel[Math.min(cur.length, usuel.length) - 1])) + "</td></tr>" : "") +
+    (ecart != null ? '<tr><th>Écart</th><td class="num ' + (ecart >= 0 ? "down" : "up") + '">' +
+      esc(fmtEur(ecart, { plus: true })) + "</td></tr>" : "") +
+    (c.running ? '<tr class="sum"><th>Fin d’année estimée</th><td class="num">' +
+      esc(fmtEur(proj)) + "</td></tr>" : "") +
+    "</tbody></table></div></div></div>";
+  return html;
+}
+
+/* Ce qui ne se discutait pas, et ce qui restait. */
+function yaSocleCard(c) {
+  const s = yaSocle(c), coups = yaCoups(c, 4);
+  if (c.expense <= 0) return "";
+  const p = s.rec / c.expense * 100;
+  return '<div class="yacard"><div class="ph">Récurrent contre exceptionnel' + yaAide(
+    "Les <b>charges récurrentes</b> sont celles que l’application repère comme revenant chaque " +
+    "mois, ramenées à l’année. La liste ne montre que les dépenses <b>exceptionnelles</b> : " +
+    "savoir qu’on a payé son loyer n’explique rien, ce sont les coups isolés qui font sortir " +
+    "un mois du rang.") + "</div>" +
+    '<div class="yasplit"><i class="rec" style="width:' + p.toFixed(1) + '%"></i>' +
+    '<i class="exc" style="width:' + (100 - p).toFixed(1) + '%"></i></div>' +
+    '<div class="yakeys"><span><b class="rec"></b>Charges récurrentes <b class="v">' +
+      esc(fmtEur(s.rec)) + "</b></span>" +
+    '<span><b class="exc"></b>Le reste <b class="v">' + esc(fmtEur(s.reste)) + "</b></span></div>" +
+    (coups.length ? '<table class="ptl"><tbody>' + coups.map(x =>
+      '<tr><td class="d num">' + esc(x.jour + " " + x.mois) + "</td><td>" + esc(x.nom) +
+      '</td><td class="a num">' + esc(fmtEur(x.v)) + "</td></tr>").join("") + "</tbody></table>" : "") +
+    '<div class="yanote">La marge de manœuvre de l’année tient dans les <b>' +
+      esc(fmtEur(s.reste)) + '</b> qui ne sont pas des charges récurrentes.</div></div>';
+}
+
+/* ---------------- onglet « Où ça part » ---------------- */
+/* La méthode derrière un point d'interrogation : utile une fois, encombrante les
+   cent fois suivantes. Le constat reste sous la carte, le calcul se lit au
+   survol. */
+function yaAide(txt) {
+  return '<button class="help" type="button" aria-label="Comment ce bloc est calculé">?' +
+    '<span class="hbox">' + txt + "</span></button>";
+}
+
+/* Le partage du revenu d'un mois typique. Un seul point de départ, donc aucun
+   ruban ne croise un autre : les nœuds d'arrivée se lisent dans le même ordre
+   que les tronçons du départ, et la géométrie se réduit à deux courbes de
+   Bézier miroir. */
+function yaFlux(c) {
+  /* Un mois typique se calcule sur les mois clos. Diviser un cumul qui inclut
+     un mois entamé mélangerait un salaire déjà tombé à des dépenses à moitié
+     faites, et le mois moyen paraîtrait plus économe qu'il ne l'est. */
+  const clos = c.months.filter(m => m.clos && (m.exp > 0 || m.inc > 0));
+  const src = clos.length ? clos : c.months.filter(m => m.exp > 0 || m.inc > 0);
+  const mois = src.length;
+  if (!mois) return "";
+  const somme = (obj, id) => src.reduce((a, m) => a + ((m.s[obj] || {})[id] || 0), 0) / mois;
+
+  const postes = GROUPS.filter(g => g.kind === KIND_EXPENSE)
+    .map(g => ({ id: g.id, nom: g.name, v: somme("groups", g.id), col: v2Colour(g.id) }))
+    .filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+  if (!postes.length) return "";
+  const dep = postes.reduce((a, x) => a + x.v, 0);
+  const rev = src.reduce((a, m) => a + m.inc, 0) / mois, epa = rev - dep;
+  /* Sans revenu saisi, ou en déficit, le revenu ne peut pas servir de source :
+     on part alors de la dépense et le diagramme dit comment elle se répartit. */
+  const surRevenu = rev > 0 && epa > 0;
+  const source = surRevenu ? rev : dep;
+
+  /* Sous 3 % de la source, un nœud devient un filet illisible dont l'étiquette
+     chevauche ses voisines : les petits postes se regroupent. */
+  const seuil = source * 0.03;
+  const gros = postes.filter(x => x.v >= seuil), petits = postes.filter(x => x.v < seuil);
+
+  const bran = [];
+  if (surRevenu) bran.push({ nom: "Épargne", v: epa, col: "var(--win)", epa: true });
+  gros.forEach(p => {
+    if (UI.yflux !== p.id) { bran.push({ ...p, ouvrable: true }); return; }
+    /* Le poste déplié ne quitte pas sa place : sa bande se subdivise, ce qui
+       garde l'ordre et les proportions de tous les autres intacts. */
+    const cats = CATS.filter(x => x.group === p.id)
+      .map(x => ({ nom: x.name, v: somme("cats", x.id) }))
+      .filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+    /* Un poste sans sous-catégorie n'a rien à déplier : il reste tel quel plutôt
+       que de disparaître, ce que faisait la version précédente. */
+    if (!cats.length) { bran.push({ ...p, ouvrable: true }); return; }
+    const tete = cats.slice(0, 5), reste = cats.slice(5);
+    bran.push({ ...p, ouvert: true, ouvrable: true, tete: true });
+    tete.forEach((x, i) => bran.push({ nom: x.nom, v: x.v, col: p.col, fils: true, rang: i }));
+    if (reste.length) bran.push({ nom: reste.length + " autres", col: p.col, fils: true, rang: 5,
+      v: reste.reduce((a, x) => a + x.v, 0) });
+  });
+  if (petits.length) bran.push({ nom: petits.length + " autres postes",
+    v: petits.reduce((a, x) => a + x.v, 0), col: v2Colour("g_legacy") });
+
+  /* Une bande de tête ne porte pas de hauteur propre : ce sont ses enfants qui
+     l'occupent. Elle sert d'étiquette et de zone de repli. */
+  const vis = bran.filter(b => !b.tete);
+  /* Les rubans prennent les trois cinquièmes de la largeur : c'est eux qu'on
+     regarde, les étiquettes ne font que nommer. Et la hauteur suit le nombre de
+     nœuds plutôt qu'un chiffre fixe, pour qu'un poste déplié respire. */
+  const W = 1000, NX = 610, NW = 13, GAP = 10, HMIN = 8, LX = NX + NW + 16;
+  const H = Math.max(300, vis.length * 38);
+  const dispo = H - (vis.length - 1) * GAP;
+  const hOf = v => Math.max(v / source * dispo, HMIN);
+
+  let defs = "", rb = "", nd = "", lab = "", y = 0, ys = 0, i = 0, teteY = null;
+  bran.forEach(b => {
+    if (b.tete) { teteY = { y, id: b.id, nom: b.nom, v: b.v }; return; }
+    const h = hOf(b.v), hs = b.v / source * H, xm = (NW + NX) / 2, id = "yag" + i;
+    const col = b.epa ? "var(--win)" : b.col;
+    defs += '<linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="0">' +
+      '<stop offset="0" stop-color="var(--ink-4)" stop-opacity=".14"/>' +
+      '<stop offset="1" stop-color="' + col + '" stop-opacity="' + (b.fils ? ".3" : ".44") + '"/></linearGradient>';
+    rb += '<path class="rb" style="animation-delay:' + (i * 45) + 'ms" fill="url(#' + id + ')" d="M' +
+      NW + " " + ys.toFixed(1) + "C" + xm + " " + ys.toFixed(1) + " " + xm + " " + y.toFixed(1) +
+      " " + NX + " " + y.toFixed(1) + "L" + NX + " " + (y + h).toFixed(1) +
+      "C" + xm + " " + (y + h).toFixed(1) + " " + xm + " " + (ys + hs).toFixed(1) + " " +
+      NW + " " + (ys + hs).toFixed(1) + 'Z"><title>' + esc(b.nom + " · " + fmtEur(b.v) +
+      " par mois · " + fmtRate(b.v / source * 100)) + "</title></path>";
+    nd += '<rect class="nd' + (b.fils ? " fils" : "") + '" style="animation-delay:' + (i * 45) +
+      'ms" x="' + (b.fils ? NX + 3 : NX) + '" y="' + y.toFixed(1) + '" width="' + (b.fils ? NW - 3 : NW) +
+      '" height="' + h.toFixed(1) + '" rx="2.5" fill="' + col + '"></rect>';
+    const g0 = b.ouvrable ? '<g class="ck" data-act="yflux" data-g="' + esc(b.id) + '">' : "<g>";
+    lab += g0 + '<text class="lb' + (b.epa ? " win" : "") + (b.fils ? " fils" : "") +
+      '" style="animation-delay:' + (i * 45) + 'ms" x="' + (b.fils ? LX + 13 : LX) +
+      '" y="' + (y + h / 2).toFixed(1) + '">' + esc(b.nom) +
+      (b.ouvrable ? '<tspan class="chev" dx="7">' + (b.ouvert ? "▾" : "▸") + "</tspan>" : "") +
+      '</text><text class="amt" style="animation-delay:' + (i * 45) + 'ms" x="' + W +
+      '" y="' + (y + h / 2).toFixed(1) + '">' + esc(fmtEurShort(b.v)) + "</text></g>";
+    y += h + GAP; ys += hs; i++;
+  });
+  /* Le nom du poste déplié coiffe ses enfants, sur la gauche de leur colonne. */
+  if (teteY) lab += '<g class="ck tete" data-act="yflux" data-g="' + esc(teteY.id) + '">' +
+    '<text class="lb open" x="' + LX + '" y="' + (teteY.y - 4).toFixed(1) + '">' +
+    esc(teteY.nom) + '<tspan class="chev" dx="6">▾</tspan></text></g>';
+
+  const titre = surRevenu ? "Revenus" : "Dépenses";
+  return '<div class="yacard"><div class="ph">Un mois typique' + yaAide(
+    "Moyenne des <b>mois clos</b> de l’année — un mois entamé mélangerait un salaire déjà tombé " +
+    "à des dépenses à moitié faites. L’<b>épaisseur du ruban est la part</b> : c’est elle qu’on " +
+    "lit, pas un pourcentage. <b>Cliquez un poste</b> pour le subdiviser en sous-catégories. Sous " +
+    "3 % de la source, les postes sont regroupés : un filet de deux pixels ne se lit pas. Sans " +
+    "revenu saisi ou sur une année déficitaire, le diagramme part de la dépense.") + "</div>" +
+    '<div class="yafwrap"><svg class="yaflux' + (UI.yanim ? " anim" : "") +
+    '" viewBox="-2 -16 ' + (W + 26) + " " + (H + 26) + '" role="img" ' +
+    'aria-label="Partage du revenu d’un mois typique">' +
+    "<defs>" + defs + "</defs>" + rb +
+    '<rect class="nd src" x="0" y="0" width="' + NW + '" height="' + H + '" rx="2.5"></rect>' +
+    nd + lab +
+    '<text class="lb src" x="0" y="-5">' + titre + '<tspan class="amt2" dx="8">' +
+      esc(fmtEurShort(source)) + " par mois</tspan></text></svg></div>" +
+    (surRevenu ? '<div class="yanote">Sur un mois moyen, l’épargne pèse <b>' +
+      fmtRate(epa / source * 100) + "</b> du revenu, et le premier poste <b>" +
+      fmtRate(gros[0].v / source * 100) + "</b>.</div>" : "") + "</div>";
+}
+/* Hauteur du diagramme : de quoi loger chaque étiquette sans qu'elles se
+   touchent, sans étirer inutilement quand les nœuds sont peu nombreux. */
+
+function yaOu(c) {
+  const rows = GROUPS.filter(g => g.kind === KIND_EXPENSE)
+    .map(g => ({ g, v: c.groups[g.id] || 0 })).filter(r => r.v > 0)
+    .sort((a, b) => b.v - a.v);
+  if (!rows.length) return '<div class="yacard"><div class="empty">Aucune dépense sur cette année.</div></div>';
+
+  const tot = rows.reduce((a, r) => a + r.v, 0);
+  const prev = ytdTotals(c.year - 1, c.running ? (c.year - 1) + todayISO().slice(4) : null);
+  const infl = 1 + (DB.settings.inflation || 0) / 100;
+  const band = (DB.settings.band || 5) / 100;
+  const mois = c.running ? Math.max(c.nClos + 1, 1) : 12;
+
+  let html = yaFlux(c);
+
+  html += '<div class="split"><div class="vhead yarow">' +
+    "<span>Poste</span><span class=\"r\">Sur l’année</span><span class=\"r\">Part</span>" +
+    "<span class=\"r\">Par mois</span><span class=\"r\">vs " + (c.year - 1) + "</span>" +
+    "<span>Saisonnalité</span></div><div class=\"vbody\">";
+
+  rows.forEach(r => {
+    const ref = (prev.groups[r.g.id] || 0) * infl;
+    const d = ref > 0 ? (r.v - ref) / ref * 100 : null;
+    const cls = d == null ? "flat" : d > band * 100 ? "up" : d < -band * 100 ? "down" : "flat";
+    const parMois = c.months.filter(m => !m.avenir).map(m => m.s.groups[r.g.id] || 0);
+    const ouvert = UI.ygroup === r.g.id;
+    html += '<button class="vrow yarow" data-act="ygroup" data-group="' + esc(r.g.id) +
+        '" aria-expanded="' + ouvert + '">' +
+      '<span class="nm"><span class="ar">▶</span>' + v2Poste(r.g.id, 21) +
+        '<span class="tx">' + esc(r.g.name) + "</span></span>" +
+      '<span class="r amt num">' + esc(fmtEur(r.v)) + "</span>" +
+      '<span class="r pt num">' + esc(fmtRate(r.v / tot * 100)) + "</span>" +
+      '<span class="r num q">' + esc(fmtEur(r.v / mois)) + "</span>" +
+      '<span class="r num ' + cls + '">' + (d == null ? "n.s." : esc(fmtPct(d))) + "</span>" +
+      "<span>" + yaSpark(parMois) + "</span></button>";
+    if (!ouvert) return;
+    const cats = CATS.filter(x => x.group === r.g.id)
+      .map(x => ({ c: x, v: c.ops.reduce((a, t) => a + (isExpense(t) && t.cat === x.id ? -t.amount : 0), 0) }))
+      .filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+    cats.forEach(x => {
+      const co = UI.ycat === x.c.id;
+      html += '<button class="vrow yarow lv2" data-act="ycat" data-cat="' + esc(x.c.id) +
+          '" aria-expanded="' + co + '">' +
+        '<span class="nm"><span class="ar">▶</span><span class="tx">' + esc(x.c.name) + "</span></span>" +
+        '<span class="r amt num">' + esc(fmtEur(x.v)) + "</span>" +
+        '<span class="r pt num">' + esc(fmtRate(x.v / r.v * 100)) + "</span>" +
+        '<span class="r num q">' + esc(fmtEur(x.v / mois)) + "</span><span></span><span></span></button>";
+      if (!co) return;
+      merchantsOfCat(c.ops, x.c.id).slice(0, 6).forEach(m => {
+        html += '<div class="vrow yarow lv3"><span class="nm"><span class="tx">' + esc(m.name) +
+          '</span><span class="cnt num">' + m.n + " ×</span></span>" +
+          '<span class="r amt num">' + esc(fmtEur(m.v)) + "</span>" +
+          '<span class="r pt num">' + esc(fmtRate(m.v / x.v * 100)) + "</span>" +
+          "<span></span><span></span><span></span></div>";
+      });
+    });
+  });
+
+  return html + '</div><div class="vrow yarow tot"><span class="nm">Total des dépenses</span>' +
+    '<span class="r num">' + esc(fmtEur(tot)) + '</span><span class="r num">100 %</span>' +
+    '<span class="r num q">' + esc(fmtEur(tot / mois)) + "</span><span></span><span></span></div></div>";
+}
+
+function yaSpark(vals) {
+  const mx = Math.max.apply(null, vals) || 1;
+  return '<span class="yasp">' + vals.map(v =>
+    '<i style="height:' + Math.max(v / mx * 100, 6).toFixed(0) + '%"></i>').join("") + "</span>";
+}
+
+/* ---------------- onglet « Les années » ---------------- */
+function yaAnnees(c) {
+  const ys = yaAnneesPleines();
+  if (!ys.length) return '<div class="yacard"><div class="empty">Aucune année complète à comparer.</div></div>';
+
+  /* --- une année après l'autre --- */
+  const bal = ys.map(y => { const p = yearProjection(y);
+    return { y, v: p.balanceYear, r: savingsRate(p.incomeYear, p.expenseYear), complet: p.complete }; });
+  const mx = Math.max(1, ...bal.map(b => Math.abs(b.v)));
+  const prem = bal[0], dern = bal[bal.length - 1];
+  let html = '<div class="yacard"><div class="ph">Une année après l’autre' + yaAide(
+    "L’<b>année en cours</b> est projetée depuis la moyenne mensuelle constatée, et signalée par " +
+    "un astérisque. Les années dont le suivi n’a pas couvert douze mois sont <b>écartées</b> : " +
+    "une année commencée en septembre pèse trois mois et fausserait la comparaison. Le second " +
+    "chiffre est le mouvement du taux d’épargne par rapport à l’année du dessus.") + "</div>" +
+    bal.map((b, i) => {
+      /* Le taux seul ne distingue rien : si toutes les années tiennent
+         l'objectif, la colonne est verte de haut en bas et ne dit plus rien.
+         C'est son mouvement d'une année sur l'autre qui porte l'information. */
+      const av = i > 0 ? bal[i - 1].r : null;
+      const d = b.r != null && av != null ? b.r - av : null;
+      return '<div class="yaline' + (b.y === c.year ? " on" : "") + '"><span class="y num">' + b.y +
+        (b.complet ? "" : " *") + "</span>" +
+      '<span class="bar"><i class="' + (b.v >= 0 ? "" : "neg") + '" style="width:' +
+        (Math.abs(b.v) / mx * 100).toFixed(1) + '%"></i></span>' +
+      '<span class="v num">' + esc(fmtEur(b.v)) + "</span>" +
+      '<span class="t"><span class="r1 num' + (c.goal && b.r != null && b.r < c.goal ? " hot" : "") + '">' +
+        (b.r == null ? "—" : esc(fmtRate(b.r))) + "</span>" +
+      '<span class="r2 num ' + (d == null ? "nil" : d >= 0 ? "up" : "down") + '">' +
+        (d == null ? "" : (d >= 0 ? "▲" : "▼") + " " + trim1(Math.abs(d)).replace(".", ",")) +
+        "</span></span></div>";
+    }).join("") +
+    (bal.length > 1 && prem.r != null && dern.r != null
+      ? '<div class="yanote">Le taux d’épargne ' + (dern.r >= prem.r ? "progresse de " : "recule de ") +
+        v2Pts(dern.r - prem.r) + " depuis " + prem.y + ".</div>"
+      : "") + "</div>";
+
+  /* --- saisonnalité --- */
+  /* Seuls les mois clos entrent dans la moyenne : le mois en cours n'a pas fini
+     de dépenser, et le compter creuserait sa case tous les ans au même endroit
+     — une saisonnalité fabriquée par le calendrier. */
+  const courant = monthKey(todayISO());
+  const sais = [];
+  for (let m = 1; m <= 12; m++) {
+    const vals = ys.map(y => y + "-" + pad2(m)).filter(k => k < courant)
+      .map(k => monthStats(k).expense).filter(v => v > 0);
+    sais.push(vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0);
+  }
+  const mxs = Math.max(1, ...sais);
+  const moy = sais.filter(v => v > 0).reduce((a, b) => a + b, 0) / (sais.filter(v => v > 0).length || 1);
+  const lourds = sais.map((v, i) => ({ v, i })).filter(x => x.v > moy * 1.12)
+    .sort((a, b) => b.v - a.v).slice(0, 3);
+  if (sais.some(v => v > 0)) html += '<div class="yacard"><div class="ph">Saisonnalité' + yaAide(
+    "Moyenne des dépenses par <b>mois calendaire</b>, toutes années confondues et mois clos " +
+    "seulement — compter le mois en cours creuserait la même case tous les ans au même endroit, " +
+    "une saisonnalité fabriquée par le calendrier.") + "</div>" +
+    '<div class="yaseason">' + sais.map((v, i) =>
+      '<div class="yascell' + (lourds.some(x => x.i === i) ? " hot" : "") + '">' +
+      '<span class="m">' + esc(MONTHS_SHORT[i]) + "</span>" +
+      '<span class="bar"><i style="height:' + (v / mxs * 100).toFixed(0) + '%"></i></span>' +
+      '<span class="v num">' + esc(fmtEurShort(v)) + "</span></div>").join("") + "</div>" +
+    (lourds.length
+      ? '<div class="yanote"><b>' + lourds.map(x => MONTHS[x.i].toLowerCase()).join("</b> et <b>") +
+        "</b> " + (lourds.length > 1 ? "pèsent" : "pèse") + " structurellement plus lourd : " +
+        "un objectif mensuel uniforme " + (lourds.length > 1 ? "les" : "le") + " condamne d’avance.</div>"
+      : "") + "</div>";
+
+  /* --- évolution des postes --- */
+  if (ys.length >= 2) {
+    /* L'année en cours ne porte que les mois écoulés : la comparer telle quelle
+       à des années pleines ferait chuter tous les postes d'un coup, en janvier
+       surtout. On la ramène à douze mois, comme le bloc du dessus le fait déjà
+       pour la balance, et l'infobulle le dit. */
+    const ecoule = y => y === yearOf(todayISO()) ? Math.max(yearProjection(y).elapsed, 0.02) : 1;
+    /* Cinq ans au plus. Au-delà, ce n'est plus la dépense qu'on mesure mais la
+       façon dont les catégories ont été remaniées : un poste qui s'est vidé dans
+       un autre affiche +1 500 % sans que personne ait dépensé un euro de plus. */
+    const fen = ys.slice(-5);
+    /* Sous 600 € à l'année de départ, le pourcentage n'a plus de sens : 2 € contre
+       261 € est arithmétiquement juste et informativement nul. */
+    const cartes = GROUPS.filter(g => g.kind === KIND_EXPENSE).map(g => ({
+      g, vals: fen.map(y => (ytdTotals(y).groups[g.id] || 0) / ecoule(y)),
+      proj: fen.map(y => ecoule(y) < 1),
+    })).filter(x => x.vals[0] >= 600 && x.vals[x.vals.length - 1] > 0)
+      .sort((a, b) => b.vals[b.vals.length - 1] - a.vals[a.vals.length - 1]);
+    /* L'échelle reste commune à toutes les cartes — c'est ce partage qui rend les
+       postes comparables — mais elle se règle sur un haut quantile et non sur le
+       maximum. Calée sur le maximum, un seul poste emballé à +45 % écrasait les
+       huit autres à deux pixels. Calée sur les neuf diximes, elle donne toute la
+       hauteur à la masse des postes ; celui qui dépasse porte son encoche, et
+       c'est précisément à ça qu'elle sert. */
+    const devs = [];
+    cartes.forEach(x => x.vals.forEach(v => {
+      const d = Math.abs((v / (x.vals[0] || 1) - 1) * 100);
+      if (d > 0.05) devs.push(d);
+    }));
+    devs.sort((a, b) => a - b);
+    const q = devs.length ? devs[Math.min(devs.length - 1, Math.floor(devs.length * 0.9))] : 0;
+    /* Une échelle se lit mieux sur un palier rond que sur un nombre calculé. */
+    const ECH = [2, 3, 5, 8, 12, 20, 30, 50, 75, 100].find(v => v >= q) || 100;
+    if (cartes.length) html += '<div class="yacard"><div class="ph">Évolution des postes · ' +
+      fen[0] + " → " + fen[fen.length - 1] +
+      (fen[fen.length - 1] === yearOf(todayISO()) ? " *" : "") + yaAide(
+      "Une barre par année, mesurée depuis le <b>niveau " + fen[0] + "</b> — le trait horizontal. " +
+      "Ce qui est dessiné est donc l’<b>écart au départ</b> et non le montant : même à 9 %, il se " +
+      "voit. L’échelle, graduée ici à <b>±" + ECH + " %</b>, est la même partout, si bien que les " +
+      "postes se comparent entre eux ; une barre qui la dépasse porte une encoche. Cinq ans au " +
+      "plus, et les postes sous 600 € à l’année de départ sont écartés — un pourcentage calculé " +
+      "sur presque rien n’apprend rien." +
+      (fen[fen.length - 1] === yearOf(todayISO())
+        ? " L’année en cours (<b>*</b>) est ramenée à douze mois, sans quoi elle s’effondrerait " +
+          "à côté des années pleines." : "")) +
+      "</div><div class=\"yaegrid\">" +
+      cartes.map(x => yaEvolCard(x.g.name, x.vals, fen, x.proj, ECH)).join("") + "</div>" +
+      '<div class="yanote">Une barre par année, mesurée depuis le <b>niveau ' + fen[0] + "</b> — le trait " +
+        "horizontal. Ce qui est dessiné est donc l’écart au départ, pas le montant : même à 9 %, il se voit. " +
+        "L’échelle, graduée ici à <b>±" + ECH + " %</b>, est la même partout, si bien que les postes se " +
+        "comparent entre eux ; une barre qui la dépasse porte une encoche. Cinq ans au plus, et les postes " +
+        "sous 600 € à l’année de départ sont écartés — un pourcentage calculé sur presque rien " +
+        "n’apprend rien. Le survol d’une barre donne son millésime et son montant." +
+        (ys[ys.length - 1] === yearOf(todayISO())
+          ? " <b>*</b> l’année en cours est ramenée à douze mois, sans quoi elle s’effondrerait à côté des années pleines."
+          : "") + "</div></div>";
+  }
+  return html;
+}
+
+/* Barres d'écart au niveau de la première année. Une barre code par sa
+   longueur : partie de zéro, une variation de 9 % serait invisible ; partie
+   d'un zéro déplacé, elle mentirait. On change donc ce qu'on mesure — l'écart
+   au départ — et la longueur redevient exactement la donnée. L'échelle est
+   commune à toutes les cartes, si bien que les postes se comparent. */
+function yaEvolCard(nom, vals, ys, proj, ECH) {
+  const W = 128, H = 52, mid = H / 2;
+  const base = vals[0] || 1;
+  const pas = W / vals.length, larg = pas * 0.46;
+  let out = '<svg viewBox="-3 -4 ' + (W + 6) + " " + (H + 8) + '" class="yadev">';
+  vals.forEach((v, i) => {
+    const d = (v / base - 1) * 100;
+    const x = i * pas + (pas - larg) / 2;
+    const h = Math.abs(Math.max(-ECH, Math.min(d, ECH))) / ECH * mid;
+    if (Math.abs(d) < 0.05) {
+      out += '<rect class="b base" x="' + x.toFixed(1) + '" y="' + (mid - 1.2).toFixed(1) +
+        '" width="' + larg.toFixed(1) + '" height="2.4" rx="1"><title>' + ys[i] + " — référence · " +
+        esc(fmtEur(v)) + ((proj || [])[i] ? " (projeté)" : "") + "</title></rect>";
+    } else {
+      const hors = Math.abs(d) > ECH;
+      out += '<rect class="b ' + (d > 0 ? "up" : "down") + (hors ? " hors" : "") +
+        '" x="' + x.toFixed(1) + '" y="' + (d >= 0 ? mid - h : mid).toFixed(1) +
+        '" width="' + larg.toFixed(1) + '" height="' + Math.max(h, 1.6).toFixed(1) +
+        '" rx="1.5"><title>' + ys[i] + " : " + esc(fmtEur(v)) + " (" + esc(fmtPct(d)) + ")" +
+        ((proj || [])[i] ? " · projeté" : "") + (hors ? " · hors échelle" : "") + "</title></rect>";
+      /* Une barre rognée ressemble à une barre pleine : l'encoche dit qu'elle
+         continue au-delà, sans quoi 60 % et 1 500 % se dessineraient pareil. */
+      if (hors) {
+        const yb = d >= 0 ? mid - h : mid + h;
+        out += '<path class="hb" d="M' + x.toFixed(1) + " " + yb.toFixed(1) + "l" +
+          (larg / 2).toFixed(1) + " " + (d >= 0 ? -2.6 : 2.6) + "l" + (larg / 2).toFixed(1) + " " +
+          (d >= 0 ? 2.6 : -2.6) + '"/>';
+      }
+    }
+  });
+  out += '<line class="mid" x1="0" y1="' + mid + '" x2="' + W + '" y2="' + mid + '"></line></svg>';
+  const dt = (vals[vals.length - 1] / base - 1) * 100;
+  return '<div class="yaecard"><div class="yaen">' + esc(nom) + "</div>" + out +
+    '<div class="yaef"><span class="num">' + esc(fmtEurShort(vals[vals.length - 1])) + "</span>" +
+    '<span class="num ' + (dt > 0 ? "up" : "down") + '">' + esc(fmtPct(dt)) + "</span></div></div>";
+}
+
+function viewYear3() {
+  const c = yearCtx(UI.year);
+  const tab = (id, label) =>
+    '<button data-act="ytab" data-tab="' + id + '" aria-selected="' + (UI.ytab === id) + '">' +
+    esc(label) + "</button>";
+  let html = '<div class="v2"><div class="top"><div class="per">' +
+    '<button data-act="prev" aria-label="Année précédente">‹</button>' +
+    "<h1>" + c.year + "</h1>" +
+    '<button data-act="next" aria-label="Année suivante">›</button>' +
+    '<span class="st">' + (c.running ? "en cours · " + c.nClos + "/12 mois clos" : "close") + "</span></div>" +
+    '<div class="tabs" role="tablist">' + tab("annee", "L’année") + tab("ou", "Où ça part") +
+      tab("annees", "Les années") + "</div></div>";
+  html += UI.ytab === "ou" ? yaOu(c) : UI.ytab === "annees" ? yaAnnees(c) : yaAnnee(c);
+  UI.yanim = false;
+  return html + "</div>";
+}
+
+/* =========================================================================
    Settings
    ========================================================================= */
 function registerCat(c) { if (!CAT_BY_ID[c.id]) { CATS.push(c); CAT_BY_ID[c.id] = c; } }
@@ -8273,12 +9225,12 @@ document.addEventListener("click", e => {
 
   switch (act) {
     case "view": UI.view = el.dataset.view; render(); break;
-    case "prev":
+    case "prev": UI.yanim = true; UI.yflux = null;
       isYearView() ? UI.year-- : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, -1)) : (UI.month = addMonth(UI.month, -1));
       UI.v2anim = "all"; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2batch = "all";
       UI.y2goal = null; UI.y2group = null; UI.y2cat = null;
       render(); break;
-    case "next":
+    case "next": UI.yanim = true; UI.yflux = null;
       isYearView() ? UI.year++ : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, 1)) : (UI.month = addMonth(UI.month, 1));
       UI.v2anim = "all"; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2batch = "all";
       UI.y2goal = null; UI.y2group = null; UI.y2cat = null;
@@ -8297,6 +9249,20 @@ document.addEventListener("click", e => {
       UI.month = el.dataset.month; UI.v2pick = false;
       UI.v2anim = "all"; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2batch = "all";
       render(); break;
+    /* Année v3. Le dépliement d'un poste se referme sur lui-même, et changer de
+       poste referme la sous-catégorie ouverte sous le précédent. */
+    case "ytab":
+      UI.ytab = el.dataset.tab; UI.ygroup = null; UI.ycat = null; UI.yflux = null;
+      UI.yanim = true; render(); break;
+    case "ygroup":
+      UI.ygroup = UI.ygroup === el.dataset.group ? null : el.dataset.group; UI.ycat = null;
+      render(); break;
+    case "ycat":
+      UI.ycat = UI.ycat === el.dataset.cat ? null : el.dataset.cat; render(); break;
+    /* Déplier un poste du diagramme ne rejoue pas l'apparition : on vient
+       regarder, pas assister à une animation. */
+    case "yflux":
+      UI.yflux = UI.yflux === el.dataset.g ? null : el.dataset.g; UI.yanim = false; render(); break;
     case "v2tab": UI.v2tab = el.dataset.tab; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2anim = "all"; render(); break;
     case "v2goal": UI.v2goal = UI.v2goal === el.dataset.goal ? null : el.dataset.goal; UI.v2anim = null; render(); break;
     case "v2group": {

@@ -12,6 +12,29 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 
 ## Journal des modifications
 
+### 2026-08-22 — un troisième écran annuel
+
+Ajout d’une entrée **Année v3** dans la barre latérale, à côté de l’**Année** d’origine et de l’**Année v2**, toutes deux laissées intactes. Les trois partagent `UI.year` : passer de l’une à l’autre ne ramène pas à l’année en cours, et les flèches bougent la même chose. Aucun calcul n’est refait autrement — `monthStats`, `ytdTotals`, `baseCost` et `spentOn` font le travail. Les espaces de noms ne se touchent pas : `y2` pour le second écran, `ya` pour celui-ci, vérifié nom par nom — vingt fonctions et vingt-sept classes — avant d’écrire une ligne.
+
+**Trois onglets, un par horizon** : l’année, sa composition, son histoire.
+
+- **L’année** — fiche et anneau, deux pastilles (le rang de l’année parmi les autres, les objectifs annuels tenus), les objectifs en liste dense, les douze mois, puis l’épargne cumulée et le partage récurrent contre exceptionnel.
+- **Où ça part** — un diagramme de flux « Un mois typique », puis la ventilation dépliable jusqu’au commerçant, avec le montant mensuel moyen et une saisonnalité par poste.
+- **Les années** — l’empilement des années, la saisonnalité globale, l’évolution des postes.
+
+**Les décisions de lecture, et ce qui les a imposées.**
+
+- **Les douze mois montrent la balance**, pas le couple revenus contre dépenses : ce qu’on veut savoir est ce qui est resté, et pour un salarié le revenu étant quasi constant, la moitié de l’encre ne porterait rien.
+- **L’évolution des postes se lit en barres d’écart.** Partant de zéro, une dérive de 9 % est invisible ; partant d’un zéro déplacé, la barre ment, sa longueur étant la donnée. On mesure donc l’écart au niveau de la première année. L’échelle est commune à toutes les cartes — c’est ce partage qui les rend comparables — mais calée sur les **neuf diximes** des écarts et non sur le maximum : calée sur le maximum, un seul poste emballé à +45 % écrasait les huit autres à deux pixels. Ce qui dépasse porte une encoche.
+- **Un mois typique se calcule sur les mois clos** : diviser un cumul qui inclut un mois entamé mélangerait un salaire déjà tombé à des dépenses à moitié faites. L’épaisseur du ruban **est** la part ; un poste se déplie au clic, sa bande se subdivisant sur place pour préserver l’ordre et les proportions des autres.
+- **Les années tronquées sont écartées** des comparaisons : une année dont le suivi a commencé en septembre pèse trois mois et faisait afficher +4 000 % au poste qui la suivait.
+- **Une année en cours n’est pas une année pleine**, et quatre endroits s’en souviennent : les mois à venir en creux, le mois entamé en demi-teinte, la saisonnalité qui l’écarte, et les cartes d’évolution qui le ramènent à douze mois.
+- **La méthode se range derrière un « ? ».** Sept blocs des trois onglets portent une aide au survol : ce qui constate reste visible, ce qui explique le calcul se lit à la demande.
+
+**Les anneaux d’épargne se remplissent au chargement**, sur le Mois comme sur cet écran. La règle ne déclare que le départ : l’arrivée est la valeur posée en ligne par le rendu, si bien qu’elle vaut pour n’importe quel taux sans que le style ait à le connaître.
+
+**Réserve honnête.** L’aperçu intégré ayant cessé de charger les fichiers locaux en cours de route, la vérification s’est faite **hors navigateur** : le script entier chargé derrière un DOM de fortune, les trois écrans annuels et le mensuel rendus sur deux années et tous leurs onglets — dix-huit combinaisons — et leur balisage relu balise par balise. Tout est bien formé, mais **le rendu n’a pas été vu à l’écran** dans sa dernière étape.
+
 ### 2026-08-22 — un second écran annuel
 
 > **Marc, si tu peux jeter un œil à la v2 de l’Année** — dis-moi si ça te convient, et si tu vois des choses chelou. L’ancien écran **Année** est intact juste à côté dans la barre latérale : les deux se comparent onglet contre onglet, sur les mêmes données, sans rien réimporter.
