@@ -3063,7 +3063,12 @@ function v2PulseBilan(key) {
    porte précisément sur le plafond actuel. Elle se corrige d'elle-même : un
    plafond qu'on vient de relever redevient tenable, et l'application se tait.
    ------------------------------------------------------------------------- */
-const V2_VERDICT_N = 6;                    // mois clos examinés
+/* Douze mois, pas six : une assurance ou un impôt tombe sur un seul mois de
+   l'année. Sur une fenêtre de six mois glissante, ce paiement est absent onze
+   fois sur douze et le poste se ferait signaler « jamais approché » alors que
+   son plafond couvre précisément cette échéance. Une année entière garantit
+   que chaque poste est jugé sur son cycle complet. */
+const V2_VERDICT_N = 12;                   // mois clos examinés
 function v2Med(arr) {
   const a = arr.slice().sort((x, y) => x - y), h = a.length >> 1;
   return a.length % 2 ? a[h] : (a[h - 1] + a[h]) / 2;
@@ -3080,7 +3085,11 @@ function v2GoalVerdict(id) {
   const mid = v2Med(last);
 
   if (last.every(v => v > ceil) && mid >= ceil * 1.2) {
-    const recent = v2Med(last.slice(-3)), avant = v2Med(last.slice(0, 3));
+    /* Les deux moitiés de la fenêtre, et non trois mois contre trois : sur une
+       année, une médiane de six mois encaisse sans broncher l'échéance annuelle
+       qui tombe dans l'une des deux. */
+    const moitie = V2_VERDICT_N / 2;
+    const recent = v2Med(last.slice(-moitie)), avant = v2Med(last.slice(0, moitie));
     if (avant > 0 && recent <= avant * 0.9) return null;   // le poste se redresse
     return { kind: "serre", n: V2_VERDICT_N, med: mid, ceil,
              prop: Math.max(Math.round(mid / 10) * 10, 10) };
