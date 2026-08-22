@@ -1016,6 +1016,103 @@ html[data-theme="dark"] .v2{
 @media(prefers-reduced-motion:reduce){.v2 *{transition:none!important;animation:none!important}}
 
 /* =========================================================================
+   ANNÉE V2 — ce que l'écran annuel ajoute au vocabulaire de « Mois »
+   -------------------------------------------------------------------------
+   Presque tout est déjà là : la fiche, l'anneau, les pastilles, les vignettes
+   d'objectif, le panneau de situation et la table de ventilation servent tels
+   quels. Ne restent ici que les quatre choses qu'une année possède et qu'un
+   mois n'a pas — un sélecteur à un seul étage, une table de douze mois, une
+   table d'années, et la frise des douze mois d'un poste dépassé.
+   ========================================================================= */
+/* Une année tient en quatre chiffres : la largeur fixe qui empêche les flèches
+   du mois de danser d'un libellé à l'autre n'a plus lieu d'être si large. */
+.v2 .per.yr2 h1{min-width:120px;letter-spacing:.12em}
+.v2 .ypick{width:214px}
+.v2 .ypick .ms button{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* ---------- tables propres à l'année ---------- */
+/* Elles empruntent .vt à la ventilation : mêmes bordures, mêmes états de
+   survol, mêmes tailles. Seules les colonnes changent. */
+.v2 .vt.m12 .vhead,.v2 .vt.m12 .vrow{grid-template-columns:minmax(0,1fr) 92px 92px 96px 68px 74px 104px}
+.v2 .vt.yrs .vhead,.v2 .vt.yrs .vrow{grid-template-columns:minmax(0,1fr) 96px 96px 100px 72px 116px}
+.v2 .vt.tops .vhead,.v2 .vt.tops .vrow{grid-template-columns:26px minmax(0,1fr) 104px 52px 84px 118px}
+/* Douze barres au lieu de six : la colonne s'élargit et la gouttière se
+   resserre, sans quoi chaque mois tombe sous les deux pixels et la série
+   devient une texture. */
+.v2 .vt.yv .vhead,.v2 .vt.yv .vrow{grid-template-columns:minmax(0,1fr) 98px 48px 116px 96px 72px 74px}
+.v2 .vt.yv .spark{gap:1.5px}
+/* Un mois qui n'est pas encore arrivé n'est pas un mois sans dépense. */
+.v2 .spark i.fut{opacity:.16}
+/* Les revenus d'un mois sont la colonne la moins disputée : discrets, mais pas
+   au point de passer pour une note de bas de page. */
+.v2 .vt.m12 .vrow .pt,.v2 .vt.yrs .vrow .pt{font-size:12.5px}
+.v2 .vt.tops .ix{color:var(--ink-4);font-size:11px;font-variation-settings:"wght" 560,"wdth" 100}
+.v2 .vt.tops .tx.cap{text-transform:capitalize}
+.v2 .mrow{text-align:left}
+/* Un mois sans la moindre opération n'a rien à dire : il garde sa ligne, pour
+   que les douze restent comparables, mais s'efface. */
+.v2 .mrow.vide{color:var(--ink-4)}
+.v2 .mrow.vide .tx{color:var(--ink-4);font-variation-settings:"wght" 480,"wdth" 100}
+.v2 .mrow.now .tx,.v2 .mrow.on .tx{font-variation-settings:"wght" 760,"wdth" 100}
+.v2 .mrow .cnt{font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-4);
+  font-variation-settings:"wght" 620,"wdth" 96;margin-left:7px;white-space:nowrap}
+.v2 .mrow.on{background:var(--surface-2);box-shadow:inset 2px 0 0 var(--ink)}
+/* L'épargne d'un mois n'est pas un verdict sur un objectif : elle dit
+   seulement de quel côté de zéro le mois est tombé. */
+.v2 .vrow .amt.gain{color:var(--win-ink)}
+.v2 .vrow .amt.loss{color:var(--bad-ink)}
+/* Le taux, lui, se juge contre l'objectif d'épargne — et faute d'objectif il
+   reste gris plutôt que de se peindre au hasard. */
+.v2 .vrow .rt{font-size:12.5px;font-variation-settings:"wght" 660,"wdth" 92;color:var(--ink-3)}
+.v2 .vrow .rt.ok{color:var(--win-ink)}
+.v2 .vrow .rt.watch{color:var(--hot-ink)}
+.v2 .vrow .rt.under{color:var(--bad-ink)}
+.v2 .vt.yrs .dbar{height:13px}
+
+/* ---------- les douze mois d'un poste dépassé ---------- */
+/* Un dépassement annuel se lit d'abord dans sa date : un poste qui a explosé
+   en juillet et un poste qui déborde tous les mois demandent deux décisions
+   différentes, et la ventilation seule ne les distingue pas. Le trait marque
+   le douzième du plafond — un mois qui le franchit mange la marge des autres. */
+.v2 .y12{margin-bottom:15px}
+.v2 .y12 .cap{margin-bottom:8px}
+/* Pas de piste sous chaque barre : un rectangle vide de 56 px se lit lui-même
+   comme une barre, et un mois à 6 % du maximum disparaissait dedans. Une simple
+   ligne de sol, et l'encre ne dit plus que ce qui a été dépensé. */
+.v2 .y12b{position:relative;display:grid;grid-template-columns:repeat(12,1fr);gap:5px;
+  align-items:end;height:60px;border-bottom:1px solid var(--line)}
+.v2 .y12c{display:flex;align-items:flex-end;height:100%;min-width:0}
+.v2 .y12c i{display:block;width:100%;background:var(--ink-4);border-radius:3px 3px 0 0}
+.v2 .y12c i.over{background:var(--bad)}
+/* Un trait continu posé par-dessus les douze barres. Douze petits traits
+   séparés se liraient comme un ornement ; celui-ci se lit comme un seuil — et
+   il reste visible quand tous les mois sont au-dessus, ce qui est justement le
+   cas où il faut le voir. */
+.v2 .y12b .lim{position:absolute;left:0;right:0;height:0;border-top:1.5px dashed var(--ink);
+  opacity:.55;pointer-events:none}
+.v2 .y12l{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;margin-top:5px}
+.v2 .y12l span{text-align:center;font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--ink-4);font-variation-settings:"wght" 620,"wdth" 92}
+
+@media(max-width:1000px){
+  .v2 .vt.m12 .vhead,.v2 .vt.m12 .vrow{grid-template-columns:minmax(0,1fr) 88px 92px 68px}
+  .v2 .vt.m12 .vhead span:nth-child(2),.v2 .vt.m12 .vhead span:nth-child(6),.v2 .vt.m12 .vhead .c2,
+  .v2 .vt.m12 .vrow>span:nth-child(2),.v2 .vt.m12 .vrow>span:nth-child(6),
+  .v2 .vt.m12 .vrow .pbar{display:none}
+  .v2 .vt.yrs .vhead,.v2 .vt.yrs .vrow{grid-template-columns:minmax(0,1fr) 96px 100px 72px}
+  .v2 .vt.yrs .vhead span:nth-child(2),.v2 .vt.yrs .vhead .c2,
+  .v2 .vt.yrs .vrow>span:nth-child(2),.v2 .vt.yrs .vrow .dbar{display:none}
+  .v2 .vt.tops .vhead,.v2 .vt.tops .vrow{grid-template-columns:26px minmax(0,1fr) 104px 52px}
+  .v2 .vt.tops .vhead span:nth-child(5),.v2 .vt.tops .vhead .c2,
+  .v2 .vt.tops .vrow>span:nth-child(5),.v2 .vt.tops .vrow .pbar{display:none}
+}
+@media(max-width:660px){
+  .v2 .y12b,.v2 .y12l{gap:3px}
+  .v2 .y12b{height:46px}
+  .v2 .y12l span{font-size:7.5px}
+}
+
+/* =========================================================================
    TROPHÉES
    -------------------------------------------------------------------------
    Échelle de rareté propre au Budget : ni bronze, ni argent, ni or — de la
@@ -1773,12 +1870,18 @@ const UI = {
   modal: null, small: null,
   v2tab: "mois", v2goal: null, v2group: null, v2cat: null, v2cmp: "pct", v2ops: "all", v2batch: "all", v2anim: "all",
   v2pick: false, v2pickYear: null,
+  /* L’écran annuel garde ses propres dépliements : ouvrir un poste dans l’Année ne
+     doit rien changer à ce qui est ouvert dans le Mois, et inversement. */
+  y2tab: "annee", y2goal: null, y2group: null, y2cat: null, y2cmp: "pct", y2pick: false,
   patMonth: monthKey(todayISO()),
   patAccount: null, patShowInactive: false, patMovFilter: "all", patRange: "all",
   patHlSeed: 1, patYearUnit: "pct",
 };
 /* Les cinq écrans Patrimoine partagent le même mois courant : passer de l'Aperçu aux
    Comptes ne doit pas ramener au mois en cours. */
+/* Les deux écrans annuels partagent UI.year : passer de l’un à l’autre ne doit pas
+   ramener à l’année en cours, et les flèches doivent bouger la même chose. */
+function isYearView() { return UI.view === "year" || UI.view === "year2"; }
 function isPatView() {
   return ["pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
 }
@@ -2289,6 +2392,7 @@ function render() {
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
+    ["year2", "chart", "Année v2"],
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
   const patNav = [["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
@@ -2301,6 +2405,7 @@ function render() {
   const body = UI.view === "month" ? viewMonth()
     : UI.view === "trophees" ? viewTrophies()
     : UI.view === "year" ? viewYear()
+    : UI.view === "year2" ? viewYear2()
     : UI.view === "todo" ? viewTodo()
     : UI.view === "pathome" ? viewPatrimoineHome()
     : UI.view === "patanalyse" ? viewPatAnalyse()
@@ -3914,6 +4019,894 @@ function viewTodo() {
     '<span class="num muted tiny" style="text-align:right">' + g.ops.length + " op.</span>" +
     '<span class="num" style="text-align:right">' + esc(fmtEur(g.total)) + "</span>" +
     catSelect(null, 'data-chg="bulkcat" data-key="' + esc(g.key) + '"') + "</div>").join("") + "</div>";
+  return html;
+}
+
+/* =========================================================================
+   ANNÉE V2
+   -------------------------------------------------------------------------
+   La refonte de l'écran annuel, posée à côté de l'ancien le temps de trancher,
+   comme « Mois v2 » l'avait été avant elle. Même direction artistique, même
+   grammaire de composants — fiche, anneau, pastilles, vignettes d'objectif,
+   panneau de situation — et les mêmes données : rien n'est recalculé autrement
+   ici, tout passe par monthStats, yearProjection, baseCost et spentOn.
+
+   Ce qui change nécessairement, c'est l'unité de temps, et trois adaptations
+   en découlent. La référence n'est plus « les trois mois précédents » mais
+   l'an dernier revalorisé de l'inflation, seule comparaison qui ait un sens à
+   cette échelle. Le rythme n'est plus le jour du mois mais la fraction d'année
+   écoulée. Et surtout, l'exemption de rythme change de cible : sur un mois, le
+   loyer fausse la lecture parce qu'il part le 3 ; sur une année, il ne la
+   fausse plus du tout puisqu'il s'étale par douzièmes. Ce qui fausse le rythme
+   annuel, c'est l'échéance rare — une assurance payée en une fois en mars met
+   son poste à 100 % dès le printemps.
+   ========================================================================= */
+
+/* Cumul des dépenses de l'année, mois par mois. Douze valeurs, la dernière
+   étant le total de l'année. */
+function y2Cumul(year) {
+  const by = new Array(12).fill(0);
+  DB.tx.forEach(t => {
+    if (isExpense(t) && yearOf(t.date) === year) by[+t.date.slice(5, 7) - 1] -= t.amount;
+  });
+  const out = []; let run = 0;
+  for (let i = 0; i < 12; i++) { run += by[i]; out.push(run); }
+  return out;
+}
+/* Le même cumul arrêté au même jour de l'année, au jour près. L'écran mensuel
+   doit interpoler entre deux marches parce qu'il compare des mois de longueurs
+   différentes ; ici les opérations portent leur date et la coupe est exacte. */
+function y2CumulTo(year, mmdd) {
+  let s = 0;
+  DB.tx.forEach(t => {
+    if (isExpense(t) && yearOf(t.date) === year && t.date.slice(5) <= mmdd) s -= t.amount;
+  });
+  return s;
+}
+function y2Infl() { return 1 + (DB.settings.inflation || 0) / 100; }
+function y2HasYear(year) { return DB.tx.some(t => isExpense(t) && yearOf(t.date) === year); }
+
+/* Part des charges fixes dans l'année, mesurée sur les opérations elles-mêmes
+   plutôt que sur l'équivalent mensuel. L'écran mensuel lisse une échéance
+   annuelle sur douze mois, ce qui est la bonne lecture pour un mois ; sur une
+   année, l'échéance est soit payée soit pas, et la somme exacte est là.
+   L'appariement se fait sur la clé de marchand retenue par le détecteur, y
+   compris sa forme composée (marchand|catégorie) pour les fournisseurs qui
+   facturent deux contrats distincts. */
+function y2FixedByGroup(ops) {
+  const keys = new Set(baseCost().kept.map(r => r.key));
+  const by = {}; let total = 0;
+  ops.forEach(t => {
+    if (!isExpense(t)) return;
+    const k = canonOf(t);
+    if (!k || (!keys.has(k) && !keys.has(k + "|" + (t.cat || "")))) return;
+    const g = catGroup(t.cat);
+    if (!g) return;
+    by[g.id] = (by[g.id] || 0) - t.amount;
+    total -= t.amount;
+  });
+  return { by, total };
+}
+/* Ce qui, dans un poste, tombe en une fois plutôt que mois après mois : c'est
+   la seule chose qui rende le rythme annuel trompeur. Un poste dont l'échéance
+   rare pèse plus du tiers du plafond est donc dispensé du verdict de rythme,
+   comme l'écran mensuel dispense les postes prélevés en début de mois. */
+function y2LumpyByGroup() {
+  const out = {};
+  baseCost().kept.forEach(r => {
+    if (r.period < 6) return;
+    const g = catGroup(r.cat);
+    if (g) out[g.id] = (out[g.id] || 0) + r.monthly * 12;
+  });
+  return out;
+}
+/* Les mois de l'année où une échéance non mensuelle tombe, lus sur ses
+   occurrences passées. Une charge trimestrielle y laisse quatre mois, une
+   annuelle un seul. */
+function y2DueMonths(r) {
+  const seen = {};
+  Object.keys(r.months || {}).forEach(k => { seen[+k.slice(5, 7)] = true; });
+  return Object.keys(seen).map(Number).sort((a, b) => a - b);
+}
+
+/* Douze barres pour les douze mois du poste. L'écran mensuel colore la dernière
+   barre, celle du mois consulté ; sur une année close, la douzième n'a rien de
+   particulier à dire. C'est le pic qui compte — un poste n'a pas un rythme mais
+   des pics, et c'est exactement ce qu'un total annuel cache.
+
+   Encore faut-il qu'il y en ait un. Sur un poste régulier, les douze mois se
+   valent à quelques euros près et colorer le plus haut désignerait un mois au
+   hasard : le pic ne se signale donc que s'il dépasse la médiane d'un bon tiers.
+   Et les mois d'une année en cours qui ne sont pas encore arrivés s'effacent —
+   à pleine encre, ils se liraient comme des mois sans dépense. */
+function y2Spark(series, groupId, upto) {
+  if (!series || !series.length) return "<span></span>";
+  const n = upto == null ? series.length : upto;
+  const mx = Math.max.apply(null, series) || 1, col = v2Colour(groupId);
+  const vus = series.slice(0, n).filter(v => v > 0).sort((a, b) => a - b);
+  const med = vus.length ? vus[vus.length >> 1] : 0;
+  const hi = mx > 0 && med > 0 && mx >= med * 1.35 ? series.indexOf(mx) : -1;
+  return '<span class="spark">' + series.map((v, i) => {
+    const fut = i >= n;
+    return '<i class="' + (i === hi ? "now" : fut ? "fut" : "") + '" style="height:' +
+      Math.max(v / mx * 100, 6).toFixed(0) + "%" + (i === hi ? ";background:" + col : "") + '"></i>';
+  }).join("") + "</span>";
+}
+
+/* Résumé de l'année, calculé une fois et passé aux trois onglets. */
+function y2Stats(year) {
+  const today = todayISO(), curY = yearOf(today);
+  const ops = DB.tx.filter(t => yearOf(t.date) === year);
+  const proj = yearProjection(year);
+  const todo = ops.filter(isTodo);
+  const months = [];
+  for (let m = 1; m <= 12; m++) months.push({ key: year + "-" + pad2(m), m, s: monthStats(year + "-" + pad2(m)) });
+  return {
+    year, ops, months, proj,
+    running: year === curY, future: year > curY,
+    income: proj.income, expense: proj.expense, balance: proj.balance,
+    /* Fraction d'année écoulée : 1 sur une année close, 0 sur une année à
+       venir. C'est le pendant exact du day/days de l'écran mensuel. */
+    elapsed: proj.complete ? 1 : (year > curY ? 0 : proj.elapsed),
+    cut: year === curY ? today.slice(5) : "12-31",
+    groups: groupTotals(ops), cats: catTotals(ops),
+    todoCount: todo.length, todoAmount: todo.reduce((s, t) => s - Math.min(t.amount, 0), 0),
+    goal: DB.settings.savingsGoal || 0,
+  };
+}
+
+/* -------------------------------------------------------------------------
+   Écran
+   ------------------------------------------------------------------------- */
+function viewYear2() {
+  const c = y2Stats(UI.year);
+  const tab = (id, label) =>
+    '<button data-act="y2tab" data-tab="' + id + '" aria-selected="' + (UI.y2tab === id) + '">' + esc(label) + "</button>";
+
+  let html = '<div class="v2"><div class="top"><div class="per yr2">' +
+    '<button data-act="prev" aria-label="Année précédente">‹</button>' +
+    '<h1 data-act="y2pick" aria-expanded="' + !!UI.y2pick + '" title="Choisir une année">' + c.year + "</h1>" +
+    '<button data-act="next" aria-label="Année suivante">›</button>' +
+    (UI.y2pick ? y2Picker(c.year) : "") +
+    '<span class="st">' + (c.future ? "à venir" : c.running
+      ? "en cours · " + Math.round(c.elapsed * 100) + " % écoulés" : "close") + "</span></div>" +
+    '<div class="tabs" role="tablist">' + tab("annee", "L’année") + tab("ou", "Où ça part") +
+      tab("mois", "Mois par mois") + "</div></div>";
+
+  if (c.future) {
+    html += '<div class="opt"><div class="oempty"><b>' + c.year + " n’a pas commencé</b>" +
+      "Rien à montrer tant qu’aucune opération n’y est enregistrée.</div></div>";
+    UI.v2anim = null;
+    return html + "</div>";
+  }
+
+  html += UI.y2tab === "ou" ? y2Ou(c) : UI.y2tab === "mois" ? y2Mois(c) : y2Annee(c);
+  UI.v2anim = null;
+  return html + "</div>";
+}
+
+/* Le sélecteur du mois ouvre l'année puis le mois ; celui de l'année n'a qu'un
+   étage, et réutilise donc le même panneau sans son en-tête. */
+function y2Picker(year) {
+  const cur = yearOf(todayISO()), ys = yearsWithData();
+  const lo = Math.min(ys.length ? ys[0] : cur, cur, year);
+  const hi = Math.max(ys.length ? ys[ys.length - 1] : cur, cur, year);
+  const list = [];
+  for (let y = lo; y <= hi; y++) list.push(y);
+  return '<div class="mpick ypick"><div class="ms">' + list.map(y =>
+    '<button data-act="y2pickyear" data-y="' + y + '" class="' + (y === year ? "on " : "") +
+      (y === cur ? "now " : "") + (ys.indexOf(y) >= 0 ? "has" : "") + '">' + y + "</button>").join("") +
+    '</div><div class="ft"><button data-act="y2pickyear" data-y="' + cur + '">Année en cours</button></div></div>';
+}
+
+/* ---------------- onglet « L'année » ---------------- */
+function y2Annee(c) {
+  const rate = savingsRate(c.income, c.expense), goal = c.goal;
+  const done = goal > 0 && rate != null && rate >= goal;
+  const prog = goal > 0 && rate != null ? Math.min(Math.max(rate, 0) / goal, 1) : 0;
+  const C = 2 * Math.PI * 63;
+  const moisRestants = Math.max(Math.round(12 - c.elapsed * 12), 0);
+
+  let html = '<div class="board"><div class="fiche">' +
+    '<div class="cap">' + (c.running
+      ? "Fiche au " + dayOf(todayISO()) + " " + MONTHS[+todayISO().slice(5, 7) - 1].toLowerCase()
+      : "Fiche de l’année") + "</div>" +
+    '<table class="ftab"><tbody>' +
+      "<tr><th>Revenus</th><td class=\"num\">" + esc(fmtEur(c.income)) + "</td></tr>" +
+      "<tr><th>Dépenses</th><td class=\"num\"><span class=\"op\">−</span>" + esc(fmtEur(c.expense)) + "</td></tr>" +
+      '<tr class="sum' + (c.balance < 0 ? " down" : "") + '"><th>Épargne</th><td class="num">' +
+        esc(fmtEur(c.balance)) + "</td></tr>" +
+      /* Le prolongement naturel de l'épargne de l'année : ce qu'elle vaut au
+         rythme constaté tant que l'année court, ce qu'elle a valu par mois une
+         fois close. Ni l'un ni l'autre n'est un verdict — d'où la même ligne
+         discrète que le cumul depuis janvier sur l'écran mensuel. */
+      '<tr class="run"><th>' + (c.running ? "Projection fin d’année" : "Moyenne par mois") + "</th>" +
+        '<td class="num">' + esc(fmtEur(c.running ? c.proj.balanceYear : c.balance / 12)) + "</td></tr>" +
+    "</tbody></table></div>";
+
+  html += '<div class="gauge' + (done ? " done" : "") + '"><div class="ringwrap">' +
+    '<svg class="ring" viewBox="0 0 154 154" aria-hidden="true">' +
+      '<circle class="rt" cx="77" cy="77" r="63"></circle>' +
+      '<circle class="rp" cx="77" cy="77" r="63" stroke-dasharray="' + C.toFixed(1) +
+        '" stroke-dashoffset="' + (C * (1 - prog)).toFixed(1) + '"></circle></svg>' +
+    '<div class="rlabel"><div class="rv num">' + (rate == null ? "—" : esc(fmtRate(rate))) +
+      '</div><div class="rk">d’épargne</div></div>' +
+    (done ? '<div class="ringmark' + (UI.v2anim === "all" ? " cheer" : "") + '">' + V2_WIN + "</div>" : "") +
+    "</div>";
+  html += '<div class="gverdict">' +
+    (!goal ? "Aucun objectif d’épargne défini"
+      : rate == null ? "Revenus de l’année non saisis"
+      : done ? "Objectif de " + fmtRate(goal) + " atteint" : "Objectif de " + fmtRate(goal) + " non atteint") + "</div>" +
+    '<div class="gsub">' +
+    (!goal ? "À régler dans Réglages"
+      : rate == null ? "Le taux se calcule sur les revenus"
+      : done ? v2Pts(rate - goal) + " au-dessus" + (c.running ? " — au rythme de l’année en cours" : "")
+      : "il manque " + v2Pts(goal - rate) +
+        (c.running && moisRestants > 0 ? ", et il reste " + moisRestants + " mois" : "")) +
+    "</div></div></div>";
+
+  /* --- objectifs annuels --- */
+  const ids = Object.keys(DB.goals).filter(id => (DB.goals[id].y || 0) > 0);
+  const lumpy = y2LumpyByGroup();
+  const pace = c.running ? c.elapsed : 1;
+  /* Même règle d'emboîtement que sur le mois : un objectif peut porter sur un
+     poste entier et un autre sur l'une de ses sous-catégories. */
+  const idSet = new Set(ids);
+  const parentOf = id => { const x = CAT_BY_ID[id]; return x && idSet.has(x.group) ? x.group : null; };
+  const hasKids = id => GROUP_BY_ID[id] && ids.some(x => (CAT_BY_ID[x] || {}).group === id);
+  const nested = ids.some(id => parentOf(id) || hasKids(id));
+
+  const rows = ids.map(id => {
+    const g = GROUP_BY_ID[id], cat = CAT_BY_ID[id];
+    const grp = g || (cat ? GROUP_BY_ID[cat.group] : null);
+    const par = parentOf(id);
+    const tie = !nested ? null : par ? GROUP_BY_ID[par].name : hasKids(id) ? "tout le poste" : "";
+    const target = DB.goals[id].y, spent = spentOn(id, c.ops);
+    const lump = g ? Math.min(lumpy[id] || 0, target) : 0;
+    /* Le seuil est plus bas que celui du mois (0,6) : une échéance annuelle qui
+       vaut un tiers du plafond suffit à décaler le poste d'un trimestre entier,
+       là où sur un mois il fallait qu'il soit majoritairement engagé. */
+    const heavy = target > 0 && lump / target >= 0.35;
+    const st = spent > target ? "bad"
+      : c.running && !heavy && spent / target > pace ? "hot" : "win";
+    return { id, name: grp && g ? g.name : (cat ? cat.name : id), grp: grp ? grp.id : "g_legacy",
+             target, spent, lump, st, heavy, tie };
+  }).sort((a, b) => (a.st === b.st ? b.spent - a.spent : a.st === "bad" ? -1 : b.st === "bad" ? 1 : a.st === "hot" ? -1 : 1));
+
+  /* Deux décomptes, et il ne faut jamais montrer le premier sur une année en
+     cours : « tenu » y signifie seulement « pas encore dépassé », ce que quatre
+     objectifs sur quatre satisfont le 3 janvier sans avoir rien prouvé. Tant
+     que l'année court, c'est le rythme qui départage — le même que les
+     vignettes affichent juste en dessous. */
+  const held = rows.filter(r => r.spent <= r.target).length;
+  const enRythme = rows.filter(r => r.st === "win").length;
+  html += '<div class="chips' + v2AnimClass("all") + '">' + y2Chips(c, rows, held, enRythme) + "</div>";
+  html += y2TroBanner(c.year);
+
+  html += '<div class="sect"><div class="shead"><span class="t">Objectifs annuels</span>';
+  if (rows.length) {
+    html += '<span class="c">' + (c.running ? enRythme + " dans le rythme sur " + rows.length
+                                            : held + " tenus sur " + rows.length) + "</span><span class=\"sp\"></span>" +
+      '<span class="leg">' +
+        '<span class="lgi win"><span class="lgb">' + V2_WIN + "</span>" + (c.running ? "dans le rythme" : "tenu") + "</span>" +
+        (c.running ? '<span class="lgi hot"><span class="lgb">' + V2_HOT + "</span>en avance sur le rythme</span>" : "") +
+        '<span class="lgi bad"><span class="lgb">' + V2_BAD + "</span>dépassé</span></span>";
+  }
+  html += "</div>";
+
+  if (!rows.length) {
+    const nm = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0).length;
+    html += '<div class="todo"><div class="tx">Aucun objectif <b>annuel</b> défini. ' +
+      (nm ? "Vos " + nm + " objectifs mensuels ne s’appliquent qu’au mois : un plafond annuel se règle à part, dans <b>Réglages</b>."
+          : "Les objectifs se règlent dans <b>Réglages</b>.") + "</div>" +
+      '<button class="act" data-act="view" data-view="settings">Régler</button></div>';
+  } else {
+    const R = 27, CIRC = 2 * Math.PI * R;
+    /* Même calcul de colonnes que sur le mois, et pour la même raison : c'est
+       lui qui décide du côté d'ouverture des cartes de survol. Une piste
+       d'écart et la vignette de bord ouvre sa carte hors de l'écran. */
+    const GAP = 8, gw = 116 + GAP;
+    const main = document.querySelector(".main");
+    let inner = window.innerWidth - 280;
+    if (main) {
+      const cs = getComputedStyle(main);
+      inner = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    }
+    const cote = !window.matchMedia("(max-width:940px)").matches;   // cf. .v2 .gsplit
+    const availW = Math.max(cote ? (Math.max(inner, 240) - 10) / 2 : inner, 240);
+    const cols = Math.max(Math.floor((availW + GAP) / gw), 1);
+
+    const cells = rows.map((r, i) => {
+      const canOpen = r.st === "bad", isOpen = UI.y2goal === r.id;
+      const frac = Math.min(r.spent / r.target, 1);
+      const notch = c.running && !r.heavy
+        ? '<circle class="pace2" cx="32" cy="32" r="' + R + '" fill="none" stroke-dasharray="2.4 ' +
+          (CIRC - 2.4).toFixed(2) + '" stroke-dashoffset="' + (-pace * CIRC).toFixed(2) + '"></circle>'
+        : "";
+      const edge = cols > 1 ? (i % cols === 0 ? " tipL" : i % cols === cols - 1 ? " tipR" : "") : "";
+      const tag = canOpen ? "button" : "div";
+      return '<div class="objwrap' + edge + (isOpen ? " open" : "") +
+          '" style="animation-delay:' + (i * 26) + 'ms">' +
+        "<" + tag + ' class="objcard ' + r.st + (canOpen ? " clk" : "") + (isOpen ? " on" : "") + '"' +
+          (canOpen ? ' data-act="y2goal" data-goal="' + esc(r.id) + '" aria-expanded="' + isOpen + '"' : "") + ">" +
+          '<span class="ringbox"><svg viewBox="0 0 64 64" aria-hidden="true">' +
+            '<circle class="rt2" cx="32" cy="32" r="' + R + '"></circle>' +
+            '<circle class="rp2" cx="32" cy="32" r="' + R + '" stroke-dasharray="' + CIRC.toFixed(1) +
+              '" stroke-dashoffset="' + (CIRC * (1 - frac)).toFixed(1) + '"></circle>' + notch + "</svg>" +
+            '<span class="mid">' + v2Glyph(r.grp, r.st) + "</span></span>" +
+          '<span class="bdg">' + V2_BADGE[r.st] + "</span>" +
+          (r.tie == null ? "" : '<span class="tie">' + esc(r.tie) + "</span>") +
+          '<span class="nm">' + esc(r.name) + "</span>" +
+          '<span class="v num">' + esc(fmtEurShort(r.spent)) + "</span>" +
+          '<span class="of num">sur ' + esc(fmtEurShort(r.target)) + "</span>" +
+        "</" + tag + ">" + y2Tip(r, c) + "</div>";
+    });
+    const open = rows.findIndex(r => r.id === UI.y2goal);
+    if (open >= 0) cells.splice(Math.min((Math.floor(open / cols) + 1) * cols, cells.length), 0, y2GoalDetail(rows[open], c));
+    html += '<div class="gsplit"><div class="gg' + v2AnimClass("all") + '">' + cells.join("") + "</div>" +
+      y2Pulse(c, rows) + "</div>";
+  }
+  html += "</div>";
+
+  /* --- à traiter --- */
+  html += '<div class="sect"><div class="shead"><span class="t">À traiter</span></div>';
+  html += c.todoCount
+    ? '<div class="todo"><div class="n num">' + c.todoCount + "</div>" +
+      '<div class="tx">opération' + (c.todoCount > 1 ? "s" : "") + " sans catégorie sur l’année, <b>" +
+      esc(fmtEur(c.todoAmount)) + "</b> hors des totaux ci-dessus.</div>" +
+      '<button class="act" data-act="view" data-view="todo">Les classer</button></div>'
+    : '<div class="todo clean"><span class="ic">' + V2_WIN + "</span>" +
+      '<div class="tx">Toutes les opérations de l’année sont classées.</div></div>';
+  return html + "</div>";
+}
+
+/* Deux constats sur l'année, dans la forme des pastilles du mois : ce que les
+   plafonds ont donné, et ce que les douze mois ont donné. */
+function y2Chips(c, rows, held, enRythme) {
+  const out = [], all = rows.length;
+  if (all) {
+    const bad = rows.filter(r => r.st === "bad").length;
+    const hot = rows.filter(r => r.st === "hot").length;
+    /* Sur une année en cours, annoncer des objectifs « tenus » serait une
+       victoire jamais disputée : un plafond annuel ne peut pas être dépassé au
+       mois de mars, et le compter gonflerait le décompte exactement comme le
+       « tenus sur douze » que l'application dénonce ailleurs. La pastille
+       compte donc ce que comptent les vignettes — les postes qui tiennent le
+       rythme — et « tenus » attend que l'année soit close pour reparaître. */
+    if (c.running) out.push({
+      cls: enRythme === all ? "win" : "hot", ic: enRythme === all ? V2_WIN : V2_HOT,
+      v: enRythme + " objectif" + (enRythme > 1 ? "s" : "") + " sur " + all + " dans le rythme",
+      k: bad ? bad + " déjà dépassé" + (bad > 1 ? "s" : "") +
+             (hot ? ", " + hot + " en avance" : "")
+        : hot ? hot + " en avance sur le rythme"
+        : "aucun n’est en avance",
+    });
+    else out.push({
+      cls: held === all ? "win" : "hot", ic: held === all ? V2_WIN : V2_HOT,
+      v: held + " objectif" + (held > 1 ? "s" : "") + " sur " + all + " tenus",
+      k: held === all ? "sans faute" : (all - held) + " dépassement" + (all - held > 1 ? "s" : ""),
+    });
+  }
+
+  /* Un mois en cours porte un salaire entier et des dépenses partielles : son
+     taux est flatteur, et le compter fausserait le décompte de l'année. */
+  const running = monthKey(todayISO());
+  const clos = c.months.filter(x => x.key < running && x.s.income > 0);
+  if (clos.length) {
+    if (c.goal > 0) {
+      const n = clos.filter(x => savingsRate(x.s.income, x.s.expense) >= c.goal).length;
+      out.push({
+        cls: n >= Math.ceil(clos.length / 2) ? "win" : "hot", ic: n >= Math.ceil(clos.length / 2) ? V2_FLAME : V2_HOT,
+        v: n + " mois sur " + clos.length + " au-dessus de " + fmtRate(c.goal),
+        k: n === clos.length ? "aucun mois manqué"
+          : (clos.length - n) + " mois sous l’objectif",
+      });
+    } else {
+      const best = clos.reduce((a, x) => (a && a.s.balance >= x.s.balance ? a : x), null);
+      out.push({
+        cls: best.s.balance > 0 ? "win" : "hot", ic: best.s.balance > 0 ? V2_WIN : V2_HOT,
+        v: "Meilleur mois : " + MONTHS[best.m - 1] + " · " + fmtEurShort(best.s.balance),
+        k: "sur " + clos.length + " mois clos",
+      });
+    }
+  }
+  if (!out.length) return "";
+  return out.map(x =>
+    '<div class="chip ' + x.cls + '"><span class="ic">' + x.ic + "</span>" +
+    '<span class="tx"><span class="v">' + esc(x.v) + '</span><span class="k">' + esc(x.k) + "</span></span></div>").join("");
+}
+
+/* Les trophées gagnés dans l'année consultée. Le mois annonce celui qui vient
+   de tomber ; l'année fait le compte de ce qu'elle a rapporté. */
+function y2TroBanner(year) {
+  const won = v2Trophies().filter(t => t.at && +t.at.slice(0, 4) === year);
+  if (!won.length) return "";
+  won.sort((a, b) => (b.tier - a.tier) || (a.at < b.at ? -1 : 1));
+  const t = won[0];
+  return '<div class="newban" style="--rc:var(--r' + t.tier + ');--rb:var(--r' + t.tier + 'b)">' +
+    '<span class="tw tro on" style="--rc:var(--r' + t.tier + ')">' + v2TroSvg(t.fam, t.tier, true, 100) + "</span>" +
+    '<div><div class="k">' + won.length + " trophée" + (won.length > 1 ? "s" : "") + " en " + year +
+      " · le plus rare : " + V2_RANK[t.tier - 1] + "</div>" +
+    '<div class="n">' + esc(t.name) + "</div>" +
+    '<div class="d">' + esc(t.desc) + "</div>" +
+    '<div class="more">' + esc(monthLabel(t.at)) +
+      (won.length > 1 ? " — et " + (won.length - 1) + " autre" + (won.length > 2 ? "s" : "") + " dans l’année" : "") +
+    "</div></div>" +
+    '<button class="go" data-act="view" data-view="trophees">Voir la collection</button></div>';
+}
+
+/* La carte de survol d'un objectif annuel. Même structure que celle du mois :
+   le rythme attendu, l'écart, et la projection de fin d'année — la seule ligne
+   qui dise si le plafond tiendra. */
+function y2Tip(r, c) {
+  const p = c.running ? c.elapsed : 1;
+  const head = '<div class="tip"><span class="th">' + esc(r.name) + "</span>";
+  const mois = Math.max(Math.round(12 - c.elapsed * 12), 0);
+
+  if (!c.running) {
+    const over = r.spent > r.target;
+    return head + "<table><tbody>" +
+      "<tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      "<tr><th>Plafond annuel</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
+      '<tr><th>Soit par mois</th><td class="num q">' + esc(fmtEur(r.spent / 12)) + "</td></tr>" +
+      '<tr class="sum"><th>' + (over ? "Dépassement" : "Marge gardée") + "</th>" +
+      '<td class="num ' + (over ? "up" : "down") + '">' +
+      esc(over ? fmtEur(r.spent - r.target) : fmtEur(r.target - r.spent)) +
+      "</td></tr></tbody></table></div>";
+  }
+  if (r.heavy) {
+    const over = r.spent > r.target;
+    return head + "<table><tbody>" +
+      "<tr><th>Dépensé à ce jour</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      "<tr><th>Plafond annuel</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
+      '<tr class="sum"><th>' + (over ? "Dépassement" : "Reste") + "</th>" +
+      '<td class="num ' + (over ? "up" : "down") + '">' +
+      esc(over ? fmtEur(r.spent - r.target) : fmtEur(r.target - r.spent)) +
+      "</td></tr></tbody></table>" +
+      '<span class="note">Ce poste porte une échéance qui tombe en une fois (' +
+      esc(fmtEurShort(r.lump)) + " sur l’année) : la comparer au calendrier ferait crier au " +
+      "dépassement dès qu’elle est payée, et au retard tant qu’elle ne l’est pas.</span></div>";
+  }
+  const attendu = r.target * p, ecart = r.spent - attendu, proj = p > 0 ? r.spent / p : r.spent;
+  return head +
+    "<table><tbody>" +
+      "<tr><th>Rythme attendu à ce jour</th><td class=\"num q\">" + esc(fmtEur(attendu)) + "</td></tr>" +
+      "<tr><th>Dépensé</th><td class=\"num\">" + esc(fmtEur(r.spent)) + "</td></tr>" +
+      '<tr class="gap"><th>Écart au rythme</th><td class="num ' + (ecart > 0 ? "up" : "down") + '">' +
+        esc(fmtEur(ecart, { plus: true })) + " · " + esc(attendu ? fmtPct(ecart / attendu * 100) : "—") + "</td></tr>" +
+      '<tr class="sum"><th>Fin d’année estimée</th><td class="num ' + (proj > r.target ? "up" : "down") + '">' +
+        esc(fmtEur(proj)) + "</td></tr>" +
+      "<tr><th>Plafond annuel</th><td class=\"num q\">" + esc(fmtEur(r.target)) + "</td></tr>" +
+    "</tbody></table>" +
+    '<span class="note">' + (proj > r.target
+      ? "À ce rythme, le plafond serait dépassé de " + fmtEur(proj - r.target) + " à la fin de l’année."
+      : "À ce rythme, l’année finirait " + fmtEur(r.target - proj) + " sous le plafond.") +
+    (mois > 0 ? " Il reste " + mois + " mois." : "") +
+    (r.st === "bad" ? " Cliquez pour voir d’où ça vient." : "") + "</span></div>";
+}
+
+/* Le pourquoi d'un dépassement annuel. Le panneau du mois montre la ventilation
+   interne et les plus grosses dépenses ; sur une année, une troisième question
+   se pose et prime sur les deux autres : quand le poste a-t-il dérapé. D'où la
+   colonne des douze mois, avec le plafond mensuel moyen en repère. */
+function y2GoalDetail(r, c) {
+  const g = GROUP_BY_ID[r.id];
+  const cats = g ? CATS.filter(x => x.group === r.id && c.cats[x.id])
+      .map(x => ({ n: x.name, v: c.cats[x.id] })).sort((a, b) => b.v - a.v) : [];
+  const tot = cats.reduce((a, x) => a + x.v, 0);
+  const ops = c.ops.filter(t => t.cat && t.amount < 0 && (g ? (CAT_BY_ID[t.cat] || {}).group === r.id : t.cat === r.id))
+    .sort((a, b) => a.amount - b.amount).slice(0, 5);
+  const serie = c.months.map(x => spentOn(r.id, x.s.ops));
+  const mx = Math.max.apply(null, serie.concat([r.target / 12])) || 1;
+
+  let html = '<div class="detail"><div class="dh"><span class="t">' + esc(r.name) + "</span>" +
+    '<span class="s num">▲ ' + esc(fmtEur(r.spent - r.target)) + " au-dessus du plafond annuel</span>" +
+    '<button class="x" data-act="y2goal" data-goal="' + esc(r.id) + '">Fermer</button></div>';
+
+  /* Les douze mois d'abord : un dépassement annuel se lit d'abord dans sa date.
+     Le trait horizontal marque le douzième du plafond — un mois qui le dépasse
+     mange la marge des autres. */
+  const douzieme = r.target / 12;
+  html += '<div class="y12"><div class="cap">Mois par mois · le trait marque ' +
+    esc(fmtEurShort(douzieme)) + " par mois</div><div class=\"y12b\">" +
+    serie.map((v, i) =>
+      '<span class="y12c" title="' + esc(MONTHS[i] + " · " + fmtEur(v)) + '">' +
+      '<i class="' + (v > douzieme ? "over" : "") + '" style="height:' +
+        Math.max(v / mx * 100, v > 0 ? 2 : 0).toFixed(1) + '%"></i></span>').join("") +
+    '<span class="lim" style="bottom:' + (douzieme / mx * 100).toFixed(1) + '%"></span></div>' +
+    '<div class="y12l">' + MONTHS_SHORT.map(m => "<span>" + m + "</span>").join("") + "</div></div>";
+
+  html += v2VerdictNote(r.id, false) + '<div class="dgrid">';
+
+  if (g) html += '<table class="dt"><caption>Par sous-catégorie</caption><tbody>' +
+    (cats.length
+      ? cats.map(x => "<tr><th>" + esc(x.n) + '</th><td class="num">' + esc(fmtEur(x.v, {})) +
+          '</td><td class="q num">' + esc(fmtRate(x.v / tot * 100)) + "</td></tr>").join("") +
+        '<tr class="tot"><th>Total</th><td class="num">' + esc(fmtEur(tot, {})) + '</td><td class="q num">100 %</td></tr>'
+      : '<tr><th>Pas de sous-catégorie</th><td></td><td></td></tr>') +
+    "</tbody></table>";
+
+  html += '<table class="dt"><caption>Plus grosses dépenses de l’année</caption><tbody>' +
+    (ops.length
+      ? ops.map(t => '<tr><td class="d num">' + esc(t.date.slice(8, 10) + "/" + t.date.slice(5, 7)) + "</td><th>" +
+          esc(t.merchantRaw || merchantFromLabel(t.label) || "—") + "</th>" +
+          (g ? '<td class="q">' + esc(catName(t.cat)) + "</td>" : "") +
+          '<td class="num">' + esc(fmtEur(-t.amount, {})) + "</td></tr>").join("")
+      : "<tr><th>Aucune dépense</th><td></td></tr>") +
+    "</tbody></table>";
+  return html + "</div></div>";
+}
+
+/* -------------------------------------------------------------------------
+   « Où en est l'année » — le pendant du panneau mensuel.
+
+   La référence change de nature. Sur un mois, « habituellement » est la moyenne
+   des trois mois précédents : trois échantillons du même régime de dépense.
+   Sur une année, les trois années précédentes ne sont pas trois échantillons
+   d'un même régime — un déménagement, un changement de salaire, une naissance
+   les séparent — et l'application n'en a de toute façon que rarement trois.
+   La comparaison se fait donc contre l'an dernier seul, revalorisé de
+   l'inflation réglée par l'utilisateur, exactement comme le fait déjà l'écart
+   par poste partout ailleurs dans l'application.
+   ------------------------------------------------------------------------- */
+function y2Pulse(c, rows) {
+  const year = c.year, infl = y2Infl();
+  const cur = y2Cumul(year);
+  const hasPrev = y2HasYear(year - 1);
+  const ref = hasPrev ? y2Cumul(year - 1).map(v => v * infl) : null;
+  const p = Math.max(c.elapsed, 0.0001);
+  const spent = c.running ? y2CumulTo(year, c.cut) : cur[11];
+  const refAt = ref ? y2CumulTo(year - 1, c.cut) * infl : null;
+  const proj = c.running ? spent / p : spent;
+  const W = 268, H = 104;
+
+  let html = '<div class="pulse"><div class="ph">Où en est l’année</div>';
+  if (!spent && !ref) {
+    return html + '<div class="soon">Pas encore assez d’historique pour situer cette année.</div></div>';
+  }
+
+  const top = Math.max(spent, ref ? ref[11] : 0, proj, 1) * 1.06;
+  /* L'axe court du mois 0 au mois 12, et non de janvier à décembre : un cumul
+     vaut zéro avant que l'année commence. Sans cette origine, janvier porterait
+     déjà son mois entier à l'abscisse zéro et la courbe démarrerait par un mur. */
+  const X = m => (m / 12) * W;
+  const Y = v => H - (v / top) * H;
+  const full = arr => "M0 " + Y(0).toFixed(1) +
+    arr.map((v, i) => "L" + X(i + 1).toFixed(1) + " " + Y(v).toFixed(1)).join("");
+  /* La courbe de l'année s'arrête au point exact où l'on se trouve : les mois
+     clos à leur frontière, puis un dernier segment jusqu'à la fraction de mois
+     écoulée. Aller jusqu'à la fin du mois courant ferait plonger la courbe,
+     puisque le mois n'a pas encore tout dépensé. */
+  const nowPath = () => {
+    const m = c.running ? +todayISO().slice(5, 7) : 12;
+    let d = "M0 " + Y(0).toFixed(1);
+    for (let i = 0; i < m - 1; i++) d += "L" + X(i + 1).toFixed(1) + " " + Y(cur[i]).toFixed(1);
+    return d + "L" + X(p * 12).toFixed(1) + " " + Y(spent).toFixed(1);
+  };
+
+  html += '<div class="pbody"><div class="pchart">' +
+    '<svg viewBox="-2 -6 ' + (W + 8) + " " + (H + 20) + '" preserveAspectRatio="none"' +
+    ' role="img" aria-label="Dépenses cumulées de l’année">' +
+    '<line class="axis" x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '"></line>';
+  if (ref) html += '<path class="usualfill" d="' + full(ref) +
+    "L" + X(12).toFixed(1) + " " + H + "L0 " + H + 'Z"></path>' +
+    '<path class="usual" d="' + full(ref) + '"></path>';
+  html += '<path class="now" d="' + nowPath() + '"></path>';
+  if (c.running && p < 1) {
+    html += '<path class="proj ' + (ref && proj > ref[11] ? "up" : "down") + '" d="M' +
+      X(p * 12).toFixed(1) + " " + Y(spent).toFixed(1) + "L" + X(12).toFixed(1) + " " + Y(proj).toFixed(1) + '"></path>' +
+      '<line class="dayline" x1="' + X(p * 12).toFixed(1) + '" y1="0" x2="' + X(p * 12).toFixed(1) +
+      '" y2="' + H + '"></line>';
+  }
+  const dx = X(p * 12).toFixed(1), dy = Y(spent).toFixed(1);
+  html += '<line class="dot" x1="' + dx + '" y1="' + dy + '" x2="' + dx + '" y2="' + dy + '"></line></svg>';
+
+  html += '<div class="lg"><span class="l1"><i></i>' + year + "</span>" +
+    (ref ? '<span class="l2"><i></i>' + (year - 1) + "</span>" : "") + "</div></div>";
+
+  html += '<div class="pnum"><table><tbody>' +
+    "<tr><th>" + (c.running ? "Dépensé à ce jour" : "Dépensé") + "</th><td class=\"num\">" +
+      esc(fmtEur(spent)) + "</td></tr>";
+  if (ref) {
+    const ecart = spent - refAt;
+    html += "<tr><th>" + (year - 1) + (c.running ? " au même jour" : "") + y2PulseHelp(year) +
+      "</th><td class=\"num q\">" + esc(fmtEur(refAt)) + "</td></tr>" +
+      '<tr><th>Écart</th><td class="num ' + (ecart > 0 ? "up" : "down") + '">' +
+      esc(fmtEur(ecart, { plus: true })) + "</td></tr>";
+  }
+  if (c.running) html += '<tr class="sum"><th>Fin d’année estimée</th><td class="num ' +
+    (ref && proj > ref[11] ? "up" : "down") + '">' + esc(fmtEur(proj)) + "</td></tr>";
+  if (ref && c.running) html += "<tr><th>Année " + (year - 1) + " entière</th><td class=\"num q\">" +
+    esc(fmtEur(ref[11])) + "</td></tr>";
+  html += "</tbody></table></div></div>";
+
+  html += c.running ? y2PulseAvenir(c, rows) : y2PulseBilan(c);
+  return html + "</div>";
+}
+
+function y2PulseHelp(year) {
+  return '<button class="help" type="button" aria-label="Comment est calculé ce chiffre">?' +
+    '<span class="hbox"><b>Dépenses de ' + (year - 1) + ", revalorisées de " +
+    esc(String(DB.settings.inflation).replace(".", ",")) + " % d’inflation</b> — le réglage se " +
+    "trouve dans Réglages. Sans cette revalorisation, la hausse des prix se lirait comme un " +
+    "relâchement. La coupe se fait au <b>même jour de l’année</b>, à la date près : les " +
+    "opérations portent leur date, aucune estimation n’intervient.</span></button>";
+}
+
+/* Ce qu'il reste sous les plafonds annuels, et ce qui en est déjà réservé.
+   Les charges mensuelles se comptent au prorata des mois restants ; les
+   échéances plus rares se comptent une par une, au mois où elles tombent —
+   une assurance annuelle déjà payée en mars ne pèse plus sur la fin d'année. */
+function y2PulseAvenir(c, rows) {
+  const kept = baseCost().kept, curM = +todayISO().slice(5, 7);
+  const restM = Math.max(12 - c.elapsed * 12, 0);
+  const mens = kept.filter(r => r.period === 1).reduce((a, r) => a + r.monthly, 0) * restM;
+  const gros = [];
+  kept.forEach(r => {
+    if (r.period < 2) return;
+    y2DueMonths(r).forEach(m => {
+      if (m <= curM) return;
+      if (r.months[c.year + "-" + pad2(m)] != null) return;    // déjà passée cette année
+      gros.push({ m, name: r.name, v: r.amount });
+    });
+  });
+  gros.sort((a, b) => a.m - b.m);
+  const engage = mens + gros.reduce((a, x) => a + x.v, 0);
+  /* Un plafond déjà dépassé ne rend pas de marge aux autres : on somme les
+     marges positives, pas leur solde net. */
+  const marge = (rows || []).reduce((a, r) => a + Math.max(r.target - r.spent, 0), 0);
+  const libre = marge - engage, moisR = Math.round(restM);
+
+  let html = '<div class="pfoot"><div class="fh">Ce qu’il reste</div>';
+  if (rows && rows.length) {
+    html += '<div class="st">Il reste <b>' + fmtEur(marge) + "</b> sous vos plafonds annuels" +
+      (engage > 0 ? ", dont <b>" + fmtEur(engage) + "</b> déjà réservés par les charges fixes d’ici décembre" : "") + "." +
+      (moisR > 0 && libre > 0
+        ? " Soit <b>" + fmtEur(libre / moisR) + "</b> par mois sur les " + moisR + " mois restants."
+        : libre <= 0 ? " Les charges à venir absorbent toute la marge." : "") + "</div>";
+  } else if (engage > 0) {
+    html += '<div class="st"><b>' + fmtEur(engage) + "</b> de charges fixes à passer d’ici la fin de l’année.</div>";
+  }
+  html += gros.length
+    ? '<table class="ptl"><tbody>' + gros.slice(0, 4).map(x =>
+        '<tr><td class="d">' + esc(MONTHS_SHORT[x.m - 1]) + "</td><td>" + esc(x.name) +
+        '</td><td class="a num">' + esc(fmtEur(x.v)) + "</td></tr>").join("") +
+      (gros.length > 4 ? '<tr><td class="d"></td><td class="q">et ' + (gros.length - 4) +
+        " autre" + (gros.length - 4 > 1 ? "s" : "") + "</td><td></td></tr>" : "") + "</tbody></table>"
+    : '<div class="st q">Plus aucune échéance annuelle ou trimestrielle attendue d’ici décembre.</div>';
+  return html + "</div>";
+}
+
+/* Sur une année close, « ce qu'il reste » n'a plus de sens : la question devient
+   d'où vient l'écart affiché juste au-dessus. On le décompose par poste, contre
+   la même référence revalorisée. */
+function y2PulseBilan(c) {
+  if (!y2HasYear(c.year - 1)) return "";
+  const infl = y2Infl();
+  const prev = groupTotals(DB.tx.filter(t => yearOf(t.date) === c.year - 1));
+  /* Sous 50 €, l'écart d'une année sur l'autre relève du bruit. */
+  const mv = GROUPS.filter(g => g.kind === KIND_EXPENSE)
+    .map(g => ({ n: g.name, d: (c.groups[g.id] || 0) - (prev[g.id] || 0) * infl }))
+    .filter(x => Math.abs(x.d) >= 50)
+    .sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, 4);
+
+  return '<div class="pfoot"><div class="fh">Ce qui a bougé depuis ' + (c.year - 1) + "</div>" + (mv.length
+    ? '<table class="ptl"><tbody>' + mv.map(x => "<tr><td>" + esc(x.n) +
+        '</td><td class="a num ' + (x.d > 0 ? "up" : "down") + '">' +
+        esc(fmtEur(x.d, { plus: true })) + "</td></tr>").join("") + "</tbody></table>"
+    : '<div class="st q">Aucun poste ne s’écarte nettement de l’an dernier.</div>') + "</div>";
+}
+
+/* ---------------- onglet « Où ça part » ---------------- */
+function y2Ou(c) {
+  const tot = c.expense, infl = y2Infl();
+  const fixed = y2FixedByGroup(c.ops);
+  const socle = Math.min(fixed.total, tot), arb = Math.max(tot - socle, 0);
+  const band = DB.settings.band || 5;
+  /* La référence est coupée au même jour de l'année quand celle-ci court, sans
+     quoi une année en cours se comparerait à douze mois pleins. */
+  const prevOps = DB.tx.filter(t => yearOf(t.date) === c.year - 1 && t.date.slice(5) <= c.cut);
+  const prev = groupTotals(prevOps);
+  const hasPrev = prevOps.some(isExpense);
+
+  let html = '<div class="split"><div class="sp-head">' +
+    '<div class="sp-tot"><div class="cap">Dépensé en ' + c.year + '</div><div class="sp-v num">' +
+      esc(fmtEur(tot)) + "</div></div>" +
+    '<div class="sp-legs">' +
+      '<span class="sp-leg"><span class="k"><i style="background:var(--ink-4)"></i>Charges fixes</span>' +
+        '<span class="v num">' + esc(fmtEur(socle)) + '</span><span class="p num">' +
+        (tot ? esc(fmtRate(socle / tot * 100)) + " du total" : "—") + "</span></span>" +
+      '<span class="sp-leg"><span class="k"><i style="background:var(--ink-2)"></i>Arbitrable</span>' +
+        '<span class="v num">' + esc(fmtEur(arb)) + '</span><span class="p num">' +
+        (tot ? esc(fmtRate(arb / tot * 100)) + " du total" : "—") + "</span></span>" +
+    "</div></div>" +
+    '<div class="sp-bar"><span class="fx" style="width:' + (tot ? socle / tot * 100 : 0) + '%"></span>' +
+      '<span class="vr" style="width:' + (tot ? arb / tot * 100 : 0) + '%"></span></div>' +
+    '<div class="sp-note">Les charges fixes sont comptées ici <b>telles qu’elles ont été payées</b> ' +
+      "dans l’année, échéance par échéance, et non lissées en équivalent mensuel comme sur l’écran " +
+      "du mois : sur une année, une assurance annuelle est soit passée, soit pas.</div></div>";
+
+  const groups = GROUPS.filter(g => g.kind === KIND_EXPENSE && (c.groups[g.id] || 0) !== 0)
+    .map(g => ({ g, v: c.groups[g.id] })).sort((a, b) => b.v - a.v);
+
+  html += '<div class="sect"><div class="shead"><span class="t">Ventilation</span>' +
+    '<span class="c">' + groups.length + " postes</span><span class=\"sp\"></span>" +
+    '<span class="c">écart contre ' + (c.year - 1) + ", revalorisé de " +
+      esc(String(DB.settings.inflation).replace(".", ",")) + " % d’inflation" +
+      (c.running ? " et arrêté au même jour des deux années" : "") + "</span>" +
+    '<span class="seg"><button data-act="y2cmp" data-mode="pct" aria-pressed="' + (UI.y2cmp !== "eur") + '">%</button>' +
+      '<button data-act="y2cmp" data-mode="eur" aria-pressed="' + (UI.y2cmp === "eur") + '">€</button></span></div>';
+
+  if (!groups.length) {
+    return html + '<div class="opt"><div class="oempty"><b>Aucune dépense classée sur ' + c.year + "</b>" +
+      "Importez un relevé, ou classez les opérations en attente.</div></div></div>";
+  }
+
+  const max = groups.reduce((a, r) => Math.max(a, r.v), 0);
+  const maxAbs = groups.reduce((a, r) => Math.max(a, Math.abs(r.v - (prev[r.g.id] || 0) * infl)), 0) || 1;
+  /* Mois déjà commencés : au-delà, les barres de la série s'effacent. */
+  const vus = c.running ? +todayISO().slice(5, 7) : 12;
+
+  html += '<div class="vt yv"><div class="vhead"><span>Poste</span><span class="r">Montant</span>' +
+    '<span class="r">Part</span><span class="c2">Fixe / arbitrable</span><span class="sp6">12 mois</span>' +
+    '<span class="r">Écart</span><span class="c2">vs ' + (c.year - 1) + "</span></div>" +
+    '<div class="' + (UI.v2anim ? "anim-" + UI.v2anim : "") + '">';
+
+  groups.forEach((row, gi) => {
+    const g = row.g, open = UI.y2group === g.id;
+    const refv = (prev[g.id] || 0) * infl;
+    /* Sous 100 € de référence annuelle, le pourcentage s'emballe : un poste à
+       12 € l'an dernier et 40 € cette année crie « +233 % » pour rien. */
+    const ns = !hasPrev || (refv < 100 && UI.y2cmp !== "eur");
+    const deur = row.v - refv;
+    const dpct = refv > 0 ? deur / refv * 100 : (row.v > 0 ? 100 : 0);
+    const dcls = ns ? "flat" : dpct > band ? "up" : dpct < -band ? "down" : "flat";
+    const dtxt = !hasPrev ? "—" : ns ? "n.s." : UI.y2cmp === "eur" ? fmtEur(deur, { plus: true }) : fmtPct(dpct);
+    const dfrac = ns ? 0 : UI.y2cmp === "eur" ? deur / maxAbs : dpct / 60;
+    const fx = Math.min(fixed.by[g.id] || 0, row.v);
+    const fxw = fx / max * 100, w = row.v / max * 100;
+
+    html += '<button class="vrow lv1" data-act="y2group" data-group="' + g.id + '" aria-expanded="' + open +
+        '" style="animation-delay:' + (gi * 24) + 'ms">' +
+      '<span class="nm"><span class="ar">▶</span>' + v2Poste(g.id, 14) + '<span class="tx">' + esc(g.name) + "</span></span>" +
+      '<span class="r amt num">' + esc(fmtEur(row.v)) + "</span>" +
+      '<span class="pt num">' + esc(fmtRate(row.v / tot * 100)) + "</span>" +
+      '<span class="pbar"><span class="fx" style="width:' + fxw.toFixed(1) + '%"></span>' +
+        '<span class="vr" style="left:' + fxw.toFixed(1) + "%;width:" +
+        Math.max(w - fxw, 0).toFixed(1) + '%"></span></span>' +
+      y2Spark(c.months.map(x => x.s.groups[g.id] || 0), g.id, vus) +
+      '<span class="dv ' + dcls + ' num">' + esc(dtxt) + "</span>" +
+      v2DeltaBar(dfrac, UI.y2cmp === "eur" ? 0 : band / 60) + "</button>";
+
+    if (!open) return;
+    const cats = CATS.filter(x => x.group === g.id && c.cats[x.id])
+      .map(x => ({ c: x, v: c.cats[x.id] })).sort((a, b) => b.v - a.v);
+    cats.forEach((x, ci) => {
+      const co = UI.y2cat === x.c.id;
+      html += '<button class="vrow lv2' + (UI.v2anim === "sub" ? " new" : "") + '" data-act="y2cat" data-cat="' + x.c.id +
+          '" aria-expanded="' + co + '" style="animation-delay:' + (ci * 30) + 'ms">' +
+        '<span class="nm"><span class="ar">▶</span><span class="tx">' + esc(x.c.name) + "</span></span>" +
+        '<span class="r amt num">' + esc(fmtEur(x.v)) + "</span>" +
+        '<span class="pt num">' + esc(fmtRate(x.v / row.v * 100)) + "</span>" +
+        "<span></span>" + y2Spark(c.months.map(m => m.s.cats[x.c.id] || 0), g.id, vus) +
+        "<span></span><span></span></button>";
+      if (!co) return;
+      merchantsOfCat(c.ops, x.c.id).slice(0, 8).forEach(m => {
+        html += '<div class="vrow lv3"><span class="nm"><span class="tx">' + esc(m.name) +
+          '</span><span class="cnt num">' + m.n + " ×</span></span>" +
+          '<span class="r amt num">' + esc(fmtEur(m.v)) + "</span>" +
+          '<span class="pt num">' + esc(fmtRate(m.v / x.v * 100)) + "</span>" +
+          "<span></span><span></span><span></span><span></span></div>";
+      });
+    });
+  });
+
+  html += '</div><div class="vrow tot"><span class="nm">Total des dépenses</span>' +
+    '<span class="r num">' + esc(fmtEur(tot)) + '</span><span class="r num">100 %</span>' +
+    "<span></span><span></span><span></span><span></span></div></div></div>";
+
+  return html + y2Top(c);
+}
+
+/* Les commerçants de l'année. Sur un mois, la question ne se pose pas vraiment ;
+   sur une année, elle est la seule qui traverse les catégories — un même
+   supermarché peut peser plus qu'un poste entier. */
+function y2Top(c) {
+  const agg = {};
+  c.ops.forEach(t => {
+    if (!isExpense(t)) return;
+    const k = canonOf(t) || normalize(t.merchantRaw || merchantFromLabel(t.label)) || "divers";
+    (agg[k] = agg[k] || { n: 0, v: 0, name: t.merchantRaw || merchantFromLabel(t.label), g: (catGroup(t.cat) || {}).id });
+    agg[k].n++; agg[k].v -= t.amount;
+  });
+  const top = Object.values(agg).sort((a, b) => b.v - a.v).slice(0, 15);
+  let html = '<div class="sect"><div class="shead"><span class="t">Où part l’argent</span>' +
+    '<span class="c">les 15 premiers commerçants</span></div>';
+  if (!top.length) return html + '<div class="opt"><div class="oempty">Aucune dépense.</div></div></div>';
+  const max = top[0].v || 1;
+  return html + '<div class="vt tops"><div class="vhead"><span class="r">#</span><span>Commerçant</span>' +
+    '<span class="r">Total</span><span class="r">Fois</span><span class="r">Moyenne</span>' +
+    '<span class="c2">Part du plus gros</span></div>' +
+    top.map((m, i) =>
+      '<div class="vrow"><span class="r ix num">' + (i + 1) + "</span>" +
+      '<span class="nm">' + (m.g ? v2Poste(m.g, 13) : "") + '<span class="tx cap">' + esc(m.name || "—") + "</span></span>" +
+      '<span class="r amt num">' + esc(fmtEur(m.v)) + "</span>" +
+      '<span class="r pt num">' + m.n + "</span>" +
+      '<span class="r pt num">' + esc(fmtEur(m.v / m.n)) + "</span>" +
+      '<span class="pbar"><span class="vr" style="left:0;width:' + (m.v / max * 100).toFixed(1) + '%"></span></span></div>').join("") +
+    "</div></div>";
+}
+
+/* ---------------- onglet « Mois par mois » ---------------- */
+function y2Mois(c) {
+  const gids = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0);
+  const running = monthKey(todayISO());
+  const maxExp = Math.max.apply(null, c.months.map(x => x.s.expense).concat([1]));
+
+  let html = '<div class="sect"><div class="shead"><span class="t">Les douze mois de ' + c.year + "</span>" +
+    '<span class="c">cliquez un mois pour l’ouvrir</span></div>';
+
+  html += '<div class="vt m12"><div class="vhead"><span>Mois</span><span class="r">Revenus</span>' +
+    '<span class="r">Dépenses</span><span class="r">Épargne</span><span class="r">Taux</span>' +
+    '<span class="r">Objectifs</span><span class="c2">Dépenses</span></div>' +
+    '<div class="' + (UI.v2anim ? "anim-" + UI.v2anim : "") + '">';
+
+  c.months.forEach((x, i) => {
+    const s = x.s, vide = !s.ops.length && !s.income;
+    const rate = savingsRate(s.income, s.expense);
+    const st = savingsState(rate, c.goal);
+    const held = gids.filter(id => spentOn(id, s.ops) <= DB.goals[id].m).length;
+    const futur = x.key > running;
+    html += '<button class="vrow lv1 mrow' + (x.key === running ? " now" : "") + (vide ? " vide" : "") +
+        '" data-act="openmonth" data-month="' + x.key + '" style="animation-delay:' + (i * 20) + 'ms">' +
+      '<span class="nm"><span class="tx">' + esc(MONTHS[x.m - 1]) + "</span>" +
+        (x.key === running ? '<span class="cnt">en cours</span>' : "") + "</span>" +
+      '<span class="r pt num">' + (s.income ? esc(fmtEurShort(s.income)) : "—") + "</span>" +
+      '<span class="r amt num">' + (s.expense ? esc(fmtEurShort(s.expense)) : "—") + "</span>" +
+      '<span class="r amt num ' + (vide ? "" : s.balance >= 0 ? "gain" : "loss") + '">' +
+        (vide ? "—" : esc(fmtEurShort(s.balance))) + "</span>" +
+      '<span class="r rt ' + st + ' num">' + (rate == null ? "—" : esc(fmtRate(rate))) + "</span>" +
+      '<span class="r pt num">' + (gids.length && !vide && !futur ? held + "/" + gids.length : "—") + "</span>" +
+      '<span class="pbar"><span class="vr" style="left:0;width:' +
+        (s.expense / maxExp * 100).toFixed(1) + '%"></span></span></button>';
+  });
+
+  const tRate = savingsRate(c.income, c.expense);
+  html += '</div><div class="vrow tot"><span class="nm">Total ' + c.year + "</span>" +
+    '<span class="r num">' + esc(fmtEurShort(c.income)) + "</span>" +
+    '<span class="r num">' + esc(fmtEurShort(c.expense)) + "</span>" +
+    '<span class="r num">' + esc(fmtEurShort(c.balance)) + "</span>" +
+    '<span class="r num">' + (tRate == null ? "—" : esc(fmtRate(tRate))) + "</span>" +
+    "<span></span><span></span></div></div></div>";
+
+  /* --- toutes les années --- */
+  const years = yearsWithData().filter(y => y <= yearOf(todayISO()));
+  if (years.length > 1) {
+    const rows = years.map(y => ({ y, p: yearProjection(y) }));
+    const maxB = Math.max.apply(null, rows.map(r => Math.abs(r.p.balanceYear)).concat([1]));
+    html += '<div class="sect"><div class="shead"><span class="t">Toutes les années</span>' +
+      '<span class="c">l’année en cours est projetée depuis la moyenne mensuelle constatée</span></div>' +
+      '<div class="vt yrs"><div class="vhead"><span>Année</span><span class="r">Revenus</span>' +
+      '<span class="r">Dépenses</span><span class="r">Épargne</span><span class="r">Taux</span>' +
+      '<span class="c2">Épargne</span></div>';
+    rows.forEach(r => {
+      const rate = savingsRate(r.p.incomeYear, r.p.expenseYear);
+      const st = savingsState(rate, c.goal);
+      const v = r.p.balanceYear, w = Math.abs(v) / maxB * 100;
+      html += '<button class="vrow lv1 mrow' + (r.y === c.year ? " on" : "") +
+          '" data-act="y2pickyear" data-y="' + r.y + '">' +
+        '<span class="nm"><span class="tx num">' + r.y + "</span>" +
+          (r.p.complete ? "" : '<span class="cnt">estimée</span>') + "</span>" +
+        '<span class="r pt num">' + esc(fmtEurShort(r.p.incomeYear)) + "</span>" +
+        '<span class="r amt num">' + esc(fmtEurShort(r.p.expenseYear)) + "</span>" +
+        '<span class="r amt num ' + (v >= 0 ? "gain" : "loss") + '">' + esc(fmtEurShort(v)) + "</span>" +
+        '<span class="r rt ' + st + ' num">' + (rate == null ? "—" : esc(fmtRate(rate))) + "</span>" +
+        '<span class="dbar"><span class="zero" style="left:50%"></span>' +
+          '<span class="f ' + (v >= 0 ? "down" : "up") + '" style="' +
+          (v >= 0 ? "left:50%;" : "left:" + (50 - w / 2) + "%;") + "width:" + Math.max(w / 2, 0.8) + '%"></span></span></button>';
+    });
+    html += "</div></div>";
+  }
   return html;
 }
 
@@ -7271,6 +8264,9 @@ document.addEventListener("click", e => {
   if (UI.v2pick && !e.target.closest(".mpick") && !(el && el.dataset.act === "v2pick")) {
     UI.v2pick = false; render();
   }
+  if (UI.y2pick && !e.target.closest(".mpick") && !(el && el.dataset.act === "y2pick")) {
+    UI.y2pick = false; render();
+  }
   if (!el) return;
   const act = el.dataset.act;
   if (act === "backdrop" && e.target !== el) return;
@@ -7278,12 +8274,14 @@ document.addEventListener("click", e => {
   switch (act) {
     case "view": UI.view = el.dataset.view; render(); break;
     case "prev":
-      UI.view === "year" ? UI.year-- : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, -1)) : (UI.month = addMonth(UI.month, -1));
+      isYearView() ? UI.year-- : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, -1)) : (UI.month = addMonth(UI.month, -1));
       UI.v2anim = "all"; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2batch = "all";
+      UI.y2goal = null; UI.y2group = null; UI.y2cat = null;
       render(); break;
     case "next":
-      UI.view === "year" ? UI.year++ : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, 1)) : (UI.month = addMonth(UI.month, 1));
+      isYearView() ? UI.year++ : isPatView() ? (UI.patMonth = addMonth(UI.patMonth, 1)) : (UI.month = addMonth(UI.month, 1));
       UI.v2anim = "all"; UI.v2goal = null; UI.v2group = null; UI.v2cat = null; UI.v2batch = "all";
+      UI.y2goal = null; UI.y2group = null; UI.y2cat = null;
       render(); break;
     case "today":
       UI.month = monthKey(todayISO()); UI.year = yearOf(todayISO()); UI.patMonth = monthKey(todayISO()); render(); break;
@@ -7310,6 +8308,23 @@ document.addEventListener("click", e => {
       e.stopPropagation();
       UI.v2cat = UI.v2cat === el.dataset.cat ? null : el.dataset.cat; UI.v2anim = null; render(); break;
     case "v2cmp": UI.v2cmp = el.dataset.mode; UI.v2anim = null; render(); break;
+    /* Année v2 — mêmes gestes que le mois, sur l’état qui lui est propre. */
+    case "y2pick": UI.y2pick = !UI.y2pick; render(); break;
+    case "y2pickyear":
+      UI.year = +el.dataset.y; UI.y2pick = false;
+      UI.v2anim = "all"; UI.y2goal = null; UI.y2group = null; UI.y2cat = null;
+      render(); break;
+    case "y2tab": UI.y2tab = el.dataset.tab; UI.y2goal = null; UI.y2group = null; UI.y2cat = null; UI.v2anim = "all"; render(); break;
+    case "y2goal": UI.y2goal = UI.y2goal === el.dataset.goal ? null : el.dataset.goal; UI.v2anim = null; render(); break;
+    case "y2group": {
+      const opening = UI.y2group !== el.dataset.group;
+      UI.y2group = opening ? el.dataset.group : null; UI.y2cat = null;
+      UI.v2anim = opening ? "sub" : null; render(); break;
+    }
+    case "y2cat":
+      e.stopPropagation();
+      UI.y2cat = UI.y2cat === el.dataset.cat ? null : el.dataset.cat; UI.v2anim = null; render(); break;
+    case "y2cmp": UI.y2cmp = el.dataset.mode; UI.v2anim = null; render(); break;
     case "v2ops": UI.v2ops = el.dataset.f; UI.v2anim = null; render(); break;
     case "v2batch": UI.v2batch = el.dataset.batch; UI.v2ops = "all"; UI.v2anim = null; render(); break;
     case "theme": cycleTheme(); break;
@@ -7664,6 +8679,7 @@ document.addEventListener("drop", e => {
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") {
     if (UI.v2pick) { UI.v2pick = false; render(); }
+    else if (UI.y2pick) { UI.y2pick = false; render(); }
     else if (UI.small) { UI.small = null; renderSmall(); }
     else if (REVIEW) { REVIEW = null; UI.modal = null; render(); }
     else if (UI.modal) closeModal();
