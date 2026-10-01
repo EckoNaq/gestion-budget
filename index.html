@@ -1488,16 +1488,26 @@ html[data-theme="dark"] .pg{
 .pg .state.todo i{background:#E59A3A}
 /* Deux écrans calés sur la fenêtre : la partie haute, puis le bilan. Le défilement
    s'accroche à l'un ou à l'autre, jamais entre les deux. */
-html:has(.pg .s1){scroll-snap-type:y mandatory}
 .main:has(> .pg){max-width:none}
-.pg .scr{position:relative;scroll-snap-align:start;scroll-snap-stop:always;height:100vh;min-height:600px;display:flex;flex-direction:column;padding:22px 0 24px;max-width:1720px;margin:0 auto}
-.pg .s1{padding-bottom:54px}
+.pg .scr{position:relative;height:100vh;min-height:600px;display:flex;flex-direction:column;padding:22px 0 24px;max-width:1720px;margin:0 auto}
+.pg .s1{padding-bottom:64px}
 .pg .pg-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
 .pg .pg-head h1{font-size:19px;font-weight:700}
-.pg .to-bil{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--pg-faint);font:inherit;font-weight:600;font-size:13px;cursor:pointer}
-.pg .to-bil:hover{background:var(--pg-tile);color:var(--pg-ink)}
-.pg .to-bil i{font-style:normal;font-size:16px;line-height:1;transform:translateY(-3px)}
-@media (prefers-reduced-motion:no-preference){.pg .to-bil i{animation:pg-nudge 2.4s ease-in-out infinite}}
+/* L'accès au bilan doit se voir du premier coup d'œil : une pastille pleine, qui respire. */
+.pg .to-bil{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 16px 0 20px;border:0;border-radius:999px;background:var(--pg-ink);color:var(--pg-tile);font:inherit;font-weight:700;font-size:14.5px;cursor:pointer;box-shadow:0 8px 22px -8px rgba(17,19,24,.45);transition:transform .2s, box-shadow .2s}
+.pg .to-bil small{font-size:12.5px;font-weight:600;opacity:.6}
+.pg .to-bil i{font-style:normal;font-size:18px;line-height:1;transform:translateY(-3px)}
+.pg .to-bil:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 12px 28px -8px rgba(17,19,24,.5)}
+@media (prefers-reduced-motion:no-preference){
+  .pg .to-bil i{animation:pg-nudge 1.8s ease-in-out infinite}
+  .pg .to-bil{animation:pg-call 2.6s 1.2s ease-in-out 3}
+}
+@keyframes pg-call{0%,100%{box-shadow:0 8px 22px -8px rgba(17,19,24,.45)}50%{box-shadow:0 8px 22px -8px rgba(17,19,24,.45),0 0 0 7px color-mix(in oklab, var(--pg-blue) 22%, transparent)}}
+.pg .bil-h{flex-direction:row!important;justify-content:space-between;align-items:flex-end}
+.pg .bil-h>div{display:flex;flex-direction:column;gap:6px}
+.pg .to-top{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border:0;border-radius:999px;background:var(--pg-tile);box-shadow:var(--pg-sh);color:var(--pg-muted);font:inherit;font-weight:600;font-size:13.5px;cursor:pointer}
+.pg .to-top:hover{color:var(--pg-ink)}
+.pg .to-top i{font-style:normal;font-size:16px;line-height:1;transform:translateY(3px)}
 @keyframes pg-nudge{0%,100%{transform:translateY(-3px)}50%{transform:translateY(1px)}}
 .pg .top{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:16px}
 .pg .bil-h{display:flex;flex-direction:column;gap:6px;margin:6px 0 18px}
@@ -1769,10 +1779,9 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
 }
 /* Écran étroit ou trop bas : plus d'écrans calés, la page défile normalement. */
 @media (max-width:1100px), (max-height:620px){
-  html:has(.pg .s1){scroll-snap-type:none}
   .pg .scr{height:auto;min-height:0}
   .pg .s1{padding-bottom:24px}
-  .pg .to-bil{display:none}
+  .pg .to-bil,.pg .to-top{display:none}
   .pg .top{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(320px,auto)}
   .pg .t-pat{min-height:560px}
   .pg .bil{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(340px,auto)}
@@ -7185,6 +7194,67 @@ function pgGainCount(tile) {
 }
 document.addEventListener("mouseenter", e => { if (e.target.matches && e.target.matches(".pg .t-pea")) pgGainCount(e.target); }, true);
 document.addEventListener("mouseleave", e => { if (e.target.matches && e.target.matches(".pg .t-autres .row")) pgRowCount(e.target, false); }, true);
+/* Les deux écrans de Progrès : un geste de défilement, quel qu'il soit (molette, pavé tactile,
+   clavier, lien « Ton bilan »), glisse d'un écran à l'autre avec la même courbe. L'accrochage
+   natif du navigateur sautait sans transition ; celui-ci est piloté ici. Il ne joue que sur
+   une fenêtre assez grande pour que chaque écran tienne en entier. */
+const PG_SCROLL = { busy: false, until: 0, raf: 0, idle: 0, fin: 0 };
+function pgScreensOn() {
+  return !!document.querySelector(".pg .s2") && matchMedia("(min-width:1101px) and (min-height:621px)").matches;
+}
+function pgBilanTop() {
+  const b = document.getElementById("pg-bilan");
+  return b ? Math.round(b.getBoundingClientRect().top + window.scrollY) : 0;
+}
+function pgGlide(to) {
+  cancelAnimationFrame(PG_SCROLL.raf);
+  const from = window.scrollY, dist = to - from;
+  if (Math.abs(dist) < 2) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { window.scrollTo(0, to); return; }
+  const D = 750, t0 = performance.now();
+  PG_SCROLL.busy = true;
+  const step = now => {
+    const p = Math.min(1, (now - t0) / D), e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    window.scrollTo(0, from + dist * e);
+    if (p < 1) PG_SCROLL.raf = requestAnimationFrame(step);
+    /* Un pavé tactile continue d'envoyer des événements par inertie : on les laisse s'éteindre. */
+    else { PG_SCROLL.busy = false; PG_SCROLL.until = performance.now() + 450; }
+  };
+  PG_SCROLL.raf = requestAnimationFrame(step);
+  /* Onglet passé en arrière-plan pendant le glissement : les images s'arrêtent, on arrive quand même. */
+  clearTimeout(PG_SCROLL.fin);
+  PG_SCROLL.fin = setTimeout(() => {
+    if (!PG_SCROLL.busy) return;
+    cancelAnimationFrame(PG_SCROLL.raf); window.scrollTo(0, to);
+    PG_SCROLL.busy = false; PG_SCROLL.until = performance.now() + 450;
+  }, D + 120);
+}
+function pgGlideTo(screen) { pgGlide(screen === "bilan" ? pgBilanTop() : 0); }
+window.addEventListener("wheel", e => {
+  if (!pgScreensOn() || e.ctrlKey) return;
+  e.preventDefault();
+  if (PG_SCROLL.busy || performance.now() < PG_SCROLL.until || Math.abs(e.deltaY) < 4) return;
+  pgGlideTo(e.deltaY > 0 ? "bilan" : "haut");
+}, { passive: false });
+document.addEventListener("keydown", e => {
+  if (!pgScreensOn() || e.altKey || e.ctrlKey || e.metaKey) return;
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) return;
+  const down = ["PageDown", "ArrowDown", "End"].indexOf(e.key) >= 0 || (e.key === " " && !e.shiftKey);
+  const up = ["PageUp", "ArrowUp", "Home"].indexOf(e.key) >= 0 || (e.key === " " && e.shiftKey);
+  if (!down && !up) return;
+  e.preventDefault();
+  if (!PG_SCROLL.busy) pgGlideTo(down ? "bilan" : "haut");
+});
+/* Barre de défilement tirée à la main : une fois lâchée entre deux écrans, on rejoint le plus proche. */
+window.addEventListener("scroll", () => {
+  if (!pgScreensOn() || PG_SCROLL.busy) return;
+  clearTimeout(PG_SCROLL.idle);
+  PG_SCROLL.idle = setTimeout(() => {
+    const b = pgBilanTop(), y = window.scrollY;
+    if (y > 2 && Math.abs(y - b) > 2) pgGlide(y > b / 2 ? b : 0);
+  }, 180);
+}, { passive: true });
 const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
 /* Le dernier mois saisi, celui que montre Progrès. */
@@ -7355,10 +7425,10 @@ function viewPatProgres() {
       '<div style="margin-top:12px">' + (run >= 2 ? '<span class="pause go">' + run + " mois de suite</span>" : run === 1 ? '<span class="pause go">Un versement ce mois-ci</span>' :
         '<span class="pause">' + (lastPaid >= 0 ? "Pause depuis " + esc(MONTHS[+last12[lastPaid].slice(5) - 1]) : "Aucun versement sur un an") + "</span>") + "</div></div>";
   }
-  html += '</div><button class="to-bil" data-act="pgbilan" aria-label="Voir ton bilan">Ton bilan<i aria-hidden="true">⌄</i></button></section>';
+  html += '</div><button class="to-bil" data-act="pgbilan"><span>Voir ton bilan</span><small>5 analyses</small><i aria-hidden="true">⌄</i></button></section>';
 
   /* ======================= Ton bilan : le second écran ======================= */
-  html += '<section class="scr s2" id="pg-bilan"><div class="bil-h"><h2>Ton bilan</h2><span>Ce qu’on regarde quand une question se pose.</span></div><div class="bil">';
+  html += '<section class="scr s2" id="pg-bilan"><div class="bil-h"><div><h2>Ton bilan</h2><span>Ce qu’on regarde quand une question se pose.</span></div><button class="to-top" data-act="pgtop"><i aria-hidden="true">⌃</i>Ton patrimoine</button></div><div class="bil">';
 
   /* ======== 5 · Qui fait grossir ton patrimoine ======== */
   if (hasYear) {
@@ -7500,7 +7570,9 @@ function viewPatProgres() {
       '<span class="foot">sur 12 mois glissants, en euros · les indices arriveront avec leur mise à jour mensuelle</span></div>';
   }
   html += "</div></section></div>";
-  return html;
+  /* Le lien vers le bilan annonce ce qu'il y a à voir. */
+  const nb = (html.split('<section class="scr s2"')[1] || "").split('class="t t-').length - 1;
+  return html.replace("<small>5 analyses</small>", nb ? "<small>" + nb + (nb > 1 ? " analyses" : " analyse") + "</small>" : "");
 }
 
 /* ---- Jalons ---------------------------------------------------------------
@@ -10285,7 +10357,8 @@ document.addEventListener("click", e => {
     }
     /* Changer de période retire aussi les repères : la fenêtre change, autant en profiter
        pour en montrer d'autres plutôt que de resservir les mêmes. */
-    case "pgbilan": { const b = document.getElementById("pg-bilan"); if (b) b.scrollIntoView({ behavior: "smooth" }); break; }
+    case "pgbilan": pgGlideTo("bilan"); break;
+    case "pgtop": pgGlideTo("haut"); break;
     case "pgrange": UI.pgRange = el.dataset.range; pgSwapRange(); break;
     case "patrange": UI.patRange = el.dataset.range; UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
     case "pathlshuffle": UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
