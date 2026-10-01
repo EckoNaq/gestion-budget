@@ -8264,7 +8264,7 @@ function viewPgAccount() {
       (ann != null ? '<span class="pd-muted">· ' + esc(fmtRate(ann)) + " par an</span>" : "") + "</div>" +
     tabs + '<div class="fig">' + (ser.length > 1 ? pdStock(val, inv, labels, !record) : "") + "</div>" +
     '<div class="pa-legend"><span><i class="ln" style="background:var(--pg-ink)"></i>valeur</span><span><i class="ln" style="background:var(--pg-chev)"></i>versé</span></div></section>' +
-    (facts.length ? '<section class="pa-facts">' + facts.map(([t, v, s]) => "<div><span>" + esc(t) + "</span><b>" + esc(v) + "</b><span>" + esc(s) + "</span></div>").join("") + "</section>" : "") + paTax(a, month);
+    paTax(a, month);
   const right = '<section class="pd-panel pa-months"><div class="pd-ph"><h2>Mois par mois</h2>' + (note ? "<span>" + esc(note) + "</span>" : "") + "</div>" +
     '<div id="pa-sum">' + paSummary(a, sel) + "</div>" +
     '<div class="pa-head"><span>mois</span><span></span><span>perf.</span><span>gain</span><span>versé</span></div><div class="pa-list" id="pa-list">' + rows + "</div>" + more +
