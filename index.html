@@ -1795,6 +1795,118 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
   .pg .flip{font-size:clamp(44px,13vw,72px)}
   .pg .w2,.pg .h2{grid-column:auto;grid-row:auto}
 }
+
+/* ---------- Progrès : pages de détail du bilan ---------- */
+.pg .pd{max-width:1720px;margin:0 auto;min-height:100vh;padding:22px 0 40px;display:flex;flex-direction:column;gap:18px}
+.pg .pd-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pg .pd-back{display:inline-flex;align-items:center;height:42px;padding:0 18px 0 14px;border:0;border-radius:999px;background:var(--pg-tile);box-shadow:var(--pg-sh);font:inherit;font-weight:600;font-size:15px;color:var(--pg-ink);cursor:pointer}
+.pg .pd-back:hover{transform:translateX(-2px)}
+.pg .pd-chips{display:flex;gap:6px;flex-wrap:wrap}
+.pg .pd-chips button{padding:7px 13px;border:0;border-radius:999px;font:inherit;font-weight:600;font-size:13.5px;background:var(--pg-trk);color:var(--pg-muted);cursor:pointer}
+.pg .pd-chips button.on{background:var(--pg-ink);color:var(--pg-tile)}
+.pg .pd-chips button[disabled]{opacity:.4;cursor:not-allowed}
+.pg .pd-grid{flex:1 1 auto;display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:26px;min-height:calc(100vh - 140px)}
+.pg .pd-left{display:flex;flex-direction:column;gap:14px;min-width:0}
+.pg .pd-right{display:flex;flex-direction:column;gap:14px;min-width:0}
+.pg .pd-label{display:flex;align-items:center;gap:9px;font-weight:600;font-size:16px;color:var(--pg-muted)}
+.pg .pd-label i{width:10px;height:10px;border-radius:3px}
+.pg .pd-h1{margin:0;font-weight:700;font-size:clamp(28px,2.6vw,44px);letter-spacing:-.035em;line-height:1.05}
+.pg .pd-stats{display:flex;gap:30px;flex-wrap:wrap}
+.pg .pd-stat{display:flex;flex-direction:column;gap:2px}
+.pg .pd-stat b{font-weight:700;font-size:26px;letter-spacing:-.02em}
+.pg .pd-stat span{font-size:14px;font-weight:600;color:var(--pg-muted)}
+.pg .pd-keys{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.pg .pd-key{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--pg-muted)}
+.pg .pd-key i{display:inline-block;width:16px;border-radius:2px}
+.pg .pd-note{font-size:13px;color:var(--pg-faint)}
+.pg .pd-muted{color:var(--pg-faint)}
+.pg .pd-left .fig{flex:1 1 0;min-height:300px;margin-top:6px}
+.pg .pd-panel{border-radius:24px;background:var(--pg-tile);padding:22px 24px;box-shadow:var(--pg-sh);display:flex;flex-direction:column;gap:12px}
+.pg .pd-ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.pg .pd-ph h2{margin:0;font-weight:700;font-size:19px}
+.pg .pd-ph span{font-size:12.5px;color:var(--pg-faint)}
+.pg .pd-text{display:flex;flex-direction:column;gap:10px;font-size:14.5px;line-height:1.45}
+/* Qui fait grossir */
+.pg .pd-pairs{display:flex;flex-direction:column;gap:16px}
+.pg .pd-pair{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;align-items:center}
+.pg .pd-pair>b{font-size:15px}
+.pg .pd-pair>div{display:flex;flex-direction:column;gap:5px}
+.pg .pd-pair>div>div{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--pg-muted)}
+.pg .pd-pair>div>div i{display:block;height:12px;border-radius:3px;min-width:2px}
+.pg .pd-pair>div>div b{color:var(--pg-ink)}
+/* Années */
+.pg .pd-cards{display:flex;flex-direction:column;gap:10px}
+.pg .pd-card{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:16px;background:var(--pg-bg)}
+.pg .pd-card.best{background:color-mix(in oklab, var(--pg-violet) 12%, var(--pg-tile))}
+.pg .pd-card>div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}
+.pg .pd-card>div:first-child b:first-child{font-size:17px}
+.pg .pd-card>div:first-child b:last-child{font-size:20px}
+.pg .pd-star{color:#E2A400}
+/* Réserve */
+.pg .pd-gauge{display:flex;flex-direction:column;gap:10px;padding:26px 22px 20px;border-radius:22px;background:var(--pg-tile);box-shadow:var(--pg-sh)}
+.pg .pd-gz{position:relative;height:54px}
+.pg .pd-gz>div{position:absolute;left:0;top:14px;height:26px;border-radius:13px}
+.pg .pd-gz .pd-goal{top:4px;width:3px;height:46px;border-radius:2px;background:var(--pg-goal)}
+.pg .pd-gz>span{position:absolute;top:-16px;font-size:12.5px;font-weight:800;white-space:nowrap}
+.pg .pd-gl{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--pg-muted)}
+.pg .pd-gl b{color:var(--pg-ink)}
+.pg .pd-budget{margin-top:6px;display:flex;flex-direction:column;gap:12px;padding:20px 22px;border-radius:22px;background:var(--pg-tile);box-shadow:var(--pg-sh)}
+.pg .pd-budget .pd-ph b{font-size:17px}
+.pg .pd-split{display:flex;gap:3px;height:30px;border-radius:8px;overflow:hidden}
+.pg .pd-split i{display:block}
+.pg .pd-sp{position:relative;display:flex;align-items:flex-end;gap:6px;height:150px;padding-top:34px}
+.pg .pd-sp .pd-avg{position:absolute;left:0;right:0;border-top:1.5px dashed var(--pg-amber)}
+.pg .pd-sp .sp{position:relative;flex:1 1 0;height:100%;display:flex;align-items:flex-end;cursor:pointer;outline:none}
+.pg .pd-sp .sp>i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--pg-grey);opacity:.6;transition:background .15s, opacity .15s, transform .15s;transform-origin:bottom}
+.pg .pd-sp .sp.last>i{background:var(--pg-ink);opacity:1}
+.pg .pd-sp .sp:hover>i,.pg .pd-sp .sp:focus>i{background:var(--pg-amber);opacity:1;transform:scaleY(1.03)}
+.pg .pd-sp .tip{position:absolute;top:-34px;display:flex;flex-direction:column;gap:1px;padding:5px 9px;border-radius:9px;background:var(--pg-ink);color:var(--pg-tile);font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:2}
+.pg .pd-sp .tip em{font-style:normal;font-weight:600;font-size:11.5px}
+.pg .pd-sp .tip em.up{color:#FFC27A}.pg .pd-sp .tip em.dn{color:#9CC8FF}
+html[data-theme="dark"] .pg .pd-sp .tip em.up{color:#B4610F}
+html[data-theme="dark"] .pg .pd-sp .tip em.dn{color:#1D5BA8}
+.pg .pd-sp .sp:hover .tip,.pg .pd-sp .sp:focus .tip,.pg .pd-sp:not(:hover) .sp.last .tip{opacity:1}
+.pg .pd-axis{display:flex;justify-content:space-between;font-size:12px;color:var(--pg-faint)}
+.pg .pd-step{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--pg-line)}
+.pg .pd-step:first-child{border-top:0}
+.pg .pd-step>span{display:flex;flex-direction:column;gap:2px}
+.pg .pd-step>span>span:first-child{font-size:14.5px;font-weight:600}
+.pg .pd-step>span>span:last-child{font-size:12.5px;color:var(--pg-faint)}
+.pg .pd-step>b{font-size:16px;white-space:nowrap}
+/* Où tu vas */
+.pg .pd-slider{display:flex;flex-direction:column;gap:8px}
+.pg .pd-slider>span{display:flex;justify-content:space-between;font-size:14px}
+.pg .pd-slider>span>span{font-weight:600;color:var(--pg-muted)}
+.pg .pd-slider input{width:100%;accent-color:var(--pg-blue);cursor:pointer}
+.pg .pd-link{align-self:flex-start;border:0;padding:0;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--pg-blue);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.pg .pd-btn{align-self:flex-start;height:40px;padding:0 16px;border:0;border-radius:999px;background:var(--pg-ink);color:var(--pg-tile);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.pg .pd-tbl>div{display:grid;grid-template-columns:76px 1fr 1fr;gap:10px;padding:6px 0;border-top:1px solid var(--pg-line);font-size:14px}
+.pg .pd-tbl>div:first-child{border-top:0}
+.pg .pd-tbl>div.done{color:var(--pg-muted)}
+.pg .pd-tbl>div.done b{color:#1D5BA8}
+html[data-theme="dark"] .pg .pd-tbl>div.done b,html[data-theme="dark"] .pg .pd-mlbl{fill:#9CC4F5;color:#9CC4F5}
+.pg .pd-tbl .ok{color:var(--pg-pos);font-weight:700}
+.pg .pd-tbl>div.th{padding:12px 0 4px;border-top:2px solid var(--pg-ink);font-size:12.5px;font-weight:600;color:var(--pg-faint)}
+/* Face aux marchés */
+.pg .pd-rank{display:flex;flex-direction:column;gap:1px}
+.pg .pd-rank .rk{display:grid;grid-template-columns:20px minmax(0,140px) minmax(0,1fr) 64px;gap:8px;align-items:center;padding:6px;border-radius:8px;cursor:default;transition:background .15s}
+.pg .pd-rank .rk:hover{background:var(--pg-bg)}
+.pg .pd-rank .i{font-size:12.5px;font-weight:700;color:var(--pg-faint)}
+.pg .pd-rank .nm{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg .pd-rank .nm i{flex:none;width:8px;height:8px;border-radius:2px}
+.pg .pd-rank .all .nm{color:var(--pg-blue)}
+.pg .pd-rank .b{display:block;height:8px;border-radius:4px}
+.pg .pd-rank b{text-align:right;font-size:14px}
+.pg .pd .cv,.pg .pd .cl{transition:opacity .2s, stroke-width .2s}
+/* Les tuiles du bilan s'ouvrent au clic. */
+.pg .bil .t[data-act]{cursor:pointer}
+.pg .bil .t[data-act]:focus-visible{outline:2px solid var(--pg-blue);outline-offset:3px}
+.pg .t .open{position:absolute;right:22px;top:22px;font-size:18px;color:var(--pg-chev);transition:transform .2s,color .2s}
+.pg .t:hover .open{color:var(--pg-ink);transform:translateX(3px)}
+@media (max-width:1100px){
+  .pg .pd-grid{grid-template-columns:minmax(0,1fr);min-height:0}
+  .pg .pd-left .fig{min-height:0}
+}
 </style>
 </head>
 <body>
@@ -2453,7 +2565,7 @@ function isYearView() {
   return UI.view === "year" || UI.view === "year2" || UI.view === "year3";
 }
 function isPatView() {
-  return ["patprogres", "pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
+  return ["patprogres", "pgdetail", "pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
 }
 
 function reindex() {
@@ -2958,7 +3070,7 @@ function render() {
   /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
      barre latérale n'indiquerait plus où l'on se trouve. */
   const navItem = ([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "patprogres" && UI.view === "pgdetail") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
@@ -2979,6 +3091,7 @@ function render() {
     : UI.view === "year3" ? viewYear3()
     : UI.view === "todo" ? viewTodo()
     : UI.view === "patprogres" ? viewPatProgres()
+    : UI.view === "pgdetail" ? viewPgDetail()
     : UI.view === "pathome" ? viewPatrimoineHome()
     : UI.view === "patanalyse" ? viewPatAnalyse()
     : UI.view === "pat" ? viewPatrimoine()
@@ -7469,7 +7582,7 @@ function viewPatProgres() {
       '<text x="262" y="' + pgF(yV) + '" font-size="12.5" font-weight="700" fill="var(--pg-grey)">' + esc(pgK(cv)) + "</text>" +
       '<text x="6" y="136" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(MOIS_COURTS[+last12[0].slice(5) - 1]) + "</text>" +
       '<text x="256" y="136" text-anchor="end" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(MOIS_COURTS[+month.slice(5) - 1]) + "</text></svg>";
-    html += '<div class="t t-qui" style="--dot:var(--pg-blue)">' + slow + '<span class="lbl">Qui fait grossir ton patrimoine ?</span>' +
+    html += '<div class="t t-qui" style="--dot:var(--pg-blue)" data-act="pgdetail" data-d="qui" role="button" tabindex="0"><span class="open" aria-hidden="true">›</span>' + slow + '<span class="lbl">Qui fait grossir ton patrimoine ?</span>' +
       '<span class="ttl">' + (cg <= 0 ? "Tes versements portent tout" : cg > cv ? "Tes placements, plus que toi" : "Toi, plus que tes placements") + "</span>" +
       (cross ? '<span class="waouh">Tes placements te dépassent !</span>' : "") + '<div class="fig">' + svg + "</div>" +
       '<div class="lgd"><span><i style="background:var(--pg-blue)"></i>tes placements</span><span><i style="background:var(--pg-grey)"></i>tes versements</span></div>' +
@@ -7484,7 +7597,7 @@ function viewPatProgres() {
     if (yrs.length) {
       const done = yrs.filter(x => !x.cur), best = done.length ? done.reduce((a, b) => b.perf > a.perf ? b : a) : null;
       const crowned = !!best && done.length > 1 && best.perf > 0, mx = Math.max(...yrs.map(x => Math.abs(x.perf)), 0.1);
-      html += '<div class="t t-annees' + (crowned ? " crowned" : "") + '" style="--dot:var(--pg-violet)"><span class="lbl">Tes années</span>' +
+      html += '<div class="t t-annees' + (crowned ? " crowned" : "") + '" style="--dot:var(--pg-violet)" data-act="pgdetail" data-d="annees" role="button" tabindex="0"><span class="open" aria-hidden="true">›</span><span class="lbl">Tes années</span>' +
         '<span class="ttl">' + (crowned ? best.y + ", la meilleure" : yrs.length === 1 ? "Ta première année" : "Année après année") + "</span>" +
         '<div class="sp"></div><div class="cols">' + yrs.map((x, i) => {
           const isBest = crowned && x.y === best.y;
@@ -7502,7 +7615,7 @@ function viewPatProgres() {
   {
     const safety = patSafetyMonths(month), goalM = Number(DB.settings.patSafetyTarget) || 3;
     const eff = patSavingsEffort(year), sleeping = eff.hasBudget && eff.balance > eff.versements ? eff.balance - eff.versements : 0;
-    html += '<div class="t t-reserve" style="--dot:var(--pg-amber)"><span class="lbl">Ta réserve et ton argent qui dort</span>';
+    html += '<div class="t t-reserve" style="--dot:var(--pg-amber)" data-act="pgdetail" data-d="reserve" role="button" tabindex="0"><span class="open" aria-hidden="true">›</span><span class="lbl">Ta réserve et ton argent qui dort</span>';
     if (!safety) {
       html += '<span class="ttl">Réserve à calculer</span><div class="sp"></div>' +
         '<span class="foot" style="font-size:14px">Elle se mesure en mois de dépenses : importe des relevés dans <b>Mois</b> pour que tes dépenses moyennes soient connues.</span>';
@@ -7546,7 +7659,7 @@ function viewPatProgres() {
       '<text x="12" y="204" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(pgMonth(pastM[0])) + "</text>" +
       '<text x="' + pgF(X(nowI) + 8) + '" y="204" font-size="12" font-weight="600" fill="var(--pg-muted)">aujourd’hui → si rien ne change</text></svg>';
     const i1 = when(m1), whenTxt = i => i < 12 ? MOIS_COURTS[+addMonth(month, i).slice(5) - 1] : pgMonth(addMonth(month, i), true);
-    html += '<div class="t t-ouvas w2" style="--dot:var(--pg-blue)"><span class="lbl">Où tu vas</span>' +
+    html += '<div class="t t-ouvas w2" style="--dot:var(--pg-blue)" data-act="pgdetail" data-d="ouvas" role="button" tabindex="0"><span class="open" aria-hidden="true">›</span><span class="lbl">Où tu vas</span>' +
       '<span class="ttl">' + (i1 != null ? esc(fmtEurShort(m1)) + " en " + esc(whenTxt(i1)) + ", " : "") + esc(fmtEurShort(Math.round(fut[60] / 1000) * 1000)) + " dans cinq ans</span>" +
       '<div class="fig">' + s + "</div>" +
       '<span class="foot">ta performance actuelle (' + esc(fmtRate(asm.rate)) + " par an) et ton versement moyen (" + esc(fmtEurShort(asm.contrib)) + " par mois), prolongés tels quels</span></div>";
@@ -7559,7 +7672,7 @@ function viewPatProgres() {
     if (twrYear) list.push({ k: "Ton patrimoine", r: twrYear.cumul });
     list.sort((p, q) => q.r - p.r);
     const mx = Math.max(...list.map(x => Math.abs(x.r)), 0.1), med = ["gold", "silver", "bronze"];
-    html += '<div class="t t-marches" style="--dot:var(--pg-blue)"><span class="lbl">Face aux marchés</span>' +
+    html += '<div class="t t-marches" style="--dot:var(--pg-blue)" data-act="pgdetail" data-d="marches" role="button" tabindex="0"><span class="open" aria-hidden="true">›</span><span class="lbl">Face aux marchés</span>' +
       '<span class="ttl">' + (list.length ? esc(list[0].k) + " en tête" : "Pas encore d’année complète") + "</span>" +
       '<div class="sp"></div><div style="display:flex;flex-direction:column;padding-left:2px">' + list.slice(0, 8).map((x, i) => {
         const m = i < 3 && x.r > 0 ? med[i] : "";
@@ -7575,6 +7688,285 @@ function viewPatProgres() {
   return html.replace("<small>5 analyses</small>", nb ? "<small>" + nb + (nb > 1 ? " analyses" : " analyse") + "</small>" : "");
 }
 
+
+/* ---- Progrès : le détail de chaque bloc du bilan ------------------------------
+   Au clic sur une tuile du bilan, une page qui pousse l'analyse : à gauche la question et
+   son graphique, à droite ce qui l'éclaire. Mêmes calculs que les tuiles, sur plus de recul. */
+const PD_DOT = { qui: "var(--pg-blue)", annees: "var(--pg-violet)", reserve: "var(--pg-amber)", ouvas: "var(--pg-blue)", marches: "var(--d-gold,#E2A400)" };
+const PD_PALETTE = ["#E2A400", "#C46E2F", "#5B4BC4", "#1E9AA8", "#C2418C", "#8A5A00", "#4F7A28", "#7A5AC8"];
+function pdChips(list, on, act) {
+  return '<div class="pd-chips">' + list.map(c => '<button class="' + (c.v === on ? "on" : "") + '" data-act="' + act + '" data-v="' + c.v + '"' + (c.off ? " disabled" : "") + ">" + c.t + "</button>").join("") + "</div>";
+}
+function pdStat(v, l, color) { return '<span class="pd-stat"><b' + (color ? ' style="color:' + color + '"' : "") + ">" + v + "</b><span>" + l + "</span></span>"; }
+function pdPanel(title, inner, note) { return '<section class="pd-panel"><div class="pd-ph"><h2>' + title + "</h2>" + (note ? "<span>" + note + "</span>" : "") + "</div>" + inner + "</section>"; }
+function pdKey(color, text, h) { return '<span class="pd-key"><i style="background:' + color + ";height:" + (h || 3) + 'px"></i>' + text + "</span>"; }
+function pdPage(d, label, left, right, chips) {
+  return '<div class="pg"><div class="pd"><header class="pd-top"><button class="pd-back" data-act="pgback">‹ Progrès</button>' + (chips || "") + "</header>" +
+    '<div class="pd-grid"><div class="pd-left"><span class="pd-label"><i style="background:' + PD_DOT[d] + '"></i>' + label + "</span>" + left + "</div>" +
+    '<div class="pd-right">' + right + "</div></div></div></div>";
+}
+/* Graduations rondes : 1, 2, 2,5 ou 5 fois une puissance de dix. */
+function pdStep(max, n) {
+  const raw = Math.max(max, 1) / (n || 3), p = Math.pow(10, Math.floor(Math.log10(raw)));
+  return [1, 2, 2.5, 5, 10].map(m => m * p).find(s => s >= raw);
+}
+function pdEur(n) { return fmtEurShort(Math.abs(n)); }
+function pdMonthName(mk) { return MONTHS[+mk.slice(5) - 1]; }
+function pdMonthYear(mk) { return MONTHS[+mk.slice(5) - 1] + " " + mk.slice(0, 4); }
+
+function viewPgDetail() {
+  const d = UI.pgDetail, month = pgLastMonth(), months = allPatMonths(month);
+  if (!(DB.patAccounts || []).length) { UI.view = "patprogres"; return viewPatProgres(); }
+  if (d === "qui") return pdQui(month, months);
+  if (d === "annees") return pdAnnees(month, months);
+  if (d === "reserve") return pdReserve(month, months);
+  if (d === "ouvas") return pdOuvas(month, months);
+  if (d === "marches") return pdMarches(month, months);
+  UI.view = "patprogres"; return viewPatProgres();
+}
+
+/* ======== 1 · Qui fait grossir ton patrimoine ======== */
+function pdQui(month, months) {
+  const R = { "1y": 12, "3y": 36, "5y": 60, all: 0 }, key = UI.pdQui || "3y";
+  const ser = R[key] ? months.slice(-(R[key] + 1)) : months;
+  const tot = ser.map(mk => patTotalAt(mk)), inv = ser.map(mk => Math.max(0, patInvested(null, mk)));
+  const base = tot.map((t, i) => Math.max(0, Math.min(t, inv[i]))), n = ser.length - 1;
+  const W = 680, H = 330, hi = Math.max(...tot, ...inv, 1) * 1.06, step = pdStep(hi, 3);
+  const X = i => 8 + (n ? i * (W - 16) / n : W - 16), Y = v => 10 + (1 - Math.max(0, v) / hi) * (H - 36);
+  const pts = (V) => V.map((v, i) => pgF(X(i)) + "," + pgF(Y(v)));
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Patrimoine : ce que tu as versé et ce que tes placements ont rapporté">';
+  for (let t = step; t < hi; t += step) s += '<line x1="0" x2="' + W + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="var(--pg-line)"/><text x="' + (W - 4) + '" y="' + pgF(Y(t) - 5) + '" text-anchor="end" font-size="11.5" fill="var(--pg-faint)">' + esc(pgK(t)) + "</text>";
+  if (n > 0) {
+    s += '<path d="M' + pts(base).join(" L") + " L" + pgF(X(n)) + "," + pgF(Y(0)) + " L" + pgF(X(0)) + "," + pgF(Y(0)) + ' Z" fill="var(--pg-grey)" fill-opacity="0.45"/>';
+    s += '<path d="M' + pts(tot).join(" L") + " L" + pts(base).reverse().join(" L") + ' Z" fill="var(--pg-blue)" fill-opacity="0.8"/>';
+    s += '<path d="' + pgCurve(tot.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="var(--pg-blue)" stroke-width="2"/>';
+    const marks = [0, Math.round(n / 3), Math.round(2 * n / 3), n].filter((v, i, a) => a.indexOf(v) === i);
+    marks.forEach(i => s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? "start" : i === n ? "end" : "middle") + '" font-size="12" fill="var(--pg-faint)">' + esc(pgMonth(ser[i])) + "</text>");
+    const gEnd = tot[n] - base[n];
+    if (Y(base[n]) - Y(tot[n]) > 20) s += '<text x="' + pgF(X(n) - 8) + '" y="' + pgF((Y(tot[n]) + Y(base[n])) / 2 + 5) + '" text-anchor="end" font-size="13" font-weight="800" fill="#FFFFFF">' + esc(pgSigned(gEnd)) + " gagnés</text>";
+    if (Y(0) - Y(base[n]) > 20) s += '<text x="' + pgF(X(n) - 8) + '" y="' + pgF((Y(base[n]) + Y(0)) / 2 + 5) + '" text-anchor="end" font-size="13" font-weight="800" fill="var(--pg-ink)">' + esc(pdEur(inv[n])) + " versés</text>";
+  }
+  s += "</svg>";
+  const total = patTotalAt(month), invested = patInvested(null, month), gains = total - invested;
+  const share = total > 0 ? Math.round(gains / total * 100) : 0;
+  const years = [2, 1, 0].map(k => +month.slice(0, 4) - k).filter(y => patHasHistoryAt(y + "-12") || String(y) === month.slice(0, 4))
+    .map(y => { const end = String(y) === month.slice(0, 4) ? month : y + "-12"; return { y, cur: end === month && month.slice(5) !== "12", vers: patContributionsOfYear(y), gain: pgGains(null, (y - 1) + "-12", end) }; });
+  const mx = Math.max(...years.map(y => Math.max(Math.abs(y.vers), Math.abs(y.gain))), 1);
+  const pair = y => '<div class="pd-pair"><b>' + y.y + (y.cur ? "*" : "") + "</b><div>" +
+    '<div><i style="width:' + pgF(Math.abs(y.vers) / mx * 70) + '%;background:var(--pg-grey)"></i><span>' + esc(pdEur(y.vers)) + " versés</span></div>" +
+    '<div><i style="width:' + pgF(Math.abs(y.gain) / mx * 70) + "%;background:" + (y.gain < 0 ? "var(--pg-neg)" : "var(--pg-blue)") + '"></i><span><b>' + esc(pgSigned(y.gain)) + "</b> " + (y.gain < 0 ? "perdus" : "gagnés") + "</span></div></div></div>";
+  const yAgo = addMonth(month, -12);
+  let changed = "";
+  if (patHasHistoryAt(yAgo)) {
+    const g12 = pgGains(null, yAgo, month), v12 = patSplit(yAgo, month).versements, tA = patTotalAt(yAgo);
+    const shareA = tA > 0 ? Math.round((tA - patInvested(null, yAgo)) / tA * 100) : 0;
+    changed = pdPanel("Ce qui a changé", '<div class="pd-text"><span>Sur douze mois glissants, <b>tes placements ont ' + (g12 >= 0 ? "rapporté " + esc(pdEur(g12)) : "perdu " + esc(pdEur(g12))) + "</b>, " +
+      (Math.abs(g12) > v12 ? "plus" : "moins") + " que tes " + esc(pdEur(v12)) + " versés.</span>" +
+      "<span>Aujourd’hui, <b>" + share + " %</b> de ton patrimoine vient de tes gains. Il y a un an, c’était " + shareA + " %.</span></div>");
+  }
+  const cur = years.find(y => y.cur);
+  const left = '<h1 class="pd-h1">' + (gains > 0 ? "Sur " + esc(fmtEurShort(total)) + ", " + esc(pdEur(gains)) + " viennent de tes gains" : "Tes versements font tout ton patrimoine") + "</h1>" +
+    '<div class="pd-stats">' + pdStat(esc(pdEur(invested)), "versés en tout", "var(--pg-muted)") + pdStat(esc(pgSigned(gains)), gains < 0 ? "perdus en tout" : "gagnés en tout", "var(--pg-blue)") + pdStat(share + " %", "de ton patrimoine") + "</div>" +
+    '<div class="pd-keys">' + pdKey("var(--pg-grey)", "ce que tu as versé", 10) + pdKey("var(--pg-blue)", "ce que tes placements ont rapporté", 10) + "</div>" + '<div class="fig">' + s + "</div>";
+  const right = pdPanel("Année par année", '<div class="pd-pairs">' + years.map(pair).join("") + "</div>" + (cur ? '<span class="pd-note">* ' + cur.y + " jusqu’à " + esc(pdMonthName(month)) + "</span>" : "")) + changed;
+  const enough = k => !R[k] || months.length > R[k];
+  return pdPage("qui", "Qui fait grossir ton patrimoine", left, right,
+    pdChips([{ v: "1y", t: "1 an" }, { v: "3y", t: "3 ans" }, { v: "5y", t: "5 ans" }, { v: "all", t: "Tout" }].map(c => ({ ...c, off: !enough(c.v) })), key, "pdqui"));
+}
+
+/* ======== 2 · Tes années ======== */
+function pdYear(y, month) {
+  const last = String(y) === month.slice(0, 4) ? month : y + "-12", curve = [0], rs = [];
+  let c = 1;
+  for (let mk = y + "-01"; mk <= last; mk = addMonth(mk, 1)) {
+    const r = patMonthlyPerf(null, mk);
+    if (r != null) { c *= 1 + r / 100; rs.push({ mk, r }); }
+    curve.push((c - 1) * 100);
+  }
+  return { y, last, curve, perf: (c - 1) * 100, cur: last === month && month.slice(5) !== "12", vers: patContributionsOfYear(y),
+    gain: pgGains(null, (y - 1) + "-12", last), best: rs.length ? rs.reduce((a, b) => b.r > a.r ? b : a) : null, worst: rs.length ? rs.reduce((a, b) => b.r < a.r ? b : a) : null };
+}
+function pdAnnees(month, months) {
+  const y0 = +month.slice(0, 4), ys = [y0 - 2, y0 - 1, y0].filter(y => patHasHistoryAt((y - 1) + "-12")).map(y => pdYear(y, month));
+  if (!ys.length) return pdPage("annees", "Tes années", '<h1 class="pd-h1">Pas encore d’année à comparer</h1><p class="pd-note">Il faut au moins une valeur en fin d’année pour mesurer la suivante.</p>', "");
+  const done = ys.filter(y => !y.cur), best = done.length ? done.reduce((a, b) => b.perf > a.perf ? b : a) : null, cur = ys.find(y => y.cur);
+  const col = y => y.cur ? "var(--pg-grey)" : best && y.y === best.y ? "var(--pg-violet)" : "#9C8CF0";
+  const all = ys.flatMap(y => y.curve), lo = Math.min(...all, 0) - 2, hi = Math.max(...all, 0) + 3, W = 680, H = 330;
+  const X = i => 30 + i * (W - 76) / 12, Y = v => 10 + (1 - (v - lo) / (hi - lo)) * (H - 40), st = pdStep(hi - lo, 5);
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Tes années, mois par mois, depuis janvier">';
+  for (let t = Math.ceil(lo / st) * st; t <= hi; t += st) s += '<line x1="30" x2="' + (W - 46) + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="' + (Math.abs(t) < 1e-9 ? "var(--pg-grey)" : "var(--pg-line)") + '"/><text x="22" y="' + pgF(Y(t) + 4) + '" text-anchor="end" font-size="11.5" fill="var(--pg-faint)">' + (Math.abs(t) < 1e-9 ? "0" : esc(fmtRate(t).replace(/^(\d)/, "+$1"))) + "</text>";
+  ys.slice().reverse().forEach(y => {
+    const b = best && y.y === best.y, L = y.curve.length - 1;
+    s += '<path d="' + pgCurve(y.curve.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="' + col(y) + '" stroke-width="' + (b ? 3.5 : 2.2) + '" stroke-linecap="round"/>' +
+      '<circle cx="' + pgF(X(L)) + '" cy="' + pgF(Y(y.curve[L])) + '" r="' + (b ? 6 : 4.5) + '" fill="' + col(y) + '" stroke="var(--pg-tile)" stroke-width="2"/>' +
+      '<text x="' + pgF(X(L) + 9) + '" y="' + pgF(Y(y.curve[L]) + 4) + '" font-size="13" font-weight="800" fill="' + (b ? "var(--pg-violet)" : "var(--pg-muted)") + '">' + y.y + "</text>";
+  });
+  [["janv.", 1], ["avr.", 4], ["juil.", 7], ["oct.", 10], ["déc.", 12]].forEach(([m, i]) => s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="12" fill="var(--pg-faint)">' + m + "</text>");
+  s += "</svg>";
+  let head;
+  if (!best) head = (cur || ys[0]).y + ", ta première année";
+  else if (cur && cur.perf > best.perf) head = cur.y + " dépasse déjà " + best.y;
+  else if (cur && best.perf > 0 && cur.perf >= best.perf * 0.75) head = best.y + " reste ta meilleure année, " + cur.y + " la talonne";
+  else head = best.y + " reste ta meilleure année";
+  const card = y => {
+    const b = best && y.y === best.y;
+    return '<div class="pd-card' + (b ? " best" : "") + '"><div><b>' + y.y + (y.cur ? ' <span class="pd-muted">en cours</span>' : "") + (b ? ' <span class="pd-star">★</span>' : "") + "</b><b" + (b ? ' style="color:var(--pg-violet)"' : y.perf < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(y.perf)) + "</b></div>" +
+      '<div class="pd-muted"><span>' + esc(pgSigned(y.gain)) + (y.gain < 0 ? " perdus" : " gagnés") + "</span><span>" + esc(pdEur(y.vers)) + " versés</span></div>" +
+      (y.best ? "<div><span>meilleur mois <b style=\"color:var(--pg-blue)\">" + esc(MOIS_COURTS[+y.best.mk.slice(5) - 1]) + " " + esc(pgPct(y.best.r)) + "</b></span><span>pire <b style=\"color:var(--pg-orange)\">" + esc(MOIS_COURTS[+y.worst.mk.slice(5) - 1]) + " " + esc(pgPct(y.worst.r)) + "</b></span></div>" : "") + "</div>";
+  };
+  const left = '<h1 class="pd-h1">' + esc(head) + '</h1><div class="pd-stats">' + ys.map(y => pdStat(esc(pgPct(y.perf)), y.cur ? y.y + ", à fin " + pdMonthName(month) : String(y.y), best && y.y === best.y ? "var(--pg-violet)" : y.perf < 0 ? "var(--pg-neg)" : "")).join("") + "</div>" +
+    '<div class="pd-keys">' + ys.map(y => pdKey(col(y), String(y.y))).join("") + '<span class="pd-note">performance cumulée depuis le 1<sup>er</sup> janvier</span></div><div class="fig">' + s + "</div>";
+  return pdPage("annees", "Tes années", left, pdPanel("Chaque année", '<div class="pd-cards">' + ys.slice().reverse().map(card).join("") + "</div>"));
+}
+
+/* ======== 3 · Ta réserve et ton argent qui dort ======== */
+function pdReserve(month) {
+  const safety = patSafetyMonths(month), goal = Number(DB.settings.patSafetyTarget) || 3, comfort = goal * 2;
+  if (!safety) return pdPage("reserve", "Ta réserve et ton argent qui dort", '<h1 class="pd-h1">Ta réserve se mesure en mois de dépenses</h1>' +
+    '<p class="pd-text" style="max-width:52ch">Importe tes relevés dans <b>Mois</b> : dès que tes dépenses moyennes sont connues, tu vois combien de mois tes livrets et comptes courants tiennent, et ce que donnerait l’argent qui dort sur ton compte.</p>', "");
+  const cur = monthKey(todayISO());
+  const keys = Array.from(new Set(DB.tx.map(t => monthKey(t.date)))).filter(k => k < cur).sort().reverse();
+  const sp = []; for (const k of keys) { const e = monthStats(k).expense; if (e > 0) sp.push({ k, e }); if (sp.length >= 12) break; }
+  sp.reverse();
+  const avg = safety.avg, liquid = safety.liquid, mNow = safety.months;
+  const eff = patSavingsEffort(+month.slice(0, 4)), sleeping = eff.hasBudget && eff.balance > eff.versements ? eff.balance - eff.versements : 0;
+  const mWith = (liquid + sleeping) / avg, need = Math.max(0, goal * avg - liquid), year = month.slice(0, 4);
+  const sc = m => pgF(Math.min(100, m / comfort * 100)) + "%";
+  const gauge = '<div class="pd-gauge"><div class="pd-gz"><div style="right:0;background:var(--pg-trk)"></div>' +
+    (sleeping ? '<div style="width:' + sc(mWith) + ';background:color-mix(in oklab, var(--pg-amber) 30%, transparent)"></div>' : "") +
+    '<div style="width:' + sc(mNow) + ';background:var(--pg-amber)"></div><div class="pd-goal" style="left:' + sc(goal) + '"></div>' +
+    '<span style="left:' + sc(goal) + ';transform:translateX(-50%);color:var(--pg-goal)">objectif ' + goal + ' mois</span><span style="right:0;color:var(--pg-blue)">confort ' + comfort + " mois</span></div>" +
+    '<div class="pd-gl"><span>aujourd’hui <b style="color:var(--pg-amber)">' + esc(trim1(mNow)) + " mois</b></span>" + (sleeping ? "<span>avec l’argent qui dort <b>" + esc(trim1(mWith)) + " mois</b></span>" : "") + "<span>" + comfort + " mois</span></div></div>";
+  const mx = Math.max(...sp.map(x => x.e), 1);
+  const bars = '<div class="pd-sp"><i class="pd-avg" style="bottom:' + pgF(avg / mx * 110) + 'px"></i>' + sp.map((x, i) => {
+    const dlt = x.e - avg;
+    return '<span class="sp' + (i === sp.length - 1 ? " last" : "") + '" tabindex="0"><i style="height:' + pgF(x.e / mx * 110) + 'px"></i><span class="tip" style="' + (i < 2 ? "left:0" : i > sp.length - 3 ? "right:0" : "left:50%;transform:translateX(-50%)") + '"><b>' + esc(pgMonth(x.k)) + " · " + esc(fmtEurShort(x.e)) + '</b><em class="' + (dlt > 0 ? "up" : "dn") + '">' + esc(pgSigned(dlt)) + " vs moyenne</em></span></span>";
+  }).join("") + '</div><div class="pd-axis"><span>' + esc(pgMonth(sp[0].k)) + '</span><span><b style="color:var(--pg-amber)">- - </b>moyenne ' + esc(fmtEurShort(avg)) + "</span><span>" + esc(pgMonth(sp[sp.length - 1].k)) + "</span></div>";
+  const liv = (DB.patAccounts || []).filter(a => { const t = patType(a.type); return t.risk === "safe" && t.liquid && (patAccountValue(a.id, month) || 0) > 0; }).map(a => a.name);
+  const asm = patAssumptions(month);
+  const stepRow = (t, v, s) => '<div class="pd-step"><span><span>' + t + "</span><span>" + s + "</span></span><b>" + v + "</b></div>";
+  let steps = "";
+  if (need > 0) {
+    if (sleeping) steps += stepRow("Place l’argent qui dort", "+" + esc(fmtEurShort(sleeping)), "ta réserve passe à " + esc(trim1(mWith)) + " mois");
+    const rest = Math.max(0, need - sleeping);
+    if (rest > 0) steps += stepRow(sleeping ? "Il manquera encore" : "Il manque", esc(fmtEurShort(rest)), asm.contrib > 0 ? "soit " + Math.ceil(rest / asm.contrib) + " mois de ton versement moyen (" + esc(fmtEurShort(asm.contrib)) + ")" : "à mettre de côté sur un livret");
+  } else steps += stepRow("Objectif atteint", "✓", "ta réserve couvre " + goal + " mois de dépenses");
+  steps += stepRow("Livrets et comptes courants", esc(fmtEurShort(liquid)), esc(liv.join(", ") || "aucun"));
+  const budget = eff.hasBudget && eff.balance > 0 ? '<div class="pd-budget"><div class="pd-ph"><b>Le solde de ton budget en ' + year + "</b><span>" + esc(fmtEurShort(eff.balance)) + " dégagés</span></div>" +
+    '<div class="pd-split"><i style="width:' + pgF(Math.min(100, eff.versements / eff.balance * 100)) + '%;background:var(--pg-blue)"></i><i style="flex:1;background:color-mix(in oklab, var(--pg-amber) 55%, transparent)"></i></div>' +
+    '<div class="pd-gl"><span><b style="color:var(--pg-blue)">' + esc(fmtEurShort(eff.versements)) + " placés</b> · " + Math.round(Math.min(100, eff.versements / eff.balance * 100)) + " %</span>" +
+    (sleeping ? '<span><b style="color:var(--pg-amber)">' + esc(fmtEurShort(sleeping)) + " qui dorment</b> sur ton compte courant</span>" : "") + "</div></div>" : "";
+  const left = '<h1 class="pd-h1">' + (need > 0 ? "Il manque " + esc(fmtEurShort(need)) + " pour tenir " + goal + " mois" : "Ta réserve tient " + esc(trim1(mNow)) + " mois de dépenses") + "</h1>" +
+    '<div class="pd-stats">' + pdStat(esc(trim1(mNow)) + " mois", "de dépenses couvertes", "var(--pg-amber)") + pdStat(esc(fmtEurShort(avg)), "de dépenses par mois") + (eff.hasBudget ? pdStat(esc(fmtEurShort(sleeping)), "qui dorment en " + year) : "") + "</div>" +
+    '<div style="height:18px"></div>' + gauge + '<span class="pd-note">Ta réserve = tes livrets et comptes courants ÷ tes dépenses moyennes des 12 derniers mois.</span>' + budget;
+  const right = pdPanel("Tes dépenses, mois par mois", bars, "survole un mois") + pdPanel("Pour atteindre " + goal + " mois", "<div>" + steps + "</div>");
+  return pdPage("reserve", "Ta réserve et ton argent qui dort", left, right);
+}
+
+/* ======== 4 · Où tu vas ======== */
+const PD_PAST = [10000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 300000, 400000, 500000, 750000, 1000000, 1500000, 2000000];
+function pdLadder(from) { const out = []; let t = from; while (out.length < 6) { t = t < 100000 ? (Math.floor(t / 10000) + 1) * 10000 : t < 500000 ? (Math.floor(t / 50000) + 1) * 50000 : (Math.floor(t / 100000) + 1) * 100000; out.push(t); } return out; }
+function pdProject(start, rate, contrib, n) { const r = Math.pow(1 + Math.max(rate, -99) / 100, 1 / 12) - 1, f = [start]; for (let i = 0; i < n; i++) f.push(f[i] * (1 + r) + contrib); return f; }
+function pdOuvasParts(month, months) {
+  const asm = patAssumptions(month), contrib = UI.pdContrib == null ? asm.contrib : UI.pdContrib, rate = UI.pdRate == null ? asm.rate : UI.pdRate;
+  const hz = UI.pdHz === "10" ? 120 : 60, net = patNetAt(month);
+  const fut = pdProject(net, rate, contrib, 360), fut5 = pdProject(net, 5, contrib, 360);
+  const when = (V, t) => { const i = V.findIndex(v => v >= t); return i < 0 ? null : i; };
+  const whenTxt = i => i == null ? "plus de 30 ans" : pdMonthYear(addMonth(month, i));
+  const pastM = months.slice(-37), past = pastM.map(mk => patNetAt(mk)), nowI = past.length - 1;
+  const all = past.concat(fut.slice(1, hz + 1)), N = all.length - 1, W = 680, H = 330, hi = Math.max(...all, ...fut5.slice(0, hz + 1)) * 1.1 || 1, stp = pdStep(hi, 3);
+  const X = i => 10 + i * (W - 20) / N, Y = v => 12 + (1 - v / hi) * (H - 40);
+  const line = (V, off) => V.map((v, i) => (i ? "L" : "M") + pgF(X(i + off)) + "," + pgF(Y(v))).join(" ");
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Ton patrimoine, puis sa projection">' +
+    '<rect x="' + pgF(X(nowI)) + '" y="0" width="' + pgF(W - X(nowI)) + '" height="' + (H - 28) + '" fill="var(--pg-bg)"/>';
+  for (let t = stp; t < hi; t += stp) s += '<line x1="0" x2="' + W + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="var(--pg-line)"/><text x="4" y="' + pgF(Y(t) - 5) + '" font-size="11.5" fill="var(--pg-faint)">' + esc(pgK(t)) + "</text>";
+  s += '<path d="' + line(fut5.slice(0, hz + 1), nowI) + '" fill="none" stroke="var(--pg-grey)" stroke-width="2" stroke-opacity=".7"/>' +
+    '<text x="' + (W - 8) + '" y="' + pgF(Y(fut5[hz]) + 16) + '" text-anchor="end" font-size="12" font-weight="700" fill="var(--pg-faint)">à 5 %/an : ' + esc(pgK(fut5[hz])) + "</text>" +
+    '<path d="' + line(past, 0) + '" fill="none" stroke="var(--pg-blue)" stroke-width="2.5"/><path d="' + line(fut.slice(0, hz + 1), nowI) + '" fill="none" stroke="var(--pg-blue)" stroke-width="2.5" stroke-opacity=".45"/>';
+  /* Les paliers déjà franchis, sur la partie passée du graphique. */
+  PD_PAST.forEach(p => {
+    const i = past.findIndex(v => v >= p);
+    if (i <= 0 || past[0] >= p) return;
+    s += '<circle cx="' + pgF(X(i)) + '" cy="' + pgF(Y(past[i])) + '" r="4.5" fill="var(--pg-blue)" stroke="var(--pg-tile)" stroke-width="2"/><text x="' + pgF(X(i)) + '" y="' + pgF(Y(past[i]) - 11) + '" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1D5BA8" class="pd-mlbl">' + esc(pgK(p)) + "</text>";
+  });
+  s += '<circle cx="' + pgF(X(nowI)) + '" cy="' + pgF(Y(net)) + '" r="6" fill="var(--pg-blue)" stroke="var(--pg-tile)" stroke-width="2"/>' +
+    '<circle cx="' + pgF(X(N)) + '" cy="' + pgF(Y(fut[hz])) + '" r="6" fill="var(--pg-tile)" stroke="var(--pg-blue)" stroke-width="2.5"/>' +
+    '<text x="' + pgF(X(N) - 8) + '" y="' + pgF(Y(fut[hz]) - 12) + '" text-anchor="end" font-size="13" font-weight="800" fill="#1D5BA8" class="pd-mlbl">' + esc(pgK(fut[hz])) + " à ton rythme</text>" +
+    '<text x="10" y="' + (H - 6) + '" font-size="12" fill="var(--pg-faint)">' + esc(pgMonth(pastM[0])) + '</text><text x="' + pgF(X(nowI) + 6) + '" y="' + (H - 6) + '" font-size="12" font-weight="600" fill="var(--pg-muted)">aujourd’hui</text>' +
+    '<text x="' + (W - 10) + '" y="' + (H - 6) + '" text-anchor="end" font-size="12" fill="var(--pg-faint)">' + esc(pgMonth(addMonth(month, hz))) + "</text></svg>";
+  const next = pdLadder(net), m100 = (Math.floor(net / 100000) + 1) * 100000, i100 = when(fut, m100), iNext = when(fut, next[0]);
+  const head = i100 != null && i100 <= hz ? fmtEurShort(m100) + " en " + pdMonthYear(addMonth(month, i100)) + ", si rien ne change"
+    : fmtEurShort(Math.round(fut[hz] / 1000) * 1000) + " dans " + (hz === 60 ? "cinq" : "dix") + " ans, si rien ne change";
+  const left = '<h1 class="pd-h1">' + esc(head) + '</h1><div class="pd-stats">' +
+    pdStat(esc(iNext == null ? "—" : pdMonthYear(addMonth(month, iNext))), "prochain palier : " + esc(pgK(next[0])), "var(--pg-blue)") +
+    pdStat(esc(pgK(fut[hz])), hz === 60 ? "dans cinq ans" : "dans dix ans") + pdStat(esc(pgK(fut5[hz])), "à 5 %/an, plus prudent", "var(--pg-muted)") + "</div>" +
+    '<div class="fig">' + s + "</div>";
+  /* Les paliers : ceux déjà franchis avec leur date, puis les prochains. */
+  const done = PD_PAST.filter(p => p <= net).map(p => { const mk = months.find(k => patNetAt(k) >= p); return mk ? { p, mk } : null; }).filter(Boolean).filter(x => x.mk !== months[0] || patNetAt(months[0]) < x.p);
+  const rows = '<div class="pd-tbl">' + done.map(x => '<div class="done"><b>' + esc(pgK(x.p)) + "</b><span>" + esc(pdMonthYear(x.mk)) + '</span><span class="ok">✓ franchi</span></div>').join("") +
+    '<div class="th"><span>à venir</span><span>à ton rythme</span><span>à 5 %/an</span></div>' +
+    next.map(t => "<div><b>" + esc(pgK(t)) + "</b><span>" + esc(whenTxt(when(fut, t))) + '</span><span class="pd-muted">' + esc(whenTxt(when(fut5, t))) + "</span></div>").join("") + "</div>";
+  return { left, rows, contrib, rate, asm };
+}
+function pdOuvas(month, months) {
+  const p = pdOuvasParts(month, months), cMax = Math.max(3000, Math.ceil(p.asm.contrib * 3 / 100) * 100);
+  const slider = (id, label, val, min, max, step, txt) => '<label class="pd-slider"><span><span>' + label + '</span><b id="pd-' + id + '-v">' + txt + "</b></span>" +
+    '<input type="range" data-pdslider="' + id + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '"></label>';
+  const right = pdPanel("Joue avec les hypothèses", slider("contrib", "Versement par mois", Math.round(p.contrib), 0, cMax, 50, esc(fmtEurShort(p.contrib))) +
+      slider("rate", "Rendement par an", (Math.round(p.rate * 2) / 2).toFixed(1), -5, 25, 0.5, esc(fmtRate(p.rate))) +
+      '<button class="pd-link" data-act="pdreset">Revenir à ton rythme actuel</button>', "par défaut : ton rythme actuel") +
+    pdPanel("Tes paliers", '<div id="pd-rows">' + p.rows + '</div><button class="pd-btn" data-act="view" data-view="settings">Fixer un objectif</button>');
+  return pdPage("ouvas", "Où tu vas", '<div id="pd-ouleft" style="display:flex;flex-direction:column;flex:1;min-height:0">' + p.left + "</div>", right,
+    pdChips([{ v: "5", t: "3 ans + 5 ans" }, { v: "10", t: "3 ans + 10 ans" }], UI.pdHz === "10" ? "10" : "5", "pdhz"));
+}
+/* Les curseurs mettent à jour le graphique et les paliers sans reconstruire la page : le curseur
+   qu'on tient reste sous le doigt. */
+document.addEventListener("input", e => {
+  const el = e.target; if (!el.matches || !el.matches("[data-pdslider]")) return;
+  if (el.dataset.pdslider === "contrib") UI.pdContrib = +el.value; else UI.pdRate = +el.value;
+  const month = pgLastMonth(), p = pdOuvasParts(month, allPatMonths(month));
+  const L = document.getElementById("pd-ouleft"), T = document.getElementById("pd-rows");
+  if (L) L.innerHTML = p.left; if (T) T.innerHTML = p.rows;
+  const cv = document.getElementById("pd-contrib-v"), rv = document.getElementById("pd-rate-v");
+  if (cv) cv.textContent = fmtEurShort(p.contrib); if (rv) rv.textContent = fmtRate(p.rate);
+});
+
+/* ======== 5 · Face aux marchés ======== */
+function pdMarches(month, months) {
+  const R = { "3m": 3, "1y": 12, "3y": 36 }, key = UI.pdMk || "1y", n = R[key], from = addMonth(month, -n);
+  const span = Array.from({ length: n }, (_, i) => addMonth(from, i + 1));
+  const chain = id => { let c = 1, any = false; const v = [0]; span.forEach(mk => { const r = patMonthlyPerf(id, mk); if (r != null) { c *= 1 + r / 100; any = true; } v.push((c - 1) * 100); }); return any ? v : null; };
+  const list = patActiveAccounts().map(a => ({ k: a.name, v: chain(a.id) })).filter(x => x.v);
+  list.sort((p, q) => q.v[n] - p.v[n]);
+  list.forEach((x, i) => { x.c = PD_PALETTE[i % PD_PALETTE.length]; x.id = "k" + i; });
+  const pat = chain(null), rows = list.concat(pat ? [{ k: "Ton patrimoine", v: pat, c: "var(--pg-blue)", id: "pat", all: true }] : []).sort((p, q) => q.v[n] - p.v[n]);
+  if (!rows.length) return pdPage("marches", "Face aux marchés", '<h1 class="pd-h1">Pas encore assez d’historique</h1>', "");
+  const vals = rows.flatMap(x => x.v), lo = Math.min(...vals, 0) - 3, hi = Math.max(...vals, 0) + 3, W = 680, H = 360, st = pdStep(hi - lo, 5);
+  const X = i => 34 + i * (W - 150) / n, Y = v => 10 + (1 - (v - lo) / (hi - lo)) * (H - 40);
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Tes comptes classés">';
+  for (let t = Math.ceil(lo / st) * st; t <= hi; t += st) s += '<line x1="34" x2="' + (W - 116) + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="' + (Math.abs(t) < 1e-9 ? "var(--pg-grey)" : "var(--pg-line)") + '"/><text x="26" y="' + pgF(Y(t) + 4) + '" text-anchor="end" font-size="11.5" fill="var(--pg-faint)">' + (Math.abs(t) < 1e-9 ? "0" : esc(fmtRate(t).replace(/^(\d)/, "+$1"))) + "</text>";
+  rows.filter(x => !x.all).concat(rows.filter(x => x.all)).forEach(x => s += '<path class="cv c-' + x.id + '" d="' + pgCurve(x.v.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="' + x.c + '" stroke-width="' + (x.all ? 3.5 : 2.4) + '" stroke-linecap="round"/>');
+  let last = -99; rows.slice().sort((p, q) => q.v[n] - p.v[n]).forEach(x => { let yy = Y(x.v[n]); if (yy - last < 14) yy = last + 14; last = yy; s += '<text class="cl l-' + x.id + '" x="' + (W - 110) + '" y="' + pgF(yy + 4) + '" font-size="12" font-weight="800" fill="' + x.c + '">' + esc(x.k) + "</text>"; });
+  const tick = [0, Math.round(n / 3), Math.round(2 * n / 3), n].filter((v, i, a) => a.indexOf(v) === i);
+  tick.forEach(i => s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="12" fill="var(--pg-faint)">' + esc(pgMonth(addMonth(from, i))) + "</text>");
+  s += "</svg>";
+  const mx = Math.max(...rows.map(x => Math.abs(x.v[n])), 0.1);
+  const listHtml = '<div class="pd-rank">' + rows.map((x, i) => '<div class="rk rk-' + x.id + (x.all ? " all" : "") + '"><span class="i">' + (i + 1) + '</span><span class="nm"><i style="background:' + x.c + '"></i>' + esc(x.k) + "</span>" +
+    '<i class="b" style="width:' + pgF(Math.abs(x.v[n]) / mx * 100) + "%;background:" + (x.v[n] < 0 ? "var(--pg-neg)" : x.c) + '"></i><b' + (x.v[n] < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.v[n])) + "</b></div>").join("") + "</div>";
+  const css = "<style>" + rows.map(x => ".pd:has(.rk-" + x.id + ":hover) .cv:not(.c-" + x.id + "),.pd:has(.rk-" + x.id + ":hover) .cl:not(.l-" + x.id + "){opacity:.12}.pd:has(.rk-" + x.id + ":hover) .c-" + x.id + "{stroke-width:4}").join("") + "</style>";
+  const perLbl = key === "3m" ? "sur 3 mois glissants" : key === "1y" ? "sur 12 mois glissants" : "sur 3 ans glissants";
+  const accs = rows.filter(x => !x.all), up = accs.filter(x => x.v[n] > 0).length, first = accs[0], patR = rows.find(x => x.all);
+  const left = css + '<h1 class="pd-h1">' + esc(first ? first.k + " en tête " + perLbl : "Ton patrimoine " + perLbl) + "</h1>" +
+    '<div class="pd-stats">' + (first ? pdStat(esc(pgPct(first.v[n])), esc(first.k), "var(--pg-blue)") : "") + (patR ? pdStat(esc(pgPct(patR.v[n])), "ton patrimoine") : "") + pdStat(up + " / " + accs.length, "comptes en hausse", "var(--pg-muted)") + "</div>" +
+    '<div class="pd-keys">' + rows.map(x => pdKey(x.c, esc(x.k))).join("") + '</div><div class="fig">' + s + "</div>";
+  const right = pdPanel("Le classement", listHtml + '<span class="pd-note">Survole une ligne pour suivre sa courbe. La comparaison aux grands indices (MSCI World, S&amp;P 500, CAC 40…) arrivera avec leur mise à jour mensuelle.</span>', esc(perLbl));
+  const enough = k => months.length > R[k];
+  return pdPage("marches", "Face aux marchés", left, right, pdChips([{ v: "3m", t: "3 mois" }, { v: "1y", t: "1 an" }, { v: "3y", t: "3 ans" }].map(c => ({ ...c, off: !enough(c.v) })), key, "pdmk"));
+}
+/* Une tuile du bilan s'ouvre aussi au clavier. */
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".pg .bil .t[data-act]")) { e.preventDefault(); e.target.click(); }
+});
 /* ---- Jalons ---------------------------------------------------------------
    Acquis en couleur, à venir en grisé, avec la distance qui reste. Un jalon barré sans
    contexte décourage ; le même avec « 62 990 sur 75 000 » donne une direction. */
@@ -10359,6 +10751,12 @@ document.addEventListener("click", e => {
        pour en montrer d'autres plutôt que de resservir les mêmes. */
     case "pgbilan": pgGlideTo("bilan"); break;
     case "pgtop": pgGlideTo("haut"); break;
+    case "pgdetail": UI.pgDetail = el.dataset.d; UI.view = "pgdetail"; render(); window.scrollTo(0, 0); break;
+    case "pgback": UI.view = "patprogres"; render(); window.scrollTo(0, pgBilanTop()); break;
+    case "pdqui": if (!el.disabled) { UI.pdQui = el.dataset.v; render(); } break;
+    case "pdmk": if (!el.disabled) { UI.pdMk = el.dataset.v; render(); } break;
+    case "pdhz": UI.pdHz = el.dataset.v; render(); break;
+    case "pdreset": UI.pdContrib = null; UI.pdRate = null; render(); break;
     case "pgrange": UI.pgRange = el.dataset.range; pgSwapRange(); break;
     case "patrange": UI.patRange = el.dataset.range; UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
     case "pathlshuffle": UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
