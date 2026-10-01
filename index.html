@@ -1971,6 +1971,53 @@ html[data-theme="dark"] .pg .pa-tx-warn{background:#33241A;color:#F2B27A}
 .pg .pa-year{padding:8px 10px 2px;border-top:1px solid var(--pg-line);margin-top:4px;font-size:11.5px;font-weight:700;color:var(--pg-faint);letter-spacing:.06em}
 .pg .pa-more-btn{align-self:center}
 @media (max-width:1100px){.pg .pa-grid{grid-template-columns:minmax(0,1fr)}.pg .pa-months{position:static}}
+
+/* Détail d'un compte, façon recherche de titres */
+.pg .pa-quote{display:flex;flex-direction:column;gap:10px;padding:22px 24px 16px;border-radius:24px;background:var(--pg-tile);box-shadow:var(--pg-sh)}
+.pg .pa-quote .pa-value{font-size:clamp(48px,5.2vw,80px)}
+.pg .pa-chg{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:17px;font-weight:600}
+.pg .pa-chg .pill{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:10px;font-weight:700}
+.pg .pa-chg .pill.up{background:color-mix(in oklab, var(--pg-pos) 14%, var(--pg-tile));color:var(--pg-pos)}
+.pg .pa-chg .pill.dn{background:color-mix(in oklab, var(--pg-neg) 14%, var(--pg-tile));color:var(--pg-neg)}
+.pg .pa-chg .up{color:var(--pg-pos)}.pg .pa-chg .dn{color:var(--pg-neg)}
+.pg .pa-chg .pd-muted{font-size:14px}
+.pg .pa-tabs{display:flex;margin-top:8px;border-bottom:1px solid var(--pg-line)}
+.pg .pa-tabs button{flex:1;position:relative;padding:8px 4px 10px;border:0;background:none;font:inherit;font-size:14.5px;font-weight:600;color:var(--pg-muted);cursor:pointer}
+.pg .pa-tabs button+button::before{content:"";position:absolute;left:0;top:9px;bottom:13px;width:1px;background:var(--pg-line)}
+.pg .pa-tabs button.on{color:var(--pg-blue)}
+.pg .pa-tabs button.on::after{content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);width:34px;height:4px;border-radius:3px 3px 0 0;background:var(--pg-blue)}
+.pg .pa-tabs button[disabled]{opacity:.35;cursor:not-allowed}
+.pg .pa-tabs button:not([disabled]):hover{color:var(--pg-ink)}
+.pg .pa-g{position:relative;cursor:crosshair}
+.pg .pa-tip{position:absolute;top:0;display:flex;flex-direction:column;gap:1px;padding:6px 10px;border-radius:10px;background:var(--pg-ink);color:var(--pg-tile);font-size:12px;white-space:nowrap;pointer-events:none;box-shadow:0 6px 16px -6px rgba(0,0,0,.35)}
+.pg .pa-tip b{font-size:14px}
+.pg .pa-tip span{opacity:.75}
+.pg .pa-legend{display:flex;gap:16px;font-size:12.5px;font-weight:600;color:var(--pg-faint)}
+.pg .pa-legend i{display:inline-block;width:16px;margin-right:6px;vertical-align:middle}
+.pg .pa-legend i.ln{height:3px;border-radius:2px}
+.pg .pa-legend i.dash{border-top:1.5px dashed var(--pg-faint)}
+/* Fiscalité, en deux lignes */
+.pg .pa-tax2{display:flex;flex-direction:column;gap:6px;padding:16px 20px;border-radius:20px;background:var(--pg-tile);box-shadow:var(--pg-sh);font-size:14.5px;line-height:1.45}
+.pg .pa-tax2 p{margin:0}
+.pg .pa-tx-h{display:flex;justify-content:space-between;align-items:baseline}
+.pg .pa-tx-h span{font-size:12.5px;color:var(--pg-faint)}
+.pg .pa-tx-next{color:var(--pg-muted)}
+.pg .pa-tax2 .save{color:var(--pg-pos)}
+.pg .pa-tax2 details{font-size:13px;color:var(--pg-muted)}
+.pg .pa-tax2 summary{cursor:pointer;font-weight:600;color:var(--pg-blue);width:max-content}
+.pg .pa-tax2 details>*:not(summary){margin-top:8px}
+.pg .pa-tx-rows{display:grid;grid-template-columns:1fr auto;gap:4px 16px;max-width:380px}
+.pg .pa-tx-rows b{text-align:right;color:var(--pg-ink);font-variant-numeric:tabular-nums}
+/* Meilleur mois, marqué discrètement */
+.pg .pa-row .star{font-style:normal;margin-left:5px;font-size:11px;color:#E2A400}
+.pg .pa-row.best:not(.on){background:color-mix(in oklab, #E2A400 7%, transparent)}
+.pg .pa-quote .fig{display:block}
+.pg .pa-g{width:100%}
+.pg .pa-g>svg{width:100%;height:auto}
+.pg .pa-tip[hidden]{display:none}
+.pg .pa-chg .pill{font-size:16px}
+.pg .pa-head,.pg .pa-row{grid-template-columns:74px minmax(0,1fr) 66px 74px 62px}
+.pg .pa-row .m{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -8074,6 +8121,44 @@ function pdStock(val, inv, labels, showPeak) {
   labels.forEach((lab, i) => { if (lab) s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? "start" : i === m ? "end" : "middle") + '" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(lab) + "</text>"; });
   return s + "</svg>";
 }
+function pdGChart(ser, val, inv) {
+  const W = 640, H = 260, padL = 46, padR = 10, padT = 12, padB = 28, m = val.length - 1;
+  const up = val[m] >= val[0], col = up ? "var(--pg-pos)" : "var(--pg-neg)";
+  const lo0 = Math.min(...val, ...inv), hi0 = Math.max(...val, ...inv), st = pdStep((hi0 - lo0) || hi0 || 1, 4);
+  const lo = Math.floor(lo0 / st) * st, hi = Math.ceil(hi0 / st) * st || st;
+  const X = i => padL + (m ? i * (W - padL - padR) / m : W - padL - padR), Y = v => padT + (1 - (v - lo) / (hi - lo || 1)) * (H - padT - padB);
+  const id = "pg" + Math.round(Math.random() * 1e6), pts = val.map((v, i) => [X(i), Y(v)]), line = pgLine(pts);
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Valeur de ' + esc(pgMonth(ser[0], true)) + " à " + esc(pgMonth(ser[m], true)) + '">' +
+    '<defs><linearGradient id="' + id + '" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="' + col + '" stop-opacity=".22"/><stop offset="1" stop-color="' + col + '" stop-opacity="0"/></linearGradient></defs>';
+  for (let t = lo; t <= hi + 1e-9; t += st) s += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="var(--pg-line)"/><text x="' + (padL - 8) + '" y="' + pgF(Y(t) + 4) + '" text-anchor="end" font-size="12" fill="var(--pg-faint)">' + esc(t >= 10000 ? pgK(t) : fmtEurShort(t)) + "</text>";
+  s += '<path d="' + line + " L" + pgF(X(m)) + "," + pgF(Y(lo)) + " L" + pgF(X(0)) + "," + pgF(Y(lo)) + ' Z" fill="url(#' + id + ')"/>' +
+    '<path d="' + pgLine(inv.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="var(--pg-faint)" stroke-width="1.5" stroke-dasharray="4 4"/>' +
+    '<path d="' + line + '" fill="none" stroke="' + col + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="' + pgF(X(m)) + '" cy="' + pgF(Y(val[m])) + '" r="5.5" fill="' + col + '"/>';
+  /* Quelques mois en repère, comme « mai 2026 · juil. 2026 · sept. 2026 ». */
+  const n = Math.min(4, m + 1), marks = Array.from({ length: n }, (_, k) => Math.round(k * m / Math.max(1, n - 1)));
+  marks.forEach((i, k) => s += '<line x1="' + pgF(X(i)) + '" x2="' + pgF(X(i)) + '" y1="' + (H - padB) + '" y2="' + (H - padB + 5) + '" stroke="var(--pg-line)"/><text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="' + (k === 0 ? "start" : k === n - 1 ? "end" : "middle") + '" font-size="12" fill="var(--pg-faint)">' + esc(pgMonth(ser[i], true)) + "</text>");
+  s += '<g class="pa-hv" style="display:none"><line y1="' + padT + '" y2="' + (H - padB) + '" stroke="var(--pg-faint)" stroke-dasharray="3 3"/><circle r="5" fill="' + col + '" stroke="var(--pg-tile)" stroke-width="2"/></g></svg>';
+  const data = { W, padL, padR, m, x0: X(0), x1: X(m), v: val, i: inv, k: ser, y: val.map(Y) };
+  return '<div class="pa-g" data-g="' + esc(JSON.stringify(data)) + '">' + s + '<div class="pa-tip" hidden></div></div>';
+}
+/* Le repère suit le pointeur sur la courbe : valeur, mois et versé à ce moment-là. */
+document.addEventListener("mousemove", e => {
+  const box = e.target.closest && e.target.closest(".pg .pa-g"); if (!box) return;
+  const d = JSON.parse(box.dataset.g), svg = box.querySelector("svg"), r = svg.getBoundingClientRect(), k = r.width / d.W;
+  const x = (e.clientX - r.left) / k, i = Math.max(0, Math.min(d.m, Math.round((x - d.x0) / ((d.x1 - d.x0) / (d.m || 1)))));
+  const cx = d.x0 + i * (d.x1 - d.x0) / (d.m || 1), g = svg.querySelector(".pa-hv"), tip = box.querySelector(".pa-tip");
+  g.style.display = ""; g.querySelector("line").setAttribute("x1", cx); g.querySelector("line").setAttribute("x2", cx);
+  g.querySelector("circle").setAttribute("cx", cx); g.querySelector("circle").setAttribute("cy", d.y[i]);
+  tip.hidden = false;
+  tip.innerHTML = "<b>" + esc(fmtEurShort(d.v[i])) + "</b><span>" + esc(pdMonthYear(d.k[i])) + "</span><span>versé " + esc(fmtEurShort(d.i[i])) + "</span>";
+  const left = cx * k, w = tip.offsetWidth;
+  tip.style.left = Math.max(0, Math.min(r.width - w, left - w / 2)) + "px";
+});
+document.addEventListener("mouseout", e => {
+  const box = e.target.closest && e.target.closest(".pg .pa-g"); if (!box || box.contains(e.relatedTarget)) return;
+  box.querySelector(".pa-hv").style.display = "none"; box.querySelector(".pa-tip").hidden = true;
+});
 const PA_R = { "3m": 3, "1y": 12, "3y": 36, "5y": 60, all: 0 };
 const PA_LBL = { "3m": "3 mois glissants", "1y": "12 mois glissants", "3y": "3 ans glissants", "5y": "5 ans glissants" };
 function paVers(id, from, to) {
@@ -8084,25 +8169,20 @@ function paVers(id, from, to) {
 function paTax(a, month) {
   const reg = taxRegime(patTaxRegime(a)), t = patTax(a, month), wait = patTaxWait(a, month), op = patOpenedMonth(a);
   const pc = n => trim1(n) + " %";
-  let body = "";
-  if (t && t.rate < 0.005) {
-    body = '<p class="pa-tx-p">Exonéré : tes <b>' + esc(fmtEurShort(t.gain)) + "</b> de gains sortent sans impôt ni prélèvements sociaux. " + esc(t.why) + "</p>";
-  } else if (!t) {
-    const u = patUnrealized(a.id, month);
-    body = '<p class="pa-tx-p">' + (u && u.gain <= 0 ? "Pas de gain latent : un retrait complet aujourd’hui ne paierait aucun impôt." : "Aucun gain imposable à ce jour.") + "</p>";
-  } else {
-    const ir = t.gain * t.ir / 100, ps = t.gain * t.ps / 100;
-    body = '<div class="pa-tx-grid"><div><span>Gain latent</span><b>' + esc(fmtEurShort(t.gain)) + "</b></div>" +
-      "<div><span>Impôt sur le revenu · " + esc(pc(t.ir)) + "</span><b>" + esc(fmtEurShort(ir)) + "</b></div>" +
-      "<div><span>Prélèvements sociaux · " + esc(pc(t.ps)) + "</span><b>" + esc(fmtEurShort(ps)) + "</b></div>" +
-      '<div class="tot"><span>Impôt total · ' + esc(pc(t.rate)) + "</span><b>" + esc(fmtEurShort(t.tax)) + "</b></div>" +
-      '<div class="net"><span>Net disponible si tu retirais tout</span><b>' + esc(fmtEurShort(t.net)) + "</b></div></div>";
-    if (wait) body += '<div class="pa-tx-steps">' + wait.steps.map(s => '<div><span>À partir de <b>' + esc(pdMonthYear(s.when)) + "</b> (" + s.years + " ans, dans " + waitDelay(s.months) + ")</span><span>impôt " + esc(pc(s.rate)) + " → " + esc(fmtEurShort(s.tax)) + ', <b class="save">' + esc(fmtEurShort(s.saved)) + " de moins</b></span></div>").join("") + "</div>";
-    else if (reg.ages && t.age != null) body += '<p class="pa-tx-p">Palier d’ancienneté déjà franchi : le taux du jour est le plus bas possible.</p>';
-    body += '<p class="pa-tx-why">' + esc(t.why) + "</p>";
+  let main, detail = "";
+  if (t && t.rate < 0.005) main = "<p>Exonéré : tes <b>" + esc(fmtEurShort(t.gain)) + "</b> de gains sortent sans impôt.</p>";
+  else if (!t) main = "<p>Pas de gain latent : un retrait aujourd’hui ne paierait rien.</p>";
+  else {
+    main = "<p>Si tu retirais tout aujourd’hui : <b>" + esc(fmtEurShort(t.tax)) + " d’impôt</b> (" + esc(pc(t.rate)) + "), il te resterait <b>" + esc(fmtEurShort(t.net)) + "</b>.</p>";
+    if (wait) { const s0 = wait.steps[0]; main += '<p class="pa-tx-next">Dès <b>' + esc(pdMonthYear(s0.when)) + "</b> : " + esc(pc(s0.rate)) + ', soit <b class="save">' + esc(fmtEurShort(s0.saved)) + " de moins</b>.</p>"; }
+    detail = '<div class="pa-tx-rows"><span>Gain latent</span><b>' + esc(fmtEurShort(t.gain)) + "</b>" +
+      "<span>Impôt sur le revenu · " + esc(pc(t.ir)) + "</span><b>" + esc(fmtEurShort(t.gain * t.ir / 100)) + "</b>" +
+      "<span>Prélèvements sociaux · " + esc(pc(t.ps)) + "</span><b>" + esc(fmtEurShort(t.gain * t.ps / 100)) + "</b></div>" +
+      "<p>" + esc(t.why) + "</p>";
   }
-  const approx = reg.ages && !op.exact && op.mk ? '<p class="pa-tx-warn">Date d’ouverture estimée à ' + esc(pdMonthYear(op.mk)) + " d’après la plus ancienne donnée : renseigne la vraie date dans les réglages du compte pour un calcul exact.</p>" : "";
-  return '<section class="pd-panel pa-tax"><div class="pd-ph"><h2>Fiscalité</h2><span>' + esc(reg.name) + "</span></div>" + body + approx + "</section>";
+  if (reg.ages && !op.exact && op.mk) detail += "<p>Ouverture estimée à " + esc(pdMonthYear(op.mk)) + " d’après la plus ancienne donnée : renseigne la vraie date dans les réglages du compte.</p>";
+  return '<section class="pa-tax2"><div class="pa-tx-h"><b>Fiscalité</b><span>' + esc(reg.name) + "</span></div>" + main +
+    (detail ? "<details><summary>Le détail</summary>" + detail + "</details>" : "") + "</section>";
 }
 /* La sélection de mois : un clic en prend un, un glissé en prend une suite, Maj + clic l'étend. */
 function paSelection(rowsM) {
@@ -8150,7 +8230,6 @@ function viewPgAccount() {
   const lastMov = movs.length ? monthKey(movs[movs.length - 1].date) : null, yAgo = addMonth(month, -12), v12 = paVers(a.id, yAgo, month);
   const facts = [];
   if (lastMov && patMonthsBetween(lastMov, month) >= 3) facts.push([(movs[movs.length - 1].amount < 0 ? "Sans mouvement depuis " : "Sans versement depuis ") + pdMonthYear(lastMov), pgSigned(pgGains(a.id, lastMov, month)), "ce que ton compte a pris tout seul depuis"]);
-  else facts.push(["Versé sur 12 mois glissants", fmtEurShort(v12), v12 > 0 ? "soit " + fmtEurShort(v12 / 12) + " par mois en moyenne" : "aucun versement sur la période"]);
   if (!record) {
     const pkMk = all.find(mk => patAccountValue(a.id, mk) === peak);
     facts.push(["Ton plus haut", fmtEurShort(peak), pdMonthYear(pkMk) + " · tu en es à " + pgPct((value / peak - 1) * 100)]);
@@ -8158,33 +8237,34 @@ function viewPgAccount() {
     const ag = id => { const r = all.slice(-24).map(mk => patMonthlyPerf(id, mk)).filter(x => x != null); return r.length ? r.reduce((s, x) => s + Math.abs(x), 0) / r.length : null; };
     const mine = ag(a.id), tot = ag(null);
     if (mine != null && tot && (mine / tot < 0.8 || mine / tot > 1.25)) facts.push(["Agitation", trim1(mine / tot) + "× ton patrimoine", "en moyenne " + trim1(mine) + " % par mois, contre " + trim1(tot) + " %"]);
-    else {
-      const bm = all.slice(-12).map(mk => ({ mk, r: patMonthlyPerf(a.id, mk) })).filter(x => x.r != null).sort((p, q) => q.r - p.r)[0];
-      if (bm) facts.push(["Meilleur mois sur 12 mois", pgPct(bm.r), pdMonthYear(bm.mk) + " · " + pgSigned(patMonthlyGain(a.id, bm.mk) || 0)]);
-    }
   }
   /* Les mois, du plus récent au plus ancien, par paquets de douze. */
   const shown = 12 * (UI.paMore || 1), rowsAll = all.slice().reverse().filter(mk => patMonthlyPerf(a.id, mk) != null), rowsM = rowsAll.slice(0, shown);
+  const best12 = rowsAll.slice(0, 12).reduce((b, mk) => !b || patMonthlyPerf(a.id, mk) > patMonthlyPerf(a.id, b) ? mk : b, null);
   const sel = paSelection(rowsM), mx = Math.max(...rowsM.map(mk => Math.abs(patMonthlyPerf(a.id, mk))), 0.1);
   const rows = rowsM.map(mk => {
     let r = patMonthlyPerf(a.id, mk); if (Math.abs(r) < 0.05) r = 0;
     const e = patMonthlyGain(a.id, mk) || 0, v = patMovementsInMonth(a.id, mk), w = Math.max(0.6, Math.abs(r) / mx * 50);
     const yearBreak = mk === rowsM[0] || mk.slice(5) === "12" ? '<div class="pa-year">' + mk.slice(0, 4) + "</div>" : "";
-    return yearBreak + '<div class="pa-row' + (sel.indexOf(mk) >= 0 ? " on" : "") + '" data-mk="' + mk + '" role="button" tabindex="0">' +
-      '<span class="m">' + esc(MOIS_COURTS[+mk.slice(5) - 1]) + " " + mk.slice(2, 4) + "</span>" +
+    const isBest = mk === best12 && r > 0;
+    return yearBreak + '<div class="pa-row' + (sel.indexOf(mk) >= 0 ? " on" : "") + (isBest ? " best" : "") + '" data-mk="' + mk + '" role="button" tabindex="0"' + (isBest ? ' title="Meilleur mois sur 12 mois glissants"' : "") + ">" +
+      '<span class="m">' + esc(MOIS_COURTS[+mk.slice(5) - 1]) + " " + mk.slice(2, 4) + (isBest ? '<i class="star" aria-label="meilleur mois">★</i>' : "") + "</span>" +
       '<span class="bar"><i class="z"></i><i style="' + (r >= 0 ? "left:50%" : "right:50%") + ";width:" + pgF(w) + "%;background:" + (r > 0 ? "var(--pg-pos)" : r < 0 ? "var(--pg-neg)" : "var(--pg-line)") + '"></i></span>' +
       '<span class="p' + (r < 0 ? " dn" : r === 0 ? " zero" : "") + '">' + esc(r === 0 ? "0,0 %" : pgPct(r)) + '</span><span class="e">' + esc(Math.abs(e) < 0.5 ? "0 €" : pgSigned(e)) + '</span><span class="vs">' + (Math.abs(v) < 0.5 ? "—" : esc(v < 0 ? pgSigned(v) : fmtEurShort(v))) + "</span></div>";
   }).join("");
   const more = rowsAll.length > shown ? '<button class="pd-link pa-more-btn" data-act="pamore">Afficher 12 mois de plus</button>' : "";
   const note = lastMov && patMonthsBetween(lastMov, month) >= 12 ? "aucun versement depuis " + pdMonthYear(lastMov) : "";
-  const chips = pdChips([{ v: "3m", t: "3 mois" }, { v: "1y", t: "1 an" }, { v: "3y", t: "3 ans" }, { v: "5y", t: "5 ans" }, { v: "all", t: "Tout" }].map(c => ({ ...c, off: !enough(c.v) })), key, "parange");
-  const left = '<span class="pa-name">' + patSwatch(a, 11) + esc(a.name) + (record ? '<span class="badge-rec">★ record</span>' : "") + "</span>" +
+  const tabs = '<div class="pa-tabs" role="tablist">' + [["3m", "3 mois"], ["1y", "1 an"], ["3y", "3 ans"], ["5y", "5 ans"], ["all", "Max"]].map(([v, t]) =>
+    '<button role="tab" aria-selected="' + (v === key) + '" class="' + (v === key ? "on" : "") + '" data-act="parange" data-v="' + v + '"' + (enough(v) ? "" : " disabled") + ">" + t + "</button>").join("") + "</div>";
+  const upP = perf == null || perf >= 0, perTxt = key === "all" ? "depuis " + pgMonth(all[0], true) : "sur " + PA_LBL[key];
+  const left = '<section class="pa-quote"><span class="pa-name">' + patSwatch(a, 11) + esc(a.name) + (record ? '<span class="badge-rec">★ record</span>' : "") + "</span>" +
     '<span class="pa-value">' + esc(fmtEurShort(value)) + "</span>" +
-    '<div class="pd-stats">' + (perf != null ? pdStat(esc(pgPct(perf)), "de performance " + esc(per) + (ann != null ? " · " + esc(fmtRate(ann)) + " par an" : ""), perf < 0 ? "var(--pg-neg)" : "") : "") +
-      pdStat(esc(pgSigned(gains)), (gains < 0 ? "perdus " : "gagnés ") + esc(per), gains < 0 ? "var(--pg-neg)" : "var(--pg-pos)") + pdStat(esc(vers < -0.5 ? pgSigned(vers) : fmtEurShort(vers)), (vers < -0.5 ? "retirés " : "versés ") + esc(per)) + "</div>" +
-    '<div class="pa-chart"><div class="pa-chart-h">' + pdKey("var(--pg-ink)", "valeur") + pdKey("var(--pg-chev)", "versé") + '<span class="sp"></span>' + chips + "</div>" +
-      '<div class="fig">' + (ser.length > 1 ? pdStock(val, inv, labels, !record) : "") + "</div></div>" +
-    '<section class="pa-facts">' + facts.map(([t, v, s]) => "<div><span>" + esc(t) + "</span><b>" + esc(v) + "</b><span>" + esc(s) + "</span></div>").join("") + "</section>" + paTax(a, month);
+    '<div class="pa-chg">' + (perf != null ? '<span class="pill ' + (upP ? "up" : "dn") + '">' + (upP ? "↑" : "↓") + " " + esc(fmtPct(Math.abs(perf)).replace(/^[+−]/, "")) + "</span>" : "") +
+      '<span class="' + (gains < 0 ? "dn" : "up") + '">' + esc(pgSigned(gains)) + (gains < 0 ? " perdus " : " gagnés ") + esc(perTxt) + "</span>" +
+      (ann != null ? '<span class="pd-muted">· ' + esc(fmtRate(ann)) + " par an</span>" : "") + "</div>" +
+    tabs + '<div class="fig">' + (ser.length > 1 ? pdGChart(ser, val, inv) : "") + "</div>" +
+    '<div class="pa-legend"><span><i class="ln" style="background:' + (val[val.length - 1] >= val[0] ? "var(--pg-pos)" : "var(--pg-neg)") + '"></i>valeur</span><span><i class="dash"></i>versé</span></div></section>' +
+    (facts.length ? '<section class="pa-facts">' + facts.map(([t, v, s]) => "<div><span>" + esc(t) + "</span><b>" + esc(v) + "</b><span>" + esc(s) + "</span></div>").join("") + "</section>" : "") + paTax(a, month);
   const right = '<section class="pd-panel pa-months"><div class="pd-ph"><h2>Mois par mois</h2>' + (note ? "<span>" + esc(note) + "</span>" : "") + "</div>" +
     '<div id="pa-sum">' + paSummary(a, sel) + "</div>" +
     '<div class="pa-head"><span>mois</span><span></span><span>perf.</span><span>gain</span><span>versé</span></div><div class="pa-list" id="pa-list">' + rows + "</div>" + more +
