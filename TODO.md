@@ -18,7 +18,7 @@ Maquettes : https://claude.ai/artifact/7M3oL9JeMPBV9kdzUE8u8Y
 - **Intégration dans `index.html`**, onglet par onglet :
   - **Progrès** : l'écran (tuiles et bilan) est en place, à côté de l'Aperçu, styles cloisonnés sous `.pg`. Écran, animations, deux écrans glissants et pages de détail du bilan en place. Quand c'est validé, l'Aperçu disparaît.
   - **Comptes** : la saisie vivante est en place (onglet « Comptes ») ; l'ancien écran reste sous « Comptes (ancien) » jusqu'à validation. Il garde pour l'instant la fiscalité par compte et l'import CSV, absents de la maquette.
-  - Puis **Journal**.
+  - **Journal** : en place (maquette « Journal v2 ») : calendrier des mois, cumul par Ctrl + clic ou glisser, année entière au clic, résumé par compte en % ou en €. Le « récap » animé du mois reste à concevoir ; le lien de Progrès et de Comptes ouvre le Journal sur le mois.
 
 ## Données
 

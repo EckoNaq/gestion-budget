@@ -1573,7 +1573,8 @@ html[data-cb="1"][data-theme="dark"] .pg{--pg-pos:#6FA8F0;--pg-star:#6FA8F0;--pg
 .pg .chip-rec>i:not(.confetti){display:inline-block;width:9px;height:9px;border-radius:50%;background:#8FF0C2}
 .pg .confetti{position:absolute;inset:0;display:block;pointer-events:none}
 .pg .confetti b{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:2px;opacity:0}
-.pg .recap{margin-top:14px;font-weight:600;font-size:15px;color:#8FB3FF}
+.pg .recap{align-self:flex-start;margin-top:14px;padding:0;border:0;background:none;font:inherit;font-weight:600;font-size:15px;color:#8FB3FF;cursor:pointer;text-align:left}
+.pg .recap:hover{text-decoration:underline;text-underline-offset:3px}
 .pg .rng{display:flex;gap:6px}
 .pg .rng button{padding:7px 13px;border-radius:999px;border:0;font:inherit;font-weight:600;font-size:13.5px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);cursor:pointer}
 .pg .rng button.on{background:#FFFFFF;color:#14181F}
@@ -2231,6 +2232,81 @@ html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A21
   .pc .pc-row .cl-vers{grid-column:2 / 4;grid-row:2}
   .pc .pc-side{grid-template-columns:1fr}
   .pc .pc-set .two{grid-template-columns:1fr}
+}
+
+/* ---- Journal : tes mois (maquette « Journal v2 »), sous .pg.jn ---- */
+.pg.jn{--jn-up:#2A78D6;--jn-dn:#E8743B;--jn-upbg:#EAF2FC;--jn-dnbg:#FDEEE6;--jn-soft:#F3F4F6;--jn-nil:rgba(255,255,255,.45);--jn-ax:#C9CDD5}
+html[data-theme="dark"] .pg.jn{--jn-up:#6FA8F0;--jn-dn:#F0924F;--jn-upbg:#16273D;--jn-dnbg:#33241A;--jn-soft:#1F252F;--jn-nil:rgba(255,255,255,.04);--jn-ax:#3A414D}
+.jn .jn-wrap{max-width:1320px;margin:0 auto;padding:22px 0 40px}
+.jn .jn-body{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:22px;align-items:start}
+.jn .jn-cal{display:flex;flex-direction:column;gap:6px;min-width:0}
+.jn .jh{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.jn .jh h1{margin:0;font-weight:700;font-size:30px;letter-spacing:-.03em}
+.jn .lg{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--pg-muted)}
+.jn .lg i{display:inline-block;width:64px;height:12px;border-radius:3px}
+.jn .yr{display:grid;grid-template-columns:54px repeat(12,minmax(0,1fr)) 84px;gap:6px;align-items:center}
+.jn .yr.mh{font-size:12.5px;font-weight:600;color:var(--pg-faint);margin-bottom:2px}
+.jn .yr.mh span{text-align:center}
+.jn .y{justify-self:start;margin-left:-10px;padding:6px 10px;border:0;border-radius:10px;background:color-mix(in oklab, var(--pg-tile) 70%, transparent);font:inherit;font-size:16px;font-weight:700;color:var(--pg-ink);cursor:pointer;transition:background .2s, color .2s}
+.jn .y:hover{background:var(--pg-tile)}
+.jn .y.on{background:var(--pg-ink);color:var(--pg-tile)}
+.jn .c{height:60px;min-width:0;border:0;border-radius:12px;padding:0;display:grid;place-items:center;font:inherit;font-size:13.5px;font-weight:700;color:var(--pg-ink);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;transition:box-shadow .15s, transform .15s}
+.jn .c:hover{transform:translateY(-1px);box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--pg-ink) 35%, transparent)}
+.jn .c.on{box-shadow:inset 0 0 0 2.5px var(--pg-ink)}
+.jn .c.nil{background:var(--jn-nil);cursor:default}
+.jn .c:focus-visible{outline:2px solid var(--pg-blue);outline-offset:2px}
+.jn .yp{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.jn .yp b{font-size:16px;font-variant-numeric:tabular-nums}
+.jn .yp small{font-size:12px;color:var(--pg-faint)}
+.jn .hint{margin-top:10px}
+.jn .jtip{font-size:13.5px;font-weight:600;color:var(--pg-faint)}
+.jn .chip{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border-radius:999px;background:var(--pg-ink);color:var(--pg-tile);font-size:13.5px;font-weight:600}
+.jn .chip small{font-size:13.5px;opacity:.6}
+
+.jn .jn-panel{position:sticky;top:20px;min-height:560px;border-radius:26px;background:var(--pg-tile);padding:24px 26px;box-shadow:var(--pg-sh);display:flex;flex-direction:column;gap:16px;animation:jn-in .3s ease both}
+@keyframes jn-in{from{opacity:.4;transform:translateY(4px)}}
+.jn .ph{display:flex;flex-direction:column;gap:4px}
+.jn .ph span{font-weight:600;font-size:15px;color:var(--pg-muted)}
+.jn .ph h2{margin:0;font-weight:700;font-size:26px;letter-spacing:-.03em;line-height:1.1}
+.jn .blks{display:flex;gap:10px}
+.jn .blk{flex:1 1 0;min-width:0;padding:14px 16px;border-radius:18px;background:var(--jn-soft);display:flex;flex-direction:column;gap:4px}
+.jn .blk.bup{background:var(--jn-upbg)}
+.jn .blk.bdn{background:var(--jn-dnbg)}
+.jn .blk span,.jn .blk small{font-size:13px;font-weight:600;color:var(--pg-muted)}
+.jn .blk small{font-size:13.5px}
+.jn .blk b{font-size:28px;letter-spacing:-.03em;line-height:1;white-space:nowrap}
+.jn .acc{display:flex;flex-direction:column}
+.jn .ah{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px}
+.jn .ah>span{font-size:13px;font-weight:600;color:var(--pg-muted)}
+.jn .unit{display:inline-flex;padding:3px;border-radius:999px;background:var(--jn-soft)}
+.jn .unit button{padding:4px 12px;border:0;border-radius:999px;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--pg-muted);cursor:pointer}
+.jn .unit button.on{background:var(--pg-tile);color:var(--pg-ink);box-shadow:0 1px 2px rgba(17,19,24,.12)}
+.jn .ar{display:grid;grid-template-columns:110px minmax(0,1fr) 78px 70px;gap:10px;align-items:center;height:36px;border-top:1px solid var(--pg-line)}
+.jn .ar.hd{height:auto;padding-bottom:6px;border-top:0;font-size:12.5px;font-weight:600;color:var(--pg-faint)}
+.jn .ar.hd span{text-align:right}
+.jn .an{display:flex;align-items:center;gap:7px;min-width:0;font-size:14px;font-weight:600}
+.jn .an em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jn .ab{position:relative;height:12px}
+.jn .ax{position:absolute;left:50%;top:-5px;bottom:-5px;width:1px;background:var(--jn-ax)}
+.jn .av{position:absolute;top:0;bottom:0;transition:width .4s cubic-bezier(.3,.8,.3,1)}
+.jn .av.up{left:50%;border-radius:0 4px 4px 0;background:var(--jn-up)}
+.jn .av.dn{right:50%;border-radius:4px 0 0 4px;background:var(--jn-dn)}
+.jn .ar>b{text-align:right;font-size:14px;font-variant-numeric:tabular-nums}
+.jn .vs{text-align:right;font-size:13.5px;color:var(--pg-muted);font-variant-numeric:tabular-nums}
+.jn .vs.nil{color:var(--jn-ax)}
+.jn .note{margin:0;font-size:12.5px;color:var(--pg-faint)}
+.jn .pf{margin-top:auto;display:flex;gap:8px}
+.jn .rc{height:40px;padding:0 16px;border:0;border-radius:999px;background:var(--pg-ink);color:var(--pg-tile);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.jn .clr{height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--pg-line);background:var(--pg-tile);color:var(--pg-ink);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.jn .jn-panel{animation:none}.jn .c{transition:none}}
+@media (max-width:1180px){
+  .jn .jn-body{grid-template-columns:minmax(0,1fr)}
+  .jn .jn-panel{position:static;min-height:0}
+}
+@media (max-width:760px){
+  .jn .yr{grid-template-columns:44px repeat(12,minmax(0,1fr)) 60px;gap:3px}
+  .jn .c{height:44px;font-size:10.5px;border-radius:8px}
+  .jn .yr.mh{font-size:10px}
 }
 </style>
 </head>
@@ -3396,7 +3472,7 @@ function render() {
   /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
      barre latérale n'indiquerait plus où l'on se trouve. */
   const navItem = ([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "patprogres" && (UI.view === "pgdetail" || UI.view === "pgacct" || UI.view === "pgcomptes")) || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "patprogres" && (UI.view === "pgdetail" || UI.view === "pgacct" || UI.view === "pgcomptes" || UI.view === "journal")) || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
@@ -3422,6 +3498,7 @@ function render() {
     : UI.view === "pathome" ? viewPatrimoineHome()
     : UI.view === "patanalyse" ? viewPatAnalyse()
     : UI.view === "pgcomptes" ? viewPgComptes()
+    : UI.view === "journal" ? viewPgJournal()
     : UI.view === "pat" ? viewPatrimoine()
     : UI.view === "patcredits" ? viewPatCredits()
     : UI.view === "patacct" ? viewPatAccount()
@@ -7733,12 +7810,10 @@ window.addEventListener("scroll", () => {
 const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
 /* Le dernier mois saisi, celui que montre Progrès. */
-/* Les onglets du Patrimoine (maquette) : Progrès, Journal, Comptes. Le Journal arrive. */
+/* Les onglets du Patrimoine (maquette) : Progrès, Journal, Comptes. */
 function pgTabs(on) {
   const t = [["patprogres", "Progrès"], ["journal", "Journal"], ["pgcomptes", "Comptes"]];
-  return '<nav class="pg-tabs" aria-label="Patrimoine">' + t.map(([id, nm]) => id === "journal"
-    ? '<button type="button" disabled title="Bientôt">' + nm + "</button>"
-    : '<button type="button"' + (id === on ? ' class="on" aria-current="page"' : "") + ' data-act="view" data-view="' + id + '">' + nm + "</button>").join("") + "</nav>";
+  return '<nav class="pg-tabs" aria-label="Patrimoine">' + t.map(([id, nm]) => '<button type="button"' + (id === on ? ' class="on" aria-current="page"' : "") + ' data-act="view" data-view="' + id + '">' + nm + "</button>").join("") + "</nav>";
 }
 function pgLastMonth() {
   const today = monthKey(todayISO());
@@ -7817,7 +7892,7 @@ function viewPatProgres() {
       '<div style="margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
         (record ? '<span class="chip-rec"><i class="confetti">' + conf + "</i><i></i>Nouveau record</span>" : "") +
         (gainM != null ? '<span style="font-weight:600;font-size:17px;color:rgba(255,255,255,.62)">' + esc(pgSigned(gainM)) + " de gains en " + esc(mName) + pgHeroPct(perfM) + "</span>" : "") + "</div>" +
-      '<span class="recap">▶ Revoir le récap de ' + esc(mName) + "</span>" +
+      '<button type="button" class="recap" data-jnact="open" data-mk="' + month + '">▶ Revoir le récap de ' + esc(mName) + "</button>" +
       '<div style="margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:relative;z-index:1">' +
         '<div class="rng">' + PG_RANGES.map(r => '<button class="' + (r[0] === rp.key ? "on" : "") + '" data-act="pgrange" data-range="' + r[0] + '">' + r[1] + "</button>").join("") + "</div>" +
         rp.text + "</div>" + rp.chart + "</div>";
@@ -8723,7 +8798,7 @@ function pcCard(k) {
   if (pcClosedNow(k)) return '<div class="done-in"><span class="ok-lbl">' + esc(mName) + " est bouclé ✓</span>" +
     '<b class="tot">' + esc(pcEur(k.tot)) + "</b>" +
     '<span class="said">' + esc(pcEur(k.delta, 0, true)) + " ce mois, dont <b>" + esc(pcEur(k.vers)) + "</b> versés.</span>" +
-    '<button type="button" class="go ready" data-act="view" data-view="patprogres">Voir le récap ›</button>' +
+    '<button type="button" class="go ready" data-jnact="open" data-mk="' + k.month + '">Voir le récap ›</button>' +
     '<button type="button" class="redo" data-pcact="reopen">Modifier la saisie</button></div>';
   const cur = k.month === monthKey(todayISO());
   return '<span class="clbl">' + esc(mName) + (cur ? ", en cours" : ", à boucler") + "</span>" +
@@ -9011,6 +9086,196 @@ document.addEventListener("click", e => {
     setTimeout(() => { const c = document.querySelector(".pc-card"); pcBurst(document.querySelector(".fx-card"), c ? c.offsetWidth / 2 : 128, 120, 40, 130); }, 60);
   }
   else if (act === "reopen") { UI.pcClosed[month] = 0; UI.pcTouched[month] = 1; render(); }
+});
+
+/* ---- Journal : tes mois, d'un coup d'œil -----------------------------------------
+   Reprise de la maquette « Journal v2 » (v10). Une case par mois, teintée selon sa
+   performance : bleu pour une hausse, orange pour une baisse, plus franc quand le mois est
+   fort. Un clic choisit un mois, Ctrl + clic ou un glissé en cumule plusieurs, un clic sur
+   l'année la prend en entier. Le panneau de droite résume la sélection, compte par compte.
+
+   La mesure est la même que dans Progrès, la méthode de Dietz modifiée : pour un mois, une
+   suite de mois ou une année, le gain rapporté au capital réellement exposé. Une sélection
+   faite de mois disjoints ne forme pas une période : leurs rendements sont alors chaînés
+   (produit des 1 + r), la façon admise de relier des périodes séparées. */
+
+/* Bleu pour les hausses, orange pour les baisses : une paire que les daltoniens
+   distinguent, et l'intensité suit l'ampleur (pleine à 8 % dans un sens ou l'autre). */
+function jnTint(r) {
+  const a = Math.min(1, Math.abs(r) / 8);
+  return r >= 0 ? "rgba(42,120,214," + (0.12 + a * 0.5).toFixed(2) + ")" : "rgba(232,116,59," + (0.14 + a * 0.52).toFixed(2) + ")";
+}
+function jnNum(x) { const t = Math.round(x * 10); return (t < 0 ? "−" : t > 0 ? "+" : "") + Math.abs(x).toFixed(1).replace(".", ","); }
+function jnLong(mk) { return MONTHS[+mk.slice(5) - 1] + " " + mk.slice(0, 4); }
+
+/* Les mois qui ont une performance : une valeur ce mois-là et le mois d'avant. */
+function jnMonths() {
+  const last = pgLastMonth(), out = [];
+  let first = null;
+  Object.values(DB.patValues || {}).forEach(v => Object.keys(v || {}).forEach(k => { if (!first || k < first) first = k; }));
+  if (!first) return out;
+  for (let mk = addMonth(first, 1); mk <= last; mk = addMonth(mk, 1)) if (patHasHistoryAt(addMonth(mk, -1))) out.push(mk);
+  return out;
+}
+/* Le chiffre d'un mois. Mis en cache le temps d'un rendu : le cache est vidé à chaque affichage. */
+const JN_CACHE = { m: {} };
+function jnMonth(mk) {
+  if (JN_CACHE.m[mk]) return JN_CACHE.m[mk];
+  const prevM = addMonth(mk, -1), dz = pgDietz(null, prevM, mk);
+  return (JN_CACHE.m[mk] = { mk, r: dz.r == null ? 0 : dz.r, gain: dz.gain, vers: dz.flows, total: patTotalAt(mk), prev: patTotalAt(prevM) });
+}
+/* Le titre d'un mois, comme dans la maquette : ce qui s'y est passé de plus marquant. */
+function jnTitle(mk, all) {
+  const x = jnMonth(mk), i = all.indexOf(mk), before = all.slice(0, i);
+  const rec = m => { const j = all.indexOf(m), t = jnMonth(m).total; return all.slice(0, j).every(p => jnMonth(p).total < t) && jnMonth(addMonth(all[0], -1)).total < t; };
+  const record = rec(mk);
+  const palier = Math.floor(x.total / 10000) > Math.floor(x.prev / 10000) ? Math.floor(x.total / 10000) * 10000 : null;
+  const accs = (DB.patAccounts || []).filter(a => patAccountValue(a.id, mk) != null);
+  const big = accs.map(a => patMovementsInMonth(a.id, mk)).some(v => v >= 2000);
+  const yearRs = all.filter(m => m.slice(0, 4) === mk.slice(0, 4) && m <= mk).map(m => jnMonth(m).r);
+  const biggest = accs.slice().sort((p, q) => (patAccountValue(q.id, mk) || 0) - (patAccountValue(p.id, mk) || 0))[0];
+  const side = accs.filter(a => a !== biggest && patAccountValue(a.id, addMonth(mk, -1)) != null).map(a => { const d = pgDietz(a.id, addMonth(mk, -1), mk); return { a, e: d.gain, r: d.r }; })
+    .filter(s => s.r != null && Math.abs(s.e) >= 300 && Math.abs(s.r) >= 8).sort((p, q) => Math.abs(q.e) - Math.abs(p.e))[0];
+  const lastRec = before.filter(rec).pop(), gap = lastRec ? i - all.indexOf(lastRec) : 99;
+  if (palier) return "Cap des " + pcNum(palier, 0) + " €";
+  if (x.r <= -3) return "Mois difficile";
+  if (big) return "Gros versement";
+  if (x.r >= 2 && yearRs.length > 1 && x.r === Math.max(...yearRs)) return "Meilleur mois de l’année";
+  if (side) return side.a.name + " " + pcPct(side.r);
+  if (record) return gap >= 3 ? "De retour au sommet" : gap === 1 ? "Encore plus haut" : "Nouveau record";
+  return x.r < 0 ? "Léger repli" : "Mois calme";
+}
+/* Le résumé d'une sélection : performance, gain, versé, et le détail par compte. */
+function jnSummary(sel) {
+  const contig = sel.every((mk, i) => !i || mk === addMonth(sel[i - 1], 1)), from = addMonth(sel[0], -1), to = sel[sel.length - 1];
+  const measure = id => {
+    if (contig) { const d = pgDietz(id, from, to); return { r: d.r, gain: d.gain, vers: d.flows }; }
+    let c = 1, gain = 0, vers = 0, any = false;
+    sel.forEach(mk => { const d = pgDietz(id, addMonth(mk, -1), mk); gain += d.gain; vers += d.flows; if (d.r != null) { c *= 1 + d.r / 100; any = true; } });
+    return { r: any ? (c - 1) * 100 : null, gain, vers };
+  };
+  const tot = measure(null);
+  const acc = (DB.patAccounts || []).filter(a => patIsValued(a) && (patAccountValue(a.id, to) != null) && (patAccountValue(a.id, to) > 0.5 || patAccountValue(a.id, from) > 0.5 || sel.some(mk => patMovementsInMonth(a.id, mk))))
+    .map(a => ({ a, val: patAccountValue(a.id, to) || 0, ...measure(a.id) })).sort((p, q) => q.val - p.val);
+  return { contig, r: tot.r == null ? 0 : tot.r, gain: tot.gain, vers: tot.vers, acc };
+}
+
+function jnPanel(sel, year, all) {
+  const S = jnSummary(sel), one = sel.length === 1 && !year, first = sel[0], last = sel[sel.length - 1], pctMode = (UI.jnUnit || "%") === "%";
+  const cur = monthKey(todayISO()).slice(0, 4);
+  const head = year ? "Ton année " + year + (year === cur ? ", jusqu’ici" : "") : one ? pcCap(jnLong(first)) :
+    sel.length + " mois · " + MOIS_COURTS[+first.slice(5) - 1] + (first.slice(0, 4) !== last.slice(0, 4) ? " " + first.slice(0, 4) : "") + " → " + jnLong(last);
+  const title = year ? "L’année en bref" : one ? jnTitle(first, all) : "La période en bref";
+  const main = pctMode ? pcPct(S.r) : pcEur(S.gain, 0, true), other = pctMode ? pcEur(S.gain, 0, true) + " de gains" : pcPct(S.r) + " de rendement";
+  const block = (cls, lbl, big, small) => '<div class="blk ' + cls + '"><span>' + lbl + "</span><b>" + esc(big) + "</b><small>" + esc(small) + "</small></div>";
+  const val = x => pctMode ? (x.r == null ? 0 : x.r) : x.gain, fmt = x => pctMode ? pcPct(x.r) : pcEur(x.gain, 0, true);
+  const mx = Math.max(...S.acc.map(x => Math.abs(val(x))), 0.01);
+  const rows = S.acc.map(x => {
+    const v = val(x), w = Math.max(0.6, Math.abs(v) / mx * 50).toFixed(1), zero = pctMode ? Math.round(v * 10) === 0 : Math.abs(v) < 0.5;
+    return '<div class="ar"><span class="an">' + patSwatch(x.a, 9) + "<em>" + esc(x.a.name) + "</em></span>" +
+      '<span class="ab"><i class="ax"></i><i class="av ' + (v >= 0 ? "up" : "dn") + '" style="width:' + w + '%"></i></span>' +
+      '<b class="' + (zero ? "" : v >= 0 ? "up" : "dn") + '">' + (zero ? "—" : esc(fmt(x))) + "</b>" +
+      '<span class="vs' + (Math.abs(x.vers) < 0.5 ? " nil" : "") + '">' + (Math.abs(x.vers) < 0.5 ? "—" : esc(pcEur(x.vers))) + "</span></div>";
+  }).join("");
+  const seg = '<span class="unit" role="group" aria-label="Unité">' + ["%", "€"].map(u => '<button type="button" data-jnact="unit" data-u="' + u + '"' + (u === (UI.jnUnit || "%") ? ' class="on" aria-pressed="true"' : ' aria-pressed="false"') + ">" + u + "</button>").join("") + "</span>";
+  const btn = year ? '<button type="button" class="rc" data-jnact="recap">▶ Revoir le récap de l’année</button>'
+    : one ? '<button type="button" class="rc" data-jnact="recap">▶ Revoir le récap</button>'
+    : '<button type="button" class="clr" data-jnact="clear">Effacer la sélection</button>';
+  return '<section class="jn-panel"><div class="ph"><span>' + esc(head) + "</span><h2>" + esc(title) + "</h2></div>" +
+    '<div class="blks">' + block(S.gain >= -0.5 ? "bup" : "bdn", "Performance", main, other) + block("", "Versé", pcEur(S.vers), Math.abs(S.vers) >= 0.5 ? "net des retraits" : "aucun versement") + "</div>" +
+    '<div class="acc"><div class="ah"><span>Par compte</span>' + seg + '</div><div class="ar hd"><span></span><span></span><span>perf</span><span>versé</span></div>' + rows + "</div>" +
+    (S.contig ? "" : '<p class="note">Mois disjoints : leurs rendements sont chaînés.</p>') +
+    '<div class="pf">' + btn + "</div></section>";
+}
+
+function viewPgJournal() {
+  JN_CACHE.m = {};
+  const all = jnMonths(), html0 = '<div class="pg jn"><div class="jn-wrap"><div class="pg-head">' + pgTabs("journal") + "</div>";
+  if (!all.length) return html0 + patNoAccounts("Il faut deux mois saisis pour voir ton premier mois ici. Commence par l’onglet <b class='inl'>Comptes</b>.") + "</div></div>";
+  const set = new Set(all);
+  UI.jnSel = (UI.jnSel || []).filter(mk => set.has(mk));
+  if (!UI.jnSel.length) { UI.jnSel = [all[all.length - 1]]; UI.jnYear = null; }
+  const sel = UI.jnSel, on = new Set(sel), year = UI.jnYear || null;
+  const cur = monthKey(todayISO()).slice(0, 4), y0 = +all[0].slice(0, 4), y1 = +all[all.length - 1].slice(0, 4);
+  const years = []; for (let y = y1; y >= y0; y--) years.push(String(y));
+  const cell = mk => {
+    if (!set.has(mk)) return '<span class="c nil"></span>';
+    const x = jnMonth(mk);
+    return '<button type="button" class="c' + (on.has(mk) ? " on" : "") + '" data-mk="' + mk + '" style="background:' + jnTint(x.r) + '" aria-pressed="' + on.has(mk) + '" aria-label="' + esc(jnLong(mk)) + " : " + esc(pcPct(x.r)) + '">' + jnNum(x.r) + "</button>";
+  };
+  const row = y => {
+    const ms = all.filter(mk => mk.startsWith(y)), r = pgDietz(null, y === all[0].slice(0, 4) ? addMonth(all[0], -1) : (+y - 1) + "-12", ms[ms.length - 1]).r;
+    const sub = y === cur ? "en cours" : ms.length < 12 && y === all[0].slice(0, 4) ? ms.length + " mois" : "l’année";
+    return '<div class="yr"><button type="button" class="y' + (year === y ? " on" : "") + '" data-jnact="year" data-y="' + y + '" aria-pressed="' + (year === y) + '" title="Voir toute l’année">' + y + "</button>" +
+      Array.from({ length: 12 }, (_, j) => cell(y + "-" + pad2(j + 1))).join("") +
+      '<span class="yp"><b class="' + (r == null ? "" : r >= 0 ? "up" : "dn") + '">' + (r == null ? "—" : jnNum(r) + " %") + "</b><small>" + sub + "</small></span></div>";
+  };
+  const legend = '<span class="lg">baisse<i style="background:linear-gradient(90deg,' + jnTint(-7) + "," + jnTint(-0.5) + "," + jnTint(0.5) + "," + jnTint(7) + ')"></i>hausse · en % du mois</span>';
+  const hint = sel.length > 1 && !year ? '<span class="chip">' + sel.length + " mois sélectionnés<small>Échap pour effacer</small></span>"
+    : '<span class="jtip">Clique sur une année pour la voir en entier · Ctrl + clic ou glisse sur des mois pour les cumuler</span>';
+  return html0 + '<div class="jn-body"><div class="jn-cal"><div class="jh"><h1>Tes mois</h1>' + legend + "</div>" +
+    '<div class="yr mh"><span></span>' + MOIS_COURTS.map(m => "<span>" + m + "</span>").join("") + "<span></span></div>" +
+    years.map(row).join("") + '<div class="hint">' + hint + "</div></div>" + jnPanel(sel, year, all) + "</div></div></div>";
+}
+
+/* ---- Choisir des mois : clic, Ctrl + clic, Maj + clic, ou glisser ---- */
+let JN_DRAG = null;
+function jnSpan(a, b) {
+  const all = jnMonths(), [p, q] = a <= b ? [a, b] : [b, a];
+  return all.filter(mk => mk >= p && mk <= q);
+}
+function jnPaint(list) {
+  const s = new Set(list);
+  document.querySelectorAll(".jn .c[data-mk]").forEach(c => c.classList.toggle("on", s.has(c.dataset.mk)));
+}
+function jnSet(list, year) {
+  UI.jnSel = Array.from(new Set(list)).sort(); UI.jnYear = year || null;
+  render();
+}
+document.addEventListener("pointerdown", e => {
+  const c = e.target.closest && e.target.closest(".jn .c[data-mk]"); if (!c || e.button) return;
+  e.preventDefault();
+  const add = e.ctrlKey || e.metaKey;
+  JN_DRAG = { a: c.dataset.mk, b: c.dataset.mk, add, shift: e.shiftKey, base: add && !UI.jnYear ? (UI.jnSel || []).slice() : [], moved: false };
+});
+document.addEventListener("pointermove", e => {
+  if (!JN_DRAG) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY), c = el && el.closest && el.closest(".jn .c[data-mk]");
+  if (!c || c.dataset.mk === JN_DRAG.b) return;
+  JN_DRAG.b = c.dataset.mk; JN_DRAG.moved = true;
+  jnPaint(JN_DRAG.base.concat(jnSpan(JN_DRAG.a, JN_DRAG.b)));
+});
+document.addEventListener("pointerup", () => {
+  if (!JN_DRAG) return;
+  const d = JN_DRAG; JN_DRAG = null;
+  if (d.moved) { UI.jnAnchor = d.a; return jnSet(d.base.concat(jnSpan(d.a, d.b))); }
+  const mk = d.a, cur = UI.jnYear ? [] : (UI.jnSel || []);
+  if (d.shift && UI.jnAnchor) return jnSet(jnSpan(UI.jnAnchor, mk));
+  UI.jnAnchor = mk;
+  if (d.add) { const s = cur.indexOf(mk) >= 0 ? cur.filter(x => x !== mk) : cur.concat(mk); return jnSet(s.length ? s : [mk]); }
+  jnSet([mk]);
+});
+document.addEventListener("click", e => {
+  /* Au clavier (Entrée, Espace), un clic sans pointeur : il choisit le mois seul, ou l'ajoute avec Ctrl. */
+  const c = e.target.closest && e.target.closest(".jn .c[data-mk]");
+  if (c && e.detail === 0) {
+    const mk = c.dataset.mk, cur = UI.jnYear ? [] : (UI.jnSel || []);
+    if (e.ctrlKey || e.metaKey) { const s = cur.indexOf(mk) >= 0 ? cur.filter(x => x !== mk) : cur.concat(mk); jnSet(s.length ? s : [mk]); } else jnSet([mk]);
+    return;
+  }
+  const el = e.target.closest && e.target.closest("[data-jnact]"); if (!el) return;
+  const act = el.dataset.jnact;
+  if (act === "year") { const y = el.dataset.y; jnSet(jnMonths().filter(mk => mk.startsWith(y)), y); }
+  else if (act === "unit") { UI.jnUnit = el.dataset.u; render(); }
+  else if (act === "clear") { const all = jnMonths(); jnSet(all.length ? [all[all.length - 1]] : []); }
+  else if (act === "recap") toast("Le récap animé arrive bientôt.");
+  /* Depuis Progrès ou Comptes : le Journal, ouvert sur le mois en question. */
+  else if (act === "open") { UI.jnSel = [el.dataset.mk]; UI.jnYear = null; UI.view = "journal"; render(); window.scrollTo(0, 0); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && UI.view === "journal" && ((UI.jnSel || []).length > 1 || UI.jnYear)) {
+    const all = jnMonths(); jnSet(all.length ? [all[all.length - 1]] : []);
+  }
 });
 /* ---- Jalons ---------------------------------------------------------------
    Acquis en couleur, à venir en grisé, avec la distance qui reste. Un jalon barré sans
