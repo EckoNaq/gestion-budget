@@ -1472,7 +1472,7 @@ html[data-theme="dark"] .v2{
   --pg-orange:#E8743B; --pg-violet:#5B4BC4; --pg-blue:#2A78D6; --pg-amber:#C98A00;
   --pg-pos:#13875E; --pg-star:#13955C; --pg-neg:#D0453C; --pg-goal:#0C6B42;
   font-family:"Archivo",system-ui,sans-serif; font-variation-settings:"wdth" 100; color:var(--pg-ink);
-  margin:-22px -26px -60px; padding:22px 26px 60px; background:var(--pg-bg); min-height:100vh;
+  margin:-22px -26px -60px; padding:0 26px; background:var(--pg-bg); min-height:100vh;
 }
 html[data-theme="dark"] .pg{
   --pg-bg:#0E1116; --pg-tile:#171C24; --pg-ink:#E7EAF0; --pg-muted:#AEB5C2; --pg-faint:#7E8696;
@@ -1486,11 +1486,27 @@ html[data-theme="dark"] .pg{
 .pg .state{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--pg-tile);box-shadow:var(--pg-sh);font:inherit;font-weight:600;font-size:15px;color:var(--pg-muted);cursor:pointer}
 .pg .state i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#13955C}
 .pg .state.todo i{background:#E59A3A}
-.pg .top{height:clamp(600px, calc(100vh - 140px), 760px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:16px}
-.pg .bil-h{display:flex;flex-direction:column;gap:6px;margin:44px 0 22px}
+/* Deux écrans calés sur la fenêtre : la partie haute, puis le bilan. Le défilement
+   s'accroche à l'un ou à l'autre, jamais entre les deux. */
+html:has(.pg .s1){scroll-snap-type:y mandatory}
+.main:has(> .pg){max-width:none}
+.pg .scr{position:relative;scroll-snap-align:start;scroll-snap-stop:always;height:100vh;min-height:600px;display:flex;flex-direction:column;padding:22px 0 24px;max-width:1720px;margin:0 auto}
+.pg .s1{padding-bottom:54px}
+.pg .pg-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
+.pg .pg-head h1{font-size:19px;font-weight:700}
+.pg .to-bil{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--pg-faint);font:inherit;font-weight:600;font-size:13px;cursor:pointer}
+.pg .to-bil:hover{background:var(--pg-tile);color:var(--pg-ink)}
+.pg .to-bil i{font-style:normal;font-size:16px;line-height:1;transform:translateY(-3px)}
+@media (prefers-reduced-motion:no-preference){.pg .to-bil i{animation:pg-nudge 2.4s ease-in-out infinite}}
+@keyframes pg-nudge{0%,100%{transform:translateY(-3px)}50%{transform:translateY(1px)}}
+.pg .top{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:16px}
+.pg .bil-h{display:flex;flex-direction:column;gap:6px;margin:6px 0 18px}
 .pg .bil-h h2{margin:0;font-weight:700;font-size:34px;letter-spacing:-.03em}
 .pg .bil-h span{font-weight:600;font-size:17px;color:var(--pg-muted)}
-.pg .bil{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(330px,auto);gap:16px}
+.pg .bil{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:16px}
+/* Les graphiques prennent la place qui reste dans leur tuile, sans jamais la déborder. */
+.pg .fig{flex:1 1 0;min-height:0;display:flex;align-items:flex-end}
+.pg .fig>svg{width:100%;height:100%;max-height:100%}
 .pg .t{position:relative;display:flex;flex-direction:column;min-width:0;border-radius:24px;background:var(--pg-tile);color:var(--pg-ink);padding:22px 24px 18px;box-shadow:var(--pg-sh);border:0;font:inherit;text-align:left;text-decoration:none;transition:transform .25s ease, box-shadow .25s ease}
 .pg .t:hover{transform:translateY(-3px);box-shadow:0 14px 30px -14px rgba(17,19,24,.28)}
 .pg button.t,.pg a.t{cursor:pointer}
@@ -1499,6 +1515,8 @@ html[data-theme="dark"] .pg{
 .pg .lbl::before{content:"";display:inline-block;flex:none;width:10px;height:10px;border-radius:3px;background:var(--dot)}
 .pg .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .pg .chev{font-size:18px;color:var(--pg-chev)}
+.pg .pbig{font-weight:700;font-size:clamp(38px,min(3.6vw,6.2vh),76px);line-height:.9;letter-spacing:-.045em}
+.pg .rbig{margin-top:12px;font-weight:700;font-size:clamp(34px,min(3vw,5.4vh),64px);line-height:.9;letter-spacing:-.045em}
 .pg .ttl{margin-top:10px;font-weight:700;font-size:30px;line-height:1.05;letter-spacing:-.03em}
 .pg .sp{flex-grow:1}
 .pg .foot{margin-top:10px;font-size:13px;color:var(--pg-faint)}
@@ -1509,7 +1527,7 @@ html[data-theme="dark"] .pg{
 .pg .t-pat{background:var(--pg-hero);color:#FFFFFF;padding:30px 32px 0;overflow:hidden;border-radius:28px}
 .pg .t-pat .lbl{font-size:18px;color:rgba(255,255,255,.6)}
 .pg .t-pat .lbl::before{display:none}
-.pg .flip{margin-top:14px;font-weight:700;font-size:clamp(64px,7.4vw,104px);line-height:.9!important;letter-spacing:-.045em;display:inline-flex;align-items:flex-start}
+.pg .flip{margin-top:14px;font-weight:700;font-size:clamp(52px,min(6.6vw,11vh),120px);line-height:.9!important;letter-spacing:-.045em;display:inline-flex;align-items:flex-start}
 .pg .fd{display:inline-block;height:1em;overflow:hidden;vertical-align:top}
 .pg .fs{display:flex;flex-direction:column;transform:translateY(calc(var(--i) * -1em))}
 .pg .fs>span{display:block;height:1em;line-height:1}
@@ -1526,8 +1544,8 @@ html[data-theme="dark"] .pg{
 /* Plus gros compte */
 .pg .badge-rec{padding:4px 10px;border-radius:999px;background:#DFF3E7;color:#0C6B42;font-size:12.5px;font-weight:700;white-space:nowrap}
 html[data-theme="dark"] .pg .badge-rec{background:#12301F;color:#3FBF8F}
-.pg .pea-chart{position:relative}
-.pg .pea-gain{position:absolute;font-size:13px;font-weight:700;color:var(--pg-orange);white-space:nowrap;opacity:0;pointer-events:none;counter-reset:pgk var(--pgk) pgu var(--pgu)}
+.pg .pea-chart{margin-top:8px}
+.pg .pea-gain{display:inline-block;font-size:13px;font-weight:700;color:var(--pg-orange);white-space:nowrap;opacity:0;pointer-events:none;counter-reset:pgk var(--pgk) pgu var(--pgu)}
 .pg .pea-gain .ck::after{content:counter(pgk)}
 .pg .pea-gain .cu::after{content:counter(pgu,pgpad3)}
 .pg .pea-gain.small .cu::after{content:counter(pgu)}
@@ -1568,7 +1586,7 @@ html[data-theme="dark"] .pg .pause.go{background:#1C2A40;color:#9CC4F5}
 .pg .cols{display:flex;gap:10px}
 .pg .col{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:6px}
 .pg .col>b{font-size:16px}
-.pg .col .bx{width:46px;height:100px;display:flex;align-items:flex-end}
+.pg .col .bx{width:clamp(46px,3.4vw,72px);height:clamp(100px,16vh,240px);display:flex;align-items:flex-end}
 .pg .col .bar{display:block;width:100%;border-radius:6px 6px 0 0}
 .pg .col .y{font-weight:600;font-size:14px}
 .pg .col .v{font-size:12.5px;color:var(--pg-faint)}
@@ -1703,13 +1721,57 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
   .pg .t-marches:hover .mrow.silver .mbar{background:linear-gradient(100deg,#9AA3B2 30%,#E6EAF0 50%,#9AA3B2 70%)!important;background-size:250% 100%!important;box-shadow:0 0 12px rgba(154,163,178,.5);animation:pg-grow .5s .06s both, pg-sheen 1.8s 1s linear infinite}
   .pg .t-marches:hover .mrow.bronze .mbar{background:linear-gradient(100deg,#C46E2F 30%,#F3B98A 50%,#C46E2F 70%)!important;background-size:250% 100%!important;box-shadow:0 0 12px rgba(196,110,47,.5);animation:pg-grow .5s .12s both, pg-sheen 1.8s 1.1s linear infinite}
 }
-@media (max-width:1100px){
-  .pg .top{height:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(320px,auto)}
+/* Grand écran : un peu plus d'air et des titres qui suivent. */
+@media (min-width:1700px) and (min-height:900px){
+  .pg .top,.pg .bil{gap:20px}
+  .pg .ttl{font-size:clamp(34px,2vw,44px)}
+  .pg .t{padding:28px 30px 24px}
+  .pg .lbl{font-size:18px}
+  .pg .bil-h h2{font-size:42px}
+  .pg .row{padding:10px 0}
+  .pg .row .nm>span:first-child,.pg .row>b{font-size:17px}
+  .pg .row .nm>span:last-child{font-size:14px}
+  .pg .mrow{height:30px;grid-template-columns:150px minmax(0,1fr) 76px}
+  .pg .mrow>span,.pg .mrow>b{font-size:15px}
+  .pg .mbx{height:12px!important}
+  .pg .col>b{font-size:19px} .pg .col .y{font-size:16px} .pg .col .v{font-size:14px}
+  .pg .kv{font-size:16px} .pg .foot{font-size:14px}
+  .pg .cell{height:40px}
+}
+/* Fenêtre basse : on resserre pour que tout tienne sans déborder. */
+@media (max-height:780px){
+  .pg .ttl{font-size:25px}
+  .pg .t{padding:18px 20px 14px}
+  .pg .t-pat{padding:24px 26px 0}
+  .pg .bil-h{margin:0 0 12px}
+  .pg .bil-h h2{font-size:28px}
+  .pg .bil-h span{font-size:15px}
+  .pg .pg-head{margin-bottom:12px}
+  .pg .t-rythme .sp{min-height:64px!important}
+  .pg .row{padding:5px 0}
+  .pg .t-autres .row:nth-child(n+5){display:none}
+  .pg .mrow{height:19px}
+  .pg .foot{margin-top:6px;font-size:12px}
+  .pg .t-pat .recap{margin-top:8px}
+  .pg .t-pat .rng{margin-top:0}
+}
+/* Écran étroit ou trop bas : plus d'écrans calés, la page défile normalement. */
+@media (max-width:1100px), (max-height:620px){
+  html:has(.pg .s1){scroll-snap-type:none}
+  .pg .scr{height:auto;min-height:0}
+  .pg .s1{padding-bottom:24px}
+  .pg .to-bil{display:none}
+  .pg .top{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(320px,auto)}
   .pg .t-pat{min-height:560px}
-  .pg .bil{height:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(330px,auto)}
+  .pg .bil{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(340px,auto)}
+  .pg .fig{flex:none}
+  .pg .fig>svg{height:auto}
 }
 @media (max-width:640px){
+  .pg{margin:-22px -16px -60px;padding:0 16px}
   .pg .top,.pg .bil{grid-template-columns:minmax(0,1fr)}
+  .pg .t-pat{min-height:520px}
+  .pg .flip{font-size:clamp(44px,13vw,72px)}
   .pg .w2,.pg .h2{grid-column:auto;grid-row:auto}
 }
 </style>
@@ -7068,15 +7130,22 @@ function pgBall(paid) {
 const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
 function viewPatProgres() {
-  const month = UI.patMonth, year = +month.slice(0, 4), mName = MONTHS[+month.slice(5) - 1];
-  const accounts = DB.patAccounts || [];
-  /* L'état de la saisie : un chiffre du mois n'a de sens que si tous les comptes y sont. */
+  /* Pas de sélecteur de mois : Progrès montre toujours le dernier mois saisi. La pastille dit
+     s'il manque des comptes à ce mois-là, ou si un mois écoulé attend sa saisie. */
+  const accounts = DB.patAccounts || [], today = monthKey(todayISO());
+  let month = "";
+  Object.values(DB.patValues || {}).forEach(v => Object.keys(v || {}).forEach(k => { if (k <= today && k > month) month = k; }));
+  if (!month) month = today;
+  const year = +month.slice(0, 4), mName = MONTHS[+month.slice(5) - 1];
   const missing = patActiveAccounts().filter(a => (DB.patValues[a.id] || {})[month] == null).length;
+  const late = patMonthsBetween(month, addMonth(today, -1));
   const nextEnd = addMonth(month, 1), lastDay = new Date(+nextEnd.slice(0, 4), +nextEnd.slice(5), 0).getDate();
-  let html = '<div class="pg">' + patTopbar("Progrès", accounts.length ? '<button class="state' + (missing ? " todo" : "") + '" data-act="view" data-view="pat"><i></i>' +
-    (missing ? missing + (missing > 1 ? " comptes à saisir" : " compte à saisir") + " pour " + esc(mName)
-             : "À jour · prochaine saisie le " + lastDay + " " + esc(MOIS_COURTS[+nextEnd.slice(5) - 1])) + "</button>" : "");
-  if (!accounts.length) return html + patNoAccounts("Ajoute un compte dans l’onglet <b class='inl'>Comptes</b> pour voir tes progrès ici.") + "</div>";
+  const state = missing ? missing + (missing > 1 ? " comptes à saisir" : " compte à saisir") + " pour " + mName
+    : late > 0 ? MONTHS[+nextEnd.slice(5) - 1] + " à saisir"
+    : "À jour · prochaine saisie le " + lastDay + " " + MOIS_COURTS[+nextEnd.slice(5) - 1];
+  let html = '<div class="pg"><section class="scr s1"><div class="pg-head"><h1>Progrès</h1>' +
+    (accounts.length ? '<button class="state' + (missing || late > 0 ? " todo" : "") + '" data-act="view" data-view="pat"><i></i>' + esc(state) + "</button>" : "") + "</div>";
+  if (!accounts.length) return html + patNoAccounts("Ajoute un compte dans l’onglet <b class='inl'>Comptes</b> pour voir tes progrès ici.") + "</section></div>";
 
   const months = allPatMonths(month), prevM = addMonth(month, -1), yAgo = addMonth(month, -12);
   const net = patNetAt(month), hasPrev = patHasHistoryAt(prevM), hasYear = patHasHistoryAt(yAgo);
@@ -7127,25 +7196,26 @@ function viewPatProgres() {
       const pv = vals.map((v, i) => [X(i), Y(v)]), pi = inv.map((v, i) => [X(i), Y(v)]), lv = pv[pv.length - 1], li = pi[pi.length - 1];
       const area = pgCurve(pv) + " L" + pi.slice().reverse().map(p => pgF(p[0]) + "," + pgF(p[1])).join(" ") + " Z";
       const gy = (lv[1] + li[1]) / 2 + 5;
-      chart = '<div class="pea-chart"><svg viewBox="0 0 528 150" role="img" aria-label="Valeur ' + esc(fmtEurShort(top.v)) + ", versé " + esc(fmtEurShort(inv[inv.length - 1])) + '">' +
+      chart = '<div class="fig pea-chart"><svg viewBox="0 0 528 150" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Valeur ' + esc(fmtEurShort(top.v)) + ", versé " + esc(fmtEurShort(inv[inv.length - 1])) + '">' +
         '<path class="ar" d="' + area + '" fill="var(--pg-orange)" fill-opacity="0.1"/>' +
         '<path class="ln" pathLength="100" d="' + pgCurve(pi) + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/>' +
         '<path class="ln" pathLength="100" d="' + pgCurve(pv) + '" fill="none" stroke="var(--pg-orange)" stroke-width="2.5" stroke-linecap="round"/>' +
         '<circle class="dot" cx="' + pgF(lv[0]) + '" cy="' + pgF(lv[1]) + '" r="6" fill="var(--pg-orange)" stroke="var(--pg-tile)" stroke-width="2"/>' +
         (u ? '<text class="gain-svg" x="' + pgF(lv[0] - 10) + '" y="' + pgF(gy) + '" text-anchor="end" font-size="13" font-weight="700" fill="var(--pg-orange)">' + esc(pgSigned(u.gain)) + (u.gain >= 0 ? " gagnés" : " perdus") + "</text>" : "") +
-        '<text x="' + pgF(li[0] - 10) + '" y="' + pgF(li[1] + 18) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--pg-faint)">versé</text></svg>';
+        '<text x="' + pgF(li[0] - 10) + '" y="' + pgF(li[1] + 18) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--pg-faint)">versé</text>';
       if (u && Math.abs(u.gain) < 1e6) {
         const g = Math.round(Math.abs(u.gain)), kk = Math.floor(g / 1000), uu = g % 1000;
-        chart += '<span class="pea-gain' + (kk ? "" : " small") + '" style="right:' + ((528 - (lv[0] - 10)) / 528 * 100).toFixed(2) + "%;top:" + ((gy - 14) / 150 * 100).toFixed(2) + "%;--k:" + kk + ";--u:" + uu + ";--pgk:" + kk + ";--pgu:" + uu + '">' +
-          (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span> ' : "") + '<span class="cu"></span> € ' + (u.gain >= 0 ? "gagnés" : "perdus") + "</span>";
+        chart += '<foreignObject x="0" y="' + pgF(gy - 15) + '" width="' + pgF(lv[0] - 10) + '" height="20"><div style="text-align:right;line-height:20px">' +
+          '<span class="pea-gain' + (kk ? "" : " small") + '" style="--k:' + kk + ";--u:" + uu + ";--pgk:" + kk + ";--pgu:" + uu + '">' +
+          (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span> ' : "") + '<span class="cu"></span> € ' + (u.gain >= 0 ? "gagnés" : "perdus") + "</span></div></foreignObject>";
       }
-      chart += "</div>";
+      chart += "</svg></div>";
     }
     html += '<button class="t t-pea w2" style="--dot:var(--pg-orange)" data-act="patopenacct" data-id="' + esc(top.a.id) + '">' +
       '<div class="hd"><span class="lbl">' + esc(top.a.name) + (accAth ? '<span class="badge-rec">★ record</span>' : "") + '</span><span class="chev">›</span></div>' +
-      '<div style="margin-top:12px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap"><span style="font-weight:700;font-size:52px;line-height:.9;letter-spacing:-.045em">' + esc(fmtEurShort(top.v)) + "</span>" +
+      '<div style="margin-top:12px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap"><span class="pbig">' + esc(fmtEurShort(top.v)) + "</span>" +
         (top.r != null ? '<span style="padding-bottom:3px;font-weight:600;font-size:16px;color:var(--pg-muted)">' + esc(pgPct(top.r)) + " en un an</span>" : "") + "</div>" +
-      '<div class="sp"></div>' + chart + "</button>";
+      (chart || '<div class="sp"></div>') + "</button>";
   }
 
   /* ======== 3 · Tes autres comptes ======== */
@@ -7169,7 +7239,7 @@ function viewPatProgres() {
     const lastPaid = paid.lastIndexOf(true), ball = pgBall(paid);
     html += '<div class="t t-rythme" style="--dot:var(--pg-blue)"><style>@media (prefers-reduced-motion:no-preference){' + ball.css + "}</style>" +
       '<div class="hd"><span class="lbl">Ton rythme</span><span class="chev">›</span></div>' +
-      '<span style="margin-top:12px;font-weight:700;font-size:44px;line-height:.9;letter-spacing:-.045em">' + paid.filter(Boolean).length + " mois</span>" +
+      '<span class="rbig">' + paid.filter(Boolean).length + " mois</span>" +
       '<span style="margin-top:8px;font-weight:600;font-size:16px;color:var(--pg-muted)">sur 12, avec un versement</span>' +
       /* Assez de hauteur libre au-dessus des cases pour que la balle ne passe jamais devant le texte. */
       '<div class="sp" style="min-height:96px"></div>' +
@@ -7178,10 +7248,10 @@ function viewPatProgres() {
       '<div style="margin-top:12px">' + (run >= 2 ? '<span class="pause go">' + run + " mois de suite</span>" : run === 1 ? '<span class="pause go">Un versement ce mois-ci</span>' :
         '<span class="pause">' + (lastPaid >= 0 ? "Pause depuis " + esc(MONTHS[+last12[lastPaid].slice(5) - 1]) : "Aucun versement sur un an") + "</span>") + "</div></div>";
   }
-  html += "</div>";
+  html += '</div><button class="to-bil" data-act="pgbilan" aria-label="Voir ton bilan">Ton bilan<i aria-hidden="true">⌄</i></button></section>';
 
-  /* ======================= Ton bilan, en faisant défiler ======================= */
-  html += '<div class="bil-h"><h2>Ton bilan</h2><span>Ce qu’on regarde quand une question se pose.</span></div><div class="bil">';
+  /* ======================= Ton bilan : le second écran ======================= */
+  html += '<section class="scr s2" id="pg-bilan"><div class="bil-h"><h2>Ton bilan</h2><span>Ce qu’on regarde quand une question se pose.</span></div><div class="bil">';
 
   /* ======== 5 · Qui fait grossir ton patrimoine ======== */
   if (hasYear) {
@@ -7197,7 +7267,7 @@ function viewPatProgres() {
       const d0 = cumG[i - 1] - cumV[i - 1], d1 = cumG[i] - cumV[i];
       if (d0 < 0 && d1 > 0) { const f = d0 / (d0 - d1); cross = { x: X(i - 1 + f), y: Y(cumV[i - 1] + f * (cumV[i] - cumV[i - 1])), mk: last12[i - 1] }; break; }
     }
-    let svg = '<svg viewBox="0 0 320 140" role="img" aria-label="Sur douze mois : ' + esc(fmtEurShort(cv)) + " versés, " + esc(pgSigned(cg)) + ' grâce à tes placements">' +
+    let svg = '<svg viewBox="0 0 320 140" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Sur douze mois : ' + esc(fmtEurShort(cv)) + " versés, " + esc(pgSigned(cg)) + ' grâce à tes placements">' +
       '<line x1="6" x2="256" y1="103.2" y2="103.2" stroke="var(--pg-line)" stroke-width="1"/>' +
       '<path class="ln ln-vers" pathLength="100" d="' + pgCurve(pV) + '" fill="none" stroke="var(--pg-grey)" stroke-width="2.5" stroke-linecap="round"/>' +
       '<path class="ln ln-plac" pathLength="100" d="' + pgCurve(pG) + '" fill="none" stroke="var(--pg-blue)" stroke-width="2.5" stroke-linecap="round"/>';
@@ -7224,7 +7294,7 @@ function viewPatProgres() {
       '<text x="256" y="136" text-anchor="end" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(MOIS_COURTS[+month.slice(5) - 1]) + "</text></svg>";
     html += '<div class="t t-qui" style="--dot:var(--pg-blue)">' + slow + '<span class="lbl">Qui fait grossir ton patrimoine ?</span>' +
       '<span class="ttl">' + (cg <= 0 ? "Tes versements portent tout" : cg > cv ? "Tes placements, plus que toi" : "Toi, plus que tes placements") + "</span>" +
-      (cross ? '<span class="waouh">Tes placements te dépassent !</span>' : "") + '<div class="sp"></div>' + svg +
+      (cross ? '<span class="waouh">Tes placements te dépassent !</span>' : "") + '<div class="fig">' + svg + "</div>" +
       '<div class="lgd"><span><i style="background:var(--pg-blue)"></i>tes placements</span><span><i style="background:var(--pg-grey)"></i>tes versements</span></div>' +
       '<span class="foot">cumulé sur les douze derniers mois</span></div>';
   }
@@ -7243,7 +7313,7 @@ function viewPatProgres() {
           const isBest = crowned && x.y === best.y;
           return '<div class="col' + (isBest ? " best" : "") + '">' + (isBest ? '<span class="crown">★</span>' : "") +
             "<b" + (x.perf < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.perf)) + "</b>" +
-            '<div class="bx"><i class="bar" style="--n:' + i + ";height:" + Math.max(3, Math.round(Math.abs(x.perf) / mx * 100)) + "px;background:" +
+            '<div class="bx"><i class="bar" style="--n:' + i + ";height:" + Math.max(3, Math.round(Math.abs(x.perf) / mx * 100)) + "%;background:" +
               (x.perf < 0 ? "var(--pg-neg)" : x.cur ? "var(--pg-grey)" : "var(--pg-violet)") + '"></i></div>' +
             '<span class="y">' + x.y + (x.cur ? ' <span style="color:var(--pg-faint);font-weight:500">en cours</span>' : "") + "</span>" +
             '<span class="v">' + esc(fmtEurShort(x.vers)) + " versés</span></div>";
@@ -7282,7 +7352,7 @@ function viewPatProgres() {
     const all = past.concat(fut.slice(1)), n = all.length - 1, nowI = past.length - 1, hiO = Math.max(...all) * 1.12 || 1;
     const X = i => 12 + i * 616 / n, Y = v => 10 + (1 - v / hiO) * 174;
     const PAST = 2.6, FUT = 1.3, tAt = i => (PAST + i / 60 * FUT).toFixed(2) + "s";
-    let s = '<svg viewBox="0 0 640 210" role="img" aria-label="Trois ans de patrimoine, puis cinq ans de projection">' +
+    let s = '<svg viewBox="0 0 640 210" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Trois ans de patrimoine, puis cinq ans de projection">' +
       '<rect x="' + pgF(X(nowI)) + '" y="0" width="' + pgF(640 - X(nowI)) + '" height="184" fill="var(--pg-bg)"/>' +
       '<path class="ln ln-past" pathLength="100" d="' + pgLine(past.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="var(--pg-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="--t:' + PAST + 's"/>' +
       '<path class="ln ln-proj" pathLength="100" d="' + pgLine(fut.map((v, i) => [X(i + nowI), Y(v)])) + '" fill="none" stroke="var(--pg-grey)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="--t0:' + PAST + "s;--t:" + FUT + 's"/>';
@@ -7301,7 +7371,7 @@ function viewPatProgres() {
     const i1 = when(m1), whenTxt = i => i < 12 ? MOIS_COURTS[+addMonth(month, i).slice(5) - 1] : pgMonth(addMonth(month, i), true);
     html += '<div class="t t-ouvas w2" style="--dot:var(--pg-blue)"><span class="lbl">Où tu vas</span>' +
       '<span class="ttl">' + (i1 != null ? esc(fmtEurShort(m1)) + " en " + esc(whenTxt(i1)) + ", " : "") + esc(fmtEurShort(Math.round(fut[60] / 1000) * 1000)) + " dans cinq ans</span>" +
-      '<div class="sp"></div>' + s +
+      '<div class="fig">' + s + "</div>" +
       '<span class="foot">ta performance actuelle (' + esc(fmtRate(asm.rate)) + " par an) et ton versement moyen (" + esc(fmtEurShort(asm.contrib)) + " par mois), prolongés tels quels</span></div>";
   }
 
@@ -7322,7 +7392,7 @@ function viewPatProgres() {
       }).join("") + "</div>" +
       '<span class="foot">sur un an, en euros · les indices arriveront avec leur mise à jour mensuelle</span></div>';
   }
-  html += "</div></div>";
+  html += "</div></section></div>";
   return html;
 }
 
@@ -10108,6 +10178,7 @@ document.addEventListener("click", e => {
     }
     /* Changer de période retire aussi les repères : la fenêtre change, autant en profiter
        pour en montrer d'autres plutôt que de resservir les mêmes. */
+    case "pgbilan": { const b = document.getElementById("pg-bilan"); if (b) b.scrollIntoView({ behavior: "smooth" }); break; }
     case "pgrange": UI.pgRange = el.dataset.range; render(); break;
     case "patrange": UI.patRange = el.dataset.range; UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
     case "pathlshuffle": UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
