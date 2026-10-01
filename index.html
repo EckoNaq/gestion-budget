@@ -42,6 +42,13 @@ html[data-theme="dark"]{
      encre sombre pour rester lisible. */
   --done-ink:#E0BA55; --done-b:#5C4C1E; --done-bg:#1E1B10; --done-on:#191509;
 }
+/* Couleurs adaptées au daltonisme : la hausse en bleu, la baisse en orange. Rouge et vert se
+   confondent dans les dyschromatopsies les plus courantes ; bleu et orange restent séparés,
+   et diffèrent aussi en clarté. Réglage dans Réglages › Affichage. */
+html[data-cb="1"]{ --pos:#1D5BA8; --pos-soft:#E4EEFB; --neg:#C2541F; --neg-soft:#FBEADF; }
+html[data-cb="1"][data-theme="dark"]{ --pos:#6FA8F0; --pos-soft:#14243A; --neg:#F0924F; --neg-soft:#33241A; }
+html[data-cb="1"] .v2{ --win:#1D5BA8; --win-ink:#174A8A; --win-bg:#D6E5F8; --win-line:#9DBEE8; --bad:#C2541F; --bad-ink:#A3441A; --bad-bg:#F6D9C6; --bad-line:#E5AE8A; }
+html[data-cb="1"][data-theme="dark"] .v2{ --win:#6FA8F0; --win-ink:#8FC0F5; --win-bg:#14243A; --win-line:#2B4B72; --bad:#F0924F; --bad-ink:#F5AD78; --bad-bg:#33241A; --bad-line:#6B4325; }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
@@ -435,6 +442,15 @@ html[data-theme="dark"] .t-plat{--tier:#8A79E4;--tier-l:#B4A8F5}
 .plafnote .adopt:hover{border-color:var(--accent);color:var(--accent)}
 .dupbox{border:1px solid var(--warn);background:var(--warn-soft);border-radius:var(--radius-sm);padding:10px 12px;margin-top:12px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.cbrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center}
+.cbdemo{display:flex;gap:8px;font-weight:650;font-size:13px}
+.cbdemo span{padding:4px 10px;border-radius:999px}
+.cbdemo .up{color:var(--pos);background:var(--pos-soft)}
+.cbdemo .dn{color:var(--neg);background:var(--neg-soft)}
+.cbswitch{position:relative;width:46px;height:26px;border:0;border-radius:999px;background:var(--line);cursor:pointer;transition:background .2s;flex:none}
+.cbswitch i{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.cbswitch.on{background:var(--accent)}
+.cbswitch.on i{transform:translateX(20px)}
 
 /* =========================================================================
    MOIS V2 — refonte visuelle, entièrement cloisonnée sous .v2
@@ -1481,6 +1497,12 @@ html[data-theme="dark"] .pg{
   --pg-orange:#F08A55; --pg-violet:#9C8CF0; --pg-blue:#6FA8F0; --pg-amber:#E0B04A;
   --pg-pos:#3FBF8F; --pg-star:#3FBF8F; --pg-neg:#F4726F; --pg-goal:#3FBF8F;
 }
+/* Couleurs adaptées au daltonisme (Réglages) : la hausse en bleu, la baisse en orange,
+   deux teintes que les dyschromatopsies rouge-vert distinguent. Le PEA, orange dans la
+   variante B, passe au bleu-vert pour ne pas se lire comme une baisse. */
+.pg{--pg-hup:#8FF0C2;--pg-hdn:#FF9A8F}
+html[data-cb="1"] .pg{--pg-pos:#1D5BA8;--pg-star:#1D5BA8;--pg-neg:#C2541F;--pg-goal:#1D5BA8;--pg-orange:#1E9AA8;--pg-hup:#8FC4FF;--pg-hdn:#FFB27A}
+html[data-cb="1"][data-theme="dark"] .pg{--pg-pos:#6FA8F0;--pg-star:#6FA8F0;--pg-neg:#F0924F;--pg-goal:#6FA8F0;--pg-orange:#3EC1B6}
 .pg *{box-sizing:border-box}
 .pg b{font-weight:700}
 .pg .state{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--pg-tile);box-shadow:var(--pg-sh);font:inherit;font-weight:600;font-size:15px;color:var(--pg-muted);cursor:pointer}
@@ -1659,8 +1681,8 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
 @keyframes pg-breathe{0%,100%{opacity:1}50%{opacity:.55}}
 @keyframes pg-flow{from{stroke-dasharray:1.6 2.2;stroke-dashoffset:0}to{stroke-dasharray:1.6 2.2;stroke-dashoffset:-7.6}}
 @keyframes pg-twinkle{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.4) rotate(18deg)}}
-@keyframes pg-glowtxt{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 10px rgba(19,135,94,.45),0 0 2px rgba(19,135,94,.45)}}
-@keyframes pg-glowneg{0%,100%{text-shadow:none}50%{text-shadow:0 0 10px rgba(208,69,60,.35)}}
+@keyframes pg-glowtxt{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 10px color-mix(in oklab, var(--pg-pos) 45%, transparent),0 0 2px color-mix(in oklab, var(--pg-pos) 45%, transparent)}}
+@keyframes pg-glowneg{0%,100%{text-shadow:none}50%{text-shadow:0 0 10px color-mix(in oklab, var(--pg-neg) 35%, transparent)}}
 @keyframes pg-sheen{from{background-position:-150% 0}to{background-position:250% 0}}
 @keyframes pg-confetti{0%{opacity:1;transform:translate(-50%,-50%) rotate(0)}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r))}}
 @keyframes pg-ring{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(2.6)}}
@@ -1698,7 +1720,7 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
   .pg .t-autres:hover .perf.best{font-size:14.5px;animation:pg-glowtxt 1.6s .5s ease-in-out infinite}
   .pg .t-autres:hover .star{animation:pg-twinkle 1.6s ease-in-out infinite}
   .pg .t-autres:hover .perf.dn{color:var(--pg-neg);font-weight:800;display:inline-block;animation:pg-shake .4s .5s 2, pg-glowneg 1.8s 1.3s ease-in-out infinite}
-  .pg .t-autres:hover .row.sweep{background-image:linear-gradient(90deg,transparent 0%,rgba(19,135,94,0) 20%,rgba(19,135,94,.22) 45%,rgba(19,135,94,.32) 50%,rgba(19,135,94,.22) 55%,transparent 80%);background-size:60% 100%;background-repeat:no-repeat;animation:pg-slide .35s calc(var(--n) * 70ms) ease-out both, pg-sweep 1.6s .5s cubic-bezier(.6,0,.4,1) infinite}
+  .pg .t-autres:hover .row.sweep{background-image:linear-gradient(90deg,transparent 0%,transparent 20%,color-mix(in oklab, var(--pg-pos) 22%, transparent) 45%,color-mix(in oklab, var(--pg-pos) 32%, transparent) 50%,color-mix(in oklab, var(--pg-pos) 22%, transparent) 55%,transparent 80%);background-size:60% 100%;background-repeat:no-repeat;animation:pg-slide .35s calc(var(--n) * 70ms) ease-out both, pg-sweep 1.6s .5s cubic-bezier(.6,0,.4,1) infinite}
   /* 4 · Rythme : les mois se remplissent, puis la balle rebondit de mois en mois jusqu'au premier trou. */
   .pg .t-rythme:hover .cell{transform-origin:bottom;animation:pg-rise .3s calc(var(--n) * 45ms) ease-out both}
   .pg .t-rythme:hover .cell:not(.on){background:#D9DCE2;box-shadow:inset 0 3px 5px rgba(17,19,24,.25)}
@@ -7513,7 +7535,7 @@ function pgLastMonth() {
 /* Une performance sur fond sombre : verte si elle monte, rouge si elle baisse. */
 function pgHeroPct(p) {
   if (p == null) return "";
-  return ' · <b style="color:' + (p > 0.005 ? "#8FF0C2" : p < -0.005 ? "#FF9A8F" : "inherit") + '">' + esc(pgPct(p)) + "</b>";
+  return ' · <b style="color:' + (p > 0.005 ? "var(--pg-hup)" : p < -0.005 ? "var(--pg-hdn)" : "inherit") + '">' + esc(pgPct(p)) + "</b>";
 }
 /* Ce qui dépend de la période choisie dans la tuile patrimoine : la ligne de gains et le graphique. */
 function pgRangeParts(month, months) {
@@ -9944,6 +9966,14 @@ function viewSettings() {
   const bytes = storageBytes(), quota = 5 * 1024 * 1024;
   let html = '<div class="topbar"><h1>Réglages</h1><div class="spacer"></div></div>';
 
+  /* --- affichage --- */
+  const cb = !!DB.settings.colorBlind;
+  html += '<div class="card"><div class="chead"><h2>Affichage</h2></div>' +
+    '<div class="cbrow"><div><b>Couleurs adaptées au daltonisme</b>' +
+    '<p class="tiny muted" style="margin:3px 0 0">Activé : la hausse en bleu, la baisse en orange. Désactivé : vert et rouge. Le changement vaut pour toute l’application.</p></div>' +
+    '<span class="cbdemo"><span class="up">↑ +2,4 %</span><span class="dn">↓ −1,7 %</span></span>' +
+    '<button class="cbswitch' + (cb ? " on" : "") + '" role="switch" aria-checked="' + cb + '" aria-label="Couleurs adaptées au daltonisme" data-act="cbtoggle"><i></i></button></div></div>';
+
   /* --- revenus --- */
   html += '<div class="card"><div class="chead"><h2>Revenus ' + year + "</h2><div class=\"spacer\"></div>" +
     '<div class="periodnav"><button data-act="prevyear">' + icon("left") + '</button><span class="label">' + year +
@@ -10941,6 +10971,8 @@ document.addEventListener("click", e => {
     case "v2ops": UI.v2ops = el.dataset.f; UI.v2anim = null; render(); break;
     case "v2batch": UI.v2batch = el.dataset.batch; UI.v2ops = "all"; UI.v2anim = null; render(); break;
     case "theme": cycleTheme(); break;
+    case "cbtoggle": DB.settings.colorBlind = !DB.settings.colorBlind; saveDB(); applyTheme(); render();
+      toast(DB.settings.colorBlind ? "Couleurs adaptées au daltonisme : hausse en bleu, baisse en orange" : "Couleurs habituelles : hausse en vert, baisse en rouge"); break;
     case "reload": location.reload(); break;
     case "import": openImport(DB.tx.length ? "month" : "history"); break;
     case "wizard": openImport("history"); break;
@@ -11359,6 +11391,7 @@ function applyTheme() {
   const t = DB.settings.theme || "auto";
   const dark = t === "dark" || (t === "auto" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  document.documentElement.setAttribute("data-cb", DB.settings.colorBlind ? "1" : "0");
 }
 function cycleTheme() {
   const order = ["auto", "light", "dark"];
