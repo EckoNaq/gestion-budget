@@ -8260,10 +8260,10 @@ function viewPgAccount() {
   const left = '<section class="pa-quote"><span class="pa-name">' + patSwatch(a, 11) + esc(a.name) + (record ? '<span class="badge-rec">★ record</span>' : "") + "</span>" +
     '<span class="pa-value">' + esc(fmtEurShort(value)) + "</span>" +
     '<div class="pa-chg">' + (perf != null ? '<span class="pill ' + (upP ? "up" : "dn") + '">' + (upP ? "↑" : "↓") + " " + esc(fmtPct(Math.abs(perf)).replace(/^[+−]/, "")) + "</span>" : "") +
-      '<span class="' + (gains < 0 ? "dn" : "up") + '">' + esc(pgSigned(gains)) + (gains < 0 ? " perdus " : " gagnés ") + esc(perTxt) + "</span>" +
+      '<span class="' + (gains < 0 ? "dn" : "up") + '">' + esc(pgSigned(gains)) + "</span>" +
       (ann != null ? '<span class="pd-muted">· ' + esc(fmtRate(ann)) + " par an</span>" : "") + "</div>" +
-    tabs + '<div class="fig">' + (ser.length > 1 ? pdGChart(ser, val, inv) : "") + "</div>" +
-    '<div class="pa-legend"><span><i class="ln" style="background:' + (val[val.length - 1] >= val[0] ? "var(--pg-pos)" : "var(--pg-neg)") + '"></i>valeur</span><span><i class="dash"></i>versé</span></div></section>' +
+    tabs + '<div class="fig">' + (ser.length > 1 ? pdStock(val, inv, labels, !record) : "") + "</div>" +
+    '<div class="pa-legend"><span><i class="ln" style="background:var(--pg-ink)"></i>valeur</span><span><i class="ln" style="background:var(--pg-chev)"></i>versé</span></div></section>' +
     (facts.length ? '<section class="pa-facts">' + facts.map(([t, v, s]) => "<div><span>" + esc(t) + "</span><b>" + esc(v) + "</b><span>" + esc(s) + "</span></div>").join("") + "</section>" : "") + paTax(a, month);
   const right = '<section class="pd-panel pa-months"><div class="pd-ph"><h2>Mois par mois</h2>' + (note ? "<span>" + esc(note) + "</span>" : "") + "</div>" +
     '<div id="pa-sum">' + paSummary(a, sel) + "</div>" +
