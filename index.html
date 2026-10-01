@@ -1910,6 +1910,32 @@ html[data-theme="dark"] .pg .pd-tbl>div.done b,html[data-theme="dark"] .pg .pd-m
   .pg .pd-grid{grid-template-columns:minmax(0,1fr);min-height:0}
   .pg .pd-left .fig{min-height:0}
 }
+
+/* ---------- Progrès : détail d'un compte ---------- */
+.pg .pa-grid{grid-template-columns:minmax(0,1fr) 470px}
+.pg .pa-name{display:flex;align-items:center;gap:12px;font-weight:600;font-size:18px;color:var(--pg-muted)}
+.pg .pa-value{font-weight:700;font-size:clamp(56px,6.4vw,96px);line-height:.85;letter-spacing:-.05em}
+.pg .pa-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pg .pa-facts>div{padding:14px 16px;border-radius:18px;background:var(--pg-tile);box-shadow:var(--pg-sh);display:flex;flex-direction:column;gap:4px}
+.pg .pa-facts>div>span:first-child{font-size:13.5px;font-weight:600;color:var(--pg-muted)}
+.pg .pa-facts b{font-size:20px;letter-spacing:-.02em}
+.pg .pa-facts>div>span:last-child{font-size:13px;color:var(--pg-faint)}
+.pg .pa-months{gap:2px}
+.pg .pa-row{display:flex;flex-direction:column;gap:2px;width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;padding:0 10px;margin:0 -10px;width:calc(100% + 20px);border-radius:12px;cursor:pointer}
+.pg .pa-row:hover{background:var(--pg-bg)}
+.pg .pa-row.on{background:var(--pg-bg);padding-bottom:8px}
+.pg .pa-line{display:grid;grid-template-columns:62px minmax(0,1fr) 140px;align-items:center;gap:12px;height:30px}
+.pg .pa-line .m{font-size:14px;font-weight:500;color:var(--pg-muted)}
+.pg .pa-row.on .m{font-weight:700;color:var(--pg-ink)}
+.pg .pa-line .bar{position:relative;height:12px}
+.pg .pa-line .bar i{position:absolute;top:0;bottom:0;border-radius:3px}
+.pg .pa-line .bar i.z{left:50%;top:-4px;bottom:-4px;width:1px;background:var(--pg-line)}
+.pg .pa-line .v{text-align:right;font-size:14px}
+.pg .pa-line .v span{color:var(--pg-faint)}
+.pg .pa-more{display:flex;gap:18px;padding-left:74px;font-size:13px;color:var(--pg-muted)}
+.pg .pa-more b{color:var(--pg-ink)}
+.pg .pa-months .pd-link{margin-top:12px}
+@media (max-width:1100px){.pg .pa-grid{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -2568,7 +2594,7 @@ function isYearView() {
   return UI.view === "year" || UI.view === "year2" || UI.view === "year3";
 }
 function isPatView() {
-  return ["patprogres", "pgdetail", "pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
+  return ["patprogres", "pgdetail", "pgacct", "pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
 }
 
 function reindex() {
@@ -3073,7 +3099,7 @@ function render() {
   /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
      barre latérale n'indiquerait plus où l'on se trouve. */
   const navItem = ([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "patprogres" && UI.view === "pgdetail") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "patprogres" && (UI.view === "pgdetail" || UI.view === "pgacct")) || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
@@ -3095,6 +3121,7 @@ function render() {
     : UI.view === "todo" ? viewTodo()
     : UI.view === "patprogres" ? viewPatProgres()
     : UI.view === "pgdetail" ? viewPgDetail()
+    : UI.view === "pgacct" ? viewPgAccount()
     : UI.view === "pathome" ? viewPatrimoineHome()
     : UI.view === "patanalyse" ? viewPatAnalyse()
     : UI.view === "pat" ? viewPatrimoine()
@@ -7503,7 +7530,7 @@ function viewPatProgres() {
       chart += '<div class="pea-foot"><span class="pea-key"><i></i>versé</span>' +
         (u && !gainIn ? '<span class="pea-gain' + (u.gain < 0 ? " dn" : "") + '">' + esc(pgSigned(u.gain)) + (u.gain < 0 ? " perdus" : " gagnés") + "</span>" : "") + "</div>";
     }
-    html += '<button class="t t-pea w2" style="--dot:var(--pg-orange)" data-act="patopenacct" data-id="' + esc(top.a.id) + '">' +
+    html += '<button class="t t-pea w2" style="--dot:var(--pg-orange)" data-act="pgacct" data-id="' + esc(top.a.id) + '">' +
       '<div class="hd"><span class="lbl">' + esc(top.a.name) + (accAth ? '<span class="badge-rec">★ record</span>' : "") + '</span><span class="chev">›</span></div>' +
       '<div style="margin-top:12px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap"><span class="pbig">' + esc(fmtEurShort(top.v)) + "</span>" +
         (top.r != null ? '<span style="padding-bottom:3px;font-weight:600;font-size:16px;color:var(--pg-muted)">' + esc(pgPct(top.r)) + " sur 12 mois glissants</span>" : "") + "</div>" +
@@ -7517,7 +7544,7 @@ function viewPatProgres() {
       '<div style="margin-top:8px">' + (others.length ? others.map((x, i) => {
         const good = x.r != null && x.r >= 10, isBest = x.r != null && x.r > 0 && x.r === best;
         const g = hasYear ? pgGains(x.a.id, yAgo, month) : 0;
-        return '<button class="row' + (isBest || (x.r != null && x.r >= 15) ? " sweep" : "") + '" style="--n:' + i + '" data-act="patopenacct" data-id="' + esc(x.a.id) + '" data-to="' + x.v.toFixed(2) + '" data-g="' + g.toFixed(2) + '">' +
+        return '<button class="row' + (isBest || (x.r != null && x.r >= 15) ? " sweep" : "") + '" style="--n:' + i + '" data-act="pgacct" data-id="' + esc(x.a.id) + '" data-to="' + x.v.toFixed(2) + '" data-g="' + g.toFixed(2) + '">' +
           '<span class="nm"><span>' + esc(x.a.name) + (good ? ' <span class="star">★</span>' : "") + "</span>" +
           "<span>" + (x.r == null ? "moins d’un an d’historique" : '<b class="perf' + (good ? " good" : "") + (isBest ? " best" : "") + (x.r < 0 ? " dn" : "") + '">' + esc(pgPct(x.r)) + "</b>") + "</span></span>" +
           '<span class="val"><b class="amt">' + esc(fmtEurShort(x.v)) + '</b><span class="gain' + (g < 0 ? " dn" : "") + '"><b>' + esc(pgSigned(g)) + "</b> " + (g < 0 ? "perdus" : "gagnés") + "</span></span></button>";
@@ -7970,6 +7997,104 @@ function pdMarches(month, months) {
 document.addEventListener("keydown", e => {
   if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".pg .bil .t[data-act]")) { e.preventDefault(); e.target.click(); }
 });
+
+/* ---- Progrès : le détail d'un compte -------------------------------------------
+   Au clic sur un compte depuis Progrès : sa valeur, sa performance, la courbe de sa valeur
+   contre ce qui y a été versé (l'écart, c'est le gain), deux faits propres au compte, et ses
+   mois un par un. L'ancien détail reste accessible pour les mouvements et les réglages. */
+function pdStock(val, inv, labels, showPeak) {
+  const W = 640, H = 230, padT = 16, padB = 26, padX = 8, m = val.length - 1;
+  const lo = Math.min(...inv, ...val) * 0.9, hi = Math.max(...val, ...inv) * 1.05 || 1;
+  const X = i => padX + (m ? i * (W - 2 * padX) / m : W - 2 * padX), Y = v => padT + (1 - (v - lo) / (hi - lo || 1)) * (H - padT - padB);
+  const t = pgCurve(val.map((v, i) => [X(i), Y(v)])), vv = pgCurve(inv.map((v, i) => [X(i), Y(v)]));
+  const back = inv.map((_, i) => m - i).map(i => pgF(X(i)) + "," + pgF(Y(inv[i]))).join(" L");
+  const g = val[m] - inv[m], id = "pa" + Math.round(Math.random() * 1e6);
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Valeur ' + esc(fmtEurShort(val[m])) + ", versé " + esc(fmtEurShort(inv[m])) + '">' +
+    '<defs><clipPath id="' + id + 'a"><path d="' + vv + " L" + pgF(X(m)) + ",0 L" + pgF(X(0)) + ',0 Z"/></clipPath><clipPath id="' + id + 'b"><path d="' + vv + " L" + pgF(X(m)) + "," + H + " L" + pgF(X(0)) + "," + H + ' Z"/></clipPath></defs>' +
+    '<path d="' + t + " L" + back + ' Z" fill="var(--pg-pos)" fill-opacity="0.12" clip-path="url(#' + id + 'a)"/>' +
+    '<path d="' + t + " L" + back + ' Z" fill="var(--pg-neg)" fill-opacity="0.14" clip-path="url(#' + id + 'b)"/>' +
+    '<path d="' + vv + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/><path d="' + t + '" fill="none" stroke="var(--pg-ink)" stroke-width="2.5" stroke-linecap="round"/>';
+  if (showPeak) { const pk = Math.max(...val); s += '<line x1="' + padX + '" x2="' + (W - padX) + '" y1="' + pgF(Y(pk)) + '" y2="' + pgF(Y(pk)) + '" stroke="var(--pg-line)"/><text x="' + padX + '" y="' + pgF(Y(pk) - 6) + '" font-size="12" font-weight="600" fill="var(--pg-faint)">plus haut ' + esc(fmtEurShort(pk)) + "</text>"; }
+  s += '<circle cx="' + pgF(X(m)) + '" cy="' + pgF(Y(val[m])) + '" r="6" fill="var(--pg-ink)" stroke="var(--pg-tile)" stroke-width="2"/>';
+  /* L'étiquette des gains se pose entre les deux courbes, là où elle a la place, sinon nulle part. */
+  {
+    const label = pgSigned(g) + (g >= 0 ? " gagnés" : " perdus"), tw = label.length * 7.6 + 6;
+    const PV = val.map((v, i) => [X(i), Y(v)]), PI = inv.map((v, i) => [X(i), Y(v)]);
+    const at = (P, x) => { for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const f = (x - P[i - 1][0]) / (P[i][0] - P[i - 1][0] || 1); return P[i - 1][1] + f * (P[i][1] - P[i - 1][1]); } return P[P.length - 1][1]; };
+    let best = null;
+    /* Un gain se lit dans la zone verte (valeur au-dessus du versé), une perte dans la rouge. */
+    for (let xr = X(m) - 14; xr - tw >= padX; xr -= 4) {
+      let top = -Infinity, bot = Infinity, ok = true;
+      for (let x = xr - tw - 8; x <= xr + 8; x += 2) {
+        const a1 = at(PV, x), a2 = at(PI, x);
+        if (g >= 0 ? a1 > a2 : a1 < a2) { ok = false; break; }
+        top = Math.max(top, Math.min(a1, a2)); bot = Math.min(bot, Math.max(a1, a2));
+      }
+      if (ok && bot - top >= 30) { best = { xr, y: (top + bot) / 2 }; break; }
+    }
+    if (best) s += '<text x="' + pgF(best.xr) + '" y="' + pgF(best.y) + '" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="' + (g >= 0 ? "var(--pg-pos)" : "var(--pg-neg)") + '">' + esc(label) + "</text>";
+  }
+  if (Y(inv[m]) + 18 < H - padB) s += '<text x="' + pgF(X(m) - 10) + '" y="' + pgF(Y(inv[m]) + 18) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--pg-faint)">versé</text>';
+  labels.forEach((lab, i) => { if (lab) s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? "start" : i === m ? "end" : "middle") + '" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(lab) + "</text>"; });
+  return s + "</svg>";
+}
+function viewPgAccount() {
+  const a = (DB.patAccounts || []).find(x => x.id === UI.pgAcc);
+  if (!a) { UI.view = "patprogres"; return viewPatProgres(); }
+  const month = pgLastMonth(), all = allPatMonths(month).filter(mk => patAccountValue(a.id, mk) != null);
+  if (!all.length) { UI.view = "patprogres"; return viewPatProgres(); }
+  const R = { "3m": 3, "1y": 12, all: 0 }, key = UI.paRange || "1y";
+  const ser = R[key] ? all.slice(-(R[key] + 1)) : all;
+  const val = ser.map(mk => patAccountValue(a.id, mk)), inv = ser.map(mk => patInvested(a.id, mk));
+  const value = patAccountValue(a.id, month) || 0, invested = patInvested(a.id, month), gain = value - invested;
+  const peak = Math.max(...all.map(mk => patAccountValue(a.id, mk))), record = all.length > 1 && value >= peak - 0.5;
+  const yAgo = addMonth(month, -12), r12 = all.includes(yAgo) || all[0] <= yAgo ? pgAccountTWR(a.id, yAgo, month) : null;
+  const ann = (() => { if (all.length < 13) return null; const c = pgAccountTWR(a.id, all[0], month); return c == null ? null : (Math.pow(1 + c / 100, 12 / (all.length - 1)) - 1) * 100; })();
+  const m = ser.length - 1, labels = ser.map((mk, i) => (i === 0 || i === m || i === Math.round(m / 2)) ? pgMonth(mk) : "");
+  /* Deux faits propres au compte. */
+  const movs = (DB.patMovements || []).filter(x => x.accountId === a.id && monthKey(x.date) <= month).sort((p, q) => p.date < q.date ? -1 : 1);
+  const lastMov = movs.length ? monthKey(movs[movs.length - 1].date) : null, v12 = movs.filter(x => monthKey(x.date) > yAgo).reduce((s, x) => s + x.amount, 0);
+  const facts = [];
+  if (lastMov && patMonthsBetween(lastMov, month) >= 3) {
+    const since = pgGains(a.id, lastMov, month);
+    facts.push(["Sans versement depuis " + pdMonthYear(lastMov), pgSigned(since), "ce que ton compte a pris tout seul"]);
+  } else facts.push(["Versé sur 12 mois glissants", fmtEurShort(v12), v12 > 0 ? "soit " + fmtEurShort(v12 / 12) + " par mois en moyenne" : "aucun versement sur la période"]);
+  const op = patOpenedMonth(a), opened = op.mk, typ = patType(a.type).id, wait = typ === "pea" ? 5 : typ === "av" ? 8 : 0;
+  if (wait && opened) {
+    const freeMk = addMonth(opened, wait * 12), done = freeMk <= month;
+    facts.push(["Fiscalité allégée", (done ? "depuis " : "à partir de ") + pdMonthYear(freeMk), "après " + wait + " ans" + (op.exact ? "" : " · date d’ouverture à confirmer")]);
+  } else if (!record) {
+    const pkMk = all.find(mk => patAccountValue(a.id, mk) === peak);
+    facts.push(["Ton plus haut", fmtEurShort(peak), pdMonthYear(pkMk) + " · tu en es à " + pgPct((value / peak - 1) * 100)]);
+  } else {
+    const ag = id => { const r = all.slice(-24).map(mk => patMonthlyPerf(id, mk)).filter(x => x != null); return r.length ? r.reduce((s, x) => s + Math.abs(x), 0) / r.length : null; };
+    const mine = ag(a.id), tot = ag(null);
+    if (mine != null && tot) facts.push(["Agitation", trim1(mine / tot) + "× ton patrimoine", "en moyenne " + trim1(mine) + " % par mois, contre " + trim1(tot) + " %"]);
+  }
+  /* Les mois un par un, le plus récent en tête ; un clic en ouvre le détail. */
+  const rowsM = all.slice(-12).reverse().filter(mk => patMonthlyPerf(a.id, mk) != null);
+  const sel = rowsM.includes(UI.paSel) ? UI.paSel : rowsM[0], mx = Math.max(...rowsM.map(mk => Math.abs(patMonthlyPerf(a.id, mk))), 0.1);
+  const rows = rowsM.map(mk => {
+    const r = patMonthlyPerf(a.id, mk), e = patMonthlyGain(a.id, mk), on = mk === sel, w = Math.max(0.6, Math.abs(r) / mx * 50);
+    return '<button class="pa-row' + (on ? " on" : "") + '" data-act="pasel" data-v="' + mk + '"><span class="pa-line"><span class="m">' + esc(pgMonth(mk)) + "</span>" +
+      '<span class="bar"><i class="z"></i><i style="' + (r >= 0 ? "left:50%" : "right:50%") + ";width:" + pgF(w) + "%;background:" + (r >= 0 ? "var(--pg-pos)" : "var(--pg-neg)") + '"></i></span>' +
+      '<span class="v"><b>' + esc(pgPct(r)) + '</b> <span>' + esc(pgSigned(e || 0)) + "</span></span></span>" +
+      (on ? '<span class="pa-more"><span>valeur <b>' + esc(fmtEurShort(patAccountValue(a.id, mk))) + "</b></span><span>versé <b>" + esc(fmtEurShort(patMovementsInMonth(a.id, mk))) + "</b></span></span>" : "") + "</button>";
+  }).join("");
+  const note = lastMov && patMonthsBetween(lastMov, month) >= 12 ? "aucun versement depuis " + pdMonthYear(lastMov) : v12 > 0 ? fmtEurShort(v12) + " versés sur 12 mois" : "";
+  const enough = k => !R[k] || all.length > R[k];
+  const left = '<span class="pa-name">' + patSwatch(a, 11) + esc(a.name) + (record ? '<span class="badge-rec">★ record</span>' : "") + "</span>" +
+    '<span class="pa-value">' + esc(fmtEurShort(value)) + "</span>" +
+    '<div class="pd-stats">' + (r12 != null ? pdStat(esc(pgPct(r12)), "sur 12 mois glissants", r12 < 0 ? "var(--pg-neg)" : "") : "") +
+      (ann != null ? pdStat(esc(fmtRate(ann)), "par an depuis " + all[0].slice(0, 4)) : "") + pdStat(esc(pgSigned(gain)), gain < 0 ? "perdus en tout" : "gagnés en tout") + "</div>" +
+    '<div class="fig">' + (ser.length > 1 ? pdStock(val, inv, labels, !record) : "") + "</div>" +
+    '<section class="pa-facts">' + facts.map(([t, v, s]) => "<div><span>" + esc(t) + "</span><b>" + esc(v) + "</b><span>" + esc(s) + "</span></div>").join("") + "</section>";
+  const right = '<section class="pd-panel pa-months"><div class="pd-ph"><h2>Mois par mois</h2>' + (note ? "<span>" + esc(note) + "</span>" : "") + "</div>" + rows +
+    '<button class="pd-link" data-act="patopenacct" data-id="' + esc(a.id) + '">Mouvements et réglages du compte ›</button></section>';
+  return '<div class="pg"><div class="pd"><header class="pd-top"><button class="pd-back" data-act="pgbacktop">‹ Progrès</button>' +
+    pdChips([{ v: "3m", t: "3 mois" }, { v: "1y", t: "1 an" }, { v: "all", t: "Tout" }].map(c => ({ ...c, off: !enough(c.v) })), key, "parange") + "</header>" +
+    '<div class="pd-grid pa-grid"><div class="pd-left">' + left + '</div><div class="pd-right">' + right + "</div></div></div></div>";
+}
 /* ---- Jalons ---------------------------------------------------------------
    Acquis en couleur, à venir en grisé, avec la distance qui reste. Un jalon barré sans
    contexte décourage ; le même avec « 62 990 sur 75 000 » donne une direction. */
@@ -8661,7 +8786,7 @@ function viewPatAccount() {
   const v = patAccountValue(a.id, month), u = patUnrealized(a.id, month);
   const pm = patMonthlyPerf(a.id, month), py = patAnnualPerf(a.id, year);
 
-  let html = '<div class="topbar"><button class="btn sm ghost" data-act="patback">' + icon("left", 14) + (UI.patFrom === "patprogres" ? "Progrès" : "Comptes") + "</button>" +
+  let html = '<div class="topbar"><button class="btn sm ghost" data-act="patback">' + icon("left", 14) + (UI.patFrom === "patprogres" ? "Progrès" : UI.patFrom === "pgacct" ? "Retour" : "Comptes") + "</button>" +
     '<h1 style="display:flex;align-items:center;gap:10px">' + patSwatch(a, 12) + esc(a.name) + "</h1>" +
     '<span class="tag">' + esc(patTypeName(patType(a.type).id)) + "</span>" +
     '<div class="periodnav"><button data-act="prev" aria-label="Mois précédent">' + icon("left") + "</button>" +
@@ -10737,7 +10862,7 @@ document.addEventListener("click", e => {
       DB.tx.forEach(t => { if (t.patMove === id) t.patMove = null; });
       saveDB(); render(); break;
     }
-    case "patopenacct": UI.patFrom = UI.view === "patprogres" ? "patprogres" : "pat"; UI.patAccount = el.dataset.id; UI.view = "patacct"; render(); break;
+    case "patopenacct": UI.patFrom = UI.view === "patprogres" || UI.view === "pgacct" ? UI.view : "pat"; UI.patAccount = el.dataset.id; UI.view = "patacct"; render(); break;
     case "patback": UI.view = UI.patFrom || "pat"; UI.patAccount = null; render(); break;
     case "patbackhome": UI.view = "pathome"; render(); break;
     case "patmilestones": UI.view = "patmilestones"; render(); break;
@@ -10754,6 +10879,10 @@ document.addEventListener("click", e => {
        pour en montrer d'autres plutôt que de resservir les mêmes. */
     case "pgbilan": pgGlideTo("bilan"); break;
     case "pgtop": pgGlideTo("haut"); break;
+    case "pgacct": UI.pgAcc = el.dataset.id; UI.paSel = null; UI.view = "pgacct"; render(); window.scrollTo(0, 0); break;
+    case "pgbacktop": UI.view = "patprogres"; render(); window.scrollTo(0, 0); break;
+    case "parange": if (!el.disabled) { UI.paRange = el.dataset.v; render(); } break;
+    case "pasel": UI.paSel = el.dataset.v; render(); break;
     case "pgdetail": UI.pgDetail = el.dataset.d; UI.view = "pgdetail"; render(); window.scrollTo(0, 0); break;
     case "pgback": UI.view = "patprogres"; render(); window.scrollTo(0, pgBilanTop()); break;
     case "pdqui": if (!el.disabled) { UI.pdQui = el.dataset.v; render(); } break;
