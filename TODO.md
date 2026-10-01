@@ -21,6 +21,6 @@ Maquettes : https://claude.ai/artifact/7M3oL9JeMPBV9kdzUE8u8Y
 
 ## Données
 
-- **Indices de marché** : une GitHub Action mensuelle (le 1er du mois) récupère le cours de fin de mois d'ETF en euros (Nasdaq-100, S&P 500, MSCI World, émergents, CAC 40) et publie un `indices.json` lu par l'app. Gratuit, sans clé, rien n'est envoyé sur l'utilisateur.
+- ~~Indices de marché~~ : fait. `scripts/fetch-indices.mjs` lit chaque mois les cours ajustés de cinq ETF en euros (MSCI World CW8, S&P 500 ESE, Nasdaq-100 ANX, Émergents AEEM, CAC 40 CAC) sur Yahoo Finance et écrit `indices.js` ; la GitHub Action `Indices de marché` le lance le 1er et le 3 du mois. « Face aux marchés » (tuile et détail) les compare à tes comptes.
 - **Réserve et argent qui dort** : calculer les dépenses moyennes et le budget non investi (solde du budget absent des versements) à partir des données Budget.
 - **Historique mensuel de chaque compte** pour « Face aux marchés » : les courbes du PER, du PEE, du livret et de la crypto sont des exemples dans la maquette.

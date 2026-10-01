@@ -1657,6 +1657,8 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
 .pg .mrow{position:relative;display:grid;grid-template-columns:108px minmax(0,1fr) 62px;gap:10px;align-items:center;height:22px}
 .pg .mrow>span{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pg .mrow>b{text-align:right;font-size:13.5px}
+.pg .mrow.ix>span,.pg .mrow.ix>b{font-weight:500;color:var(--pg-muted)}
+.pg .mrow.ix .mbar{background:color-mix(in oklab, var(--pg-grey) 55%, var(--pg-tile))}
 .pg .mrow .mbx{height:10px}
 .pg .mbar{display:block;height:100%;border-radius:3px;background:var(--pg-blue)}
 .pg .medal{position:absolute;left:-23px;top:50%;width:17px;height:17px;margin-top:-8.5px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;color:#fff;opacity:0;transform:scale(0);pointer-events:none}
@@ -2040,10 +2042,14 @@ html[data-theme="dark"] .pg .pa-tx-warn{background:#33241A;color:#F2B27A}
 .pg .pa-chg .pill{font-size:16px}
 .pg .pa-head,.pg .pa-row{grid-template-columns:74px minmax(0,1fr) 66px 74px 62px}
 .pg .pa-row .m{white-space:nowrap}
+
+.pg .pd-rank .ix .nm{font-weight:500;color:var(--pg-muted)}
+.pg .pd-rank .ix b{font-weight:500;color:var(--pg-muted)}
 </style>
 </head>
 <body>
 <div id="app"></div>
+<script src="indices.js"></script>
 <script>
 /* =========================================================================
    Budget — single-file expense tracker. All data stays in this browser.
@@ -7340,6 +7346,19 @@ function pgDietz(accountId, fromMk, toMk) {
   const gain = v1 - v0 - flows, base = v0 + weighted;
   return { r: base > 0 ? gain / base * 100 : null, gain, flows, v0, v1 };
 }
+/* Les grands indices, d'après indices.js (cours de fin de mois en euros, dividendes
+   réinvestis, mis à jour chaque mois par une GitHub Action). Absent ou en retard sur le
+   mois affiché : on n'invente rien, la comparaison se fait sans eux. */
+function pgIndices() { return (typeof window !== "undefined" && window.INDICES && window.INDICES.series) || null; }
+function pgIndexPerf(id, fromMk, toMk) {
+  const s = pgIndices(), m = s && s[id] && s[id].months;
+  if (!m || m[fromMk] == null || m[toMk] == null) return null;
+  return (m[toMk] / m[fromMk] - 1) * 100;
+}
+function pgIndexRows(fromMk, toMk) {
+  const s = pgIndices(); if (!s) return [];
+  return Object.keys(s).map(id => ({ id, k: s[id].name, r: pgIndexPerf(id, fromMk, toMk), idx: true })).filter(x => x.r != null);
+}
 function pgYearPerf(year, month) {
   const end = String(year) === month.slice(0, 4) ? month : year + "-12";
   return pgDietz(null, (year - 1) + "-12", end).r;
@@ -7820,22 +7839,29 @@ function viewPatProgres() {
       '<span class="foot">ta performance actuelle (' + esc(fmtRate(asm.rate)) + " par an) et ton versement moyen (" + esc(fmtEurShort(asm.contrib)) + " par mois), prolongés tels quels</span></div>";
   }
 
-  /* ======== 9 · Face aux marchés : tes comptes classés sur un an. Les indices viendront
-     s'y ajouter dès que leur fichier mensuel existera ; d'ici là, aucun chiffre inventé. ======== */
+  /* ======== 9 · Face aux marchés : sur 12 mois glissants, en performance enchaînée, la seule
+     mesure qui se compare à un indice (un indice ne reçoit pas tes versements). ======== */
   if (hasYear) {
-    const list = ranked.filter(x => x.r != null).map(x => ({ k: x.a.name, r: x.r }));
-    if (twrYear) list.push({ k: "Ton patrimoine", r: twrYear.cumul });
-    list.sort((p, q) => q.r - p.r);
+    const acc = ranked.map(x => ({ a: x.a, k: x.a.name, r: pgAccountTWR(x.a.id, yAgo, month), me: true })).filter(x => x.r != null);
+    const ix = pgIndexRows(yAgo, month), msci = ix.find(x => x.id === "msci"), main = acc[0];
+    /* Peu de place : ton plus gros compte, ton meilleur, ton patrimoine, et les indices. */
+    const best = acc.slice().sort((p, q) => q.r - p.r)[0];
+    const mine = [main, best].filter((x, i, arr) => x && arr.indexOf(x) === i);
+    if (twrYear) mine.push({ k: "Ton patrimoine", r: twrYear.cumul, me: true });
+    const list = (ix.length ? mine.concat(ix) : acc.concat(twrYear ? [{ k: "Ton patrimoine", r: twrYear.cumul, me: true }] : [])).sort((p, q) => q.r - p.r);
     const mx = Math.max(...list.map(x => Math.abs(x.r)), 0.1), med = ["gold", "silver", "bronze"];
+    const title = msci && main ? (main.r >= msci.r ? main.k + " devant le MSCI World" : "Le MSCI World devant " + main.k) : list.length ? list[0].k + " en tête" : "Pas encore d’année complète";
+    const beaten = main ? ix.filter(x => main.r > x.r).length : 0;
     html += '<div class="t t-marches" style="--dot:var(--pg-blue)" data-act="pgdetail" data-d="marches" role="button" tabindex="0"><span class="open" aria-hidden="true">›</span><span class="lbl">Face aux marchés</span>' +
-      '<span class="ttl">' + (list.length ? esc(list[0].k) + " en tête" : "Pas encore d’année complète") + "</span>" +
-      '<div class="sp"></div><div style="display:flex;flex-direction:column;padding-left:2px">' + list.slice(0, 8).map((x, i) => {
-        const m = i < 3 && x.r > 0 ? med[i] : "";
-        return '<div class="mrow' + (m ? " " + m : "") + '">' + (m ? '<span class="medal ' + m + '">' + (i + 1) + "</span>" : "") +
+      '<span class="ttl">' + esc(title) + "</span>" +
+      '<div class="sp"></div><div style="display:flex;flex-direction:column;padding-left:2px">' + list.slice(0, 9).map((x, i) => {
+        const m = x.me && i < 3 && x.r > 0 ? med[i] : "";
+        return '<div class="mrow' + (m ? " " + m : "") + (x.idx ? " ix" : "") + '">' + (m ? '<span class="medal ' + m + '">' + (i + 1) + "</span>" : "") +
           "<span>" + esc(x.k) + '</span><div class="mbx"><i class="mbar" style="--n:' + i + ";width:" + (Math.abs(x.r) / mx * 100).toFixed(1) + "%" + (x.r < 0 ? ";background:var(--pg-neg)" : "") + '"></i></div>' +
           "<b" + (x.r < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.r)) + "</b></div>";
       }).join("") + "</div>" +
-      '<span class="foot">performance du placement sur 12 mois glissants, comme un indice · les indices arriveront avec leur mise à jour mensuelle</span></div>';
+      '<span class="foot">' + (ix.length && main ? esc(main.k) + " bat " + beaten + " indice" + (beaten > 1 ? "s" : "") + " sur " + ix.length + " · " : "") +
+        "sur 12 mois glissants, en euros, dividendes réinvestis" + (ix.length ? "" : " · indices en attente de leur mise à jour mensuelle") + "</span></div>";
   }
   html += "</div></section></div>";
   /* Le lien vers le bilan annonce ce qu'il y a à voir. */
@@ -8094,27 +8120,33 @@ function pdMarches(month, months) {
   const list = patActiveAccounts().map(a => ({ k: a.name, v: chain(a.id) })).filter(x => x.v);
   list.sort((p, q) => q.v[n] - p.v[n]);
   list.forEach((x, i) => { x.c = PD_PALETTE[i % PD_PALETTE.length]; x.id = "k" + i; });
-  const pat = chain(null), rows = list.concat(pat ? [{ k: "Ton patrimoine", v: pat, c: "var(--pg-blue)", id: "pat", all: true }] : []).sort((p, q) => q.v[n] - p.v[n]);
+  const pat = chain(null), ixS = pgIndices(), ixRows = [];
+  if (ixS) Object.keys(ixS).forEach(id => {
+    const m = ixS[id].months; if (m[from] == null || m[month] == null) return;
+    ixRows.push({ k: ixS[id].name, v: [0].concat(span.map(mk => m[mk] == null ? null : (m[mk] / m[from] - 1) * 100)), c: id === "msci" ? "var(--pg-muted)" : "var(--pg-grey)", id: "ix-" + id, idx: true });
+  });
+  ixRows.forEach(x => { for (let i = 1; i < x.v.length; i++) if (x.v[i] == null) x.v[i] = x.v[i - 1]; });
+  const rows = list.concat(pat ? [{ k: "Ton patrimoine", v: pat, c: "var(--pg-blue)", id: "pat", all: true }] : []).concat(ixRows).sort((p, q) => q.v[n] - p.v[n]);
   if (!rows.length) return pdPage("marches", "Face aux marchés", '<h1 class="pd-h1">Pas encore assez d’historique</h1>', "");
   const vals = rows.flatMap(x => x.v), lo = Math.min(...vals, 0) - 3, hi = Math.max(...vals, 0) + 3, W = 680, H = 360, st = pdStep(hi - lo, 5);
   const X = i => 34 + i * (W - 150) / n, Y = v => 10 + (1 - (v - lo) / (hi - lo)) * (H - 40);
   let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Tes comptes classés">';
   for (let t = Math.ceil(lo / st) * st; t <= hi; t += st) s += '<line x1="34" x2="' + (W - 116) + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="' + (Math.abs(t) < 1e-9 ? "var(--pg-grey)" : "var(--pg-line)") + '"/><text x="26" y="' + pgF(Y(t) + 4) + '" text-anchor="end" font-size="11.5" fill="var(--pg-faint)">' + (Math.abs(t) < 1e-9 ? "0" : esc(fmtRate(t).replace(/^(\d)/, "+$1"))) + "</text>";
-  rows.filter(x => !x.all).concat(rows.filter(x => x.all)).forEach(x => s += '<path class="cv c-' + x.id + '" d="' + pgCurve(x.v.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="' + x.c + '" stroke-width="' + (x.all ? 3.5 : 2.4) + '" stroke-linecap="round"/>');
+  rows.filter(x => x.idx).concat(rows.filter(x => !x.all && !x.idx), rows.filter(x => x.all)).forEach(x => s += '<path class="cv c-' + x.id + '" d="' + pgCurve(x.v.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="' + x.c + '" stroke-width="' + (x.all ? 3.5 : x.idx ? 1.6 : 2.4) + '" stroke-linecap="round"' + (x.idx ? ' stroke-dasharray="' + (x.id === "ix-msci" ? "0" : "4 3") + '"' : "") + "/>");
   let last = -99; rows.slice().sort((p, q) => q.v[n] - p.v[n]).forEach(x => { let yy = Y(x.v[n]); if (yy - last < 14) yy = last + 14; last = yy; s += '<text class="cl l-' + x.id + '" x="' + (W - 110) + '" y="' + pgF(yy + 4) + '" font-size="12" font-weight="800" fill="' + x.c + '">' + esc(x.k) + "</text>"; });
   const tick = [0, Math.round(n / 3), Math.round(2 * n / 3), n].filter((v, i, a) => a.indexOf(v) === i);
   tick.forEach(i => s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="12" fill="var(--pg-faint)">' + esc(pgMonth(addMonth(from, i))) + "</text>");
   s += "</svg>";
   const mx = Math.max(...rows.map(x => Math.abs(x.v[n])), 0.1);
-  const listHtml = '<div class="pd-rank">' + rows.map((x, i) => '<div class="rk rk-' + x.id + (x.all ? " all" : "") + '"><span class="i">' + (i + 1) + '</span><span class="nm"><i style="background:' + x.c + '"></i>' + esc(x.k) + "</span>" +
+  const listHtml = '<div class="pd-rank">' + rows.map((x, i) => '<div class="rk rk-' + x.id + (x.all ? " all" : "") + (x.idx ? " ix" : "") + '"><span class="i">' + (i + 1) + '</span><span class="nm"><i style="background:' + x.c + '"></i>' + esc(x.k) + "</span>" +
     '<i class="b" style="width:' + pgF(Math.abs(x.v[n]) / mx * 100) + "%;background:" + (x.v[n] < 0 ? "var(--pg-neg)" : x.c) + '"></i><b' + (x.v[n] < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.v[n])) + "</b></div>").join("") + "</div>";
   const css = "<style>" + rows.map(x => ".pd:has(.rk-" + x.id + ":hover) .cv:not(.c-" + x.id + "),.pd:has(.rk-" + x.id + ":hover) .cl:not(.l-" + x.id + "){opacity:.12}.pd:has(.rk-" + x.id + ":hover) .c-" + x.id + "{stroke-width:4}").join("") + "</style>";
   const perLbl = key === "3m" ? "sur 3 mois glissants" : key === "1y" ? "sur 12 mois glissants" : "sur 3 ans glissants";
-  const accs = rows.filter(x => !x.all), up = accs.filter(x => x.v[n] > 0).length, first = accs[0], patR = rows.find(x => x.all);
+  const accs = rows.filter(x => !x.all && !x.idx), up = accs.filter(x => x.v[n] > 0).length, first = accs[0], patR = rows.find(x => x.all);
   const left = css + '<h1 class="pd-h1">' + esc(first ? first.k + " en tête " + perLbl : "Ton patrimoine " + perLbl) + "</h1>" +
     '<div class="pd-stats">' + (first ? pdStat(esc(pgPct(first.v[n])), esc(first.k), "var(--pg-blue)") : "") + (patR ? pdStat(esc(pgPct(patR.v[n])), "ton patrimoine") : "") + pdStat(up + " / " + accs.length, "comptes en hausse", "var(--pg-muted)") + "</div>" +
     '<div class="pd-keys">' + rows.map(x => pdKey(x.c, esc(x.k))).join("") + '</div><div class="fig">' + s + "</div>";
-  const right = pdPanel("Le classement", listHtml + '<span class="pd-note">Survole une ligne pour suivre sa courbe. La comparaison aux grands indices (MSCI World, S&amp;P 500, CAC 40…) arrivera avec leur mise à jour mensuelle.</span>', esc(perLbl));
+  const right = pdPanel("Le classement", listHtml + '<span class="pd-note">Survole une ligne pour suivre sa courbe. ' + (ixRows.length ? "Indices : ETF en euros, dividendes réinvestis, mis à jour chaque mois." : "La comparaison aux grands indices arrivera avec leur mise à jour mensuelle.") + '</span>', esc(perLbl));
   const enough = k => months.length > R[k];
   return pdPage("marches", "Face aux marchés", left, right, pdChips([{ v: "3m", t: "3 mois" }, { v: "1y", t: "1 an" }, { v: "3y", t: "3 ans" }].map(c => ({ ...c, off: !enough(c.v) })), key, "pdmk"));
 }
