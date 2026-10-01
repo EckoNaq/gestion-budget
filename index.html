@@ -7170,6 +7170,20 @@ function pgRowCount(row, on) {
   row._fin = setTimeout(() => { cancelAnimationFrame(row._raf); amt.textContent = fmtEurShort(to); if (gain) gain.textContent = pgSigned(g); }, D + 150);
 }
 document.addEventListener("mouseenter", e => { if (e.target.matches && e.target.matches(".pg .t-autres .row")) pgRowCount(e.target, true); }, true);
+function pgGainCount(tile) {
+  const t = tile.querySelector(".pea-gtxt");
+  if (!t || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const g = +t.dataset.g, suf = t.dataset.suffix, t0 = performance.now(), D = 1200;
+  cancelAnimationFrame(t._raf); clearTimeout(t._fin);
+  const step = now => {
+    const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3);
+    t.textContent = pgSigned(g * e) + suf;
+    if (p < 1) t._raf = requestAnimationFrame(step);
+  };
+  t._raf = requestAnimationFrame(step);
+  t._fin = setTimeout(() => { cancelAnimationFrame(t._raf); t.textContent = pgSigned(g) + suf; }, D + 150);
+}
+document.addEventListener("mouseenter", e => { if (e.target.matches && e.target.matches(".pg .t-pea")) pgGainCount(e.target); }, true);
 document.addEventListener("mouseleave", e => { if (e.target.matches && e.target.matches(".pg .t-autres .row")) pgRowCount(e.target, false); }, true);
 const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
@@ -7271,21 +7285,37 @@ function viewPatProgres() {
       const X = i => 8 + i * 512 / (vals.length - 1), Y = v => hi > lo ? 127.5 - (v - lo) / (hi - lo) * 106 : 74;
       const pv = vals.map((v, i) => [X(i), Y(v)]), pi = inv.map((v, i) => [X(i), Y(v)]), lv = pv[pv.length - 1], li = pi[pi.length - 1];
       const area = pgCurve(pv) + " L" + pi.slice().reverse().map(p => pgF(p[0]) + "," + pgF(p[1])).join(" ") + " Z";
-      const gy = (lv[1] + li[1]) / 2 + 5;
       chart = '<div class="fig pea-chart"><svg viewBox="0 0 528 150" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Valeur ' + esc(fmtEurShort(top.v)) + ", versé " + esc(fmtEurShort(inv[inv.length - 1])) + '">' +
         '<path class="ar" d="' + area + '" fill="var(--pg-orange)" fill-opacity="0.1"/>' +
         '<path class="ln" pathLength="100" d="' + pgCurve(pi) + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/>' +
         '<path class="ln" pathLength="100" d="' + pgCurve(pv) + '" fill="none" stroke="var(--pg-orange)" stroke-width="2.5" stroke-linecap="round"/>' +
-        '<circle class="dot" cx="' + pgF(lv[0]) + '" cy="' + pgF(lv[1]) + '" r="6" fill="var(--pg-orange)" stroke="var(--pg-tile)" stroke-width="2"/>' +
-''; 
-      chart += "</svg></div>";
+        '<circle class="dot" cx="' + pgF(lv[0]) + '" cy="' + pgF(lv[1]) + '" r="6" fill="var(--pg-orange)" stroke="var(--pg-tile)" stroke-width="2"/>';
+      let gainIn = false;
       if (u) {
-        const g = Math.round(Math.abs(u.gain)), kk = Math.floor(g / 1000), uu = g % 1000;
-        chart += '<div class="pea-foot"><span class="pea-key"><i></i>versé</span>' + (g < 1e6
-          ? '<span class="pea-gain' + (kk ? "" : " small") + (u.gain < 0 ? " dn" : "") + '" style="--k:' + kk + ";--u:" + uu + ";--pgk:" + kk + ";--pgu:" + uu + '">' +
-            (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span>\u202f' : "") + '<span class="cu"></span>\u00a0€ de gains au total</span>'
-          : '<span class="pea-gain">' + esc(pgSigned(u.gain)) + " de gains au total</span>") + "</div>";
+        /* Les gains se posent entre les deux courbes, là où l'écart est assez large pour tout
+           le texte : on cherche, de droite à gauche, une fenêtre de la largeur de l'étiquette
+           où le bas de la courbe de valeur et le haut du versé laissent la place. */
+        const label = pgSigned(u.gain) + (u.gain < 0 ? " perdus" : " gagnés");
+        const tw = label.length * 7.6 + 6, at = (P, x) => {
+          for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const f = (x - P[i - 1][0]) / (P[i][0] - P[i - 1][0]); return P[i - 1][1] + f * (P[i][1] - P[i - 1][1]); }
+          return P[P.length - 1][1];
+        };
+        let best = null;
+        for (let xr = lv[0] - 12; xr - tw >= 8; xr -= 4) {
+          let low = -Infinity, high = Infinity;
+          for (let x = xr - tw; x <= xr; x += 3) { low = Math.max(low, at(pv, x)); high = Math.min(high, at(pi, x)); }
+          const room = high - low;
+          if (room >= 30) { best = { xr, y: (low + high) / 2 }; break; }
+          if (room >= 22 && (!best || room > best.room)) best = { xr, y: (low + high) / 2, room };
+        }
+        if (best) {
+          gainIn = true;
+          chart += '<text class="pea-gtxt" x="' + pgF(best.xr) + '" y="' + pgF(best.y) + '" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="var(--pg-orange)" data-g="' + u.gain.toFixed(2) + '" data-suffix="' + (u.gain < 0 ? " perdus" : " gagnés") + '">' + esc(label) + "</text>";
+        }
       }
+      chart += "</svg></div>";
+      chart += '<div class="pea-foot"><span class="pea-key"><i></i>versé</span>' +
+        (u && !gainIn ? '<span class="pea-gain' + (u.gain < 0 ? " dn" : "") + '">' + esc(pgSigned(u.gain)) + (u.gain < 0 ? " perdus" : " gagnés") + "</span>" : "") + "</div>";
     }
     html += '<button class="t t-pea w2" style="--dot:var(--pg-orange)" data-act="patopenacct" data-id="' + esc(top.a.id) + '">' +
       '<div class="hd"><span class="lbl">' + esc(top.a.name) + (accAth ? '<span class="badge-rec">★ record</span>' : "") + '</span><span class="chev">›</span></div>' +
@@ -7304,7 +7334,7 @@ function viewPatProgres() {
         return '<button class="row' + (isBest || (x.r != null && x.r >= 15) ? " sweep" : "") + '" style="--n:' + i + '" data-act="patopenacct" data-id="' + esc(x.a.id) + '" data-to="' + x.v.toFixed(2) + '" data-g="' + g.toFixed(2) + '">' +
           '<span class="nm"><span>' + esc(x.a.name) + (good ? ' <span class="star">★</span>' : "") + "</span>" +
           "<span>" + (x.r == null ? "moins d’un an d’historique" : '<b class="perf' + (good ? " good" : "") + (isBest ? " best" : "") + (x.r < 0 ? " dn" : "") + '">' + esc(pgPct(x.r)) + "</b>") + "</span></span>" +
-          '<span class="val"><b class="amt">' + esc(fmtEurShort(x.v)) + '</b><span class="gain' + (g < 0 ? " dn" : "") + '"><b>' + esc(pgSigned(g)) + "</b> " + (g < 0 ? "perdus" : "de gains") + "</span></span></button>";
+          '<span class="val"><b class="amt">' + esc(fmtEurShort(x.v)) + '</b><span class="gain' + (g < 0 ? " dn" : "") + '"><b>' + esc(pgSigned(g)) + "</b> " + (g < 0 ? "perdus" : "gagnés") + "</span></span></button>";
       }).join("") : '<p class="foot">Un seul compte suivi pour l’instant.</p>') + "</div></div>";
   }
 
