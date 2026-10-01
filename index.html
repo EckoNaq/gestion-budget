@@ -2235,8 +2235,8 @@ html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A21
 }
 
 /* ---- Journal : tes mois (maquette « Journal v2 »), sous .pg.jn ---- */
-.pg.jn{--jn-up:#2A78D6;--jn-dn:#E8743B;--jn-upbg:#EAF2FC;--jn-dnbg:#FDEEE6;--jn-soft:#F3F4F6;--jn-nil:rgba(255,255,255,.45);--jn-ax:#C9CDD5}
-html[data-theme="dark"] .pg.jn{--jn-up:#6FA8F0;--jn-dn:#F0924F;--jn-upbg:#16273D;--jn-dnbg:#33241A;--jn-soft:#1F252F;--jn-nil:rgba(255,255,255,.04);--jn-ax:#3A414D}
+.pg.jn{--jn-up:var(--pg-pos);--jn-dn:var(--pg-neg);--jn-upbg:color-mix(in oklab, var(--pg-pos) 10%, var(--pg-tile));--jn-dnbg:color-mix(in oklab, var(--pg-neg) 10%, var(--pg-tile));--jn-soft:#F3F4F6;--jn-nil:rgba(255,255,255,.45);--jn-ax:#C9CDD5}
+html[data-theme="dark"] .pg.jn{--jn-upbg:color-mix(in oklab, var(--pg-pos) 16%, var(--pg-tile));--jn-dnbg:color-mix(in oklab, var(--pg-neg) 16%, var(--pg-tile));--jn-soft:#1F252F;--jn-nil:rgba(255,255,255,.04);--jn-ax:#3A414D}
 .jn .jn-wrap{max-width:1320px;margin:0 auto;padding:22px 0 40px}
 .jn .jn-body{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:22px;align-items:start}
 .jn .jn-cal{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -9099,11 +9099,12 @@ document.addEventListener("click", e => {
    faite de mois disjoints ne forme pas une période : leurs rendements sont alors chaînés
    (produit des 1 + r), la façon admise de relier des périodes séparées. */
 
-/* Bleu pour les hausses, orange pour les baisses : une paire que les daltoniens
-   distinguent, et l'intensité suit l'ampleur (pleine à 8 % dans un sens ou l'autre). */
+/* La hausse et la baisse prennent les couleurs de l'application : vert et rouge, ou bleu et
+   orange avec le réglage « Couleurs adaptées au daltonisme ». L'intensité suit l'ampleur,
+   pleine à 8 % dans un sens ou l'autre. */
 function jnTint(r) {
   const a = Math.min(1, Math.abs(r) / 8);
-  return r >= 0 ? "rgba(42,120,214," + (0.12 + a * 0.5).toFixed(2) + ")" : "rgba(232,116,59," + (0.14 + a * 0.52).toFixed(2) + ")";
+  return "color-mix(in oklab, var(" + (r >= 0 ? "--jn-up" : "--jn-dn") + ") " + Math.round((r >= 0 ? 0.12 + a * 0.5 : 0.14 + a * 0.52) * 100) + "%, transparent)";
 }
 function jnNum(x) { const t = Math.round(x * 10); return (t < 0 ? "−" : t > 0 ? "+" : "") + Math.abs(x).toFixed(1).replace(".", ","); }
 function jnLong(mk) { return MONTHS[+mk.slice(5) - 1] + " " + mk.slice(0, 4); }
