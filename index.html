@@ -1559,7 +1559,13 @@ html[data-theme="dark"] .pg .badge-rec{background:#12301F;color:#3FBF8F}
 .pg .row .nm>span:first-child{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pg .row .nm>span:last-child{font-size:13px;color:var(--pg-faint)}
 .pg .row .star{color:var(--pg-star);font-size:13px;display:inline-block}
-.pg .row>b{font-weight:700;font-size:16px}
+.pg .row .val{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.pg .row .amt{font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+.pg .row .gain{font-size:12.5px;color:var(--pg-pos);opacity:0;transform:translateY(-4px);transition:opacity .3s, transform .3s;white-space:nowrap}
+.pg .row .gain.dn{color:var(--pg-neg)}
+.pg .row .gain b{font-variant-numeric:tabular-nums}
+.pg .row:hover .gain,.pg .row:focus-visible .gain{opacity:1;transform:none}
+.pg .per{display:block;margin:2px 0 0 20px;font-size:12.5px;font-weight:600;color:var(--pg-faint)}
 /* Rythme */
 .pg .cells{position:relative;display:flex;gap:4px}
 .pg .cell{display:block;flex:1 1 0;height:30px;border-radius:4px;background:var(--pg-trk)}
@@ -1729,7 +1735,7 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
   .pg .lbl{font-size:18px}
   .pg .bil-h h2{font-size:42px}
   .pg .row{padding:10px 0}
-  .pg .row .nm>span:first-child,.pg .row>b{font-size:17px}
+  .pg .row .nm>span:first-child,.pg .row .amt{font-size:17px}
   .pg .row .nm>span:last-child{font-size:14px}
   .pg .mrow{height:30px;grid-template-columns:150px minmax(0,1fr) 76px}
   .pg .mrow>span,.pg .mrow>b{font-size:15px}
@@ -1749,7 +1755,8 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
   .pg .pg-head{margin-bottom:12px}
   .pg .t-rythme .sp{min-height:64px!important}
   .pg .row{padding:5px 0}
-  .pg .t-autres .row:nth-child(n+5){display:none}
+  .pg .t-autres .row:nth-child(n+4){display:none}
+  .pg .per{margin-top:0}
   .pg .mrow{height:19px}
   .pg .foot{margin-top:6px;font-size:12px}
   .pg .t-pat .recap{margin-top:8px}
@@ -7127,6 +7134,38 @@ function pgBall(paid) {
   });
   return { html: '<b class="ball"></b>' + html, css };
 }
+/* Gains en euros entre deux bornes : la somme des gains mensuels, versements exclus, sur le
+   même périmètre que la performance enchaînée. accountId null = tout le patrimoine. */
+function pgGains(accountId, fromMk, toMk) {
+  let g = 0;
+  for (let mk = addMonth(fromMk, 1); mk <= toMk; mk = addMonth(mk, 1)) g += patMonthlyGain(accountId, mk) || 0;
+  return g;
+}
+/* Survol d'un compte : le montant part du solde sans les gains et rejoint la valeur actuelle,
+   pendant que les gains comptent en dessous. Le rendu refait le DOM à chaque clic, d'où
+   l'écoute posée une fois pour toutes sur le document. */
+function pgRowCount(row, on) {
+  const amt = row.querySelector(".amt"), gain = row.querySelector(".gain b");
+  if (!amt) return;
+  cancelAnimationFrame(row._raf); clearTimeout(row._fin);
+  const to = +row.dataset.to, g = +row.dataset.g;
+  if (!on || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    amt.textContent = fmtEurShort(to); if (gain) gain.textContent = pgSigned(g); return;
+  }
+  const t0 = performance.now(), D = 1100;
+  const step = now => {
+    const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3);
+    amt.textContent = fmtEurShort(to - g + g * e);
+    if (gain) gain.textContent = pgSigned(g * e);
+    if (p < 1) row._raf = requestAnimationFrame(step);
+  };
+  amt.textContent = fmtEurShort(to - g); if (gain) gain.textContent = pgSigned(0);
+  row._raf = requestAnimationFrame(step);
+  /* Onglet en arrière-plan : les images ne tournent pas, la valeur finale arrive quand même. */
+  row._fin = setTimeout(() => { cancelAnimationFrame(row._raf); amt.textContent = fmtEurShort(to); if (gain) gain.textContent = pgSigned(g); }, D + 150);
+}
+document.addEventListener("mouseenter", e => { if (e.target.matches && e.target.matches(".pg .t-autres .row")) pgRowCount(e.target, true); }, true);
+document.addEventListener("mouseleave", e => { if (e.target.matches && e.target.matches(".pg .t-autres .row")) pgRowCount(e.target, false); }, true);
 const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
 function viewPatProgres() {
@@ -7161,19 +7200,20 @@ function viewPatProgres() {
     const vals = ser.map(mk => patNetAt(mk)), lo = Math.min(...vals), hi = Math.max(...vals);
     const X = i => vals.length > 1 ? 20 + i * 536 / (vals.length - 1) : 556, Y = v => hi > lo ? 181 - (v - lo) / (hi - lo) * 146 : 108;
     const pts = vals.map((v, i) => [X(i), Y(v)]), d = pgCurve(pts), last = pts[pts.length - 1];
-    const from = ser[0], twr = ser.length > 1 ? patTWR(from, month) : null, delta = net - patNetAt(from);
-    const rangeTxt = rg[0] === "3m" ? "en trois mois" : rg[0] === "1y" ? "en un an" : "depuis " + pgMonth(from, true);
+    const from = ser[0], twr = ser.length > 1 ? patTWR(from, month) : null, gains = pgGains(null, from, month);
+    const rangeTxt = rg[0] === "3m" ? "sur 3 mois glissants" : rg[0] === "1y" ? "sur 12 mois glissants" : "depuis " + pgMonth(from, true);
+    const gainM = hasPrev ? patMonthlyGain(null, month) : null;
     const record = ath && ath.mk === month && net > 0;
     const conf = Array.from({ length: 8 }, (_, i) => { const a = i * 45 * Math.PI / 180; return '<b style="background:' + ["#8FF0C2", "#FFE58A", "#8FB3FF", "#F3B98A"][i % 4] + ";--x:" + (Math.cos(a) * 70).toFixed(0) + "px;--y:" + (Math.sin(a) * 40 - 10).toFixed(0) + "px;--r:" + (i * 50) + "deg;--d:" + (300 + i * 25) + 'ms"></b>'; }).join("");
     html += '<div class="t t-pat w2 h2"><span class="lbl">' + (patHasDebt() ? "Ton patrimoine net" : "Ton patrimoine") + "</span>" +
       '<span class="flip" aria-label="' + esc(fmtEurShort(net)) + '">' + pgFlip(fmtEurShort(net)) + "</span>" +
       '<div style="margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
         (record ? '<span class="chip-rec"><i class="confetti">' + conf + "</i><i></i>Nouveau record</span>" : "") +
-        (hasPrev ? '<span style="font-weight:600;font-size:17px;color:rgba(255,255,255,.62)">' + esc(pgSigned(net - patNetAt(prevM))) + " en " + esc(mName) + (perfM != null ? " · " + esc(pgPct(perfM)) : "") + "</span>" : "") + "</div>" +
+        (gainM != null ? '<span style="font-weight:600;font-size:17px;color:rgba(255,255,255,.62)">' + esc(pgSigned(gainM)) + " de gains en " + esc(mName) + (perfM != null ? " · " + esc(pgPct(perfM)) : "") + "</span>" : "") + "</div>" +
       '<span class="recap">▶ Revoir le récap de ' + esc(mName) + "</span>" +
       '<div style="margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:relative;z-index:1">' +
         '<div class="rng">' + PG_RANGES.map(r => '<button class="' + (r === rg ? "on" : "") + '" data-act="pgrange" data-range="' + r[0] + '">' + r[1] + "</button>").join("") + "</div>" +
-        (ser.length > 1 ? '<span style="font-weight:700;font-size:20px">' + esc(pgSigned(delta)) + ' <span style="font-weight:600;font-size:15px;color:rgba(255,255,255,.55)">' + esc(rangeTxt) + (twr ? " · " + esc(pgPct(twr.cumul)) : "") + "</span></span>" : "") + "</div>" +
+        (ser.length > 1 ? '<span style="font-weight:700;font-size:20px">' + esc(pgSigned(gains)) + ' <span style="font-weight:600;font-size:15px;color:rgba(255,255,255,.55)">de gains ' + esc(rangeTxt) + (twr ? " · " + esc(pgPct(twr.cumul)) : "") + "</span></span>" : "") + "</div>" +
       (vals.length > 1 ? '<div class="pat-chart"><svg viewBox="0 0 576 230" role="img" aria-label="Patrimoine ' + esc(rangeTxt) + '">' +
         '<path class="ar" d="' + d + " L" + pgF(last[0]) + ",230 L20.0,230 Z" + '" fill="rgba(143,179,255,0.12)"/>' +
         '<path class="ln" pathLength="100" d="' + d + '" fill="none" stroke="#8FB3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -7201,33 +7241,34 @@ function viewPatProgres() {
         '<path class="ln" pathLength="100" d="' + pgCurve(pi) + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/>' +
         '<path class="ln" pathLength="100" d="' + pgCurve(pv) + '" fill="none" stroke="var(--pg-orange)" stroke-width="2.5" stroke-linecap="round"/>' +
         '<circle class="dot" cx="' + pgF(lv[0]) + '" cy="' + pgF(lv[1]) + '" r="6" fill="var(--pg-orange)" stroke="var(--pg-tile)" stroke-width="2"/>' +
-        (u ? '<text class="gain-svg" x="' + pgF(lv[0] - 10) + '" y="' + pgF(gy) + '" text-anchor="end" font-size="13" font-weight="700" fill="var(--pg-orange)">' + esc(pgSigned(u.gain)) + (u.gain >= 0 ? " gagnés" : " perdus") + "</text>" : "") +
+        (u ? '<text class="gain-svg" x="' + pgF(lv[0] - 10) + '" y="' + pgF(gy) + '" text-anchor="end" font-size="13" font-weight="700" fill="var(--pg-orange)">' + esc(pgSigned(u.gain)) + " de gains au total</text>" : "") +
         '<text x="' + pgF(li[0] - 10) + '" y="' + pgF(li[1] + 18) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--pg-faint)">versé</text>';
       if (u && Math.abs(u.gain) < 1e6) {
         const g = Math.round(Math.abs(u.gain)), kk = Math.floor(g / 1000), uu = g % 1000;
         chart += '<foreignObject x="0" y="' + pgF(gy - 15) + '" width="' + pgF(lv[0] - 10) + '" height="20"><div style="text-align:right;line-height:20px">' +
           '<span class="pea-gain' + (kk ? "" : " small") + '" style="--k:' + kk + ";--u:" + uu + ";--pgk:" + kk + ";--pgu:" + uu + '">' +
-          (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span> ' : "") + '<span class="cu"></span> € ' + (u.gain >= 0 ? "gagnés" : "perdus") + "</span></div></foreignObject>";
+          (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span> ' : "") + '<span class="cu"></span> € de gains au total</span></div></foreignObject>';
       }
       chart += "</svg></div>";
     }
     html += '<button class="t t-pea w2" style="--dot:var(--pg-orange)" data-act="patopenacct" data-id="' + esc(top.a.id) + '">' +
       '<div class="hd"><span class="lbl">' + esc(top.a.name) + (accAth ? '<span class="badge-rec">★ record</span>' : "") + '</span><span class="chev">›</span></div>' +
       '<div style="margin-top:12px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap"><span class="pbig">' + esc(fmtEurShort(top.v)) + "</span>" +
-        (top.r != null ? '<span style="padding-bottom:3px;font-weight:600;font-size:16px;color:var(--pg-muted)">' + esc(pgPct(top.r)) + " en un an</span>" : "") + "</div>" +
+        (top.r != null ? '<span style="padding-bottom:3px;font-weight:600;font-size:16px;color:var(--pg-muted)">' + esc(pgPct(top.r)) + " sur 12 mois glissants</span>" : "") + "</div>" +
       (chart || '<div class="sp"></div>') + "</button>";
   }
 
   /* ======== 3 · Tes autres comptes ======== */
   {
     const others = ranked.slice(1).slice(0, 5), best = Math.max(...others.map(x => x.r == null ? -Infinity : x.r));
-    html += '<div class="t t-autres" style="--dot:var(--pg-violet);padding-bottom:10px"><div class="hd"><span class="lbl">' + (top ? "Tes autres comptes" : "Tes comptes") + '</span><span class="chev">›</span></div>' +
+    html += '<div class="t t-autres" style="--dot:var(--pg-violet);padding-bottom:10px"><div class="hd"><span class="lbl">' + (top ? "Tes autres comptes" : "Tes comptes") + '</span><span class="chev">›</span></div><span class="per">performance sur 12 mois glissants</span>' +
       '<div style="margin-top:8px">' + (others.length ? others.map((x, i) => {
         const good = x.r != null && x.r >= 10, isBest = x.r != null && x.r > 0 && x.r === best;
-        return '<button class="row' + (isBest || (x.r != null && x.r >= 15) ? " sweep" : "") + '" style="--n:' + i + '" data-act="patopenacct" data-id="' + esc(x.a.id) + '">' +
+        const g = hasYear ? pgGains(x.a.id, yAgo, month) : 0;
+        return '<button class="row' + (isBest || (x.r != null && x.r >= 15) ? " sweep" : "") + '" style="--n:' + i + '" data-act="patopenacct" data-id="' + esc(x.a.id) + '" data-to="' + x.v.toFixed(2) + '" data-g="' + g.toFixed(2) + '">' +
           '<span class="nm"><span>' + esc(x.a.name) + (good ? ' <span class="star">★</span>' : "") + "</span>" +
-          "<span>" + (x.r == null ? "moins d’un an d’historique" : '<b class="perf' + (good ? " good" : "") + (isBest ? " best" : "") + (x.r < 0 ? " dn" : "") + '">' + esc(pgPct(x.r)) + "</b> en un an") + "</span></span>" +
-          "<b>" + esc(fmtEurShort(x.v)) + "</b></button>";
+          "<span>" + (x.r == null ? "moins d’un an d’historique" : '<b class="perf' + (good ? " good" : "") + (isBest ? " best" : "") + (x.r < 0 ? " dn" : "") + '">' + esc(pgPct(x.r)) + "</b>") + "</span></span>" +
+          '<span class="val"><b class="amt">' + esc(fmtEurShort(x.v)) + '</b><span class="gain' + (g < 0 ? " dn" : "") + '"><b>' + esc(pgSigned(g)) + "</b> " + (g < 0 ? "perdus" : "de gains") + "</span></span></button>";
       }).join("") : '<p class="foot">Un seul compte suivi pour l’instant.</p>') + "</div></div>";
   }
 
@@ -7390,7 +7431,7 @@ function viewPatProgres() {
           "<span>" + esc(x.k) + '</span><div class="mbx"><i class="mbar" style="--n:' + i + ";width:" + (Math.abs(x.r) / mx * 100).toFixed(1) + "%" + (x.r < 0 ? ";background:var(--pg-neg)" : "") + '"></i></div>' +
           "<b" + (x.r < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.r)) + "</b></div>";
       }).join("") + "</div>" +
-      '<span class="foot">sur un an, en euros · les indices arriveront avec leur mise à jour mensuelle</span></div>';
+      '<span class="foot">sur 12 mois glissants, en euros · les indices arriveront avec leur mise à jour mensuelle</span></div>';
   }
   html += "</div></section></div>";
   return html;
