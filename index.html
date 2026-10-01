@@ -2045,6 +2045,191 @@ html[data-theme="dark"] .pg .pa-tx-warn{background:#33241A;color:#F2B27A}
 
 .pg .pd-rank .ix .nm{font-weight:500;color:var(--pg-muted)}
 .pg .pd-rank .ix b{font-weight:500;color:var(--pg-muted)}
+
+/* ---- Comptes : la saisie vivante (maquettes v11 et v17), sous .pg.pc ---- */
+.pg.pc{--pc-bd:#D4D7DE;--pc-ph:#A3A8B3;--pc-flagbg:#FFF6EA;--pc-flag:#9A4A00;--pc-flagbd:#E59A3A;--pc-has:#9CC0EE;--pc-link:#1D5BA8;--pc-pop:0 6px 22px rgba(17,19,24,.09)}
+html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A2116;--pc-flag:#F2B266;--pc-flagbd:#C98236;--pc-has:#3F6DA6;--pc-link:#8FB8F2;--pc-pop:0 6px 22px rgba(0,0,0,.35)}
+.pc .pc-wrap{max-width:1320px;margin:0 auto;padding:28px 0 48px;display:flex;flex-direction:column;gap:18px}
+.pc .pc-top{display:grid;grid-template-columns:minmax(0,1fr) auto 300px;gap:22px;align-items:end}
+.pc .pc-title{display:flex;flex-direction:column;gap:4px}
+.pc .pc-title h1{margin:0;font-weight:700;font-size:30px;letter-spacing:-.03em}
+.pc .pc-title span{font-size:14px;font-weight:600;color:var(--pg-muted)}
+.pc .cnt{display:inline-block;font-size:14px;font-weight:700;color:var(--pg-muted);padding-bottom:2px}
+.pc .mpill{justify-self:end;align-self:center;display:flex;align-items:center;gap:4px;padding:4px;border-radius:999px;background:var(--pg-tile);box-shadow:var(--pg-sh)}
+.pc .mpill>button{width:44px;height:44px;border:0;border-radius:50%;background:transparent;font:inherit;font-size:18px;color:var(--pg-ink);cursor:pointer}
+.pc .mpill>button:hover:not([disabled]){background:var(--pg-trk)}
+.pc .mpill>button[disabled]{color:var(--pg-chev);cursor:default}
+.pc .mpill>span{display:flex;flex-direction:column;align-items:center;min-width:120px}
+.pc .mpill b{font-size:15px}
+.pc .mpill small{font-size:11.5px;font-weight:700;color:var(--pc-flag)}
+.pc .mpill small.ok,.pc .mpill small.rd{color:var(--pc-link)}
+
+.pc .pc-body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+.pc .pc-rows{display:flex;flex-direction:column;gap:8px}
+.pc .pc-row{position:relative;display:grid;grid-template-columns:minmax(120px,190px) minmax(140px,196px) minmax(130px,178px) minmax(84px,1fr) 56px;gap:16px;align-items:start;padding:12px 18px;border-radius:18px;background:var(--pg-tile);box-shadow:var(--pg-sh);transition:background .35s, box-shadow .35s}
+.pc .pc-row.flag{background:var(--pc-flagbg)}
+.pc .pc-row:focus-within{box-shadow:var(--pc-pop)}
+.pc .pc-row .nm{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.pc .pc-row .nm>span{display:flex;align-items:center;gap:8px;font-size:15.5px;font-weight:700;max-width:100%}
+.pc .pc-row .nm>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc .pc-row .nm small{font-size:12.5px;color:var(--pg-faint)}
+.pc .pc-row .nm:hover>span{text-decoration:underline;text-decoration-color:var(--pg-chev);text-underline-offset:3px}
+.pc .pc-row .gain{min-height:40px;justify-content:center}
+.pc .pc-row .end{height:40px}
+.pc .pc-row .nm{min-height:40px;justify-content:center}
+.pc .cl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pc .sub{font-size:12px;color:var(--pg-faint)}
+.pc .flg{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;font-size:12px;font-weight:700;color:var(--pc-flag)}
+.pc .inp{width:100%;height:40px;padding:0 12px;border-radius:12px;border:1.5px solid var(--pc-bd);background:var(--pg-tile);font:inherit;font-weight:600;font-size:15.5px;color:var(--pg-ink);font-variant-numeric:tabular-nums;outline:none;transition:border-color .15s, box-shadow .2s}
+.pc .inp,.pc .inp::placeholder{text-align:left}
+.pc .inp::placeholder{color:var(--pc-ph);font-weight:500}
+.pc .inp:focus{border-color:var(--pg-ink);box-shadow:0 0 0 4px color-mix(in oklab, var(--pg-blue) 16%, transparent)}
+.pc .inp.empty{border-color:var(--pg-ink)}
+.pc .inp.flag{border-color:var(--pc-flagbd)}
+.pc .inp.has{border-color:var(--pc-has)}
+.pc .inp[disabled]{background:var(--pg-bg);color:var(--pg-muted)}
+.pc .mini{border:0;padding:3px 9px;border-radius:999px;background:var(--pc-flag);color:var(--pg-tile);font:inherit;font-weight:700;font-size:11.5px;cursor:pointer}
+.pc .habit{border:0;padding:0;background:transparent;font:inherit;font-weight:700;font-size:12px;color:var(--pc-link);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.pc .gain{text-align:right;display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums}
+.pc .gain b{font-size:16px}
+.pc .gain span{font-size:13px;color:var(--pg-muted)}
+.pc .gain .wait{font-size:13.5px;color:var(--pg-faint)}
+.pc .g-pos{color:var(--pg-pos)}.pc .g-neg{color:var(--pg-neg)}.pc .g-flag{color:var(--pc-flag)}
+.pc .end{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.pc .chk{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--pg-blue);color:#FFFFFF;font-size:13px;font-weight:900;font-style:normal;opacity:0;transform:scale(.3);transition:opacity .2s, transform .45s cubic-bezier(.3,1.7,.5,1)}
+.pc .pc-row.ok .chk{opacity:1;transform:scale(1)}
+.pc .chev{width:24px;height:32px;border:0;border-radius:8px;background:none;font:inherit;font-size:18px;color:var(--pg-chev);cursor:pointer}
+.pc .chev:hover{color:var(--pg-ink);background:var(--pg-trk)}
+.pc .fx{position:absolute;left:0;top:0;width:0;height:0;overflow:visible;pointer-events:none;z-index:5}
+.pc .pc-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:4px}
+.pc .pc-add{height:40px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--pg-muted);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.pc .pc-add:hover{background:var(--pg-tile);color:var(--pg-ink)}
+.pc .gone{font-size:13px;color:var(--pg-faint)}
+.pc .gone .habit{font-size:13px;color:var(--pg-muted)}
+
+.pc .pc-side{display:flex;flex-direction:column;gap:14px;position:sticky;top:20px}
+.pc .pc-card{position:relative;border-radius:24px;background:var(--pg-hero);color:#FFFFFF;padding:22px;display:flex;flex-direction:column;gap:12px;min-height:300px}
+.pc .pc-card .clbl{font-size:14px;font-weight:600;opacity:.65}
+.pc .pc-card .tot{display:inline-block;align-self:flex-start;font-size:38px;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;transform-origin:left center}
+.pc .pc-card .lines{display:flex;flex-direction:column;gap:6px;font-size:14px;font-variant-numeric:tabular-nums}
+.pc .pc-card .lines>span{display:flex;justify-content:space-between;gap:10px}
+.pc .pc-card .lines>span>span{opacity:.65}
+.pc .pc-card .lines b{display:inline-block;transform-origin:right center}
+.pc .gtrack{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden}
+.pc .gfill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#8FB3FF;transition:width .7s cubic-bezier(.3,.8,.3,1)}
+.pc .go{height:48px;border:0;border-radius:999px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;position:relative;overflow:hidden;background:rgba(255,255,255,.14);color:rgba(255,255,255,.7);transition:background .3s, color .3s, transform .15s}
+.pc .go.ready{background:#FFFFFF;color:#111318}
+.pc .go.ready::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-50%;background:linear-gradient(100deg,transparent,rgba(42,120,214,.28),transparent);animation:pc-shine 2.4s .4s ease-in-out infinite}
+.pc .go:active{transform:scale(.97)}
+@keyframes pc-shine{0%{left:-50%}60%,100%{left:120%}}
+.pc .pc-card .hint{font-size:12.5px;opacity:.6;text-align:center}
+.pc .done-in{display:flex;flex-direction:column;gap:12px;animation:pc-in .6s cubic-bezier(.2,1.3,.4,1) both}
+.pc .done-in .ok-lbl{font-size:14px;font-weight:700;color:#8FB3FF}
+.pc .done-in .said{font-size:15px;line-height:1.4}
+.pc .done-in .go{margin-top:8px}
+.pc .redo{border:0;background:transparent;color:rgba(255,255,255,.55);font:inherit;font-weight:600;font-size:12.5px;cursor:pointer}
+.pc .redo:hover{color:#FFFFFF}
+.pc .pc-tile{border-radius:24px;background:var(--pg-tile);padding:18px 22px;box-shadow:var(--pg-sh);display:flex;flex-direction:column;gap:10px}
+.pc .pc-tile .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.pc .pc-tile .hd>span{font-size:14px;font-weight:600;color:var(--pg-muted)}
+.pc .pc-tile .hd b{font-size:13px;color:var(--pc-link)}
+.pc .cells{display:flex;gap:4px}
+.pc .cell{display:block;flex:1 1 0;height:22px;border-radius:5px;background:var(--pg-trk);transition:background .4s}
+.pc .cell.on{background:var(--pg-blue)}
+.pc .ends{display:flex;justify-content:space-between;font-size:11.5px;color:var(--pg-faint)}
+.pc .bar{display:flex;gap:2px;height:14px;border-radius:5px;overflow:hidden}
+.pc .seg{display:block;height:100%;transition:width .7s cubic-bezier(.3,.8,.3,1)}
+.pc .keys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px}
+.pc .key{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;min-width:0}
+.pc .key em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc .key .pc-pct{margin-left:auto;color:var(--pg-muted);font-weight:500;white-space:nowrap}
+
+.pc .pc-toast-host{position:fixed;left:calc(212px + 40px);bottom:32px;z-index:60}
+.pc .pc-toast{display:flex;align-items:center;gap:14px;padding:14px 20px 14px 14px;border-radius:20px;background:#14181F;color:#FFFFFF;box-shadow:0 14px 40px rgba(17,19,24,.25);animation:pc-in .55s cubic-bezier(.2,1.4,.4,1) both;max-width:440px}
+.pc .pc-toast i{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:#2A78D6;font-style:normal;font-size:20px;font-weight:900}
+.pc .pc-toast span{display:flex;flex-direction:column;gap:2px}
+.pc .pc-toast b{font-size:16px}
+.pc .pc-toast small{font-size:13.5px;opacity:.75}
+@keyframes pc-in{from{opacity:0;transform:translateY(24px) scale(.9)}to{opacity:1;transform:none}}
+
+/* Réglages d'un compte : un panneau qui glisse depuis la droite, le reste voilé. */
+.pc .pc-veil{position:fixed;inset:0;z-index:70;background:color-mix(in oklab, var(--pg-bg) 55%, transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.pc .pc-set{position:fixed;top:16px;right:16px;bottom:16px;z-index:71;width:min(470px, calc(100vw - 32px));padding:24px 26px;border-radius:28px;background:var(--pg-tile);box-shadow:0 30px 60px -20px rgba(17,19,24,.35);display:flex;flex-direction:column;gap:16px;overflow:auto}
+.pc .pc-veil.in{animation:pc-fade .25s ease both}
+.pc .pc-set.in{animation:pc-slide .4s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pc-fade{from{opacity:0}}
+@keyframes pc-slide{from{opacity:0;transform:translateX(40px)}}
+.pc .pc-set .sh{display:flex;align-items:center;gap:10px}
+.pc .pc-set h2{display:flex;align-items:center;gap:10px;margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.pc .pc-set .tag{font-size:12px;font-weight:700;color:var(--pg-muted);background:var(--pg-trk);padding:3px 9px;border-radius:999px}
+.pc .pc-set .x{margin-left:auto;width:40px;height:40px;border:0;border-radius:50%;background:var(--pg-bg);font:inherit;font-size:22px;line-height:1;color:var(--pg-ink);cursor:pointer}
+.pc .pc-set .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pc .pc-set label{display:flex;flex-direction:column;gap:6px}
+.pc .pc-set .two>label>span{font-size:13.5px;font-weight:600;color:var(--pg-muted)}
+.pc .pc-set select,.pc .pc-set input[type="month"],.pc .mvform input{height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--pc-bd);background:var(--pg-tile);color:var(--pg-ink);font:inherit;font-size:15px;font-weight:600;width:100%}
+.pc .pc-set label small{font-size:12.5px;color:var(--pg-faint);text-align:center}
+.pc .pc-set .warn{margin:0;padding:12px 14px;border-radius:12px;background:var(--pc-flagbg);color:var(--pc-flag);font-size:13.5px;font-weight:600;line-height:1.4}
+.pc .pc-set .tg{flex-direction:row;align-items:center;justify-content:space-between;gap:16px;cursor:pointer}
+.pc .pc-set .tg>span{display:flex;flex-direction:column;gap:2px}
+.pc .pc-set .tg b{font-size:15px;font-weight:600}
+.pc .pc-set .tg small{text-align:left}
+.pc .pc-set .tg input{position:absolute;opacity:0;width:1px;height:1px}
+.pc .pc-set .tg i{position:relative;flex:none;width:44px;height:26px;border-radius:999px;background:var(--pc-bd);transition:background .2s}
+.pc .pc-set .tg i::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.pc .pc-set .tg input:checked+i{background:var(--pg-pos)}
+.pc .pc-set .tg input:checked+i::after{transform:translateX(18px)}
+.pc .pc-set .tg input:focus-visible+i{box-shadow:0 0 0 3px color-mix(in oklab, var(--pg-blue) 35%, transparent)}
+.pc .mv{display:flex;flex-direction:column;padding-top:6px}
+.pc .mvh{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px;border-bottom:1px solid var(--pg-line)}
+.pc .mvh>span{font-size:14px;font-weight:600;color:var(--pg-muted)}
+.pc .mvh .add{border:0;background:none;font:inherit;font-size:13.5px;font-weight:700;color:var(--pc-link);cursor:pointer}
+.pc .mvform{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:8px;padding:10px 0}
+.pc .mvform button{height:44px;padding:0 14px;border:0;border-radius:12px;background:var(--pg-ink);color:var(--pg-tile);font:inherit;font-weight:700;cursor:pointer}
+.pc .mvr{display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--pg-line);font-size:14.5px}
+.pc .mvr>span{color:var(--pg-muted)}
+.pc .mvr .lnk{font-style:normal;font-size:11.5px;font-weight:700;color:var(--pg-muted);background:var(--pg-trk);padding:2px 7px;border-radius:999px;margin-left:4px}
+.pc .mvr b{font-variant-numeric:tabular-nums}
+.pc .mvr b.dn{color:var(--pg-neg)}
+.pc .mvr .del{width:24px;height:24px;border:0;border-radius:50%;background:none;color:var(--pg-chev);font:inherit;font-size:16px;cursor:pointer;opacity:0;transition:opacity .15s}
+.pc .mvr:hover .del,.pc .mvr .del:focus-visible{opacity:1}
+.pc .mvr .del:hover{color:var(--pg-neg);background:var(--pg-trk)}
+.pc .mv .none{margin:10px 0 0;font-size:13.5px;color:var(--pg-faint)}
+.pc .mv .more{align-self:flex-start;margin-top:10px;font-size:13px}
+.pc .pc-set .ft{margin-top:auto;display:flex;justify-content:space-between;align-items:center;padding-top:8px}
+.pc .pc-set .cls{height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--pc-bd);background:var(--pg-tile);color:var(--pg-ink);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.pc .pc-set .rm{height:40px;padding:0 6px;border:0;background:none;color:var(--pg-neg);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.pc .pc-toast,.pc .done-in,.pc .pc-set.in,.pc .pc-veil.in{animation:none}.pc .go.ready::after{animation:none}.pc .chk,.pc .gfill,.pc .seg{transition:none}}
+
+/* Écran moyen : la colonne de droite passe dessous, en trois blocs côte à côte. */
+@media (max-width:1180px){
+  .pc .pc-top{grid-template-columns:minmax(0,1fr) auto}
+  .pc .pc-top .mpill{grid-column:2;grid-row:1}
+  .pc .pc-top .cnt{grid-column:1;grid-row:2}
+  .pc .pc-body{grid-template-columns:minmax(0,1fr)}
+  .pc .pc-side{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+  .pc .pc-card{min-height:0}
+}
+@media (max-width:900px){
+  .pc .pc-side{grid-template-columns:1fr 1fr}
+  .pc .pc-side .pc-card{grid-column:1 / -1}
+  .pc .pc-toast-host{left:16px;right:16px}
+}
+/* Téléphone : le nom et le gain en tête de ligne, les deux champs dessous. */
+@media (max-width:660px){
+  .pc .pc-wrap{padding-top:16px}
+  .pc .pc-title h1{font-size:24px}
+  .pc .pc-top{grid-template-columns:1fr}
+  .pc .pc-top .mpill{grid-column:1;grid-row:auto;justify-self:start}
+  .pc .pc-top .cnt{grid-row:auto}
+  .pc .pc-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px 12px;padding:12px 14px}
+  .pc .pc-row .nm{grid-column:1;grid-row:1}
+  .pc .pc-row .gain{grid-column:2;grid-row:1}
+  .pc .pc-row .end{grid-column:3;grid-row:1}
+  .pc .pc-row .cl-val{grid-column:1;grid-row:2}
+  .pc .pc-row .cl-vers{grid-column:2 / 4;grid-row:2}
+  .pc .pc-side{grid-template-columns:1fr}
+  .pc .pc-set .two{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -3217,7 +3402,7 @@ function render() {
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
   const patNav = [["patprogres", "chart", "Progrès"], ["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
-    ["pat", "vault", "Comptes"], ["patcredits", "debt", "Crédits"]];
+    ["pgcomptes", "vault", "Comptes"], ["pat", "vault", "Comptes (ancien)"], ["patcredits", "debt", "Crédits"]];
   const dataNav = [["data", "file", "Données"]];
   const nav = '<div class="navlabel">Budget</div>' + budgetNav.map(navItem).join("") +
     '<div class="navlabel">Patrimoine</div>' + patNav.map(navItem).join("") +
@@ -3234,6 +3419,7 @@ function render() {
     : UI.view === "pgacct" ? viewPgAccount()
     : UI.view === "pathome" ? viewPatrimoineHome()
     : UI.view === "patanalyse" ? viewPatAnalyse()
+    : UI.view === "pgcomptes" ? viewPgComptes()
     : UI.view === "pat" ? viewPatrimoine()
     : UI.view === "patcredits" ? viewPatCredits()
     : UI.view === "patacct" ? viewPatAccount()
@@ -7601,7 +7787,7 @@ function viewPatProgres() {
     : late > 0 ? MONTHS[+nextEnd.slice(5) - 1] + " à saisir"
     : "À jour · prochaine saisie le " + lastDay + " " + MOIS_COURTS[+nextEnd.slice(5) - 1];
   let html = '<div class="pg"><section class="scr s1"><div class="pg-head"><h1>Progrès</h1>' +
-    (accounts.length ? '<button class="state' + (missing || late > 0 ? " todo" : "") + '" data-act="view" data-view="pat"><i></i>' + esc(state) + "</button>" : "") + "</div>";
+    (accounts.length ? '<button class="state' + (missing || late > 0 ? " todo" : "") + '" data-act="view" data-view="pgcomptes"><i></i>' + esc(state) + "</button>" : "") + "</div>";
   if (!accounts.length) return html + patNoAccounts("Ajoute un compte dans l’onglet <b class='inl'>Comptes</b> pour voir tes progrès ici.") + "</section></div>";
 
   const months = allPatMonths(month), prevM = addMonth(month, -1), yAgo = addMonth(month, -12);
@@ -8370,6 +8556,450 @@ document.addEventListener("keydown", e => {
   e.preventDefault();
   const cur = UI.paSelRange;
   PA_DRAG.a = e.shiftKey && cur ? cur.a : r.dataset.mk; PA_DRAG.b = r.dataset.mk; paPaint(); paCommit();
+});
+
+/* ---- Comptes : la saisie vivante -------------------------------------------------
+   Reprise des maquettes « Comptes » (v11) et « Comptes vivant » (v17). Chaque mois, la
+   valeur de chaque compte au dernier jour et ce qu'on y a versé. Tout se recalcule en
+   direct pendant la frappe ; rien n'est réécrit tant que le champ n'est pas quitté.
+
+   Les données sont celles de l'ancienne saisie, sans rien de neuf : la valeur va dans
+   DB.patValues[compte][mois], le versement devient un mouvement manuel daté du 15, le
+   milieu du mois, la convention de la méthode de Dietz modifiée utilisée par Progrès.
+   Un mois qui a plusieurs mouvements, ou un mouvement venu du budget, ne se réécrit pas
+   d'ici : le champ affiche leur somme et renvoie aux réglages du compte.
+
+   Pour ne pas casser les animations, la vue ne se redessine pas à chaque saisie :
+   pcRefresh met à jour les chiffres, les états et les blocs de droite en place. */
+
+/* Une valeur identique au centime au mois précédent est suspecte (un copier-coller, un
+   relevé pas encore à jour), sauf là où elle est normale : un livret sans versement, un
+   compte courant, un bien immobilier qu'on ne réestime pas chaque mois. */
+const PC_SAME_OK = { courant: 1, livret: 1, immo: 1 };
+
+function pcNum(x, d) { return Math.abs(x).toLocaleString("fr-FR", { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/ /g, " "); }
+/* Sous le nom, ce que contient le compte plutôt que sa classe, qui répète souvent le nom. */
+const PC_KIND = { courant: "Compte courant", livret: "Épargne", pea: "Actions", av: "Assurance-vie", per: "Retraite", pee: "Épargne salariale", crypto: "Crypto", immo: "Immobilier", autre: "Autre" };
+function pcEur(x, d, sign) {
+  d = d || 0; const z = Math.abs(x) < (d ? 0.005 : 0.5);
+  return (z ? "" : x < 0 ? "−" : sign ? "+" : "") + pcNum(x, d) + " €";
+}
+function pcPct(x) { return (Math.abs(x) < 0.05 ? "" : x < 0 ? "−" : "+") + pcNum(x, 1) + " %"; }
+function pcMonthName(mk) { return MONTHS[+mk.slice(5) - 1]; }
+/* « de septembre », mais « d’octobre », « d’avril », « d’août ». */
+function pcDe(mk) { const n = pcMonthName(mk); return (/^[aeiouyàâéèêîôû]/i.test(n) ? "d’" : "de ") + n; }
+function pcCap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function pcReduced() { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } }
+
+/* Le mois proposé à l'ouverture : le mois écoulé s'il manque une valeur, sinon le mois en
+   cours dans ses cinq derniers jours (on saisit souvent la veille du relevé), sinon le
+   mois écoulé, qui se montre alors bouclé. */
+function pcDefaultMonth() {
+  const today = monthKey(todayISO()), last = addMonth(today, -1);
+  if (pcAccounts(last).some(a => (((DB.patValues || {})[a.id]) || {})[last] == null)) return last;
+  const d = +todayISO().slice(8, 10), dim = new Date(+today.slice(0, 4), +today.slice(5), 0).getDate();
+  return dim - d < 5 ? today : last;
+}
+/* Les comptes à saisir pour un mois : ceux qui y ont déjà une valeur, et les comptes
+   ouverts à cette date et pas clôturés. Un compte jamais valorisé est proposé : c'est
+   ici qu'il reçoit sa première valeur. Ordre : du plus gros au plus petit le mois d'avant. */
+function pcAccounts(month) {
+  const vals = DB.patValues || {}, prevM = addMonth(month, -1);
+  return (DB.patAccounts || []).filter(a => {
+    const v = vals[a.id] || {}, ks = Object.keys(v).sort();
+    if (v[month] != null) return true;
+    if (a.closed) return false;
+    if (!ks.length) return true;
+    const open = /^\d{4}-\d{2}$/.test(a.opened || "") ? a.opened : ks[0];
+    return open <= month;
+  }).sort((p, q) => (patAccountValue(q.id, prevM) || 0) - (patAccountValue(p.id, prevM) || 0));
+}
+/* « Comme d'habitude » : le montant qui revient au moins trois fois sur les douze mois
+   précédents, sinon la médiane des mois versés, arrondie. Il faut au moins quatre mois
+   versés pour parler d'habitude. */
+function pcHabit(a, month) {
+  const sums = [];
+  for (let i = 1; i <= 12; i++) { const s = patMovementsInMonth(a.id, addMonth(month, -i)); if (s > 0.5) sums.push(Math.round(s)); }
+  if (sums.length < 4) return null;
+  const cnt = {}; sums.forEach(s => cnt[s] = (cnt[s] || 0) + 1);
+  const mode = Object.keys(cnt).sort((p, q) => cnt[q] - cnt[p])[0];
+  if (cnt[mode] >= 3) return +mode;
+  const s = sums.slice().sort((p, q) => p - q), n = s.length;
+  const med = n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2, step = med >= 500 ? 100 : med >= 50 ? 10 : 1;
+  return Math.round(med / step) * step;
+}
+
+/* Tout ce que montre l'écran pour un mois. live : lit les champs en cours de frappe. */
+function pcModel(month, live) {
+  UI.pcTyped = UI.pcTyped || {}; UI.pcSure = UI.pcSure || {};
+  const prevM = addMonth(month, -1);
+  const rows = pcAccounts(month).map(a => {
+    const key = a.id + "|" + month, raw = (((DB.patValues || {})[a.id]) || {})[month];
+    const prev = patAccountValue(a.id, prevM);
+    const moves = (DB.patMovements || []).filter(x => x.accountId === a.id && monthKey(x.date) === month);
+    const stored = moves.reduce((s, x) => s + x.amount, 0), editable = moves.length <= 1 && !moves.some(x => x.tx);
+    let v = raw == null ? null : raw, m = stored;
+    if (live) {
+      const r = document.querySelector('.pc-row[data-id="' + a.id + '"]');
+      if (r) {
+        const vi = r.querySelector('[data-pc="val"]'), mi = r.querySelector('[data-pc="vers"]');
+        if (vi) v = parseAmount(vi.value);
+        if (mi && !mi.disabled) m = parseAmount(mi.value) || 0;
+      }
+    }
+    const flag = v != null && prev != null && !!UI.pcTyped[key] && !UI.pcSure[key] && !PC_SAME_OK[patType(a.type).id] && Math.abs(v - prev) < 0.005;
+    /* Le gain du mois, et son rendement selon Dietz modifiée : le versement, supposé au
+       milieu du mois, ne compte que pour moitié dans le capital exposé. */
+    const e = v == null || prev == null ? null : v - prev - m, base = (prev || 0) + m / 2;
+    return { a, key, raw, prev, moves, stored, editable, v, m, flag, ok: v != null && !flag, e, r: e != null && base > 0 ? e / base * 100 : null };
+  });
+  let tot = 0, prevTot = 0, vers = 0, stored = 0, delta = 0, base = 0, done = 0, flags = 0, empty = 0;
+  rows.forEach(x => {
+    tot += x.v != null ? x.v : (x.prev || 0); prevTot += x.prev || 0; vers += x.m; stored += x.stored;
+    if (x.e != null) { delta += x.e; base += (x.prev || 0) + x.m / 2; }
+    if (x.ok) done++; if (x.flag) flags++; if (x.v == null) empty++;
+  });
+  const year = +month.slice(0, 4), others = patMovementsInMonth(null, month) - stored;
+  const last12 = Array.from({ length: 12 }, (_, i) => addMonth(month, i - 11));
+  const paid = last12.map((mk, i) => (i === 11 ? others + vers : patMovementsInMonth(null, mk)) > 0.5);
+  return { month, rows, tot, prevTot, vers, delta, r: base > 0 ? delta / base * 100 : null, done, flags, empty,
+    ready: rows.length > 0 && done === rows.length, year, yearV: patMovementsInYear(null, year) - stored + vers, last12, paid };
+}
+
+/* ---- Morceaux d'écran, partagés entre le rendu et la mise à jour en place ---- */
+function pcValSub(x, month) {
+  if (x.flag) return '<span class="flg">Identique au centime à ' + esc(pcMonthName(addMonth(month, -1))) +
+    '<button type="button" class="mini" data-pcact="sure" data-id="' + x.a.id + '">C’est bien ça</button></span>';
+  return '<span class="sub">' + (x.prev == null ? "premier mois du compte" : esc(MOIS_COURTS[+addMonth(month, -1).slice(5) - 1].replace(/\.$/, "")) + " : " + esc(pcEur(x.prev, 2))) + "</span>";
+}
+function pcVersSub(x, month) {
+  if (!x.editable) return '<span class="sub">' + (x.moves.some(m => m.tx) ? "lié au budget" : x.moves.length + " mouvements") +
+    ' · <button type="button" class="habit" data-pcact="set" data-id="' + x.a.id + '">détail</button></span>';
+  const h = x.m === 0 ? pcHabit(x.a, month) : null;
+  return '<span class="sub">versé ce mois' + (h ? ' · <button type="button" class="habit" data-pcact="habit" data-id="' + x.a.id + '" data-v="' + h + '">' +
+    esc(pcEur(h)) + " comme d’habitude ?</button>" : "") + "</span>";
+}
+function pcGain(x) {
+  if (x.v == null) return '<span class="wait">en attente</span>';
+  if (x.e == null) return '<span class="wait">premier mois</span>';
+  return '<b class="' + (x.flag ? "g-flag" : x.e < -0.5 ? "g-neg" : "g-pos") + '">' + esc(pcEur(x.e, 0, true)) + "</b>" +
+    "<span>" + (x.r == null ? "" : esc(pcPct(x.r)) + " ce mois") + "</span>";
+}
+function pcHint(k) {
+  if (k.ready) return "tout est prêt";
+  const t = [];
+  if (k.empty) t.push(k.empty === 1 ? "encore 1 compte à saisir" : "encore " + k.empty + " comptes à saisir");
+  if (k.flags) t.push(k.flags === 1 ? "1 valeur à vérifier" : k.flags + " valeurs à vérifier");
+  return t.join(", ");
+}
+function pcStreak(k) {
+  let run = 0; for (let i = 11; i >= 0 && k.paid[i]; i--) run++;
+  if (run) return run === 1 ? (k.paid.slice(0, 11).some(Boolean) ? "ta série repart" : "premier versement") : run + " mois de suite";
+  const lp = k.paid.lastIndexOf(true);
+  return lp < 0 ? "pas encore de versement" : "pause depuis " + pcMonthName(k.last12[lp]);
+}
+function pcCells(k) {
+  return k.last12.map((mk, i) => '<span class="cell' + (k.paid[i] ? " on" : "") + (i === 11 ? " now" : "") + '" title="' + esc(monthLabel(mk)) + '"></span>').join("");
+}
+function pcSegs(k) {
+  const list = k.rows.map(x => ({ a: x.a, v: Math.max(0, x.v != null ? x.v : (x.prev || 0)) })).filter(s => s.v > 0), T = list.reduce((s, x) => s + x.v, 0) || 1;
+  return {
+    bar: list.map(s => '<i class="seg" data-id="' + s.a.id + '" style="width:' + (s.v / T * 100).toFixed(2) + "%;background:" + patAccountColor(s.a) + '"></i>').join(""),
+    keys: list.map(s => '<span class="key">' + patSwatch(s.a, 10) + "<em>" + esc(s.a.name) + '</em><span class="pc-pct" data-id="' + s.a.id + '">' + Math.max(1, Math.round(s.v / T * 100)) + " %</span></span>").join("")
+  };
+}
+function pcClosedNow(k) { UI.pcClosed = UI.pcClosed || {}; UI.pcTouched = UI.pcTouched || {}; return k.ready && (!!UI.pcClosed[k.month] || !UI.pcTouched[k.month]); }
+function pcCard(k) {
+  const mName = pcCap(pcMonthName(k.month)), deltaTxt = pcEur(k.delta, 0, true) + (k.r == null ? "" : " · " + pcPct(k.r));
+  if (pcClosedNow(k)) return '<div class="done-in"><span class="ok-lbl">' + esc(mName) + " est bouclé ✓</span>" +
+    '<b class="tot">' + esc(pcEur(k.tot)) + "</b>" +
+    '<span class="said">' + esc(pcEur(k.delta, 0, true)) + " ce mois, dont <b>" + esc(pcEur(k.vers)) + "</b> versés.</span>" +
+    '<button type="button" class="go ready" data-act="view" data-view="patprogres">Voir le récap ›</button>' +
+    '<button type="button" class="redo" data-pcact="reopen">Modifier la saisie</button></div>';
+  const cur = k.month === monthKey(todayISO());
+  return '<span class="clbl">' + esc(mName) + (cur ? ", en cours" : ", à boucler") + "</span>" +
+    '<b class="tot num-tot" data-v="' + k.tot + '">' + esc(pcEur(k.tot)) + "</b>" +
+    '<div class="lines"><span><span>Ce mois</span><b class="num-delta" data-v="' + k.delta + '">' + esc(deltaTxt) + "</b></span>" +
+    '<span><span>Versé</span><b class="num-vers" data-v="' + k.vers + '">' + esc(pcEur(k.vers)) + "</b></span>" +
+    '<span><span>Versé en ' + k.year + '</span><b class="num-year" data-v="' + k.yearV + '">' + esc(pcEur(k.yearV)) + "</b></span></div>" +
+    '<div class="gtrack"><i class="gfill" style="width:' + (k.rows.length ? k.done / k.rows.length * 100 : 0).toFixed(1) + '%"></i></div>' +
+    '<button type="button" class="go' + (k.ready ? " ready" : "") + '" data-pcact="validate">Valider et voir le récap</button>' +
+    '<span class="hint">' + esc(pcHint(k)) + "</span>";
+}
+function pcRowHtml(x, month) {
+  const last = new Date(+month.slice(0, 4), +month.slice(5), 0).getDate(), mc = MOIS_COURTS[+month.slice(5) - 1];
+  return '<div class="pc-row' + (x.flag ? " flag" : "") + (x.ok ? " ok" : "") + '" data-id="' + x.a.id + '">' +
+    '<button type="button" class="nm" data-pcact="set" data-id="' + x.a.id + '"><span>' + patSwatch(x.a, 10) + esc(x.a.name) + "</span><small>" + esc(PC_KIND[patType(x.a.type).id] || patTypeName(x.a.type)) + "</small></button>" +
+    '<span class="cl cl-val"><input class="inp' + (x.flag ? " flag" : x.v == null ? " empty" : "") + '" data-pc="val" inputmode="decimal" autocomplete="off" value="' + (x.raw == null ? "" : pcNum(x.raw, 2)) +
+      '" placeholder="Valeur au ' + last + " " + esc(mc) + '" aria-label="Valeur de ' + esc(x.a.name) + " au " + last + " " + esc(MONTHS[+month.slice(5) - 1]) + '">' +
+      '<span class="vsub">' + pcValSub(x, month) + "</span></span>" +
+    '<span class="cl cl-vers"><input class="inp' + (x.m > 0 ? " has" : "") + '" data-pc="vers" inputmode="decimal" autocomplete="off" value="' + (x.stored ? pcNum(x.stored, 2) : "") +
+      '" placeholder="0 €"' + (x.editable ? "" : " disabled") + ' aria-label="Versé sur ' + esc(x.a.name) + " en " + esc(MONTHS[+month.slice(5) - 1]) + '">' +
+      '<span class="msub">' + pcVersSub(x, month) + "</span></span>" +
+    '<span class="gain">' + pcGain(x) + "</span>" +
+    '<span class="end"><i class="chk" aria-hidden="true">✓</i><button type="button" class="chev" data-pcact="set" data-id="' + x.a.id + '" aria-label="Réglages de ' + esc(x.a.name) + '">›</button></span>' +
+    '<span class="fx"></span></div>';
+}
+
+function viewPgComptes() {
+  if (!UI.pcMonth) UI.pcMonth = pcDefaultMonth();
+  const month = UI.pcMonth, today = monthKey(todayISO()), k = pcModel(month);
+  const accounts = DB.patAccounts || [], closedNow = pcClosedNow(k);
+  const firstMk = Object.values(DB.patValues || {}).reduce((m, v) => Object.keys(v || {}).reduce((n, x) => x < n ? x : n, m), today);
+  const mState = closedNow ? "bouclé" : k.ready ? "prêt" : "à saisir";
+  let html = '<div class="pg pc"><div class="pc-wrap">' +
+    '<div class="pc-top"><div class="pc-title"><h1>Saisie ' + esc(pcDe(month)) + (month.slice(0, 4) !== today.slice(0, 4) ? " " + month.slice(0, 4) : "") + "</h1>" +
+      "<span>La valeur de chaque compte au dernier jour du mois, et ce que tu y as versé.</span></div>" +
+      '<span class="cnt">' + k.done + " sur " + k.rows.length + "</span>" +
+      '<div class="mpill"><button type="button" data-pcact="mprev" aria-label="Mois précédent"' + (month <= addMonth(firstMk, -1) ? " disabled" : "") + ">‹</button>" +
+        '<span><b>' + esc(pcCap(MOIS_COURTS[+month.slice(5) - 1])) + " " + month.slice(0, 4) + '</b><small class="' + (closedNow ? "ok" : k.ready ? "rd" : "") + '">' + mState + "</small></span>" +
+        '<button type="button" data-pcact="mnext" aria-label="Mois suivant"' + (month >= today ? " disabled" : "") + ">›</button></div></div>";
+  if (!accounts.length) return html + patNoAccounts("Crée un premier compte pour commencer à saisir ses valeurs mois après mois.") +
+    '<button type="button" class="pc-add" data-act="newpataccount">＋ Ajouter un compte</button></div></div>';
+
+  html += '<div class="pc-body"><div class="pc-rows">' + k.rows.map(x => pcRowHtml(x, month)).join("") +
+    '<div class="pc-foot"><button type="button" class="pc-add" data-act="newpataccount">＋ Ajouter un compte</button>';
+  const gone = accounts.filter(a => a.closed && !k.rows.some(x => x.a.id === a.id));
+  if (gone.length) html += '<span class="gone">Clôturés : ' + gone.map(a => '<button type="button" class="habit" data-pcact="set" data-id="' + a.id + '">' + esc(a.name) + "</button>").join(", ") + "</span>";
+  html += "</div></div>";
+
+  const sg = pcSegs(k);
+  html += '<div class="pc-side"><section class="pc-card' + (closedNow ? " closed" : "") + '">' + pcCard(k) + '<span class="fx fx-card"></span></section>' +
+    '<section class="pc-tile"><div class="hd"><span>Ton rythme</span><b class="streak">' + esc(pcStreak(k)) + "</b></div>" +
+      '<div class="cells">' + pcCells(k) + '</div><div class="ends"><span>' + esc(MOIS_COURTS[+k.last12[0].slice(5) - 1]) + "</span><span>" + esc(MOIS_COURTS[+month.slice(5) - 1]) + "</span></div></section>" +
+    '<section class="pc-tile"><div class="hd"><span>Ta répartition</span></div><div class="bar">' + sg.bar + '</div><div class="keys">' + sg.keys + "</div></section></div></div>";
+  html += pcSettings() + '<div class="pc-toast-host"></div></div></div>';
+  return html;
+}
+
+/* ---- Réglages d'un compte, dans un panneau latéral (maquette v11-2) ---- */
+function pcSettings() {
+  const a = UI.pcSet && (DB.patAccounts || []).find(x => x.id === UI.pcSet);
+  if (!a) { UI.pcSet = null; return ""; }
+  const anim = UI.pcSetIn ? " in" : ""; UI.pcSetIn = false;
+  const t = patType(a.type).id, open = patOpenedMonth(a);
+  const moves = (DB.patMovements || []).filter(m => m.accountId === a.id).sort((p, q) => p.date < q.date ? 1 : p.date > q.date ? -1 : q.id - p.id);
+  const show = UI.pcSetAll ? moves : moves.slice(0, 6);
+  const age = t === "pea" ? "5 ans" : t === "av" ? "8 ans" : "";
+  return '<div class="pc-veil' + anim + '" data-pcact="close"></div>' +
+    '<aside class="pc-set' + anim + '" aria-label="Réglages de ' + esc(a.name) + '">' +
+    '<div class="sh"><h2>' + patSwatch(a, 11) + esc(a.name) + "</h2>" + (a.closed ? '<span class="tag">clôturé</span>' : "") +
+      '<button type="button" class="x" data-pcact="close" aria-label="Fermer">×</button></div>' +
+    '<div class="two"><label><span>Type</span><select data-chg="pataccounttype" data-id="' + a.id + '">' +
+      PAT_TYPES.map(p => '<option value="' + p.id + '"' + (p.id === t ? " selected" : "") + ">" + esc(p.name) + "</option>").join("") + "</select></label>" +
+      '<label><span>Ouvert le</span><input type="month" data-chg="patopened" data-id="' + a.id + '" value="' + esc(a.opened || "") + '"' +
+        (open.mk && !open.exact ? ' placeholder="' + esc(open.mk) + '"' : "") + ">" +
+        (open.mk && !open.exact ? "<small>déduit de ta première saisie (" + esc(monthLabel(open.mk)) + ")</small>" : "") + "</label></div>" +
+    (age && !open.exact ? '<p class="warn">Ton ' + esc(a.name) + " est peut-être plus ancien. Sa vraie date rend l’impôt estimé plus juste : après " + age + ", il baisse fortement.</p>" : "") +
+    '<label class="tg"><span><b>Compter dans ta performance</b><small>décoche pour un compte que tu ne veux pas suivre</small></span>' +
+      '<input type="checkbox" role="switch" data-chg="patperfexcluded" data-id="' + a.id + '"' + (a.perfExcluded ? "" : " checked") + "><i></i></label>" +
+    '<label class="tg"><span><b>Alimenté hors de ton compte bancaire</b><small>pour un PEE ou un PER versé par ton employeur</small></span>' +
+      '<input type="checkbox" role="switch" data-chg="patoffbudget" data-id="' + a.id + '"' + (patIsOffBudget(a) ? " checked" : "") + "><i></i></label>" +
+    '<div class="mv"><div class="mvh"><span>Derniers versements</span><button type="button" class="add" data-pcact="addform">＋ Ajouter</button></div>' +
+      (UI.pcAddMove ? '<div class="mvform"><input type="month" id="pcmovmonth" value="' + esc(UI.pcMonth) + '" aria-label="Mois du versement">' +
+        '<input type="text" id="pcmovamt" inputmode="decimal" placeholder="Montant, − pour un retrait" aria-label="Montant">' +
+        '<button type="button" data-pcact="addmove" data-id="' + a.id + '">Ajouter</button></div>' : "") +
+      (show.length ? show.map(m => '<div class="mvr"><span>' + esc(pcCap(monthLabel(monthKey(m.date)))) + (m.tx ? ' <em class="lnk">budget</em>' : "") + "</span>" +
+        "<b" + (m.amount < 0 ? ' class="dn"' : "") + ">" + esc(pcEur(m.amount, m.amount % 1 ? 2 : 0, true)) + "</b>" +
+        '<button type="button" class="del" data-act="delpatmovement" data-id="' + m.id + '" aria-label="Supprimer ce mouvement">×</button></div>').join("")
+        : '<p class="none">Aucun versement pour l’instant.</p>') +
+      (moves.length > 6 ? '<button type="button" class="habit more" data-pcact="allmoves">' + (UI.pcSetAll ? "Voir moins" : "Voir les " + moves.length + " mouvements") + "</button>" : "") + "</div>" +
+    '<div class="ft"><button type="button" class="cls" data-act="pattoggleclosed" data-id="' + a.id + '">' + (a.closed ? "Rouvrir le compte" : "Clôturer le compte") + "</button>" +
+      '<button type="button" class="rm" data-act="delpataccount" data-id="' + a.id + '">Supprimer</button></div></aside>';
+}
+
+/* ---- Petits retours visuels (repris tels quels de la maquette vivante) ---- */
+function pcFlash(el) {
+  if (!el || pcReduced() || !el.animate) return;
+  el.animate([{ transform: "scale(1)" }, { transform: "scale(1.08)", color: "#8FB3FF", offset: 0.35 }, { transform: "scale(1)" }], { duration: 520, easing: "ease-out" });
+}
+function pcShake(el) {
+  if (!el || pcReduced() || !el.animate) return;
+  el.animate([{ transform: "none" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(-4px)" }, { transform: "translateX(3px)" }, { transform: "none" }], { duration: 420, easing: "ease-out" });
+}
+function pcBurst(host, x, y, count, dist, cols) {
+  if (!host || pcReduced() || !host.animate) return;
+  cols = cols || ["#2A78D6", "#E2A400", "#8FF0C2", "#E8743B", "#5B4BC4", "#FFE58A"];
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement("i"), s = 5 + Math.random() * 5, ang = i / count * Math.PI * 2 + Math.random() * 0.4, d = dist * (0.55 + Math.random() * 0.6);
+    b.style.cssText = "position:absolute;display:block;left:" + (x - s / 2) + "px;top:" + (y - s / 2) + "px;width:" + s + "px;height:" + s + "px;border-radius:" + (i % 3 ? "2px" : "50%") + ";background:" + cols[i % cols.length];
+    host.appendChild(b);
+    const dx = Math.cos(ang) * d, dy = Math.sin(ang) * d * 0.8, rot = (Math.random() - 0.5) * 540;
+    const an = b.animate([{ transform: "translate(0,0) scale(.3)", opacity: 1 }, { transform: "translate(" + dx + "px," + dy + "px) rotate(" + rot / 2 + "deg) scale(1)", opacity: 1, offset: 0.6 },
+      { transform: "translate(" + dx * 1.1 + "px," + (dy + 34) + "px) rotate(" + rot + "deg) scale(.7)", opacity: 0 }], { duration: 1000 + Math.random() * 500, easing: "cubic-bezier(.2,.7,.3,1)" });
+    an.onfinish = () => b.remove();
+    setTimeout(() => b.remove(), 1700);
+  }
+}
+let PC_TOAST = 0;
+function pcToast(icon, title, sub) {
+  const host = document.querySelector(".pc-toast-host"); if (!host) return;
+  clearTimeout(PC_TOAST);
+  host.innerHTML = '<div class="pc-toast" role="status"><i>' + esc(icon) + '</i><span><b>' + esc(title) + "</b><small>" + esc(sub) + "</small></span></div>";
+  PC_TOAST = setTimeout(() => { host.innerHTML = ""; }, 4800);
+}
+/* Les chiffres défilent jusqu'à leur nouvelle valeur. Onglet en arrière-plan : les images
+   ne tournent pas, la valeur finale est posée quand même. */
+function pcTween(el, to, fmt, flash) {
+  if (!el) return;
+  const from = +el.dataset.v || 0; el.dataset.v = to;
+  if (Math.abs(to - from) < 0.004) { el.textContent = fmt(to); return; }
+  const D = pcReduced() ? 0 : 750, t0 = performance.now();
+  cancelAnimationFrame(el._raf); clearTimeout(el._fin);
+  const step = now => { const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3); el.textContent = fmt(from + (to - from) * e); if (p < 1) el._raf = requestAnimationFrame(step); };
+  if (D) el._raf = requestAnimationFrame(step);
+  el._fin = setTimeout(() => { cancelAnimationFrame(el._raf); el.textContent = fmt(to); }, D + 80);
+  if (flash) pcFlash(el);
+}
+
+/* ---- Mise à jour en place ----
+   live : pendant la frappe, seuls les chiffres bougent ; l'état des lignes (coche, valeur
+   à vérifier) attend que le champ soit quitté. ctx : l'état d'avant une saisie validée,
+   pour saluer ce qui vient de changer. */
+function pcRefresh(live, ctx) {
+  const root = document.querySelector(".pc"); if (!root) return;
+  const month = UI.pcMonth, k = pcModel(month, live);
+  k.rows.forEach(x => {
+    const r = root.querySelector('.pc-row[data-id="' + x.a.id + '"]'); if (!r) return;
+    const g = r.querySelector(".gain"); if (g) g.innerHTML = pcGain(x);
+    const vi = r.querySelector('[data-pc="vers"]'); if (vi) vi.classList.toggle("has", x.m > 0);
+    if (live) return;
+    r.classList.toggle("ok", x.ok); r.classList.toggle("flag", x.flag);
+    const v = r.querySelector('[data-pc="val"]'); if (v) { v.classList.toggle("flag", x.flag); v.classList.toggle("empty", !x.flag && x.v == null); }
+    const vs = r.querySelector(".vsub"); if (vs) vs.innerHTML = pcValSub(x, month);
+    const ms = r.querySelector(".msub"); if (ms) ms.innerHTML = pcVersSub(x, month);
+  });
+  const cnt = root.querySelector(".cnt"); if (cnt) cnt.textContent = k.done + " sur " + k.rows.length;
+  const card = root.querySelector(".pc-card"), closedNow = pcClosedNow(k);
+  if (card) {
+    const wasClosed = card.classList.contains("closed");
+    if (wasClosed !== closedNow) { card.classList.toggle("closed", closedNow); card.innerHTML = pcCard(k) + '<span class="fx fx-card"></span>'; }
+    else if (!closedNow) {
+      const changed = !live && ctx;
+      pcTween(card.querySelector(".num-tot"), k.tot, x => pcEur(x), changed);
+      pcTween(card.querySelector(".num-delta"), k.delta, x => pcEur(x, 0, true) + (k.r == null ? "" : " · " + pcPct(k.r)), changed);
+      pcTween(card.querySelector(".num-vers"), k.vers, x => pcEur(x), changed);
+      pcTween(card.querySelector(".num-year"), k.yearV, x => pcEur(x), false);
+      const gf = card.querySelector(".gfill"); if (gf) gf.style.width = (k.rows.length ? k.done / k.rows.length * 100 : 0).toFixed(1) + "%";
+      const go = card.querySelector(".go"); if (go) go.classList.toggle("ready", k.ready);
+      const h = card.querySelector(".hint"); if (h) h.textContent = pcHint(k);
+    }
+  }
+  const pill = root.querySelector(".mpill small");
+  if (pill) { pill.textContent = closedNow ? "bouclé" : k.ready ? "prêt" : "à saisir"; pill.className = closedNow ? "ok" : k.ready ? "rd" : ""; }
+  const st = root.querySelector(".streak"); if (st) st.textContent = pcStreak(k);
+  root.querySelectorAll(".cell").forEach((c, i) => c.classList.toggle("on", !!k.paid[i]));
+  const sg = pcSegs(k), bar = root.querySelector(".pc-tile .bar"), keys = root.querySelector(".pc-tile .keys");
+  /* Mêmes comptes qu'avant : les segments glissent vers leur nouvelle largeur. Sinon on redessine. */
+  const tmp = document.createElement("div"); tmp.innerHTML = '<div class="b">' + sg.bar + '</div><div class="k">' + sg.keys + "</div>";
+  const ids = el => Array.from(el.querySelectorAll(".seg")).map(s => s.dataset.id).join();
+  if (bar && keys && ids(bar) === ids(tmp.querySelector(".b"))) {
+    tmp.querySelectorAll(".seg").forEach(ns => { const s = bar.querySelector('.seg[data-id="' + ns.dataset.id + '"]'); if (s) s.style.width = ns.style.width; });
+    tmp.querySelectorAll(".pc-pct").forEach(np => { const p = keys.querySelector('.pc-pct[data-id="' + np.dataset.id + '"]'); if (p) p.textContent = np.textContent; });
+  } else if (bar && keys) { bar.innerHTML = sg.bar; keys.innerHTML = sg.keys; }
+  if (!ctx) return;
+
+  /* ---- ce qui mérite d'être salué ---- */
+  const before = ctx.before;
+  k.rows.forEach(x => {
+    const b = before.rows.find(y => y.a.id === x.a.id), r = root.querySelector('.pc-row[data-id="' + x.a.id + '"]'); if (!b || !r) return;
+    if (x.ok && !b.ok) { const c = r.querySelector(".chk"); pcBurst(r.querySelector(".fx"), c ? c.offsetLeft + 12 : r.offsetWidth - 64, r.offsetHeight / 2, 10, 34, ["#2A78D6", "#8FB3FF", "#5B4BC4"]); }
+    if (x.flag && !b.flag) pcShake(r);
+  });
+  const x = k.rows.find(y => y.a.id === ctx.id), b = before.rows.find(y => y.a.id === ctx.id);
+  if (ctx.kind === "vers" && x && b && x.m > 0.5 && x.m > b.m + 0.5) {
+    const r = root.querySelector('.pc-row[data-id="' + x.a.id + '"]'), inp = r && r.querySelector('[data-pc="vers"]');
+    if (r && inp) pcBurst(r.querySelector(".fx"), inp.offsetLeft + inp.offsetWidth / 2, inp.offsetTop + inp.offsetHeight / 2, 24, 80);
+    const firstOfMonth = before.vers < 0.5, prevPaid = k.paid[10], run = (() => { let n = 0; for (let i = 11; i >= 0 && k.paid[i]; i--) n++; return n; })();
+    const lp = k.paid.slice(0, 11).lastIndexOf(true);
+    if (firstOfMonth && !prevPaid) pcToast("↗", "Ta série repart !", pcEur(x.m - b.m) + " placés sur " + x.a.name + (lp >= 0 ? ", ton premier versement depuis " + pcMonthName(k.last12[lp]) + "." : ", ton tout premier versement."));
+    else if (firstOfMonth) pcToast("↗", run + " mois de suite !", pcEur(x.m - b.m) + " placés sur " + x.a.name + ".");
+    else pcToast("+", pcEur(x.m - b.m, 0, true) + " de plus au travail", pcEur(k.yearV) + " versés en " + k.year + ", déjà.");
+    setTimeout(() => {
+      const c = root.querySelector(".cell.now"); if (c && c.animate && !pcReduced()) c.animate([{ transform: "scale(1)" }, { transform: "scale(1.5,1.35)", offset: 0.4 }, { transform: "scale(1)" }], { duration: 600, easing: "cubic-bezier(.3,1.6,.5,1)" });
+      pcFlash(root.querySelector(".num-year"));
+    }, 120);
+  }
+  if (k.done !== before.done) pcFlash(cnt);
+  if (k.ready && !before.ready && !closedNow) {
+    setTimeout(() => { const c = root.querySelector(".pc-card"); pcBurst(root.querySelector(".fx-card"), c ? c.offsetWidth / 2 : 128, 250, 26, 90); }, 250);
+    pcToast("★", "Tout est saisi", "Valide pour voir le récap " + pcDe(month) + ".");
+  }
+}
+
+/* Un champ quitté : la valeur ou le versement s'écrit, puis l'écran se met à jour. */
+function pcCommit(el) {
+  const row = el.closest(".pc-row"); if (!row) return;
+  const id = row.dataset.id, month = UI.pcMonth, key = id + "|" + month, x = parseAmount(el.value), before = pcModel(month);
+  if (el.dataset.pc === "val") {
+    DB.patValues = DB.patValues || {}; DB.patValues[id] = DB.patValues[id] || {};
+    const old = DB.patValues[id][month];
+    if (x == null) delete DB.patValues[id][month]; else DB.patValues[id][month] = Math.round(x * 100) / 100;
+    if (x != null && old !== DB.patValues[id][month]) { UI.pcTyped[key] = 1; delete UI.pcSure[key]; }
+    el.value = x == null ? "" : pcNum(x, 2);
+  } else {
+    const amt = x == null ? 0 : Math.round(x * 100) / 100;
+    DB.patMovements = DB.patMovements || [];
+    const mine = DB.patMovements.filter(m => m.accountId === id && monthKey(m.date) === month);
+    if (mine.length > 1 || mine.some(m => m.tx)) return;
+    if (!amt) DB.patMovements = DB.patMovements.filter(m => mine.indexOf(m) < 0);
+    else if (mine.length) mine[0].amount = amt;
+    else DB.patMovements.push({ id: (DB.patMovements.reduce((m, y) => Math.max(m, y.id), 0) || 0) + 1, accountId: id, date: month + "-15", amount: amt });
+    el.value = amt ? pcNum(amt, 2) : "";
+  }
+  UI.pcTouched = UI.pcTouched || {}; UI.pcTouched[month] = 1;
+  saveDB();
+  pcRefresh(false, { before, id, kind: el.dataset.pc });
+}
+
+document.addEventListener("input", e => { const el = e.target; if (el.matches && el.matches(".pc [data-pc]")) pcRefresh(true); });
+document.addEventListener("change", e => { const el = e.target; if (el.matches && el.matches(".pc [data-pc]")) pcCommit(el); });
+document.addEventListener("keydown", e => {
+  const el = e.target;
+  if (e.key === "Enter" && el.matches && el.matches(".pc [data-pc]")) {
+    /* Entrée passe au champ suivant, comme dans un tableur. */
+    e.preventDefault();
+    const all = Array.from(document.querySelectorAll('.pc [data-pc]:not([disabled])')), i = all.indexOf(el);
+    if (i >= 0 && i < all.length - 1) all[i + 1].focus(); else el.blur();
+  }
+  if (e.key === "Enter" && el.id === "pcmovamt") { const b = document.querySelector('[data-pcact="addmove"]'); if (b) b.click(); }
+  if (e.key === "Escape" && UI.view === "pgcomptes" && UI.pcSet) { UI.pcSet = null; UI.pcAddMove = false; render(); }
+});
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-pcact]"); if (!el) return;
+  const act = el.dataset.pcact, month = UI.pcMonth;
+  if (act === "mprev" || act === "mnext") { UI.pcMonth = addMonth(month, act === "mprev" ? -1 : 1); render(); }
+  else if (act === "set") { UI.pcSet = el.dataset.id; UI.pcSetIn = true; UI.pcAddMove = false; UI.pcSetAll = false; render(); }
+  else if (act === "close") { UI.pcSet = null; UI.pcAddMove = false; render(); }
+  else if (act === "addform") { UI.pcAddMove = !UI.pcAddMove; render(); const i = document.getElementById("pcmovamt"); if (i) i.focus(); }
+  else if (act === "allmoves") { UI.pcSetAll = !UI.pcSetAll; render(); }
+  else if (act === "addmove") {
+    const mk = (document.getElementById("pcmovmonth") || {}).value || month, amt = parseAmount((document.getElementById("pcmovamt") || {}).value);
+    if (!/^\d{4}-\d{2}$/.test(mk) || !amt) { toast("Il faut un mois et un montant."); return; }
+    DB.patMovements = DB.patMovements || [];
+    DB.patMovements.push({ id: (DB.patMovements.reduce((m, y) => Math.max(m, y.id), 0) || 0) + 1, accountId: el.dataset.id, date: mk + "-15", amount: Math.round(amt * 100) / 100 });
+    UI.pcAddMove = false; saveDB(); render();
+  }
+  else if (act === "sure") {
+    const before = pcModel(month); UI.pcSure[el.dataset.id + "|" + month] = 1; UI.pcTouched[month] = 1;
+    pcRefresh(false, { before, id: el.dataset.id, kind: "sure" });
+  }
+  else if (act === "habit") {
+    const inp = document.querySelector('.pc-row[data-id="' + el.dataset.id + '"] [data-pc="vers"]');
+    if (inp) { inp.value = pcNum(+el.dataset.v, 2); pcCommit(inp); }
+  }
+  else if (act === "validate") {
+    const k = pcModel(month);
+    if (!k.ready) {
+      document.querySelectorAll(".pc-row:not(.ok)").forEach(pcShake);
+      const f = document.querySelector('.pc-row:not(.ok) [data-pc="val"]'); if (f) f.focus();
+      return;
+    }
+    UI.pcClosed[month] = 1; pcRefresh(false);
+    const host = document.querySelector(".pc-toast-host"); if (host) host.innerHTML = "";
+    setTimeout(() => { const c = document.querySelector(".pc-card"); pcBurst(document.querySelector(".fx-card"), c ? c.offsetWidth / 2 : 128, 120, 40, 130); }, 60);
+  }
+  else if (act === "reopen") { UI.pcClosed[month] = 0; UI.pcTouched[month] = 1; render(); }
 });
 /* ---- Jalons ---------------------------------------------------------------
    Acquis en couleur, à venir en grisé, avec la distance qui reste. Un jalon barré sans
