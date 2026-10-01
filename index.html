@@ -1455,7 +1455,107 @@ html[data-theme="dark"] .v2{
 @media(max-width:1000px){
   .v2 .yarow{grid-template-columns:minmax(0,1fr) 96px 56px 82px 74px}
   .v2 .vhead.yarow span:last-child,.v2 .yarow .yasp{display:none}
+}
 
+/* =========================================================================
+   PROGRÈS — le nouvel accueil du Patrimoine, cloisonné sous .pg
+   -------------------------------------------------------------------------
+   Même principe que .v2 : rien ne fuit vers le reste de l'application. Les
+   couleurs de fond et d'encre reprennent celles du thème, la typographie
+   reprend Archivo. Fonds blancs, une pastille de couleur par tuile, la
+   couleur dans les courbes et les barres (variante B des maquettes).
+   --up / --down portent la hausse et la baisse : le réglage daltonisme
+   n'aura qu'à les redéfinir.
+   ========================================================================= */
+.pg{
+  --disp:"Archivo",system-ui,sans-serif;
+  --up:var(--pos); --down:var(--neg);
+  --tile:var(--surface); --tile-sh:0 1px 2px rgba(17,19,24,.05);
+  --hero:#14181F; --hero-ink:#FFFFFF; --hero-soft:rgba(255,255,255,.62);
+  --d-blue:#2A78D6; --d-violet:#5B4BC4; --d-amber:#C98A00; --d-gold:#E2A400; --d-grey:#9AA0AC;
+  font-family:var(--disp); font-variation-settings:"wght" 450,"wdth" 100;
+}
+html[data-theme="dark"] .pg{ --tile-sh:0 0 0 1px var(--line); --hero:#1E2530; --d-blue:#6FA8F0; --d-violet:#9C8CF0; --d-amber:#E0B04A; }
+.pg *{box-sizing:border-box}
+.pg .num{font-family:var(--disp);font-variant-numeric:tabular-nums;letter-spacing:0}
+.pg .up{color:var(--up)} .pg .down{color:var(--down)}
+.pg .state{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-variation-settings:"wght" 600,"wdth" 100;color:var(--ink-2);cursor:pointer}
+.pg .state i{width:8px;height:8px;border-radius:50%;background:var(--up)}
+.pg .state.todo i{background:var(--warn)}
+.pg .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(150px,auto);gap:14px}
+.pg .bgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pg .w2{grid-column:span 2} .pg .h2{grid-row:span 2}
+.pg .t{position:relative;display:flex;flex-direction:column;min-width:0;border-radius:20px;background:var(--tile);box-shadow:var(--tile-sh);padding:18px 20px 16px;color:var(--ink);text-align:left;border:0;font:inherit;transition:transform .2s, box-shadow .2s}
+.pg button.t{cursor:pointer}
+.pg button.t:hover{transform:translateY(-2px);box-shadow:0 8px 24px -10px rgba(17,19,24,.25), var(--tile-sh)}
+.pg .tl{display:flex;align-items:center;gap:8px;font-size:14px;font-variation-settings:"wght" 620,"wdth" 100;color:var(--ink-2)}
+.pg .tl .dot{width:9px;height:9px;border-radius:3px;flex:none}
+.pg .tl .go{margin-left:auto;color:var(--ink-mute);font-size:17px}
+.pg .tag{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-variation-settings:"wght" 700,"wdth" 100;background:rgba(226,164,0,.16);color:#8A6200}
+html[data-theme="dark"] .pg .tag{color:var(--done-ink)}
+.pg .big{font-size:30px;line-height:1.05;letter-spacing:-.03em;font-variation-settings:"wght" 700,"wdth" 90;margin-top:8px}
+.pg .sub{font-size:13px;color:var(--ink-soft);margin-top:3px}
+.pg .head{font-size:21px;line-height:1.15;letter-spacing:-.02em;font-variation-settings:"wght" 700,"wdth" 92;margin-top:8px}
+.pg .foot{font-size:12px;color:var(--ink-mute);margin-top:auto;padding-top:10px}
+.pg svg{display:block;width:100%;height:auto;overflow:visible}
+.pg svg text{font-family:var(--disp)}
+/* La tuile du patrimoine, en sombre */
+.pg .hero{background:var(--hero);color:var(--hero-ink);padding:24px 26px 0;overflow:hidden}
+.pg .hero .tl{color:var(--hero-soft)}
+.pg .hero .amount{font-size:clamp(46px,6.2vw,84px);line-height:1;letter-spacing:-.045em;font-variation-settings:"wght" 720,"wdth" 86;margin-top:12px}
+.pg .hero .lines{display:flex;flex-direction:column;gap:3px;margin-top:12px;font-size:15px;font-variation-settings:"wght" 560,"wdth" 100}
+.pg .hero .lines span{color:var(--hero-soft)}
+.pg .hero .lines b{color:var(--hero-ink);font-variation-settings:"wght" 700,"wdth" 100}
+.pg .hero .chart{flex:1 1 150px;display:flex;min-height:150px;margin:0 -26px;padding-top:14px}
+.pg .hero .chart svg{height:100%;min-height:150px;align-self:stretch}
+.pg .hero .tag{background:rgba(255,229,138,.16);color:#FFE58A}
+/* Autres comptes */
+.pg .rows{display:flex;flex-direction:column;margin-top:8px}
+.pg .row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;padding:7px 8px;margin:0 -8px;border-radius:10px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.pg .row:hover{background:var(--surface-2)}
+.pg .row .n{display:flex;align-items:center;gap:7px;font-size:14px;font-variation-settings:"wght" 650,"wdth" 100;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg .row .v{font-size:14px;font-variation-settings:"wght" 600,"wdth" 95;text-align:right}
+.pg .row .p{grid-column:1/-1;font-size:12px;color:var(--ink-mute);padding-left:16px}
+.pg .row .p b{font-variation-settings:"wght" 700,"wdth" 100}
+/* Rythme */
+.pg .cells{display:flex;gap:4px;margin-top:auto}
+.pg .cells i{flex:1 1 0;height:24px;border-radius:5px;background:var(--line)}
+.pg .cells i.on{background:var(--d-blue)}
+.pg .axis{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-mute);margin-top:5px}
+/* Bilan */
+.pg .sect{display:flex;align-items:baseline;gap:12px;margin:30px 0 12px}
+.pg .sect h2{font-size:20px;letter-spacing:-.02em;font-variation-settings:"wght" 700,"wdth" 92}
+.pg .yr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px 12px;padding:8px 0;border-top:1px solid var(--line-2)}
+.pg .yr:first-of-type{border-top:0}
+.pg .yr .y{font-size:15px;font-variation-settings:"wght" 700,"wdth" 100}
+.pg .yr .bar{height:8px;border-radius:4px;background:var(--line-2);overflow:hidden}
+.pg .yr .bar i{display:block;height:100%;border-radius:4px}
+.pg .yr .r{font-size:17px;font-variation-settings:"wght" 700,"wdth" 90;text-align:right}
+.pg .yr .s{grid-column:2/-1;font-size:12px;color:var(--ink-mute)}
+.pg .yr.best .r{color:var(--d-violet)}
+.pg .gauge{position:relative;height:16px;border-radius:8px;background:var(--line-2);margin:26px 0 6px}
+.pg .gauge .fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:var(--d-amber)}
+.pg .gauge .ghost{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:color-mix(in oklab, var(--d-amber) 30%, transparent)}
+.pg .gauge .mark{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink)}
+.pg .gauge .mark span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:11.5px;white-space:nowrap;font-variation-settings:"wght" 700,"wdth" 100}
+.pg .kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-top:1px solid var(--line-2)}
+.pg .kv b{font-variation-settings:"wght" 700,"wdth" 95}
+.pg .rank{display:grid;grid-template-columns:18px minmax(0,1fr) 72px 58px;align-items:center;gap:8px;padding:4px 0;font-size:13px}
+.pg .rank .i{color:var(--ink-mute);font-size:12px;font-variation-settings:"wght" 700,"wdth" 100}
+.pg .rank .k{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variation-settings:"wght" 620,"wdth" 100}
+.pg .rank .b{height:7px;border-radius:4px}
+.pg .rank .r{text-align:right;font-variation-settings:"wght" 700,"wdth" 95}
+.pg .rank.all .k{color:var(--d-blue)}
+.pg .legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:8px}
+.pg .legend2 i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+@media (max-width:1100px){
+  .pg .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pg .bgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .pg .grid,.pg .bgrid{grid-template-columns:minmax(0,1fr)}
+  .pg .w2,.pg .h2{grid-column:auto;grid-row:auto}
+}
 </style>
 </head>
 <body>
@@ -2114,7 +2214,7 @@ function isYearView() {
   return UI.view === "year" || UI.view === "year2" || UI.view === "year3";
 }
 function isPatView() {
-  return ["pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
+  return ["patprogres", "pathome", "patanalyse", "pat", "patcredits", "patacct", "patmilestones"].indexOf(UI.view) >= 0;
 }
 
 function reindex() {
@@ -2619,14 +2719,14 @@ function render() {
   /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
      barre latérale n'indiquerait plus où l'on se trouve. */
   const navItem = ([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
     ["year2", "chart", "Année v2"], ["year3", "chart", "Année v3"],
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
-  const patNav = [["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
+  const patNav = [["patprogres", "chart", "Progrès"], ["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
     ["pat", "vault", "Comptes"], ["patcredits", "debt", "Crédits"]];
   const dataNav = [["data", "file", "Données"]];
   const nav = '<div class="navlabel">Budget</div>' + budgetNav.map(navItem).join("") +
@@ -2639,6 +2739,7 @@ function render() {
     : UI.view === "year2" ? viewYear2()
     : UI.view === "year3" ? viewYear3()
     : UI.view === "todo" ? viewTodo()
+    : UI.view === "patprogres" ? viewPatProgres()
     : UI.view === "pathome" ? viewPatrimoineHome()
     : UI.view === "patanalyse" ? viewPatAnalyse()
     : UI.view === "pat" ? viewPatrimoine()
@@ -6713,6 +6814,226 @@ function viewPatrimoineHome() {
   return html;
 }
 
+/* ---- Progrès ---------------------------------------------------------------
+   Le nouvel accueil : d'abord ce qu'on a et comment ça bouge (patrimoine, plus gros
+   compte, autres comptes, rythme des versements), puis le bilan en faisant défiler.
+   Tout se calcule sur les données : aucun chiffre n'est propre à un utilisateur. */
+const MOIS_COURTS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+function pgMonth(mk, withYear) { const [y, m] = mk.split("-"); return MOIS_COURTS[+m - 1] + (withYear ? " " + y : " " + y.slice(2)); }
+/* Performance enchaînée d'un compte, comparable d'un compte à l'autre et à un indice :
+   un gros versement en cours de période ne la fausse pas. */
+function pgAccountTWR(accountId, fromMk, toMk) {
+  let chain = 1, n = 0;
+  for (let mk = addMonth(fromMk, 1); mk <= toMk && n < 1200; mk = addMonth(mk, 1)) {
+    const r = patMonthlyPerf(accountId, mk);
+    if (r == null) continue;
+    chain *= 1 + r / 100; n++;
+  }
+  return n ? (chain - 1) * 100 : null;
+}
+function pgYearPerf(year, month) {
+  const end = String(year) === month.slice(0, 4) ? month : year + "-12";
+  const from = (year - 1) + "-12";
+  const scope = patPerfAccounts().filter(a => patAccountValue(a.id, from) != null && patAccountValue(a.id, end) != null);
+  const twr = patTWR(from, end);
+  return { perf: twr ? twr.cumul : patScopedPerf(scope, from, end), end };
+}
+function pgPath(vals, X, Y) { return vals.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" "); }
+function pgSigned(n) { return fmtEurShort(n).replace(/^-/, "−").replace(/^(?!−)/, n > 0.5 ? "+" : ""); }
+function pgPct(n) { return n == null ? "—" : fmtPct(n); }
+
+function viewPatProgres() {
+  const month = UI.patMonth, year = +month.slice(0, 4);
+  const accounts = DB.patAccounts || [];
+  let html = '<div class="pg">';
+  /* L'état de la saisie : un chiffre du mois n'a de sens que si tous les comptes y sont. */
+  const missing = patActiveAccounts().filter(a => (DB.patValues[a.id] || {})[month] == null).length;
+  html += patTopbar("Progrès", accounts.length ? '<button class="state' + (missing ? " todo" : "") + '" data-act="view" data-view="pat"><i></i>' +
+    (missing ? missing + (missing > 1 ? " comptes à saisir" : " compte à saisir") + " pour " + esc(pgMonth(month, true)) : "À jour") + "</button>" : "");
+  if (!accounts.length) return html + patNoAccounts("Ajoutez un compte dans l’onglet <b class='inl'>Comptes</b> pour voir vos progrès ici.") + "</div>";
+
+  const months = allPatMonths(month), prevM = addMonth(month, -1), yAgo = addMonth(month, -12);
+  const net = patNetAt(month), netPrev = patNetAt(prevM);
+  const hasPrev = patHasHistoryAt(prevM), hasYear = patHasHistoryAt(yAgo);
+  const perfM = patMonthlyPerf(null, month), ath = patATH(month);
+  const twrYear = hasYear ? patTWR(yAgo, month) : null;
+  const twrAll = months.length > 1 ? patTWR(months[0], month) : null;
+  const asm = patAssumptions(month);
+
+  html += '<div class="grid">';
+  /* --- Le patrimoine --- */
+  const series = months.map(mk => patNetAt(mk));
+  const W = 600, H = 170, lo = Math.min(0, ...series), hi = Math.max(...series) * 1.08 || 1;
+  const X = i => series.length > 1 ? i * W / (series.length - 1) : W, Y = v => 8 + (1 - (v - lo) / (hi - lo)) * (H - 8);
+  const line = pgPath(series, X, Y);
+  html += '<div class="t hero w2 h2"><div class="tl">' + (patHasDebt() ? "Votre patrimoine net" : "Votre patrimoine") +
+    (ath && ath.mk === month && net > 0 ? '<span class="tag">★ record</span>' : "") + "</div>" +
+    '<div class="amount num">' + esc(fmtEurShort(net)) + "</div>" +
+    '<div class="lines">' +
+      (hasPrev ? "<span><b>" + esc(pgSigned(net - netPrev)) + "</b> en " + esc(MONTHS[+month.slice(5) - 1]) +
+        (perfM != null ? " · " + esc(pgPct(perfM)) + " de performance" : "") + "</span>" : "") +
+      (hasYear ? "<span><b>" + esc(pgSigned(net - patNetAt(yAgo))) + "</b> en un an" +
+        (twrYear ? " · " + esc(pgPct(twrYear.cumul)) : "") + "</span>" : "") +
+      (twrAll && twrAll.months >= 12 ? "<span><b>" + esc(fmtRate(twrAll.annualized)) + "</b> par an depuis " + esc(pgMonth(months[0], true)) + "</span>" : "") +
+    "</div>" +
+    (series.length > 1 ? '<div class="chart"><svg viewBox="0 -4 ' + W + " " + (H + 4) + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<defs><linearGradient id="pgfill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8FB3FF" stop-opacity=".35"/><stop offset="1" stop-color="#8FB3FF" stop-opacity="0"/></linearGradient></defs>' +
+      '<path d="' + line + " L" + W + "," + H + " L0," + H + ' Z" fill="url(#pgfill)"/>' +
+      '<path d="' + line + '" fill="none" stroke="#8FB3FF" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></div>' : "") +
+    "</div>";
+
+  /* --- Le plus gros compte, puis les autres --- */
+  const ranked = patActiveAccounts().map(a => ({ a, v: patAccountValue(a.id, month) || 0, r: hasYear ? pgAccountTWR(a.id, yAgo, month) : null }))
+    .filter(x => x.v > 0).sort((p, q) => q.v - p.v);
+  const top = ranked[0];
+  if (top) {
+    const hist = months.slice(-36).map(mk => patAccountValue(top.a.id, mk));
+    const firstI = hist.findIndex(v => v != null), vals = hist.slice(firstI).map(v => v || 0);
+    const inv = months.slice(-36).slice(firstI).map(mk => patInvested(top.a.id, mk));
+    const u = patUnrealized(top.a.id, month);
+    const accAth = Math.max(...vals) <= top.v + 0.5;
+    const w = 600, h = 120, hiA = Math.max(...vals, ...inv) * 1.08 || 1;
+    const xa = i => vals.length > 1 ? i * w / (vals.length - 1) : w, ya = v => 6 + (1 - v / hiA) * (h - 6);
+    html += '<button class="t w2" data-act="patopenacct" data-id="' + esc(top.a.id) + '"><div class="tl"><i class="dot" style="background:' + patAccountColor(top.a) + '"></i>' + esc(top.a.name) +
+      (accAth ? '<span class="tag">★ record</span>' : "") + '<span class="go">›</span></div>' +
+      '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="big num">' + esc(fmtEurShort(top.v)) + "</span>" +
+      (top.r != null ? '<span class="sub"><b class="' + (top.r >= 0 ? "up" : "down") + '">' + esc(pgPct(top.r)) + "</b> en un an</span>" : "") + "</div>" +
+      (vals.length > 1 ? '<svg viewBox="0 0 ' + w + " " + (h + 4) + '" preserveAspectRatio="none" style="height:' + h + 'px;margin-top:auto" aria-hidden="true">' +
+        '<path d="' + pgPath(inv, xa, ya) + '" fill="none" stroke="var(--ink-mute)" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>' +
+        '<path d="' + pgPath(vals, xa, ya) + '" fill="none" stroke="' + patAccountColor(top.a) + '" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>' : "") +
+      '<div class="legend2"><span><i style="background:' + patAccountColor(top.a) + '"></i>valeur</span><span><i style="background:var(--ink-mute)"></i>versé</span>' +
+        (u ? '<span style="margin-left:auto"><b class="' + (u.gain >= 0 ? "up" : "down") + '">' + esc(pgSigned(u.gain)) + "</b> " + (u.gain >= 0 ? "gagnés" : "perdus") + "</span>" : "") + "</div></button>";
+  }
+  const others = ranked.slice(1);
+  html += '<div class="t"><div class="tl">' + (top ? "Vos autres comptes" : "Vos comptes") + "</div>" +
+    (others.length ? '<div class="rows">' + others.slice(0, 6).map(x =>
+      '<button class="row" data-act="patopenacct" data-id="' + esc(x.a.id) + '"><span class="n">' + patSwatch(x.a, 9) + esc(x.a.name) + '</span><span class="v num">' + esc(fmtEurShort(x.v)) + "</span>" +
+        '<span class="p">' + (x.r == null ? "moins d’un an d’historique" : '<b class="' + (x.r >= 0 ? "up" : "down") + '">' + esc(pgPct(x.r)) + "</b> en un an") + "</span></button>").join("") + "</div>" +
+      (others.length > 6 ? '<div class="foot">et ' + (others.length - 6) + " autres dans Comptes</div>" : "")
+      : '<p class="foot">Un seul compte suivi pour l’instant.</p>') + "</div>";
+
+  /* --- Le rythme : les douze derniers mois, avec ou sans versement --- */
+  const last12 = Array.from({ length: 12 }, (_, i) => addMonth(month, i - 11));
+  const paid = last12.map(mk => patMovementsInMonth(null, mk) > 0.5);
+  let run = 0; for (let i = 11; i >= 0 && paid[i]; i--) run++;
+  let gap = 0; for (let i = 11; i >= 0 && !paid[i]; i--) gap++;
+  const lastPaid = paid.lastIndexOf(true);
+  html += '<div class="t"><div class="tl">Votre rythme</div>' +
+    '<div class="big num">' + paid.filter(Boolean).length + ' mois</div><div class="sub">sur 12, avec un versement</div>' +
+    '<div class="cells" style="margin-top:16px">' + paid.map((p, i) => '<i class="' + (p ? "on" : "") + '" title="' + esc(pgMonth(last12[i], true)) + '"></i>').join("") + "</div>" +
+    '<div class="axis"><span>' + esc(MOIS_COURTS[+last12[0].slice(5) - 1]) + "</span><span>" + esc(MOIS_COURTS[+month.slice(5) - 1]) + "</span></div>" +
+    '<div class="foot" style="padding-top:8px">' + (run >= 2 ? run + " mois de suite" : run === 1 ? "Un versement ce mois-ci" :
+      lastPaid >= 0 ? "Pause depuis " + esc(MONTHS[+last12[lastPaid].slice(5) - 1]) : "Aucun versement sur un an") + "</div></div>";
+  html += "</div>";
+
+  /* ======================= Le bilan ======================= */
+  html += '<div class="sect"><h2>Votre bilan</h2><span class="tiny muted">à fin ' + esc(monthLabel(month)) + "</span></div>";
+  html += '<div class="bgrid">';
+
+  /* --- Qui fait grossir le patrimoine : douze mois de versements contre douze mois de gains --- */
+  if (hasYear) {
+    let cv = 0, cg = 0;
+    const cumV = [0], cumG = [0];
+    last12.forEach(mk => {
+      const s = patSplit(addMonth(mk, -1), mk);
+      cv += s.versements; cg += s.perf; cumV.push(cv); cumG.push(cg);
+    });
+    const ws = 300, hs = 110, all = cumV.concat(cumG), lo2 = Math.min(0, ...all), hi2 = Math.max(...all, 1) * 1.1;
+    const xs = i => i * ws / 12, ys = v => 6 + (1 - (v - lo2) / (hi2 - lo2)) * (hs - 6);
+    const ahead = cg > cv;
+    html += '<div class="t"><div class="tl"><i class="dot" style="background:var(--d-blue)"></i>Qui fait grossir votre patrimoine ?</div>' +
+      '<div class="head">' + (cg <= 0 ? "Vos versements portent tout" : ahead ? "Vos placements, plus que vous" : "Vous, plus que vos placements") + "</div>" +
+      '<svg viewBox="0 0 ' + ws + " " + (hs + 4) + '" style="margin-top:12px" aria-hidden="true">' +
+        (lo2 < 0 ? '<line x1="0" x2="' + ws + '" y1="' + ys(0).toFixed(1) + '" y2="' + ys(0).toFixed(1) + '" stroke="var(--line)"/>' : "") +
+        '<path d="' + pgPath(cumV, xs, ys) + '" fill="none" stroke="var(--d-grey)" stroke-width="2.5" stroke-linejoin="round"/>' +
+        '<path d="' + pgPath(cumG, xs, ys) + '" fill="none" stroke="var(--d-blue)" stroke-width="3" stroke-linejoin="round"/></svg>' +
+      '<div class="legend2"><span><i style="background:var(--d-blue)"></i>vos placements <b>' + esc(pgSigned(cg)) + '</b></span><span><i style="background:var(--d-grey)"></i>vos versements <b>' + esc(fmtEurShort(cv)) + "</b></span></div>" +
+      '<div class="foot">cumulé sur les douze derniers mois</div></div>';
+  }
+
+  /* --- Vos années --- */
+  const yrs = [year - 2, year - 1, year].filter(y => patHasHistoryAt(y + "-12") || String(y) === month.slice(0, 4))
+    .filter(y => patHasHistoryAt((y - 1) + "-12")).map(y => {
+      const p = pgYearPerf(y, month);
+      return { y, perf: p.perf, vers: patContributionsOfYear(y), cur: String(y) === month.slice(0, 4) && month.slice(5) !== "12" };
+    }).filter(x => x.perf != null);
+  if (yrs.length) {
+    const done = yrs.filter(x => !x.cur), best = done.length ? done.reduce((a, b) => b.perf > a.perf ? b : a) : null;
+    const mx = Math.max(...yrs.map(x => Math.abs(x.perf)), 1);
+    html += '<div class="t"><div class="tl"><i class="dot" style="background:var(--d-violet)"></i>Vos années</div>' +
+      (best && done.length > 1 ? '<div class="head">' + best.y + ", la meilleure</div>" : "") + '<div style="margin-top:8px">' +
+      yrs.map(x => '<div class="yr' + (best && x.y === best.y && done.length > 1 ? " best" : "") + '"><span class="y num">' + x.y + "</span>" +
+        '<span class="bar"><i style="width:' + (Math.abs(x.perf) / mx * 100).toFixed(1) + "%;background:" + (x.perf < 0 ? "var(--down)" : best && x.y === best.y ? "var(--d-violet)" : "color-mix(in oklab, var(--d-violet) 45%, var(--surface))") + '"></i></span>' +
+        '<span class="r num' + (x.perf < 0 ? " down" : "") + '">' + esc(pgPct(x.perf)) + "</span>" +
+        '<span class="s">' + esc(fmtEurShort(x.vers)) + " versés" + (x.cur ? " · en cours" : "") + "</span></div>").join("") + "</div></div>";
+  }
+
+  /* --- Réserve et argent qui dort --- */
+  const safety = patSafetyMonths(month), goalM = Number(DB.settings.patSafetyTarget) || 3;
+  const eff = patSavingsEffort(year), sleeping = eff.hasBudget && eff.balance > eff.versements ? eff.balance - eff.versements : 0;
+  html += '<div class="t"><div class="tl"><i class="dot" style="background:var(--d-amber)"></i>Votre réserve et votre argent qui dort</div>';
+  if (!safety) {
+    html += '<p class="sub" style="margin-top:10px">Elle se mesure en mois de dépenses : importez des relevés dans <b class="inl">Mois</b> pour que vos dépenses moyennes soient connues.</p>';
+  } else {
+    const scale = goalM * 2, withS = safety.months + sleeping / safety.avg, pc = m => Math.min(100, m / scale * 100).toFixed(1) + "%";
+    const ok = safety.months >= goalM;
+    html += '<div class="head">' + (ok ? "Réserve solide : " : "Réserve courte : ") + esc(trim1(safety.months)) + " mois</div>" +
+      '<div class="gauge">' + (sleeping ? '<i class="ghost" style="width:' + pc(withS) + '"></i>' : "") + '<i class="fill" style="width:' + pc(safety.months) + '"></i>' +
+        '<i class="mark" style="left:' + pc(goalM) + '"><span>objectif ' + goalM + " mois</span></i></div>" +
+      '<div class="axis"><span>0</span><span>' + scale + " mois</span></div>" +
+      '<div style="margin-top:10px"><div class="kv"><span>Dépenses moyennes</span><b class="num">' + esc(fmtEurShort(safety.avg)) + " / mois</b></div>" +
+      '<div class="kv"><span>Sur vos livrets et comptes courants</span><b class="num">' + esc(fmtEurShort(safety.liquid)) + "</b></div>" +
+      (eff.hasBudget ? '<div class="kv"><span>Budget non investi en ' + year + '</span><b class="num">' + esc(fmtEurShort(sleeping)) + "</b></div>" : "") + "</div>" +
+      (sleeping ? '<div class="foot">Placés sur vos livrets, ces ' + esc(fmtEurShort(sleeping)) + " porteraient votre réserve à " + esc(trim1(withS)) + " mois.</div>" : "");
+  }
+  html += "</div>";
+
+  /* --- Où vous allez : trois ans de passé, cinq ans de projection --- */
+  {
+    const past = months.slice(-37).map(mk => patNetAt(mk)), r = Math.pow(1 + Math.max(asm.rate, -99) / 100, 1 / 12) - 1;
+    const fut = [net]; for (let i = 0; i < 60; i++) fut.push(fut[i] * (1 + r) + asm.contrib);
+    const m1 = patNextMilestone(net), m2 = Math.floor(m1 / 100000) * 100000 + 100000;
+    const when = t => { const i = fut.findIndex(v => v >= t); return i < 0 ? null : i; };
+    const all = past.concat(fut.slice(1)), n = all.length - 1, nowI = past.length - 1, wo = 640, ho = 190;
+    const hiO = Math.max(...all) * 1.12 || 1, xo = i => 10 + i * (wo - 20) / n, yo = v => 22 + (1 - v / hiO) * (ho - 46);
+    let s = '<svg viewBox="0 0 ' + wo + " " + ho + '" style="margin-top:10px" aria-label="Trois ans de patrimoine, puis cinq ans de projection">' +
+      '<rect x="' + xo(nowI).toFixed(1) + '" y="0" width="' + (wo - xo(nowI)).toFixed(1) + '" height="' + (ho - 24) + '" fill="var(--surface-2)"/>' +
+      '<path d="' + pgPath(past, xo, yo) + '" fill="none" stroke="var(--d-blue)" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="' + pgPath(fut, i => xo(i + nowI), yo) + '" fill="none" stroke="var(--d-grey)" stroke-width="2.5" stroke-dasharray="1 0" stroke-linejoin="round"/>';
+    [m1, m2].filter((t, i, arr) => arr.indexOf(t) === i).forEach(t => {
+      const i = when(t); if (i == null || i === 60) return;
+      const cx = xo(i + nowI), cy = yo(fut[i]);
+      s += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="var(--surface)" stroke="var(--d-blue)" stroke-width="2.5"/>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (cy - 12).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="800" fill="var(--d-blue)">' + esc(Math.round(t / 1000) + " k€ · " + pgMonth(addMonth(month, i))) + "</text>";
+    });
+    s += '<circle cx="' + xo(n).toFixed(1) + '" cy="' + yo(fut[60]).toFixed(1) + '" r="6" fill="var(--surface)" stroke="var(--d-blue)" stroke-width="2.5"/>' +
+      '<text x="' + (xo(n) - 4).toFixed(1) + '" y="' + (yo(fut[60]) - 13).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="800" fill="var(--d-blue)">' + esc(Math.round(fut[60] / 1000) + " k€ · " + pgMonth(addMonth(month, 60))) + "</text>" +
+      '<circle cx="' + xo(nowI).toFixed(1) + '" cy="' + yo(net).toFixed(1) + '" r="6" fill="var(--d-blue)" stroke="var(--surface)" stroke-width="2"/>' +
+      '<text x="10" y="' + (ho - 6) + '" font-size="12" fill="var(--ink-mute)">' + esc(pgMonth(months.slice(-37)[0])) + "</text>" +
+      '<text x="' + (xo(nowI) + 8).toFixed(1) + '" y="' + (ho - 6) + '" font-size="12" font-weight="600" fill="var(--ink-soft)">aujourd’hui → si rien ne change</text></svg>';
+    const i1 = when(m1);
+    html += '<div class="t w2"><div class="tl"><i class="dot" style="background:var(--d-blue)"></i>Où vous allez</div>' +
+      '<div class="head">' + (i1 != null ? esc(fmtEurShort(m1)) + " en " + esc(pgMonth(addMonth(month, i1), true)) + ", " : "") + esc(fmtEurShort(Math.round(fut[60] / 1000) * 1000)) + " dans cinq ans</div>" + s +
+      '<div class="foot">Votre performance actuelle (' + esc(fmtRate(asm.rate)) + " par an) et votre versement moyen (" + esc(fmtEurShort(asm.contrib)) + " par mois), prolongés tels quels. Une extrapolation, pas une prévision.</div></div>";
+  }
+
+  /* --- Face aux marchés : vos comptes classés sur un an. Les indices viendront s'y ajouter
+     dès que leur fichier mensuel existera ; d'ici là, aucun chiffre inventé. --- */
+  if (hasYear) {
+    const list = ranked.filter(x => x.r != null).map(x => ({ k: x.a.name, r: x.r, c: patAccountColor(x.a) }));
+    if (twrYear) list.push({ k: "Votre patrimoine", r: twrYear.cumul, c: "var(--d-blue)", all: true });
+    list.sort((p, q) => q.r - p.r);
+    const mx = Math.max(...list.map(x => Math.abs(x.r)), 1);
+    html += '<div class="t"><div class="tl"><i class="dot" style="background:var(--d-gold)"></i>Face aux marchés</div>' +
+      '<div style="margin-top:10px">' + list.map((x, i) => '<div class="rank' + (x.all ? " all" : "") + '"><span class="i num">' + (i + 1) + '</span><span class="k">' + esc(x.k) + "</span>" +
+        '<i class="b" style="width:' + (Math.abs(x.r) / mx * 100).toFixed(1) + "%;background:" + (x.r < 0 ? "var(--down)" : x.c) + '"></i>' +
+        '<span class="r num' + (x.r < 0 ? " down" : "") + '">' + esc(pgPct(x.r)) + "</span></div>").join("") + "</div>" +
+      '<div class="foot">sur un an · la comparaison aux grands indices arrivera avec leur mise à jour mensuelle</div></div>';
+  }
+  html += "</div></div>";
+  return html;
+}
+
 /* ---- Jalons ---------------------------------------------------------------
    Acquis en couleur, à venir en grisé, avec la distance qui reste. Un jalon barré sans
    contexte décourage ; le même avec « 62 990 sur 75 000 » donne une direction. */
@@ -7404,7 +7725,7 @@ function viewPatAccount() {
   const v = patAccountValue(a.id, month), u = patUnrealized(a.id, month);
   const pm = patMonthlyPerf(a.id, month), py = patAnnualPerf(a.id, year);
 
-  let html = '<div class="topbar"><button class="btn sm ghost" data-act="patback">' + icon("left", 14) + "Comptes</button>" +
+  let html = '<div class="topbar"><button class="btn sm ghost" data-act="patback">' + icon("left", 14) + (UI.patFrom === "patprogres" ? "Progrès" : "Comptes") + "</button>" +
     '<h1 style="display:flex;align-items:center;gap:10px">' + patSwatch(a, 12) + esc(a.name) + "</h1>" +
     '<span class="tag">' + esc(patTypeName(patType(a.type).id)) + "</span>" +
     '<div class="periodnav"><button data-act="prev" aria-label="Mois précédent">' + icon("left") + "</button>" +
@@ -9480,8 +9801,8 @@ document.addEventListener("click", e => {
       DB.tx.forEach(t => { if (t.patMove === id) t.patMove = null; });
       saveDB(); render(); break;
     }
-    case "patopenacct": UI.patAccount = el.dataset.id; UI.view = "patacct"; render(); break;
-    case "patback": UI.view = "pat"; UI.patAccount = null; render(); break;
+    case "patopenacct": UI.patFrom = UI.view === "patprogres" ? "patprogres" : "pat"; UI.patAccount = el.dataset.id; UI.view = "patacct"; render(); break;
+    case "patback": UI.view = UI.patFrom || "pat"; UI.patAccount = null; render(); break;
     case "patbackhome": UI.view = "pathome"; render(); break;
     case "patmilestones": UI.view = "patmilestones"; render(); break;
     case "pattoggleinactive": UI.patShowInactive = !UI.patShowInactive; render(); break;
