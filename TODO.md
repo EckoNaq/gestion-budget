@@ -16,7 +16,7 @@ Maquettes : https://claude.ai/artifact/7M3oL9JeMPBV9kdzUE8u8Y
 
 - **Réglage « Couleurs adaptées au daltonisme »**, dans l'écran **Réglages actuel de l'application** (pas de refonte de cet écran) : activé, hausse en bleu et baisse en orange ; désactivé, vert et rouge. Il suffit de redéfinir `--pos` et `--neg` (déjà utilisées partout) sur la racine selon le réglage. Attention : en mode daltonien, l'orange de baisse ne doit pas servir aussi de couleur d'un bloc (le PEA est orange dans la variante B) ; prévoir une autre couleur pour ce bloc.
 - **Intégration dans `index.html`**, onglet par onglet :
-  - **Progrès** : l'écran (tuiles et bilan) est en place, à côté de l'Aperçu, styles cloisonnés sous `.pg`. Animations au survol en place. Reste : les pages de détail au clic sur les blocs du bilan. Quand c'est validé, l'Aperçu disparaît.
+  - **Progrès** : l'écran (tuiles et bilan) est en place, à côté de l'Aperçu, styles cloisonnés sous `.pg`. Écran, animations, deux écrans glissants et pages de détail du bilan en place. Quand c'est validé, l'Aperçu disparaît.
   - Puis **Comptes**, puis **Journal**.
 
 ## Données

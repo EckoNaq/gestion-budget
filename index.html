@@ -1805,7 +1805,7 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
 .pg .pd-chips button{padding:7px 13px;border:0;border-radius:999px;font:inherit;font-weight:600;font-size:13.5px;background:var(--pg-trk);color:var(--pg-muted);cursor:pointer}
 .pg .pd-chips button.on{background:var(--pg-ink);color:var(--pg-tile)}
 .pg .pd-chips button[disabled]{opacity:.4;cursor:not-allowed}
-.pg .pd-grid{flex:1 1 auto;display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:26px;min-height:calc(100vh - 140px)}
+.pg .pd-grid{flex:1 1 auto;display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:26px;align-items:start}
 .pg .pd-left{display:flex;flex-direction:column;gap:14px;min-width:0}
 .pg .pd-right{display:flex;flex-direction:column;gap:14px;min-width:0}
 .pg .pd-label{display:flex;align-items:center;gap:9px;font-weight:600;font-size:16px;color:var(--pg-muted)}
@@ -1820,7 +1820,10 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
 .pg .pd-key i{display:inline-block;width:16px;border-radius:2px}
 .pg .pd-note{font-size:13px;color:var(--pg-faint)}
 .pg .pd-muted{color:var(--pg-faint)}
-.pg .pd-left .fig{flex:1 1 0;min-height:300px;margin-top:6px}
+.pg .pd-left .fig{flex:none;min-height:0;margin-top:6px}
+.pg .pd-left .fig>svg{height:auto}
+.pg .pd-p{margin:4px 0 0;max-width:56ch;font-size:15px;line-height:1.5;color:var(--pg-muted)}
+.pg .pd-ph h2{white-space:nowrap}
 .pg .pd-panel{border-radius:24px;background:var(--pg-tile);padding:22px 24px;box-shadow:var(--pg-sh);display:flex;flex-direction:column;gap:12px}
 .pg .pd-ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .pg .pd-ph h2{margin:0;font-weight:700;font-size:19px}
@@ -7735,7 +7738,7 @@ function pdQui(month, months) {
   const X = i => 8 + (n ? i * (W - 16) / n : W - 16), Y = v => 10 + (1 - Math.max(0, v) / hi) * (H - 36);
   const pts = (V) => V.map((v, i) => pgF(X(i)) + "," + pgF(Y(v)));
   let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Patrimoine : ce que tu as versé et ce que tes placements ont rapporté">';
-  for (let t = step; t < hi; t += step) s += '<line x1="0" x2="' + W + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="var(--pg-line)"/><text x="' + (W - 4) + '" y="' + pgF(Y(t) - 5) + '" text-anchor="end" font-size="11.5" fill="var(--pg-faint)">' + esc(pgK(t)) + "</text>";
+  for (let t = step; t < hi; t += step) s += '<line x1="0" x2="' + W + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="var(--pg-line)"/><text x="12" y="' + pgF(Y(t) - 5) + '" font-size="11.5" fill="var(--pg-faint)">' + esc(pgK(t)) + "</text>";
   if (n > 0) {
     s += '<path d="M' + pts(base).join(" L") + " L" + pgF(X(n)) + "," + pgF(Y(0)) + " L" + pgF(X(0)) + "," + pgF(Y(0)) + ' Z" fill="var(--pg-grey)" fill-opacity="0.45"/>';
     s += '<path d="M' + pts(tot).join(" L") + " L" + pts(base).reverse().join(" L") + ' Z" fill="var(--pg-blue)" fill-opacity="0.8"/>';
@@ -7823,7 +7826,7 @@ function pdAnnees(month, months) {
 function pdReserve(month) {
   const safety = patSafetyMonths(month), goal = Number(DB.settings.patSafetyTarget) || 3, comfort = goal * 2;
   if (!safety) return pdPage("reserve", "Ta réserve et ton argent qui dort", '<h1 class="pd-h1">Ta réserve se mesure en mois de dépenses</h1>' +
-    '<p class="pd-text" style="max-width:52ch">Importe tes relevés dans <b>Mois</b> : dès que tes dépenses moyennes sont connues, tu vois combien de mois tes livrets et comptes courants tiennent, et ce que donnerait l’argent qui dort sur ton compte.</p>', "");
+    '<p class="pd-p">Importe tes relevés dans <b>Mois</b> : dès que tes dépenses moyennes sont connues, tu vois combien de mois tes livrets et comptes courants tiennent, et ce que donnerait l’argent qui dort sur ton compte.</p>', "");
   const cur = monthKey(todayISO());
   const keys = Array.from(new Set(DB.tx.map(t => monthKey(t.date)))).filter(k => k < cur).sort().reverse();
   const sp = []; for (const k of keys) { const e = monthStats(k).expense; if (e > 0) sp.push({ k, e }); if (sp.length >= 12) break; }
@@ -7914,7 +7917,7 @@ function pdOuvas(month, months) {
     '<input type="range" data-pdslider="' + id + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '"></label>';
   const right = pdPanel("Joue avec les hypothèses", slider("contrib", "Versement par mois", Math.round(p.contrib), 0, cMax, 50, esc(fmtEurShort(p.contrib))) +
       slider("rate", "Rendement par an", (Math.round(p.rate * 2) / 2).toFixed(1), -5, 25, 0.5, esc(fmtRate(p.rate))) +
-      '<button class="pd-link" data-act="pdreset">Revenir à ton rythme actuel</button>', "par défaut : ton rythme actuel") +
+      '<button class="pd-link" data-act="pdreset">Revenir à ton rythme actuel</button>', "par défaut : ton rythme") +
     pdPanel("Tes paliers", '<div id="pd-rows">' + p.rows + '</div><button class="pd-btn" data-act="view" data-view="settings">Fixer un objectif</button>');
   return pdPage("ouvas", "Où tu vas", '<div id="pd-ouleft" style="display:flex;flex-direction:column;flex:1;min-height:0">' + p.left + "</div>", right,
     pdChips([{ v: "5", t: "3 ans + 5 ans" }, { v: "10", t: "3 ans + 10 ans" }], UI.pdHz === "10" ? "10" : "5", "pdhz"));
