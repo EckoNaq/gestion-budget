@@ -1515,6 +1515,11 @@ html[data-cb="1"][data-theme="dark"] .pg{--pg-pos:#6FA8F0;--pg-star:#6FA8F0;--pg
 .pg .s1{padding-bottom:64px}
 .pg .pg-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
 .pg .pg-head h1{font-size:19px;font-weight:700}
+.pg .pg-tabs{display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in oklab, var(--pg-tile) 75%, transparent);box-shadow:var(--pg-sh);flex:none}
+.pg .pg-tabs button{height:44px;padding:0 20px;border:0;border-radius:999px;background:transparent;font:inherit;font-weight:600;font-size:15px;color:var(--pg-muted);cursor:pointer;transition:background .2s, color .2s}
+.pg .pg-tabs button:hover:not(.on):not([disabled]){color:var(--pg-ink);background:var(--pg-trk)}
+.pg .pg-tabs button.on{background:var(--pg-ink);color:var(--pg-tile);cursor:default}
+.pg .pg-tabs button[disabled]{color:var(--pg-chev);cursor:default}
 /* L'accès au bilan doit se voir du premier coup d'œil : une pastille pleine, qui respire. */
 .pg .to-bil{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 16px 0 20px;border:0;border-radius:999px;background:var(--pg-ink);color:var(--pg-tile);font:inherit;font-weight:700;font-size:14.5px;cursor:pointer;box-shadow:0 8px 22px -8px rgba(17,19,24,.45);transition:transform .2s, box-shadow .2s}
 .pg .to-bil small{font-size:12.5px;font-weight:600;opacity:.6}
@@ -2050,12 +2055,13 @@ html[data-theme="dark"] .pg .pa-tx-warn{background:#33241A;color:#F2B27A}
 .pg.pc{--pc-bd:#D4D7DE;--pc-ph:#A3A8B3;--pc-flagbg:#FFF6EA;--pc-flag:#9A4A00;--pc-flagbd:#E59A3A;--pc-has:#9CC0EE;--pc-link:#1D5BA8;--pc-pop:0 6px 22px rgba(17,19,24,.09)}
 html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A2116;--pc-flag:#F2B266;--pc-flagbd:#C98236;--pc-has:#3F6DA6;--pc-link:#8FB8F2;--pc-pop:0 6px 22px rgba(0,0,0,.35)}
 .pc .pc-wrap{max-width:1320px;margin:0 auto;padding:28px 0 48px;display:flex;flex-direction:column;gap:18px}
+.pc .pc-nav{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .pc .pc-top{display:grid;grid-template-columns:minmax(0,1fr) auto 300px;gap:22px;align-items:end}
 .pc .pc-title{display:flex;flex-direction:column;gap:4px}
 .pc .pc-title h1{margin:0;font-weight:700;font-size:30px;letter-spacing:-.03em}
 .pc .pc-title span{font-size:14px;font-weight:600;color:var(--pg-muted)}
 .pc .cnt{display:inline-block;font-size:14px;font-weight:700;color:var(--pg-muted);padding-bottom:2px}
-.pc .mpill{justify-self:end;align-self:center;display:flex;align-items:center;gap:4px;padding:4px;border-radius:999px;background:var(--pg-tile);box-shadow:var(--pg-sh)}
+.pc .mpill{display:flex;align-items:center;gap:4px;padding:4px;border-radius:999px;background:var(--pg-tile);box-shadow:var(--pg-sh)}
 .pc .mpill>button{width:44px;height:44px;border:0;border-radius:50%;background:transparent;font:inherit;font-size:18px;color:var(--pg-ink);cursor:pointer}
 .pc .mpill>button:hover:not([disabled]){background:var(--pg-trk)}
 .pc .mpill>button[disabled]{color:var(--pg-chev);cursor:default}
@@ -2203,8 +2209,6 @@ html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A21
 /* Écran moyen : la colonne de droite passe dessous, en trois blocs côte à côte. */
 @media (max-width:1180px){
   .pc .pc-top{grid-template-columns:minmax(0,1fr) auto}
-  .pc .pc-top .mpill{grid-column:2;grid-row:1}
-  .pc .pc-top .cnt{grid-column:1;grid-row:2}
   .pc .pc-body{grid-template-columns:minmax(0,1fr)}
   .pc .pc-side{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
   .pc .pc-card{min-height:0}
@@ -2219,8 +2223,6 @@ html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A21
   .pc .pc-wrap{padding-top:16px}
   .pc .pc-title h1{font-size:24px}
   .pc .pc-top{grid-template-columns:1fr}
-  .pc .pc-top .mpill{grid-column:1;grid-row:auto;justify-self:start}
-  .pc .pc-top .cnt{grid-row:auto}
   .pc .pc-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px 12px;padding:12px 14px}
   .pc .pc-row .nm{grid-column:1;grid-row:1}
   .pc .pc-row .gain{grid-column:2;grid-row:1}
@@ -3394,7 +3396,7 @@ function render() {
   /* Le détail d'un compte n'a pas d'entrée propre : il garde « Comptes » allumé, sinon la
      barre latérale n'indiquerait plus où l'on se trouve. */
   const navItem = ([id, ic, label, badge]) =>
-    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "patprogres" && (UI.view === "pgdetail" || UI.view === "pgacct")) || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
+    '<button class="navbtn ' + (UI.view === id || (id === "pat" && UI.view === "patacct" && UI.patFrom !== "patprogres") || (id === "patprogres" && UI.view === "patacct" && UI.patFrom === "patprogres") || (id === "patprogres" && (UI.view === "pgdetail" || UI.view === "pgacct" || UI.view === "pgcomptes")) || (id === "pathome" && UI.view === "patmilestones") ? "on" : "") + '" data-act="view" data-view="' + id + '">' +
     icon(ic) + "<span>" + label + "</span>" + (badge ? '<span class="badge">' + badge + "</span>" : "") + "</button>";
   const budgetNav = [
     ["month", "cal", "Mois"], ["trophees", "trophy", "Trophées"], ["year", "chart", "Année"],
@@ -3402,7 +3404,7 @@ function render() {
     ["todo", "inbox", "À catégoriser", todo], ["settings", "gear", "Réglages"],
   ];
   const patNav = [["patprogres", "chart", "Progrès"], ["pathome", "home", "Aperçu"], ["patanalyse", "pie", "Analyse"],
-    ["pgcomptes", "vault", "Comptes"], ["pat", "vault", "Comptes (ancien)"], ["patcredits", "debt", "Crédits"]];
+    ["pat", "vault", "Comptes (ancien)"], ["patcredits", "debt", "Crédits"]];
   const dataNav = [["data", "file", "Données"]];
   const nav = '<div class="navlabel">Budget</div>' + budgetNav.map(navItem).join("") +
     '<div class="navlabel">Patrimoine</div>' + patNav.map(navItem).join("") +
@@ -7731,6 +7733,13 @@ window.addEventListener("scroll", () => {
 const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
 /* Le dernier mois saisi, celui que montre Progrès. */
+/* Les onglets du Patrimoine (maquette) : Progrès, Journal, Comptes. Le Journal arrive. */
+function pgTabs(on) {
+  const t = [["patprogres", "Progrès"], ["journal", "Journal"], ["pgcomptes", "Comptes"]];
+  return '<nav class="pg-tabs" aria-label="Patrimoine">' + t.map(([id, nm]) => id === "journal"
+    ? '<button type="button" disabled title="Bientôt">' + nm + "</button>"
+    : '<button type="button"' + (id === on ? ' class="on" aria-current="page"' : "") + ' data-act="view" data-view="' + id + '">' + nm + "</button>").join("") + "</nav>";
+}
 function pgLastMonth() {
   const today = monthKey(todayISO());
   let month = "";
@@ -7786,7 +7795,7 @@ function viewPatProgres() {
   const state = missing ? missing + (missing > 1 ? " comptes à saisir" : " compte à saisir") + " pour " + mName
     : late > 0 ? MONTHS[+nextEnd.slice(5) - 1] + " à saisir"
     : "À jour · prochaine saisie le " + lastDay + " " + MOIS_COURTS[+nextEnd.slice(5) - 1];
-  let html = '<div class="pg"><section class="scr s1"><div class="pg-head"><h1>Progrès</h1>' +
+  let html = '<div class="pg"><section class="scr s1"><div class="pg-head">' + pgTabs("patprogres") +
     (accounts.length ? '<button class="state' + (missing || late > 0 ? " todo" : "") + '" data-act="view" data-view="pgcomptes"><i></i>' + esc(state) + "</button>" : "") + "</div>";
   if (!accounts.length) return html + patNoAccounts("Ajoute un compte dans l’onglet <b class='inl'>Comptes</b> pour voir tes progrès ici.") + "</section></div>";
 
@@ -8747,13 +8756,15 @@ function viewPgComptes() {
   const accounts = DB.patAccounts || [], closedNow = pcClosedNow(k);
   const firstMk = Object.values(DB.patValues || {}).reduce((m, v) => Object.keys(v || {}).reduce((n, x) => x < n ? x : n, m), today);
   const mState = closedNow ? "bouclé" : k.ready ? "prêt" : "à saisir";
+  /* Comme dans la maquette : les onglets et le mois sur la première ligne, le titre dessous. */
   let html = '<div class="pg pc"><div class="pc-wrap">' +
-    '<div class="pc-top"><div class="pc-title"><h1>Saisie ' + esc(pcDe(month)) + (month.slice(0, 4) !== today.slice(0, 4) ? " " + month.slice(0, 4) : "") + "</h1>" +
-      "<span>La valeur de chaque compte au dernier jour du mois, et ce que tu y as versé.</span></div>" +
-      '<span class="cnt">' + k.done + " sur " + k.rows.length + "</span>" +
+    '<div class="pc-nav">' + pgTabs("pgcomptes") +
       '<div class="mpill"><button type="button" data-pcact="mprev" aria-label="Mois précédent"' + (month <= addMonth(firstMk, -1) ? " disabled" : "") + ">‹</button>" +
         '<span><b>' + esc(pcCap(MOIS_COURTS[+month.slice(5) - 1])) + " " + month.slice(0, 4) + '</b><small class="' + (closedNow ? "ok" : k.ready ? "rd" : "") + '">' + mState + "</small></span>" +
-        '<button type="button" data-pcact="mnext" aria-label="Mois suivant"' + (month >= today ? " disabled" : "") + ">›</button></div></div>";
+        '<button type="button" data-pcact="mnext" aria-label="Mois suivant"' + (month >= today ? " disabled" : "") + ">›</button></div></div>" +
+    '<div class="pc-top"><div class="pc-title"><h1>Saisie ' + esc(pcDe(month)) + (month.slice(0, 4) !== today.slice(0, 4) ? " " + month.slice(0, 4) : "") + "</h1>" +
+      "<span>La valeur de chaque compte au dernier jour du mois, et ce que tu y as versé.</span></div>" +
+      '<span class="cnt">' + k.done + " sur " + k.rows.length + "</span></div>";
   if (!accounts.length) return html + patNoAccounts("Crée un premier compte pour commencer à saisir ses valeurs mois après mois.") +
     '<button type="button" class="pc-add" data-act="newpataccount">＋ Ajouter un compte</button></div></div>';
 
