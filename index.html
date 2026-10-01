@@ -7296,10 +7296,31 @@ function pgAccountTWR(accountId, fromMk, toMk) {
   }
   return n ? (chain - 1) * 100 : null;
 }
+/* Performance pondérée par l'argent, méthode de Dietz modifiée (Dietz, 1966 ; reconnue par
+   les normes GIPS) : le gain de la période rapporté au capital réellement exposé, chaque
+   versement comptant pour la part de la période où il a été placé. Son signe suit toujours
+   celui du gain en euros, ce que la performance enchaînée ne garantit pas : un placement
+   peut faire +5 % pendant que l'argent qu'on y a mis perd, si l'on a versé juste avant une
+   baisse. accountId null = tout le patrimoine, sur les comptes valorisés. */
+function pgDietz(accountId, fromMk, toMk) {
+  const end = mk => { const [y, m] = mk.split("-").map(Number); return new Date(y, m, 0).getTime(); };
+  const t0 = end(fromMk), T = Math.max(1, end(toMk) - t0);
+  const v0 = accountId ? (patAccountValue(accountId, fromMk) || 0) : patTotalAt(fromMk);
+  const v1 = accountId ? (patAccountValue(accountId, toMk) || 0) : patTotalAt(toMk);
+  let flows = 0, weighted = 0;
+  (DB.patMovements || []).forEach(x => {
+    const k = monthKey(x.date);
+    if (k <= fromMk || k > toMk) return;
+    if (accountId ? x.accountId !== accountId : !(DB.patAccounts || []).some(a => a.id === x.accountId && patIsValued(a))) return;
+    const [y, m, d] = x.date.split("-").map(Number), w = Math.min(1, Math.max(0, (T - (new Date(y, m - 1, d || 15).getTime() - t0)) / T));
+    flows += x.amount; weighted += x.amount * w;
+  });
+  const gain = v1 - v0 - flows, base = v0 + weighted;
+  return { r: base > 0 ? gain / base * 100 : null, gain, flows, v0, v1 };
+}
 function pgYearPerf(year, month) {
   const end = String(year) === month.slice(0, 4) ? month : year + "-12";
-  const twr = patTWR((year - 1) + "-12", end);
-  return twr ? twr.cumul : null;
+  return pgDietz(null, (year - 1) + "-12", end).r;
 }
 const pgF = n => n.toFixed(1);
 /* Courbe lissée, la même que dans les maquettes : chaque segment est une cubique dont les
@@ -7501,11 +7522,11 @@ function pgRangeParts(month, months) {
   const vals = ser.map(mk => patNetAt(mk)), lo = Math.min(...vals), hi = Math.max(...vals);
   const X = i => vals.length > 1 ? 20 + i * 536 / (vals.length - 1) : 556, Y = v => hi > lo ? 181 - (v - lo) / (hi - lo) * 146 : 108;
   const pts = vals.map((v, i) => [X(i), Y(v)]), d = pgCurve(pts), last = pts[pts.length - 1];
-  const from = ser[0], twr = ser.length > 1 ? patTWR(from, month) : null, gains = pgGains(null, from, month);
+  const from = ser[0], dz = ser.length > 1 ? pgDietz(null, rg[2] ? from : addMonth(from, -1), month) : null, gains = dz ? dz.gain : 0;
   const rangeTxt = rg[0] === "3m" ? "sur 3 mois glissants" : rg[0] === "1y" ? "sur 12 mois glissants" : "depuis " + pgMonth(from, true);
   return {
     key: rg[0],
-    text: '<span class="rng-txt" style="font-weight:700;font-size:20px">' + (ser.length > 1 ? esc(pgSigned(gains)) + ' <span style="font-weight:600;font-size:15px;color:rgba(255,255,255,.55)">de gains ' + esc(rangeTxt) + (twr ? pgHeroPct(twr.cumul) : "") + "</span>" : "") + "</span>",
+    text: '<span class="rng-txt" style="font-weight:700;font-size:20px">' + (ser.length > 1 ? esc(pgSigned(gains)) + ' <span style="font-weight:600;font-size:15px;color:rgba(255,255,255,.55)">de gains ' + esc(rangeTxt) + (dz && dz.r != null ? pgHeroPct(dz.r) : "") + "</span>" : "") + "</span>",
     chart: vals.length > 1 ? '<div class="pat-chart"><svg viewBox="0 0 576 230" role="img" aria-label="Patrimoine ' + esc(rangeTxt) + '">' +
       '<path class="ar" d="' + d + " L" + pgF(last[0]) + ",230 L20.0,230 Z" + '" fill="rgba(143,179,255,0.12)"/>' +
       '<path class="ln" pathLength="100" d="' + d + '" fill="none" stroke="#8FB3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -7567,7 +7588,7 @@ function viewPatProgres() {
   }
 
   /* ======== 2 · Le plus gros compte ======== */
-  const ranked = patActiveAccounts().map(a => ({ a, v: patAccountValue(a.id, month) || 0, r: hasYear ? pgAccountTWR(a.id, yAgo, month) : null }))
+  const ranked = patActiveAccounts().map(a => ({ a, v: patAccountValue(a.id, month) || 0, r: hasYear ? pgDietz(a.id, yAgo, month).r : null }))
     .filter(x => x.v > 0).sort((p, q) => q.v - p.v);
   const top = ranked[0];
   if (top) {
@@ -7625,7 +7646,7 @@ function viewPatProgres() {
     html += '<div class="t t-autres" style="--dot:var(--pg-violet);padding-bottom:10px"><div class="hd"><span class="lbl">' + (top ? "Tes autres comptes" : "Tes comptes") + '</span><span class="chev">›</span></div><span class="per">performance sur 12 mois glissants</span>' +
       '<div style="margin-top:8px">' + (others.length ? others.map((x, i) => {
         const good = x.r != null && x.r >= 10, isBest = x.r != null && x.r > 0 && x.r === best;
-        const g = hasYear ? pgGains(x.a.id, yAgo, month) : 0;
+        const g = hasYear ? pgDietz(x.a.id, yAgo, month).gain : 0;
         return '<button class="row' + (isBest || (x.r != null && x.r >= 15) ? " sweep" : "") + '" style="--n:' + i + '" data-act="pgacct" data-id="' + esc(x.a.id) + '" data-to="' + x.v.toFixed(2) + '" data-g="' + g.toFixed(2) + '">' +
           '<span class="nm"><span>' + esc(x.a.name) + (good ? ' <span class="star">★</span>' : "") + "</span>" +
           "<span>" + (x.r == null ? "moins d’un an d’historique" : '<b class="perf' + (good ? " good" : "") + (isBest ? " best" : "") + (x.r < 0 ? " dn" : "") + '">' + esc(pgPct(x.r)) + "</b>") + "</span></span>" +
@@ -7792,7 +7813,7 @@ function viewPatProgres() {
           "<span>" + esc(x.k) + '</span><div class="mbx"><i class="mbar" style="--n:' + i + ";width:" + (Math.abs(x.r) / mx * 100).toFixed(1) + "%" + (x.r < 0 ? ";background:var(--pg-neg)" : "") + '"></i></div>' +
           "<b" + (x.r < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.r)) + "</b></div>";
       }).join("") + "</div>" +
-      '<span class="foot">sur 12 mois glissants, en euros · les indices arriveront avec leur mise à jour mensuelle</span></div>';
+      '<span class="foot">performance du placement sur 12 mois glissants, comme un indice · les indices arriveront avec leur mise à jour mensuelle</span></div>';
   }
   html += "</div></section></div>";
   /* Le lien vers le bilan annonce ce qu'il y a à voir. */
@@ -7862,7 +7883,7 @@ function pdQui(month, months) {
   const total = patTotalAt(month), invested = patInvested(null, month), gains = total - invested;
   const share = total > 0 ? Math.round(gains / total * 100) : 0;
   const years = [2, 1, 0].map(k => +month.slice(0, 4) - k).filter(y => patHasHistoryAt(y + "-12") || String(y) === month.slice(0, 4))
-    .map(y => { const end = String(y) === month.slice(0, 4) ? month : y + "-12"; return { y, cur: end === month && month.slice(5) !== "12", vers: patContributionsOfYear(y), gain: pgGains(null, (y - 1) + "-12", end) }; });
+    .map(y => { const end = String(y) === month.slice(0, 4) ? month : y + "-12"; return { y, cur: end === month && month.slice(5) !== "12", vers: patContributionsOfYear(y), gain: pgDietz(null, (y - 1) + "-12", end).gain }; });
   const mx = Math.max(...years.map(y => Math.max(Math.abs(y.vers), Math.abs(y.gain))), 1);
   const pair = y => '<div class="pd-pair"><b>' + y.y + (y.cur ? "*" : "") + "</b><div>" +
     '<div><i style="width:' + pgF(Math.abs(y.vers) / mx * 70) + '%;background:var(--pg-grey)"></i><span>' + esc(pdEur(y.vers)) + " versés</span></div>" +
@@ -7870,7 +7891,7 @@ function pdQui(month, months) {
   const yAgo = addMonth(month, -12);
   let changed = "";
   if (patHasHistoryAt(yAgo)) {
-    const g12 = pgGains(null, yAgo, month), v12 = patSplit(yAgo, month).versements, tA = patTotalAt(yAgo);
+    const g12 = pgDietz(null, yAgo, month).gain, v12 = patSplit(yAgo, month).versements, tA = patTotalAt(yAgo);
     const shareA = tA > 0 ? Math.round((tA - patInvested(null, yAgo)) / tA * 100) : 0;
     changed = pdPanel("Ce qui a changé", '<div class="pd-text"><span>Sur douze mois glissants, <b>tes placements ont ' + (g12 >= 0 ? "rapporté " + esc(pdEur(g12)) : "perdu " + esc(pdEur(g12))) + "</b>, " +
       (Math.abs(g12) > v12 ? "plus" : "moins") + " que tes " + esc(pdEur(v12)) + " versés.</span>" +
@@ -7888,15 +7909,15 @@ function pdQui(month, months) {
 
 /* ======== 2 · Tes années ======== */
 function pdYear(y, month) {
-  const last = String(y) === month.slice(0, 4) ? month : y + "-12", curve = [0], rs = [];
-  let c = 1;
+  const last = String(y) === month.slice(0, 4) ? month : y + "-12", start = (y - 1) + "-12", curve = [0], rs = [];
   for (let mk = y + "-01"; mk <= last; mk = addMonth(mk, 1)) {
     const r = patMonthlyPerf(null, mk);
-    if (r != null) { c *= 1 + r / 100; rs.push({ mk, r }); }
-    curve.push((c - 1) * 100);
+    if (r != null) rs.push({ mk, r });
+    curve.push(pgDietz(null, start, mk).r || 0);
   }
-  return { y, last, curve, perf: (c - 1) * 100, cur: last === month && month.slice(5) !== "12", vers: patContributionsOfYear(y),
-    gain: pgGains(null, (y - 1) + "-12", last), best: rs.length ? rs.reduce((a, b) => b.r > a.r ? b : a) : null, worst: rs.length ? rs.reduce((a, b) => b.r < a.r ? b : a) : null };
+  const dz = pgDietz(null, start, last);
+  return { y, last, curve, perf: dz.r, cur: last === month && month.slice(5) !== "12", vers: patContributionsOfYear(y),
+    gain: dz.gain, best: rs.length ? rs.reduce((a, b) => b.r > a.r ? b : a) : null, worst: rs.length ? rs.reduce((a, b) => b.r < a.r ? b : a) : null };
 }
 function pdAnnees(month, months) {
   const y0 = +month.slice(0, 4), ys = [y0 - 2, y0 - 1, y0].filter(y => patHasHistoryAt((y - 1) + "-12")).map(y => pdYear(y, month));
@@ -8175,8 +8196,7 @@ function paSelection(rowsM) {
 }
 function paSummary(a, sel) {
   const chrono = sel.slice().sort(), first = chrono[0], last = chrono[chrono.length - 1], from = addMonth(first, -1);
-  let c = 1; chrono.forEach(mk => { const r = patMonthlyPerf(a.id, mk); if (r != null) c *= 1 + r / 100; });
-  const perf = (c - 1) * 100, gain = pgGains(a.id, from, last), vers = paVers(a.id, from, last);
+  const dz = pgDietz(a.id, from, last), perf = dz.r == null ? 0 : dz.r, gain = dz.gain, vers = paVers(a.id, from, last);
   const v0 = patAccountValue(a.id, from), v1 = patAccountValue(a.id, last);
   const title = sel.length === 1 ? pdMonthYear(first) : pgMonth(first) + " → " + pgMonth(last) + " · " + sel.length + " mois";
   return '<div class="pa-sum"><div class="pa-sum-h"><b>' + esc(title) + "</b>" + '<span class="pd-muted">' + (sel.length > 1 ? "clique à côté pour revenir à un mois" : "glisse pour en prendre plusieurs") + "</span>" + "</div>" +
@@ -8198,14 +8218,14 @@ function viewPgAccount() {
   const peak = Math.max(...all.map(mk => patAccountValue(a.id, mk))), record = all.length > 1 && value >= peak - 0.5;
   /* Les trois chiffres suivent la période : sur « Tout », depuis l'ouverture ; sinon, sur la
      fenêtre glissante choisie. */
-  const perf = ser.length > 1 ? pgAccountTWR(a.id, from, month) : null;
+  const full = key === "all" || from === all[0];
+  const dz = ser.length > 1 || full ? pgDietz(a.id, full ? addMonth(all[0], -1) : from, month) : null, perf = dz ? dz.r : null;
   /* Une fenêtre qui couvre tout l'historique se calcule comme « Tout » : sinon le premier
      mois, celui de l'ouverture, serait compté d'un côté et pas de l'autre. */
-  const full = key === "all" || from === all[0];
-  const gains = full ? value - patInvested(a.id, month) : pgGains(a.id, from, month);
+  const gains = dz ? dz.gain : 0;
   const vers = full ? patInvested(a.id, month) : paVers(a.id, from, month);
   const per = key === "all" ? "depuis " + pgMonth(all[0], true) : "sur " + PA_LBL[key];
-  const ann = key !== "1y" && key !== "3m" && perf != null && ser.length > 13 ? (Math.pow(1 + perf / 100, 12 / (ser.length - 1)) - 1) * 100 : null;
+  const ann = key !== "1y" && key !== "3m" && perf != null && ser.length > 13 ? (Math.pow(1 + perf / 100, 12 / (ser.length - (full ? 0 : 1))) - 1) * 100 : null;
   const m = ser.length - 1, labels = ser.map((mk, i) => (i === 0 || i === m || i === Math.round(m / 2)) ? pgMonth(mk) : "");
   /* Un ou deux faits propres au compte, la fiscalité ayant son propre panneau. */
   const movs = (DB.patMovements || []).filter(x => x.accountId === a.id && monthKey(x.date) <= month).sort((p, q) => p.date < q.date ? -1 : 1);
