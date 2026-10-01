@@ -1545,7 +1545,10 @@ html:has(.pg .s1){scroll-snap-type:y mandatory}
 .pg .badge-rec{padding:4px 10px;border-radius:999px;background:#DFF3E7;color:#0C6B42;font-size:12.5px;font-weight:700;white-space:nowrap}
 html[data-theme="dark"] .pg .badge-rec{background:#12301F;color:#3FBF8F}
 .pg .pea-chart{margin-top:8px}
-.pg .pea-gain{display:inline-block;font-size:13px;font-weight:700;color:var(--pg-orange);white-space:nowrap;opacity:0;pointer-events:none;counter-reset:pgk var(--pgk) pgu var(--pgu)}
+.pg .pea-foot{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:6px}
+.pg .pea-key{font-size:12.5px;font-weight:600;color:var(--pg-faint)}
+.pg .pea-key i{display:inline-block;width:14px;height:2px;margin-right:6px;vertical-align:middle;background:var(--pg-chev)}
+.pg .pea-gain{display:inline-block;font-size:14px;font-weight:700;color:var(--pg-orange);white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums;counter-reset:pgk var(--pgk) pgu var(--pgu)}
 .pg .pea-gain .ck::after{content:counter(pgk)}
 .pg .pea-gain .cu::after{content:counter(pgu,pgpad3)}
 .pg .pea-gain.small .cu::after{content:counter(pgu)}
@@ -1568,6 +1571,9 @@ html[data-theme="dark"] .pg .badge-rec{background:#12301F;color:#3FBF8F}
 .pg .per{display:block;margin:2px 0 0 20px;font-size:12.5px;font-weight:600;color:var(--pg-faint)}
 /* Rythme */
 .pg .cells{position:relative;display:flex;gap:4px}
+.pg .t-rythme{overflow:hidden}
+.pg .t-rythme .cell,.pg .t-rythme .pause{position:relative;z-index:1}
+.pg .t-rythme .ball{z-index:3}
 .pg .cell{display:block;flex:1 1 0;height:30px;border-radius:4px;background:var(--pg-trk)}
 .pg .cell.on{background:var(--pg-blue)}
 .pg .ball{position:absolute;width:12px;height:12px;border-radius:50%;background:#1F5FD1;left:0;top:-12px;opacity:0;box-shadow:inset -2px -3px 0 rgba(0,0,0,.18);pointer-events:none}
@@ -1675,8 +1681,7 @@ html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
   .pg .t-pea:hover .ar{animation:pg-fade .8s .7s both, pg-breathe 2.6s 1.5s ease-in-out infinite}
   .pg .t-pea:hover .dot{animation:pg-pop .4s 1s both, pg-halo 2s 1.4s ease-in-out infinite}
   .pg .t-pea:hover .badge-rec{background-image:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.9) 50%,transparent 70%);background-size:200% 100%;animation:pg-sheen 1.4s ease-in-out infinite}
-  .pg .t-pea:hover .gain-svg{opacity:0}
-  .pg .t-pea:hover .pea-gain{animation:pg-fade .2s both, pg-count 1.2s cubic-bezier(.2,.6,.3,1) both}
+  .pg .t-pea:hover .pea-gain{animation:pg-count 1.2s cubic-bezier(.2,.6,.3,1) both}
   /* 3 · Autres comptes : les lignes arrivent, les beaux rendements s'allument, un balayage pour les meilleurs, la baisse tremble. */
   .pg .t-autres:hover .row{animation:pg-slide .35s calc(var(--n) * 70ms) ease-out both}
   .pg .t-autres:hover .perf.good{color:var(--pg-pos);font-weight:800;transition:color .3s}
@@ -7104,10 +7109,10 @@ function pgBall(paid) {
   }
   if (hole >= 0) {
     const t0 = start + n * P;
-    k.push(pc(t0) + "{left:calc(" + cx(hole) + "% - 6px);top:-12px;transform:scale(1);animation-timing-function:cubic-bezier(.3,0,.3,1)}");
-    k.push(pc(t0 + 0.55) + "{left:calc(" + cx(hole) + "% - 6px);top:10px;transform:scale(.6);opacity:1;animation-timing-function:ease-in}");
-    k.push(pc(t0 + 0.9) + "{left:calc(" + cx(hole) + "% - 6px);top:16px;transform:scale(.25);opacity:0}");
-    k.push("100%{left:calc(" + cx(hole) + "% - 6px);top:16px;opacity:0}");
+    k.push(pc(t0) + "{left:calc(" + cx(hole) + "% - 6px);top:-12px;transform:scale(1);opacity:1;animation-timing-function:cubic-bezier(.55,0,1,.45)}");
+    k.push(pc(t0 + 0.75) + "{left:calc(" + cx(hole) + "% - 6px);top:160px;transform:scale(.92,1.12);opacity:1}");
+    k.push(pc(t0 + 0.76) + "{left:calc(" + cx(hole) + "% - 6px);top:160px;opacity:0}");
+    k.push("100%{left:calc(" + cx(hole) + "% - 6px);top:160px;opacity:0}");
   } else {
     const t0 = start + 11 * P;
     k.push(pc(t0 + 0.5) + "{left:calc(50% - 6px);top:-86px;transform:scale(1.6)}");
@@ -7168,13 +7173,55 @@ document.addEventListener("mouseenter", e => { if (e.target.matches && e.target.
 document.addEventListener("mouseleave", e => { if (e.target.matches && e.target.matches(".pg .t-autres .row")) pgRowCount(e.target, false); }, true);
 const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
+/* Le dernier mois saisi, celui que montre Progrès. */
+function pgLastMonth() {
+  const today = monthKey(todayISO());
+  let month = "";
+  Object.values(DB.patValues || {}).forEach(v => Object.keys(v || {}).forEach(k => { if (k <= today && k > month) month = k; }));
+  return month || today;
+}
+/* Une performance sur fond sombre : verte si elle monte, rouge si elle baisse. */
+function pgHeroPct(p) {
+  if (p == null) return "";
+  return ' · <b style="color:' + (p > 0.005 ? "#8FF0C2" : p < -0.005 ? "#FF9A8F" : "inherit") + '">' + esc(pgPct(p)) + "</b>";
+}
+/* Ce qui dépend de la période choisie dans la tuile patrimoine : la ligne de gains et le graphique. */
+function pgRangeParts(month, months) {
+  const rg = PG_RANGES.find(r => r[0] === (UI.pgRange || "1y")) || PG_RANGES[1];
+  const ser = rg[2] ? months.slice(-(rg[2] + 1)) : months;
+  const vals = ser.map(mk => patNetAt(mk)), lo = Math.min(...vals), hi = Math.max(...vals);
+  const X = i => vals.length > 1 ? 20 + i * 536 / (vals.length - 1) : 556, Y = v => hi > lo ? 181 - (v - lo) / (hi - lo) * 146 : 108;
+  const pts = vals.map((v, i) => [X(i), Y(v)]), d = pgCurve(pts), last = pts[pts.length - 1];
+  const from = ser[0], twr = ser.length > 1 ? patTWR(from, month) : null, gains = pgGains(null, from, month);
+  const rangeTxt = rg[0] === "3m" ? "sur 3 mois glissants" : rg[0] === "1y" ? "sur 12 mois glissants" : "depuis " + pgMonth(from, true);
+  return {
+    key: rg[0],
+    text: '<span class="rng-txt" style="font-weight:700;font-size:20px">' + (ser.length > 1 ? esc(pgSigned(gains)) + ' <span style="font-weight:600;font-size:15px;color:rgba(255,255,255,.55)">de gains ' + esc(rangeTxt) + (twr ? pgHeroPct(twr.cumul) : "") + "</span>" : "") + "</span>",
+    chart: vals.length > 1 ? '<div class="pat-chart"><svg viewBox="0 0 576 230" role="img" aria-label="Patrimoine ' + esc(rangeTxt) + '">' +
+      '<path class="ar" d="' + d + " L" + pgF(last[0]) + ",230 L20.0,230 Z" + '" fill="rgba(143,179,255,0.12)"/>' +
+      '<path class="ln" pathLength="100" d="' + d + '" fill="none" stroke="#8FB3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle class="dot" cx="' + pgF(last[0]) + '" cy="' + pgF(last[1]) + '" r="8" fill="#8FB3FF" stroke="#14181F" stroke-width="4"/></svg></div>' : '<div class="pat-chart"></div>'
+  };
+}
+/* Changer de période ne touche que la ligne de gains et le graphique : le reste de l'écran
+   n'est pas reconstruit, donc rien d'autre ne rejoue son animation. Seule la courbe se
+   retrace, puisque c'est elle qui change. */
+function pgSwapRange() {
+  const tile = document.querySelector(".pg .t-pat");
+  if (!tile) { render(); return; }
+  const month = pgLastMonth(), rp = pgRangeParts(month, allPatMonths(month));
+  tile.querySelectorAll(".rng button").forEach(b => b.classList.toggle("on", b.dataset.range === rp.key));
+  const txt = tile.querySelector(".rng-txt"), chart = tile.querySelector(".pat-chart");
+  if (txt) txt.outerHTML = rp.text;
+  if (chart) {
+    chart.outerHTML = rp.chart;
+  }
+}
+
 function viewPatProgres() {
   /* Pas de sélecteur de mois : Progrès montre toujours le dernier mois saisi. La pastille dit
      s'il manque des comptes à ce mois-là, ou si un mois écoulé attend sa saisie. */
-  const accounts = DB.patAccounts || [], today = monthKey(todayISO());
-  let month = "";
-  Object.values(DB.patValues || {}).forEach(v => Object.keys(v || {}).forEach(k => { if (k <= today && k > month) month = k; }));
-  if (!month) month = today;
+  const accounts = DB.patAccounts || [], today = monthKey(todayISO()), month = pgLastMonth();
   const year = +month.slice(0, 4), mName = MONTHS[+month.slice(5) - 1];
   const missing = patActiveAccounts().filter(a => (DB.patValues[a.id] || {})[month] == null).length;
   const late = patMonthsBetween(month, addMonth(today, -1));
@@ -7195,30 +7242,19 @@ function viewPatProgres() {
 
   /* ======== 1 · Ton patrimoine ======== */
   {
-    const rg = PG_RANGES.find(r => r[0] === (UI.pgRange || "1y")) || PG_RANGES[1];
-    const ser = (rg[2] ? months.slice(-(rg[2] + 1)) : months);
-    const vals = ser.map(mk => patNetAt(mk)), lo = Math.min(...vals), hi = Math.max(...vals);
-    const X = i => vals.length > 1 ? 20 + i * 536 / (vals.length - 1) : 556, Y = v => hi > lo ? 181 - (v - lo) / (hi - lo) * 146 : 108;
-    const pts = vals.map((v, i) => [X(i), Y(v)]), d = pgCurve(pts), last = pts[pts.length - 1];
-    const from = ser[0], twr = ser.length > 1 ? patTWR(from, month) : null, gains = pgGains(null, from, month);
-    const rangeTxt = rg[0] === "3m" ? "sur 3 mois glissants" : rg[0] === "1y" ? "sur 12 mois glissants" : "depuis " + pgMonth(from, true);
     const gainM = hasPrev ? patMonthlyGain(null, month) : null;
     const record = ath && ath.mk === month && net > 0;
     const conf = Array.from({ length: 8 }, (_, i) => { const a = i * 45 * Math.PI / 180; return '<b style="background:' + ["#8FF0C2", "#FFE58A", "#8FB3FF", "#F3B98A"][i % 4] + ";--x:" + (Math.cos(a) * 70).toFixed(0) + "px;--y:" + (Math.sin(a) * 40 - 10).toFixed(0) + "px;--r:" + (i * 50) + "deg;--d:" + (300 + i * 25) + 'ms"></b>'; }).join("");
+    const rp = pgRangeParts(month, months);
     html += '<div class="t t-pat w2 h2"><span class="lbl">' + (patHasDebt() ? "Ton patrimoine net" : "Ton patrimoine") + "</span>" +
       '<span class="flip" aria-label="' + esc(fmtEurShort(net)) + '">' + pgFlip(fmtEurShort(net)) + "</span>" +
       '<div style="margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
         (record ? '<span class="chip-rec"><i class="confetti">' + conf + "</i><i></i>Nouveau record</span>" : "") +
-        (gainM != null ? '<span style="font-weight:600;font-size:17px;color:rgba(255,255,255,.62)">' + esc(pgSigned(gainM)) + " de gains en " + esc(mName) + (perfM != null ? " · " + esc(pgPct(perfM)) : "") + "</span>" : "") + "</div>" +
+        (gainM != null ? '<span style="font-weight:600;font-size:17px;color:rgba(255,255,255,.62)">' + esc(pgSigned(gainM)) + " de gains en " + esc(mName) + pgHeroPct(perfM) + "</span>" : "") + "</div>" +
       '<span class="recap">▶ Revoir le récap de ' + esc(mName) + "</span>" +
       '<div style="margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:relative;z-index:1">' +
-        '<div class="rng">' + PG_RANGES.map(r => '<button class="' + (r === rg ? "on" : "") + '" data-act="pgrange" data-range="' + r[0] + '">' + r[1] + "</button>").join("") + "</div>" +
-        (ser.length > 1 ? '<span style="font-weight:700;font-size:20px">' + esc(pgSigned(gains)) + ' <span style="font-weight:600;font-size:15px;color:rgba(255,255,255,.55)">de gains ' + esc(rangeTxt) + (twr ? " · " + esc(pgPct(twr.cumul)) : "") + "</span></span>" : "") + "</div>" +
-      (vals.length > 1 ? '<div class="pat-chart"><svg viewBox="0 0 576 230" role="img" aria-label="Patrimoine ' + esc(rangeTxt) + '">' +
-        '<path class="ar" d="' + d + " L" + pgF(last[0]) + ",230 L20.0,230 Z" + '" fill="rgba(143,179,255,0.12)"/>' +
-        '<path class="ln" pathLength="100" d="' + d + '" fill="none" stroke="#8FB3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
-        '<circle class="dot" cx="' + pgF(last[0]) + '" cy="' + pgF(last[1]) + '" r="8" fill="#8FB3FF" stroke="#14181F" stroke-width="4"/></svg></div>' : "") +
-      "</div>";
+        '<div class="rng">' + PG_RANGES.map(r => '<button class="' + (r[0] === rp.key ? "on" : "") + '" data-act="pgrange" data-range="' + r[0] + '">' + r[1] + "</button>").join("") + "</div>" +
+        rp.text + "</div>" + rp.chart + "</div>";
   }
 
   /* ======== 2 · Le plus gros compte ======== */
@@ -7241,15 +7277,15 @@ function viewPatProgres() {
         '<path class="ln" pathLength="100" d="' + pgCurve(pi) + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/>' +
         '<path class="ln" pathLength="100" d="' + pgCurve(pv) + '" fill="none" stroke="var(--pg-orange)" stroke-width="2.5" stroke-linecap="round"/>' +
         '<circle class="dot" cx="' + pgF(lv[0]) + '" cy="' + pgF(lv[1]) + '" r="6" fill="var(--pg-orange)" stroke="var(--pg-tile)" stroke-width="2"/>' +
-        (u ? '<text class="gain-svg" x="' + pgF(lv[0] - 10) + '" y="' + pgF(gy) + '" text-anchor="end" font-size="13" font-weight="700" fill="var(--pg-orange)">' + esc(pgSigned(u.gain)) + " de gains au total</text>" : "") +
-        '<text x="' + pgF(li[0] - 10) + '" y="' + pgF(li[1] + 18) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--pg-faint)">versé</text>';
-      if (u && Math.abs(u.gain) < 1e6) {
-        const g = Math.round(Math.abs(u.gain)), kk = Math.floor(g / 1000), uu = g % 1000;
-        chart += '<foreignObject x="0" y="' + pgF(gy - 15) + '" width="' + pgF(lv[0] - 10) + '" height="20"><div style="text-align:right;line-height:20px">' +
-          '<span class="pea-gain' + (kk ? "" : " small") + '" style="--k:' + kk + ";--u:" + uu + ";--pgk:" + kk + ";--pgu:" + uu + '">' +
-          (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span> ' : "") + '<span class="cu"></span> € de gains au total</span></div></foreignObject>';
-      }
+''; 
       chart += "</svg></div>";
+      if (u) {
+        const g = Math.round(Math.abs(u.gain)), kk = Math.floor(g / 1000), uu = g % 1000;
+        chart += '<div class="pea-foot"><span class="pea-key"><i></i>versé</span>' + (g < 1e6
+          ? '<span class="pea-gain' + (kk ? "" : " small") + (u.gain < 0 ? " dn" : "") + '" style="--k:' + kk + ";--u:" + uu + ";--pgk:" + kk + ";--pgu:" + uu + '">' +
+            (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span>\u202f' : "") + '<span class="cu"></span>\u00a0€ de gains au total</span>'
+          : '<span class="pea-gain">' + esc(pgSigned(u.gain)) + " de gains au total</span>") + "</div>";
+      }
     }
     html += '<button class="t t-pea w2" style="--dot:var(--pg-orange)" data-act="patopenacct" data-id="' + esc(top.a.id) + '">' +
       '<div class="hd"><span class="lbl">' + esc(top.a.name) + (accAth ? '<span class="badge-rec">★ record</span>' : "") + '</span><span class="chev">›</span></div>' +
@@ -10220,7 +10256,7 @@ document.addEventListener("click", e => {
     /* Changer de période retire aussi les repères : la fenêtre change, autant en profiter
        pour en montrer d'autres plutôt que de resservir les mêmes. */
     case "pgbilan": { const b = document.getElementById("pg-bilan"); if (b) b.scrollIntoView({ behavior: "smooth" }); break; }
-    case "pgrange": UI.pgRange = el.dataset.range; render(); break;
+    case "pgrange": UI.pgRange = el.dataset.range; pgSwapRange(); break;
     case "patrange": UI.patRange = el.dataset.range; UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
     case "pathlshuffle": UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
     case "patyearunit": UI.patYearUnit = el.dataset.unit; render(); break;
