@@ -8197,9 +8197,9 @@ function paSummary(a, sel) {
   const perf = (c - 1) * 100, gain = pgGains(a.id, from, last), vers = paVers(a.id, from, last);
   const v0 = patAccountValue(a.id, from), v1 = patAccountValue(a.id, last);
   const title = sel.length === 1 ? pdMonthYear(first) : pgMonth(first) + " → " + pgMonth(last) + " · " + sel.length + " mois";
-  return '<div class="pa-sum"><div class="pa-sum-h"><b>' + esc(title) + "</b>" + (sel.length > 1 ? '<button class="pd-link" data-act="paclear">un seul mois</button>' : '<span class="pd-muted">glisse pour en prendre plusieurs</span>') + "</div>" +
-    '<div class="pa-sum-g"><div><span>performance</span><b' + (perf < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(perf)) + "</b></div>" +
-    "<div><span>" + (gain < 0 ? "perdus" : "gagnés") + "</span><b>" + esc(pgSigned(gain)) + "</b></div>" +
+  return '<div class="pa-sum"><div class="pa-sum-h"><b>' + esc(title) + "</b>" + '<span class="pd-muted">' + (sel.length > 1 ? "clique à côté pour revenir à un mois" : "glisse pour en prendre plusieurs") + "</span>" + "</div>" +
+    '<div class="pa-sum-g"><div><span>performance</span><b style="color:' + (perf < -0.05 ? "var(--pg-neg)" : perf > 0.05 ? "var(--pg-pos)" : "inherit") + '">' + esc(pgPct(perf)) + "</b></div>" +
+    "<div><span>" + (gain < 0 ? "perdus" : "gagnés") + '</span><b style="color:' + (gain < -0.5 ? "var(--pg-neg)" : gain > 0.5 ? "var(--pg-pos)" : "inherit") + '">' + esc(pgSigned(gain)) + "</b></div>" +
     "<div><span>" + (vers < -0.5 ? "retiré" : "versé") + "</span><b>" + esc(vers < -0.5 ? pgSigned(vers) : fmtEurShort(vers)) + "</b></div>" +
     "<div><span>valeur</span><b>" + (v0 != null && sel.length > 1 ? esc(fmtEurShort(v0)) + " → " : "") + esc(fmtEurShort(v1 || 0)) + "</b></div></div></div>";
 }
@@ -8288,7 +8288,14 @@ function paCommit() {
   sum.innerHTML = paSummary(a, paSelection([...list.querySelectorAll(".pa-row")].map(r => r.dataset.mk)));
 }
 document.addEventListener("mousedown", e => {
-  const r = e.target.closest && e.target.closest(".pg .pa-row"); if (!r || e.button !== 0) return;
+  const r = e.target.closest && e.target.closest(".pg .pa-row");
+  /* Un clic en dehors des mois ramène à un seul mois, sans reconstruire la page. */
+  if (!r && UI.paSelRange && UI.paSelRange.a !== UI.paSelRange.b && document.getElementById("pa-list")) {
+    const first = document.querySelector("#pa-list .pa-row");
+    if (first) { PA_DRAG.a = PA_DRAG.b = first.dataset.mk; paPaint(); paCommit(); }
+    return;
+  }
+  if (!r || e.button !== 0) return;
   e.preventDefault();
   const cur = UI.paSelRange;
   PA_DRAG.on = true;
