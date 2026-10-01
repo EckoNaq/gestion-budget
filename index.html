@@ -2053,6 +2053,18 @@ html[data-theme="dark"] .pg .pa-tx-warn{background:#33241A;color:#F2B27A}
 .pg .pd-rank .ix .nm{font-weight:500;color:var(--pg-muted)}
 .pg .pd-rank .ix b{font-weight:500;color:var(--pg-muted)}
 
+/* Ton rythme : où va l'épargne. */
+.pg .ry-tbl{display:flex;flex-direction:column}
+.pg .ry-r{display:grid;grid-template-columns:minmax(0,120px) minmax(0,1fr) 82px 92px;gap:10px;align-items:center;height:38px;border-top:1px solid var(--pg-line);font-size:14px}
+.pg .ry-r:first-child{border-top:0}
+.pg .ry-r .nm{display:flex;align-items:center;gap:7px;min-width:0;font-weight:600}
+.pg .ry-r .nm em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg .ry-r .br{height:10px;border-radius:5px;background:var(--pg-trk);overflow:hidden}
+.pg .ry-r .br i{display:block;height:100%;border-radius:5px}
+.pg .ry-r b{text-align:right;font-variant-numeric:tabular-nums}
+.pg .ry-r .ct{text-align:right;font-size:12.5px;color:var(--pg-faint);white-space:nowrap}
+.pg .ry-m:hover rect:not([fill="transparent"]){filter:brightness(1.12)}
+
 /* ---- Comptes : la saisie vivante (maquettes v11 et v17), sous .pg.pc ---- */
 .pg.pc{--pc-bd:#D4D7DE;--pc-ph:#A3A8B3;--pc-flagbg:#FFF6EA;--pc-flag:#9A4A00;--pc-flagbd:#E59A3A;--pc-has:#9CC0EE;--pc-link:#1D5BA8;--pc-pop:0 6px 22px rgba(17,19,24,.09)}
 html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A2116;--pc-flag:#F2B266;--pc-flagbd:#C98236;--pc-has:#3F6DA6;--pc-link:#8FB8F2;--pc-pop:0 6px 22px rgba(0,0,0,.35)}
@@ -2173,6 +2185,8 @@ html[data-theme="dark"] .pg.pc{--pc-bd:#363D4A;--pc-ph:#6E7686;--pc-flagbg:#2A21
 .pc .pc-set .x{margin-left:auto;width:40px;height:40px;border:0;border-radius:50%;background:var(--pg-bg);font:inherit;font-size:22px;line-height:1;color:var(--pg-ink);cursor:pointer}
 .pc .pc-set .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .pc .pc-set label{display:flex;flex-direction:column;gap:6px}
+.pc .pc-set .two .wide{grid-column:1 / -1}
+.pc .pc-set .two .wide>span{font-size:13.5px;font-weight:600;color:var(--pg-muted)}
 .pc .pc-set .two>label>span{font-size:13.5px;font-weight:600;color:var(--pg-muted)}
 .pc .pc-set select,.pc .pc-set input[type="month"],.pc .mvform input{height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--pc-bd);background:var(--pg-tile);color:var(--pg-ink);font:inherit;font-size:15px;font-weight:600;width:100%}
 .pc .pc-set label small{font-size:12.5px;color:var(--pg-faint);text-align:center}
@@ -7997,7 +8011,7 @@ function viewPatProgres() {
     const paid = last12.map(mk => patMovementsInMonth(null, mk) > 0.5);
     let run = 0; for (let i = 11; i >= 0 && paid[i]; i--) run++;
     const lastPaid = paid.lastIndexOf(true), ball = pgBall(paid);
-    html += '<div class="t t-rythme" style="--dot:var(--pg-blue)"><style>@media (prefers-reduced-motion:no-preference){' + ball.css + "}</style>" +
+    html += '<div class="t t-rythme" style="--dot:var(--pg-blue)" data-act="pgdetail" data-d="rythme" role="button" tabindex="0"><style>@media (prefers-reduced-motion:no-preference){' + ball.css + "}</style>" +
       '<div class="hd"><span class="lbl">Ton rythme</span><span class="chev">›</span></div>' +
       '<span class="rbig">' + paid.filter(Boolean).length + " mois</span>" +
       '<span style="margin-top:8px;font-weight:600;font-size:16px;color:var(--pg-muted)">sur 12, avec un versement</span>' +
@@ -8169,7 +8183,7 @@ function viewPatProgres() {
 /* ---- Progrès : le détail de chaque bloc du bilan ------------------------------
    Au clic sur une tuile du bilan, une page qui pousse l'analyse : à gauche la question et
    son graphique, à droite ce qui l'éclaire. Mêmes calculs que les tuiles, sur plus de recul. */
-const PD_DOT = { qui: "var(--pg-blue)", annees: "var(--pg-violet)", reserve: "var(--pg-amber)", ouvas: "var(--pg-blue)", marches: "var(--d-gold,#E2A400)" };
+const PD_DOT = { qui: "var(--pg-blue)", annees: "var(--pg-violet)", reserve: "var(--pg-amber)", ouvas: "var(--pg-blue)", rythme: "var(--pg-blue)", marches: "var(--d-gold,#E2A400)" };
 const PD_PALETTE = ["#E2A400", "#C46E2F", "#5B4BC4", "#1E9AA8", "#C2418C", "#8A5A00", "#4F7A28", "#7A5AC8"];
 function pdChips(list, on, act) {
   return '<div class="pd-chips">' + list.map(c => '<button class="' + (c.v === on ? "on" : "") + '" data-act="' + act + '" data-v="' + c.v + '"' + (c.off ? " disabled" : "") + ">" + c.t + "</button>").join("") + "</div>";
@@ -8199,6 +8213,7 @@ function viewPgDetail() {
   if (d === "reserve") return pdReserve(month, months);
   if (d === "ouvas") return pdOuvas(month, months);
   if (d === "marches") return pdMarches(month, months);
+  if (d === "rythme") return pdRythme(month);
   UI.view = "patprogres"; return viewPatProgres();
 }
 
@@ -8448,7 +8463,95 @@ function pdMarches(month, months) {
 }
 /* Une tuile du bilan s'ouvre aussi au clavier. */
 document.addEventListener("keydown", e => {
-  if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".pg .bil .t[data-act]")) { e.preventDefault(); e.target.click(); }
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".pg .t[data-act]")) { e.preventDefault(); e.target.click(); }
+});
+
+/* ======== Ton rythme : le détail ========
+   Trois questions, avec des chiffres constatés seulement, sans hypothèse de marché :
+   est-ce que je verse régulièrement, où va mon épargne, et que coûte une pause.
+   « Typique » se lit sur la médiane des mois versés, pas sur la moyenne : un gros versement
+   ponctuel (une prime, un transfert) ferait sinon paraître le rythme plus soutenu qu'il n'est.
+   Le taux d'épargne, quand le budget est importé, rapporte aux revenus les seuls versements
+   sortis du compte bancaire : l'abondement d'un PEE n'a jamais été un arbitrage de budget. */
+function pdMedian(xs) { const s = xs.slice().sort((p, q) => p - q), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : 0; }
+function pdRythme(month) {
+  const R = { "1y": 12, "2y": 24, all: 0 }, key = UI.pdRy || "1y";
+  const movs = (DB.patMovements || []).filter(m => (DB.patAccounts || []).some(a => a.id === m.accountId));
+  if (!movs.length) return pdPage("rythme", "Ton rythme", '<h1 class="pd-h1">Pas encore de versement</h1><p class="pd-p">Saisis ce que tu verses chaque mois dans <b>Comptes</b> : ton rythme apparaîtra ici.</p>', "");
+  const firstMk = movs.map(m => monthKey(m.date)).sort()[0];
+  const n = R[key] || Math.max(1, patMonthsBetween(firstMk, month) + 1);
+  const span = Array.from({ length: n }, (_, i) => addMonth(month, i - n + 1));
+  const accs = (DB.patAccounts || []).filter(a => movs.some(m => m.accountId === a.id));
+  const per = span.map(mk => { const o = {}; accs.forEach(a => o[a.id] = patMovementsInMonth(a.id, mk)); return o; });
+  const net = per.map(o => Object.values(o).reduce((s, v) => s + v, 0)), paid = net.map(v => v > 0.5);
+  const nPaid = paid.filter(Boolean).length, med = pdMedian(net.filter(v => v > 0.5)), total = net.reduce((s, v) => s + v, 0);
+
+  /* Séries : celle en cours, et la plus longue de tout l'historique. */
+  const hist = []; for (let mk = firstMk; mk <= month; mk = addMonth(mk, 1)) hist.push({ mk, p: patMovementsInMonth(null, mk) > 0.5 });
+  let run = 0; for (let i = hist.length - 1; i >= 0 && hist[i].p; i--) run++;
+  let best = { n: 0 }, c = 0; hist.forEach((h, i) => { c = h.p ? c + 1 : 0; if (c > best.n) best = { n: c, to: h.mk, from: hist[i - c + 1].mk }; });
+  const lastPaid = hist.filter(h => h.p).pop(), pause = run ? 0 : lastPaid ? patMonthsBetween(lastPaid.mk, month) : hist.length;
+  /* Le manque à verser d'une pause : ton versement médian, autant de fois que de mois sans. */
+  const histMed = pdMedian(hist.slice(-24).map(h => patMovementsInMonth(null, h.mk)).filter(v => v > 0.5)), missed = pause * histMed;
+
+  /* Le graphique : un bâton par mois, empilé par compte ; les retraits passent sous l'axe. */
+  const W = 680, H = 300, ups = per.map(o => Object.values(o).filter(v => v > 0).reduce((s, v) => s + v, 0)), dns = per.map(o => Object.values(o).filter(v => v < 0).reduce((s, v) => s - v, 0));
+  const hi = Math.max(...ups, med, 1) * 1.08, lo = Math.max(...dns, 0) * 1.08, st = pdStep(hi, 3);
+  const Y = v => 10 + (hi - v) / (hi + lo) * (H - 40), bw = (W - 16) / n, X = i => 8 + i * bw;
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Tes versements, mois par mois">';
+  let lbls = "";
+  for (let t = st; t < hi; t += st) { s += '<line x1="0" x2="' + W + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="var(--pg-line)"/>'; lbls += '<text x="10" y="' + pgF(Y(t) - 5) + '" font-size="11.5" fill="var(--pg-faint)" stroke="var(--pg-bg)" stroke-width="4" paint-order="stroke">' + esc(fmtEurShort(t)) + "</text>"; }
+  per.forEach((o, i) => {
+    let up = 0, dn = 0, g = "";
+    accs.forEach(a => {
+      const v = o[a.id]; if (Math.abs(v) < 0.5) return;
+      const y0 = v > 0 ? up : -dn, y1 = v > 0 ? (up += v) : -(dn -= v);
+      g += '<rect x="' + pgF(X(i) + bw * 0.16) + '" y="' + pgF(Math.min(Y(y0), Y(y1))) + '" width="' + pgF(bw * 0.68) + '" height="' + pgF(Math.max(1, Math.abs(Y(y1) - Y(y0)))) + '" fill="' + patAccountColor(a) + '"/>';
+    });
+    if (!paid[i]) g += '<rect x="' + pgF(X(i) + bw * 0.16) + '" y="' + pgF(Y(0) - 4) + '" width="' + pgF(bw * 0.68) + '" height="4" rx="2" fill="var(--pg-trk)"/>';
+    const tip = pdMonthYear(span[i]) + " : " + (Math.abs(net[i]) < 0.5 ? "aucun versement" : pgSigned(net[i])) + accs.filter(a => Math.abs(o[a.id]) >= 0.5).map(a => "\n" + a.name + " " + pgSigned(o[a.id])).join("");
+    s += '<g class="ry-m"><title>' + esc(tip) + '</title><rect x="' + pgF(X(i)) + '" y="0" width="' + pgF(bw) + '" height="' + (H - 24) + '" fill="transparent"/>' + g + "</g>";
+  });
+  s += '<line x1="0" x2="' + W + '" y1="' + pgF(Y(0)) + '" y2="' + pgF(Y(0)) + '" stroke="var(--pg-grey)"/>';
+  if (med) s += '<line x1="0" x2="' + W + '" y1="' + pgF(Y(med)) + '" y2="' + pgF(Y(med)) + '" stroke="var(--pg-blue)" stroke-width="1.5" stroke-dasharray="5 4"/>';
+  s += lbls;
+  const ticks = n <= 12 ? span.map((_, i) => i) : [0, Math.round(n / 3), Math.round(2 * n / 3), n - 1];
+  ticks.forEach(i => s += '<text x="' + pgF(X(i) + bw / 2) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="12" fill="var(--pg-faint)">' + esc(n <= 12 ? MOIS_COURTS[+span[i].slice(5) - 1] : pgMonth(span[i])) + "</text>");
+  s += "</svg>";
+
+  const perLbl = key === "1y" ? "sur 12 mois" : key === "2y" ? "sur 24 mois" : "depuis " + pdMonthYear(firstMk);
+  const head = run >= 2 ? run + " mois de suite" + (run >= best.n ? ", ta plus longue série" : "")
+    : run === 1 ? "Un versement ce mois-ci" + (pause ? "" : "")
+    : lastPaid ? "Pause depuis " + pdMonthName(lastPaid.mk) + " : " + pause + " mois sans versement" : "Aucun versement pour l’instant";
+  const left = '<h1 class="pd-h1">' + esc(head) + "</h1>" +
+    '<div class="pd-stats">' + pdStat(nPaid + " / " + n, "mois avec un versement", "var(--pg-blue)") + pdStat(esc(fmtEurShort(med)), "un mois type, en médiane") +
+      pdStat(best.n + " mois", "ta plus longue série" + (best.n ? " (" + esc(pgMonth(best.from)) + " → " + esc(pgMonth(best.to)) + ")" : "")) + "</div>" +
+    '<div class="pd-keys">' + accs.filter(a => per.some(o => Math.abs(o[a.id]) >= 0.5)).map(a => pdKey(patAccountColor(a), esc(a.name), 8)).join("") +
+      pdKey("var(--pg-blue)", "ton mois type", 2) + '<span class="pd-note">versements nets des retraits, ' + esc(perLbl) + " · survole un mois</span></div>" +
+    '<div class="fig">' + s + "</div>";
+
+  /* À droite : où va l'épargne, et ce que coûte une pause ou ce que pèse l'effort. */
+  const rows = accs.map(a => { const v = per.reduce((t, o) => t + o[a.id], 0), m = per.filter(o => o[a.id] > 0.5).length; return { a, v, m }; }).filter(x => Math.abs(x.v) >= 0.5).sort((p, q) => q.v - p.v);
+  const mx = Math.max(...rows.map(x => Math.abs(x.v)), 1);
+  const where = '<div class="ry-tbl">' + rows.map(x => '<div class="ry-r"><span class="nm">' + patSwatch(x.a, 9) + "<em>" + esc(x.a.name) + "</em></span>" +
+    '<span class="br"><i style="width:' + pgF(Math.abs(x.v) / mx * 100) + "%;background:" + (x.v < 0 ? "var(--pg-neg)" : patAccountColor(x.a)) + '"></i></span>' +
+    "<b" + (x.v < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(x.v < 0 ? pgSigned(x.v) : fmtEurShort(x.v)) + "</b>" +
+    '<span class="ct">' + x.m + " mois · " + (total > 0.5 && x.v > 0 ? Math.round(x.v / total * 100) + " %" : "—") + "</span></div>").join("") + "</div>";
+  const stepRow = (t, v, sub) => '<div class="pd-step"><span><span>' + t + "</span><span>" + sub + "</span></span><b>" + v + "</b></div>";
+  let steps = "";
+  if (pause && histMed) steps += stepRow("Ce que la pause n’a pas placé", esc(fmtEurShort(missed)), pause + " mois × ton mois type (" + esc(fmtEurShort(histMed)) + ")");
+  else if (run) steps += stepRow("Série en cours", run + " mois", "depuis " + esc(pdMonthYear(hist[hist.length - run].mk)));
+  steps += stepRow("Versé " + esc(perLbl), esc(fmtEurShort(total)), "soit " + esc(fmtEurShort(total / n)) + " par mois en moyenne");
+  const year = +month.slice(0, 4), eff = patSavingsEffort(year);
+  if (eff.hasBudget && eff.income > 0) steps += stepRow("Ton taux d’épargne en " + year, esc(trim1(eff.versements / eff.income * 100)) + " %",
+    esc(fmtEurShort(eff.versements)) + " placés sur " + esc(fmtEurShort(eff.income)) + " de revenus" + (eff.offBudget > 0.5 ? ", hors " + esc(fmtEurShort(eff.offBudget)) + " versés par l’employeur" : ""));
+  else steps += stepRow("Ton taux d’épargne", "—", "importe tes relevés dans Mois pour le voir");
+  const right = pdPanel("Où va ton épargne", where, esc(perLbl)) + pdPanel("Ce que ça représente", "<div>" + steps + "</div>");
+  return pdPage("rythme", "Ton rythme", left, right, pdChips([{ v: "1y", t: "1 an" }, { v: "2y", t: "2 ans" }, { v: "all", t: "Tout" }].map(x => ({ ...x, off: x.v !== "all" && patMonthsBetween(firstMk, month) + 1 < R[x.v] / 2 })), key, "pdry"));
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest && e.target.closest('[data-act="pdry"]');
+  if (el && !el.disabled) { UI.pdRy = el.dataset.v; render(); }
 });
 
 /* ---- Progrès : le détail d'un compte -------------------------------------------
@@ -8870,7 +8973,8 @@ function viewPgComptes() {
     '<button type="button" class="pc-add" data-act="newpataccount">＋ Ajouter un compte</button></div></div>';
 
   html += '<div class="pc-body"><div class="pc-rows">' + k.rows.map(x => pcRowHtml(x, month)).join("") +
-    '<div class="pc-foot"><button type="button" class="pc-add" data-act="newpataccount">＋ Ajouter un compte</button>';
+    '<div class="pc-foot"><button type="button" class="pc-add" data-act="newpataccount">＋ Ajouter un compte</button>' +
+    '<button type="button" class="pc-add" data-act="patimportcsv">↓ Importer un historique (CSV)</button>';
   const gone = accounts.filter(a => a.closed && !k.rows.some(x => x.a.id === a.id));
   if (gone.length) html += '<span class="gone">Clôturés : ' + gone.map(a => '<button type="button" class="habit" data-pcact="set" data-id="' + a.id + '">' + esc(a.name) + "</button>").join(", ") + "</span>";
   html += "</div></div>";
@@ -8901,7 +9005,12 @@ function pcSettings() {
       PAT_TYPES.map(p => '<option value="' + p.id + '"' + (p.id === t ? " selected" : "") + ">" + esc(p.name) + "</option>").join("") + "</select></label>" +
       '<label><span>Ouvert le</span><input type="month" data-chg="patopened" data-id="' + a.id + '" value="' + esc(a.opened || "") + '"' +
         (open.mk && !open.exact ? ' placeholder="' + esc(open.mk) + '"' : "") + ">" +
-        (open.mk && !open.exact ? "<small>déduit de ta première saisie (" + esc(monthLabel(open.mk)) + ")</small>" : "") + "</label></div>" +
+        (open.mk && !open.exact ? "<small>déduit de ta première saisie (" + esc(monthLabel(open.mk)) + ")</small>" : "") + "</label>" +
+      /* La fiscalité ne sert qu'à l'impôt estimé : elle suit la classe, sauf là où la classe
+         ne tranche pas (livret bancaire fiscalisé, résidence principale exonérée). */
+      '<label class="wide"><span>Fiscalité</span><select data-chg="pattaxregime" data-id="' + a.id + '">' +
+        '<option value=""' + (a.taxRegime == null ? " selected" : "") + ">d’après le type (" + esc(taxRegime(TAX_BY_TYPE[t] || "pfu").name) + ")</option>" +
+        TAX_REGIMES.map(r => '<option value="' + r.id + '"' + (a.taxRegime === r.id ? " selected" : "") + ">" + esc(r.name) + "</option>").join("") + "</select></label></div>" +
     (age && !open.exact ? '<p class="warn">Ton ' + esc(a.name) + " est peut-être plus ancien. Sa vraie date rend l’impôt estimé plus juste : après " + age + ", il baisse fortement.</p>" : "") +
     '<label class="tg"><span><b>Compter dans ta performance</b><small>décoche pour un compte que tu ne veux pas suivre</small></span>' +
       '<input type="checkbox" role="switch" data-chg="patperfexcluded" data-id="' + a.id + '"' + (a.perfExcluded ? "" : " checked") + "><i></i></label>" +
