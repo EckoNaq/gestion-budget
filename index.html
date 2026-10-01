@@ -1912,30 +1912,65 @@ html[data-theme="dark"] .pg .pd-tbl>div.done b,html[data-theme="dark"] .pg .pd-m
 }
 
 /* ---------- Progrès : détail d'un compte ---------- */
-.pg .pa-grid{grid-template-columns:minmax(0,1fr) 470px}
+.pg .pa-grid{grid-template-columns:minmax(0,1fr) 480px}
 .pg .pa-name{display:flex;align-items:center;gap:12px;font-weight:600;font-size:18px;color:var(--pg-muted)}
 .pg .pa-value{font-weight:700;font-size:clamp(56px,6.4vw,96px);line-height:.85;letter-spacing:-.05em}
-.pg .pa-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pg .pa-grid .pd-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.pg .pa-grid .pd-stat span{line-height:1.3}
+.pg .pa-chart{display:flex;flex-direction:column;gap:6px;padding:16px 18px 10px;border-radius:22px;background:var(--pg-tile);box-shadow:var(--pg-sh)}
+.pg .pa-chart-h{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.pg .pa-chart-h .sp{flex:1}
+.pg .pa-chart .fig{margin:0}
+.pg .pa-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .pg .pa-facts>div{padding:14px 16px;border-radius:18px;background:var(--pg-tile);box-shadow:var(--pg-sh);display:flex;flex-direction:column;gap:4px}
 .pg .pa-facts>div>span:first-child{font-size:13.5px;font-weight:600;color:var(--pg-muted)}
 .pg .pa-facts b{font-size:20px;letter-spacing:-.02em}
 .pg .pa-facts>div>span:last-child{font-size:13px;color:var(--pg-faint)}
-.pg .pa-months{gap:2px}
-.pg .pa-row{display:flex;flex-direction:column;gap:2px;width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;padding:0 10px;margin:0 -10px;width:calc(100% + 20px);border-radius:12px;cursor:pointer}
+/* Fiscalité */
+.pg .pa-tax{gap:10px}
+.pg .pa-tx-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pg .pa-tx-grid>div{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;background:var(--pg-bg)}
+.pg .pa-tx-grid span{font-size:12.5px;font-weight:600;color:var(--pg-muted)}
+.pg .pa-tx-grid b{font-size:18px;font-variant-numeric:tabular-nums}
+.pg .pa-tx-grid .tot{background:color-mix(in oklab, var(--pg-neg) 10%, var(--pg-tile))}
+.pg .pa-tx-grid .tot b{color:var(--pg-neg)}
+.pg .pa-tx-grid .net{grid-column:span 2;background:color-mix(in oklab, var(--pg-pos) 10%, var(--pg-tile))}
+.pg .pa-tx-steps{display:flex;flex-direction:column;gap:6px}
+.pg .pa-tx-steps>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;border:1px dashed var(--pg-line);font-size:13.5px}
+.pg .pa-tx-steps .save{color:var(--pg-pos)}
+.pg .pa-tx-p,.pg .pa-tx-why{margin:0;font-size:13px;line-height:1.45;color:var(--pg-muted)}
+.pg .pa-tx-warn{margin:0;padding:8px 12px;border-radius:12px;background:#FFE9D1;color:#6E3500;font-size:12.5px;font-weight:600}
+html[data-theme="dark"] .pg .pa-tx-warn{background:#33241A;color:#F2B27A}
+/* Mois par mois */
+.pg .pa-months{gap:8px;position:sticky;top:16px}
+.pg .pa-sum{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:16px;background:var(--pg-bg)}
+.pg .pa-sum-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14.5px}
+.pg .pa-sum-h .pd-muted{font-size:12px}
+.pg .pa-sum-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+.pg .pa-sum-g>div{display:flex;flex-direction:column;gap:1px}
+.pg .pa-sum-g span{font-size:11.5px;font-weight:600;color:var(--pg-faint);text-transform:uppercase;letter-spacing:.04em}
+.pg .pa-sum-g b{font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pg .pa-head,.pg .pa-row{display:grid;grid-template-columns:58px minmax(0,1fr) 66px 74px 66px;align-items:center;gap:10px}
+.pg .pa-head{padding:4px 10px 2px;font-size:11.5px;font-weight:600;color:var(--pg-faint);text-transform:uppercase;letter-spacing:.04em}
+.pg .pa-head span:nth-child(n+3){text-align:right}
+.pg .pa-list{display:flex;flex-direction:column;user-select:none}
+.pg .pa-list>.pa-year:first-child{border-top:0;margin-top:0;padding-top:2px}
+.pg .pa-row{height:32px;padding:0 10px;border-radius:10px;cursor:pointer;font-variant-numeric:tabular-nums;outline:none}
 .pg .pa-row:hover{background:var(--pg-bg)}
-.pg .pa-row.on{background:var(--pg-bg);padding-bottom:8px}
-.pg .pa-line{display:grid;grid-template-columns:62px minmax(0,1fr) 140px;align-items:center;gap:12px;height:30px}
-.pg .pa-line .m{font-size:14px;font-weight:500;color:var(--pg-muted)}
-.pg .pa-row.on .m{font-weight:700;color:var(--pg-ink)}
-.pg .pa-line .bar{position:relative;height:12px}
-.pg .pa-line .bar i{position:absolute;top:0;bottom:0;border-radius:3px}
-.pg .pa-line .bar i.z{left:50%;top:-4px;bottom:-4px;width:1px;background:var(--pg-line)}
-.pg .pa-line .v{text-align:right;font-size:14px}
-.pg .pa-line .v span{color:var(--pg-faint)}
-.pg .pa-more{display:flex;gap:18px;padding-left:74px;font-size:13px;color:var(--pg-muted)}
-.pg .pa-more b{color:var(--pg-ink)}
-.pg .pa-months .pd-link{margin-top:12px}
-@media (max-width:1100px){.pg .pa-grid{grid-template-columns:minmax(0,1fr)}}
+.pg .pa-row.on{background:color-mix(in oklab, var(--pg-blue) 12%, var(--pg-tile))}
+.pg .pa-row:focus-visible{box-shadow:inset 0 0 0 2px var(--pg-blue)}
+.pg .pa-row .m{font-size:14px;font-weight:600}
+.pg .pa-row .bar{position:relative;height:10px}
+.pg .pa-row .bar i{position:absolute;top:0;bottom:0;border-radius:3px}
+.pg .pa-row .bar i.z{left:50%;top:-5px;bottom:-5px;width:1px;background:var(--pg-line)}
+.pg .pa-row .p{text-align:right;font-size:14px;font-weight:700}
+.pg .pa-row .p.dn{color:var(--pg-neg)}
+.pg .pa-row .p.zero{color:var(--pg-faint);font-weight:600}
+.pg .pa-row .e{text-align:right;font-size:13.5px;color:var(--pg-muted)}
+.pg .pa-row .vs{text-align:right;font-size:13px;color:var(--pg-faint)}
+.pg .pa-year{padding:8px 10px 2px;border-top:1px solid var(--pg-line);margin-top:4px;font-size:11.5px;font-weight:700;color:var(--pg-faint);letter-spacing:.06em}
+.pg .pa-more-btn{align-self:center}
+@media (max-width:1100px){.pg .pa-grid{grid-template-columns:minmax(0,1fr)}.pg .pa-months{position:static}}
 </style>
 </head>
 <body>
@@ -7999,9 +8034,10 @@ document.addEventListener("keydown", e => {
 });
 
 /* ---- Progrès : le détail d'un compte -------------------------------------------
-   Au clic sur un compte depuis Progrès : sa valeur, sa performance, la courbe de sa valeur
-   contre ce qui y a été versé (l'écart, c'est le gain), deux faits propres au compte, et ses
-   mois un par un. L'ancien détail reste accessible pour les mouvements et les réglages. */
+   Au clic sur un compte depuis Progrès : sa valeur, ses chiffres sur la période choisie, la
+   courbe de sa valeur contre ce qui y a été versé (l'écart, c'est le gain), ce qu'en dirait
+   l'impôt, et ses mois un par un, qu'on peut sélectionner à plusieurs en glissant. L'ancien
+   détail reste accessible pour les mouvements et les réglages. */
 function pdStock(val, inv, labels, showPeak) {
   const W = 640, H = 230, padT = 16, padB = 26, padX = 8, m = val.length - 1;
   const lo = Math.min(...inv, ...val) * 0.9, hi = Math.max(...val, ...inv) * 1.05 || 1;
@@ -8016,13 +8052,13 @@ function pdStock(val, inv, labels, showPeak) {
     '<path d="' + vv + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/><path d="' + t + '" fill="none" stroke="var(--pg-ink)" stroke-width="2.5" stroke-linecap="round"/>';
   if (showPeak) { const pk = Math.max(...val); s += '<line x1="' + padX + '" x2="' + (W - padX) + '" y1="' + pgF(Y(pk)) + '" y2="' + pgF(Y(pk)) + '" stroke="var(--pg-line)"/><text x="' + padX + '" y="' + pgF(Y(pk) - 6) + '" font-size="12" font-weight="600" fill="var(--pg-faint)">plus haut ' + esc(fmtEurShort(pk)) + "</text>"; }
   s += '<circle cx="' + pgF(X(m)) + '" cy="' + pgF(Y(val[m])) + '" r="6" fill="var(--pg-ink)" stroke="var(--pg-tile)" stroke-width="2"/>';
-  /* L'étiquette des gains se pose entre les deux courbes, là où elle a la place, sinon nulle part. */
+  /* L'étiquette des gains se pose entre les deux courbes, dans la zone de son signe, là où
+     elle a la place ; sinon nulle part, le chiffre est déjà au-dessus. */
   {
-    const label = pgSigned(g) + (g >= 0 ? " gagnés" : " perdus"), tw = label.length * 7.6 + 6;
+    const label = pgSigned(g) + (g >= 0 ? " gagnés au total" : " perdus au total"), tw = label.length * 7.6 + 6;
     const PV = val.map((v, i) => [X(i), Y(v)]), PI = inv.map((v, i) => [X(i), Y(v)]);
     const at = (P, x) => { for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const f = (x - P[i - 1][0]) / (P[i][0] - P[i - 1][0] || 1); return P[i - 1][1] + f * (P[i][1] - P[i - 1][1]); } return P[P.length - 1][1]; };
     let best = null;
-    /* Un gain se lit dans la zone verte (valeur au-dessus du versé), une perte dans la rouge. */
     for (let xr = X(m) - 14; xr - tw >= padX; xr -= 4) {
       let top = -Infinity, bot = Infinity, ok = true;
       for (let x = xr - tw - 8; x <= xr + 8; x += 2) {
@@ -8038,63 +8074,160 @@ function pdStock(val, inv, labels, showPeak) {
   labels.forEach((lab, i) => { if (lab) s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? "start" : i === m ? "end" : "middle") + '" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(lab) + "</text>"; });
   return s + "</svg>";
 }
+const PA_R = { "3m": 3, "1y": 12, "3y": 36, "5y": 60, all: 0 };
+const PA_LBL = { "3m": "3 mois glissants", "1y": "12 mois glissants", "3y": "3 ans glissants", "5y": "5 ans glissants" };
+function paVers(id, from, to) {
+  return (DB.patMovements || []).filter(x => x.accountId === id && monthKey(x.date) > from && monthKey(x.date) <= to).reduce((s, x) => s + x.amount, 0);
+}
+/* Ce que dit l'impôt : le régime, ce que coûterait un retrait complet aujourd'hui, et les
+   paliers d'ancienneté qui l'allègent. Tout vient des barèmes déjà tenus par l'application. */
+function paTax(a, month) {
+  const reg = taxRegime(patTaxRegime(a)), t = patTax(a, month), wait = patTaxWait(a, month), op = patOpenedMonth(a);
+  const pc = n => trim1(n) + " %";
+  let body = "";
+  if (t && t.rate < 0.005) {
+    body = '<p class="pa-tx-p">Exonéré : tes <b>' + esc(fmtEurShort(t.gain)) + "</b> de gains sortent sans impôt ni prélèvements sociaux. " + esc(t.why) + "</p>";
+  } else if (!t) {
+    const u = patUnrealized(a.id, month);
+    body = '<p class="pa-tx-p">' + (u && u.gain <= 0 ? "Pas de gain latent : un retrait complet aujourd’hui ne paierait aucun impôt." : "Aucun gain imposable à ce jour.") + "</p>";
+  } else {
+    const ir = t.gain * t.ir / 100, ps = t.gain * t.ps / 100;
+    body = '<div class="pa-tx-grid"><div><span>Gain latent</span><b>' + esc(fmtEurShort(t.gain)) + "</b></div>" +
+      "<div><span>Impôt sur le revenu · " + esc(pc(t.ir)) + "</span><b>" + esc(fmtEurShort(ir)) + "</b></div>" +
+      "<div><span>Prélèvements sociaux · " + esc(pc(t.ps)) + "</span><b>" + esc(fmtEurShort(ps)) + "</b></div>" +
+      '<div class="tot"><span>Impôt total · ' + esc(pc(t.rate)) + "</span><b>" + esc(fmtEurShort(t.tax)) + "</b></div>" +
+      '<div class="net"><span>Net disponible si tu retirais tout</span><b>' + esc(fmtEurShort(t.net)) + "</b></div></div>";
+    if (wait) body += '<div class="pa-tx-steps">' + wait.steps.map(s => '<div><span>À partir de <b>' + esc(pdMonthYear(s.when)) + "</b> (" + s.years + " ans, dans " + waitDelay(s.months) + ")</span><span>impôt " + esc(pc(s.rate)) + " → " + esc(fmtEurShort(s.tax)) + ', <b class="save">' + esc(fmtEurShort(s.saved)) + " de moins</b></span></div>").join("") + "</div>";
+    else if (reg.ages && t.age != null) body += '<p class="pa-tx-p">Palier d’ancienneté déjà franchi : le taux du jour est le plus bas possible.</p>';
+    body += '<p class="pa-tx-why">' + esc(t.why) + "</p>";
+  }
+  const approx = reg.ages && !op.exact && op.mk ? '<p class="pa-tx-warn">Date d’ouverture estimée à ' + esc(pdMonthYear(op.mk)) + " d’après la plus ancienne donnée : renseigne la vraie date dans les réglages du compte pour un calcul exact.</p>" : "";
+  return '<section class="pd-panel pa-tax"><div class="pd-ph"><h2>Fiscalité</h2><span>' + esc(reg.name) + "</span></div>" + body + approx + "</section>";
+}
+/* La sélection de mois : un clic en prend un, un glissé en prend une suite, Maj + clic l'étend. */
+function paSelection(rowsM) {
+  const s = UI.paSelRange;
+  if (!s || rowsM.indexOf(s.a) < 0 || rowsM.indexOf(s.b) < 0) return [rowsM[0]];
+  const i = rowsM.indexOf(s.a), j = rowsM.indexOf(s.b);
+  return rowsM.slice(Math.min(i, j), Math.max(i, j) + 1);
+}
+function paSummary(a, sel) {
+  const chrono = sel.slice().sort(), first = chrono[0], last = chrono[chrono.length - 1], from = addMonth(first, -1);
+  let c = 1; chrono.forEach(mk => { const r = patMonthlyPerf(a.id, mk); if (r != null) c *= 1 + r / 100; });
+  const perf = (c - 1) * 100, gain = pgGains(a.id, from, last), vers = paVers(a.id, from, last);
+  const v0 = patAccountValue(a.id, from), v1 = patAccountValue(a.id, last);
+  const title = sel.length === 1 ? pdMonthYear(first) : pgMonth(first) + " → " + pgMonth(last) + " · " + sel.length + " mois";
+  return '<div class="pa-sum"><div class="pa-sum-h"><b>' + esc(title) + "</b>" + (sel.length > 1 ? '<button class="pd-link" data-act="paclear">un seul mois</button>' : '<span class="pd-muted">glisse pour en prendre plusieurs</span>') + "</div>" +
+    '<div class="pa-sum-g"><div><span>performance</span><b' + (perf < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(perf)) + "</b></div>" +
+    "<div><span>" + (gain < 0 ? "perdus" : "gagnés") + "</span><b>" + esc(pgSigned(gain)) + "</b></div>" +
+    "<div><span>" + (vers < -0.5 ? "retiré" : "versé") + "</span><b>" + esc(vers < -0.5 ? pgSigned(vers) : fmtEurShort(vers)) + "</b></div>" +
+    "<div><span>valeur</span><b>" + (v0 != null && sel.length > 1 ? esc(fmtEurShort(v0)) + " → " : "") + esc(fmtEurShort(v1 || 0)) + "</b></div></div></div>";
+}
 function viewPgAccount() {
   const a = (DB.patAccounts || []).find(x => x.id === UI.pgAcc);
   if (!a) { UI.view = "patprogres"; return viewPatProgres(); }
   const month = pgLastMonth(), all = allPatMonths(month).filter(mk => patAccountValue(a.id, mk) != null);
   if (!all.length) { UI.view = "patprogres"; return viewPatProgres(); }
-  const R = { "3m": 3, "1y": 12, all: 0 }, key = UI.paRange || "1y";
-  const ser = R[key] ? all.slice(-(R[key] + 1)) : all;
+  const enough = k => !PA_R[k] || all.length > PA_R[k];
+  let key = UI.paRange || "1y"; if (!enough(key)) key = "all";
+  const ser = PA_R[key] ? all.slice(-(PA_R[key] + 1)) : all, from = ser[0];
   const val = ser.map(mk => patAccountValue(a.id, mk)), inv = ser.map(mk => patInvested(a.id, mk));
-  const value = patAccountValue(a.id, month) || 0, invested = patInvested(a.id, month), gain = value - invested;
+  const value = patAccountValue(a.id, month) || 0;
   const peak = Math.max(...all.map(mk => patAccountValue(a.id, mk))), record = all.length > 1 && value >= peak - 0.5;
-  const yAgo = addMonth(month, -12), r12 = all.includes(yAgo) || all[0] <= yAgo ? pgAccountTWR(a.id, yAgo, month) : null;
-  const ann = (() => { if (all.length < 13) return null; const c = pgAccountTWR(a.id, all[0], month); return c == null ? null : (Math.pow(1 + c / 100, 12 / (all.length - 1)) - 1) * 100; })();
+  /* Les trois chiffres suivent la période : sur « Tout », depuis l'ouverture ; sinon, sur la
+     fenêtre glissante choisie. */
+  const perf = ser.length > 1 ? pgAccountTWR(a.id, from, month) : null;
+  /* Une fenêtre qui couvre tout l'historique se calcule comme « Tout » : sinon le premier
+     mois, celui de l'ouverture, serait compté d'un côté et pas de l'autre. */
+  const full = key === "all" || from === all[0];
+  const gains = full ? value - patInvested(a.id, month) : pgGains(a.id, from, month);
+  const vers = full ? patInvested(a.id, month) : paVers(a.id, from, month);
+  const per = key === "all" ? "depuis " + pgMonth(all[0], true) : "sur " + PA_LBL[key];
+  const ann = key !== "1y" && key !== "3m" && perf != null && ser.length > 13 ? (Math.pow(1 + perf / 100, 12 / (ser.length - 1)) - 1) * 100 : null;
   const m = ser.length - 1, labels = ser.map((mk, i) => (i === 0 || i === m || i === Math.round(m / 2)) ? pgMonth(mk) : "");
-  /* Deux faits propres au compte. */
+  /* Un ou deux faits propres au compte, la fiscalité ayant son propre panneau. */
   const movs = (DB.patMovements || []).filter(x => x.accountId === a.id && monthKey(x.date) <= month).sort((p, q) => p.date < q.date ? -1 : 1);
-  const lastMov = movs.length ? monthKey(movs[movs.length - 1].date) : null, v12 = movs.filter(x => monthKey(x.date) > yAgo).reduce((s, x) => s + x.amount, 0);
+  const lastMov = movs.length ? monthKey(movs[movs.length - 1].date) : null, yAgo = addMonth(month, -12), v12 = paVers(a.id, yAgo, month);
   const facts = [];
-  if (lastMov && patMonthsBetween(lastMov, month) >= 3) {
-    const since = pgGains(a.id, lastMov, month);
-    facts.push(["Sans versement depuis " + pdMonthYear(lastMov), pgSigned(since), "ce que ton compte a pris tout seul"]);
-  } else facts.push(["Versé sur 12 mois glissants", fmtEurShort(v12), v12 > 0 ? "soit " + fmtEurShort(v12 / 12) + " par mois en moyenne" : "aucun versement sur la période"]);
-  const op = patOpenedMonth(a), opened = op.mk, typ = patType(a.type).id, wait = typ === "pea" ? 5 : typ === "av" ? 8 : 0;
-  if (wait && opened) {
-    const freeMk = addMonth(opened, wait * 12), done = freeMk <= month;
-    facts.push(["Fiscalité allégée", (done ? "depuis " : "à partir de ") + pdMonthYear(freeMk), "après " + wait + " ans" + (op.exact ? "" : " · date d’ouverture à confirmer")]);
-  } else if (!record) {
+  if (lastMov && patMonthsBetween(lastMov, month) >= 3) facts.push([(movs[movs.length - 1].amount < 0 ? "Sans mouvement depuis " : "Sans versement depuis ") + pdMonthYear(lastMov), pgSigned(pgGains(a.id, lastMov, month)), "ce que ton compte a pris tout seul depuis"]);
+  else facts.push(["Versé sur 12 mois glissants", fmtEurShort(v12), v12 > 0 ? "soit " + fmtEurShort(v12 / 12) + " par mois en moyenne" : "aucun versement sur la période"]);
+  if (!record) {
     const pkMk = all.find(mk => patAccountValue(a.id, mk) === peak);
     facts.push(["Ton plus haut", fmtEurShort(peak), pdMonthYear(pkMk) + " · tu en es à " + pgPct((value / peak - 1) * 100)]);
   } else {
     const ag = id => { const r = all.slice(-24).map(mk => patMonthlyPerf(id, mk)).filter(x => x != null); return r.length ? r.reduce((s, x) => s + Math.abs(x), 0) / r.length : null; };
     const mine = ag(a.id), tot = ag(null);
-    if (mine != null && tot) facts.push(["Agitation", trim1(mine / tot) + "× ton patrimoine", "en moyenne " + trim1(mine) + " % par mois, contre " + trim1(tot) + " %"]);
+    if (mine != null && tot && (mine / tot < 0.8 || mine / tot > 1.25)) facts.push(["Agitation", trim1(mine / tot) + "× ton patrimoine", "en moyenne " + trim1(mine) + " % par mois, contre " + trim1(tot) + " %"]);
+    else {
+      const bm = all.slice(-12).map(mk => ({ mk, r: patMonthlyPerf(a.id, mk) })).filter(x => x.r != null).sort((p, q) => q.r - p.r)[0];
+      if (bm) facts.push(["Meilleur mois sur 12 mois", pgPct(bm.r), pdMonthYear(bm.mk) + " · " + pgSigned(patMonthlyGain(a.id, bm.mk) || 0)]);
+    }
   }
-  /* Les mois un par un, le plus récent en tête ; un clic en ouvre le détail. */
-  const rowsM = all.slice(-12).reverse().filter(mk => patMonthlyPerf(a.id, mk) != null);
-  const sel = rowsM.includes(UI.paSel) ? UI.paSel : rowsM[0], mx = Math.max(...rowsM.map(mk => Math.abs(patMonthlyPerf(a.id, mk))), 0.1);
+  /* Les mois, du plus récent au plus ancien, par paquets de douze. */
+  const shown = 12 * (UI.paMore || 1), rowsAll = all.slice().reverse().filter(mk => patMonthlyPerf(a.id, mk) != null), rowsM = rowsAll.slice(0, shown);
+  const sel = paSelection(rowsM), mx = Math.max(...rowsM.map(mk => Math.abs(patMonthlyPerf(a.id, mk))), 0.1);
   const rows = rowsM.map(mk => {
-    const r = patMonthlyPerf(a.id, mk), e = patMonthlyGain(a.id, mk), on = mk === sel, w = Math.max(0.6, Math.abs(r) / mx * 50);
-    return '<button class="pa-row' + (on ? " on" : "") + '" data-act="pasel" data-v="' + mk + '"><span class="pa-line"><span class="m">' + esc(pgMonth(mk)) + "</span>" +
-      '<span class="bar"><i class="z"></i><i style="' + (r >= 0 ? "left:50%" : "right:50%") + ";width:" + pgF(w) + "%;background:" + (r >= 0 ? "var(--pg-pos)" : "var(--pg-neg)") + '"></i></span>' +
-      '<span class="v"><b>' + esc(pgPct(r)) + '</b> <span>' + esc(pgSigned(e || 0)) + "</span></span></span>" +
-      (on ? '<span class="pa-more"><span>valeur <b>' + esc(fmtEurShort(patAccountValue(a.id, mk))) + "</b></span><span>versé <b>" + esc(fmtEurShort(patMovementsInMonth(a.id, mk))) + "</b></span></span>" : "") + "</button>";
+    let r = patMonthlyPerf(a.id, mk); if (Math.abs(r) < 0.05) r = 0;
+    const e = patMonthlyGain(a.id, mk) || 0, v = patMovementsInMonth(a.id, mk), w = Math.max(0.6, Math.abs(r) / mx * 50);
+    const yearBreak = mk === rowsM[0] || mk.slice(5) === "12" ? '<div class="pa-year">' + mk.slice(0, 4) + "</div>" : "";
+    return yearBreak + '<div class="pa-row' + (sel.indexOf(mk) >= 0 ? " on" : "") + '" data-mk="' + mk + '" role="button" tabindex="0">' +
+      '<span class="m">' + esc(MOIS_COURTS[+mk.slice(5) - 1]) + " " + mk.slice(2, 4) + "</span>" +
+      '<span class="bar"><i class="z"></i><i style="' + (r >= 0 ? "left:50%" : "right:50%") + ";width:" + pgF(w) + "%;background:" + (r > 0 ? "var(--pg-pos)" : r < 0 ? "var(--pg-neg)" : "var(--pg-line)") + '"></i></span>' +
+      '<span class="p' + (r < 0 ? " dn" : r === 0 ? " zero" : "") + '">' + esc(r === 0 ? "0,0 %" : pgPct(r)) + '</span><span class="e">' + esc(Math.abs(e) < 0.5 ? "0 €" : pgSigned(e)) + '</span><span class="vs">' + (Math.abs(v) < 0.5 ? "—" : esc(v < 0 ? pgSigned(v) : fmtEurShort(v))) + "</span></div>";
   }).join("");
-  const note = lastMov && patMonthsBetween(lastMov, month) >= 12 ? "aucun versement depuis " + pdMonthYear(lastMov) : v12 > 0 ? fmtEurShort(v12) + " versés sur 12 mois" : "";
-  const enough = k => !R[k] || all.length > R[k];
+  const more = rowsAll.length > shown ? '<button class="pd-link pa-more-btn" data-act="pamore">Afficher 12 mois de plus</button>' : "";
+  const note = lastMov && patMonthsBetween(lastMov, month) >= 12 ? "aucun versement depuis " + pdMonthYear(lastMov) : "";
+  const chips = pdChips([{ v: "3m", t: "3 mois" }, { v: "1y", t: "1 an" }, { v: "3y", t: "3 ans" }, { v: "5y", t: "5 ans" }, { v: "all", t: "Tout" }].map(c => ({ ...c, off: !enough(c.v) })), key, "parange");
   const left = '<span class="pa-name">' + patSwatch(a, 11) + esc(a.name) + (record ? '<span class="badge-rec">★ record</span>' : "") + "</span>" +
     '<span class="pa-value">' + esc(fmtEurShort(value)) + "</span>" +
-    '<div class="pd-stats">' + (r12 != null ? pdStat(esc(pgPct(r12)), "sur 12 mois glissants", r12 < 0 ? "var(--pg-neg)" : "") : "") +
-      (ann != null ? pdStat(esc(fmtRate(ann)), "par an depuis " + all[0].slice(0, 4)) : "") + pdStat(esc(pgSigned(gain)), gain < 0 ? "perdus en tout" : "gagnés en tout") + "</div>" +
-    '<div class="fig">' + (ser.length > 1 ? pdStock(val, inv, labels, !record) : "") + "</div>" +
-    '<section class="pa-facts">' + facts.map(([t, v, s]) => "<div><span>" + esc(t) + "</span><b>" + esc(v) + "</b><span>" + esc(s) + "</span></div>").join("") + "</section>";
-  const right = '<section class="pd-panel pa-months"><div class="pd-ph"><h2>Mois par mois</h2>' + (note ? "<span>" + esc(note) + "</span>" : "") + "</div>" + rows +
+    '<div class="pd-stats">' + (perf != null ? pdStat(esc(pgPct(perf)), "de performance " + esc(per) + (ann != null ? " · " + esc(fmtRate(ann)) + " par an" : ""), perf < 0 ? "var(--pg-neg)" : "") : "") +
+      pdStat(esc(pgSigned(gains)), (gains < 0 ? "perdus " : "gagnés ") + esc(per), gains < 0 ? "var(--pg-neg)" : "var(--pg-pos)") + pdStat(esc(vers < -0.5 ? pgSigned(vers) : fmtEurShort(vers)), (vers < -0.5 ? "retirés " : "versés ") + esc(per)) + "</div>" +
+    '<div class="pa-chart"><div class="pa-chart-h">' + pdKey("var(--pg-ink)", "valeur") + pdKey("var(--pg-chev)", "versé") + '<span class="sp"></span>' + chips + "</div>" +
+      '<div class="fig">' + (ser.length > 1 ? pdStock(val, inv, labels, !record) : "") + "</div></div>" +
+    '<section class="pa-facts">' + facts.map(([t, v, s]) => "<div><span>" + esc(t) + "</span><b>" + esc(v) + "</b><span>" + esc(s) + "</span></div>").join("") + "</section>" + paTax(a, month);
+  const right = '<section class="pd-panel pa-months"><div class="pd-ph"><h2>Mois par mois</h2>' + (note ? "<span>" + esc(note) + "</span>" : "") + "</div>" +
+    '<div id="pa-sum">' + paSummary(a, sel) + "</div>" +
+    '<div class="pa-head"><span>mois</span><span></span><span>perf.</span><span>gain</span><span>versé</span></div><div class="pa-list" id="pa-list">' + rows + "</div>" + more +
     '<button class="pd-link" data-act="patopenacct" data-id="' + esc(a.id) + '">Mouvements et réglages du compte ›</button></section>';
-  return '<div class="pg"><div class="pd"><header class="pd-top"><button class="pd-back" data-act="pgbacktop">‹ Progrès</button>' +
-    pdChips([{ v: "3m", t: "3 mois" }, { v: "1y", t: "1 an" }, { v: "all", t: "Tout" }].map(c => ({ ...c, off: !enough(c.v) })), key, "parange") + "</header>" +
+  return '<div class="pg"><div class="pd"><header class="pd-top"><button class="pd-back" data-act="pgbacktop">‹ Progrès</button></header>' +
     '<div class="pd-grid pa-grid"><div class="pd-left">' + left + '</div><div class="pd-right">' + right + "</div></div></div></div>";
 }
+/* Glisser sur la liste des mois : la sélection suit le pointeur en direct, le résumé se
+   recalcule au relâchement, sans reconstruire la page. */
+const PA_DRAG = { on: false, a: null, b: null };
+function paPaint() {
+  const list = document.getElementById("pa-list"); if (!list) return;
+  const rows = [...list.querySelectorAll(".pa-row")], ks = rows.map(r => r.dataset.mk);
+  const i = ks.indexOf(PA_DRAG.a), j = ks.indexOf(PA_DRAG.b), lo = Math.min(i, j), hi = Math.max(i, j);
+  rows.forEach((r, k) => r.classList.toggle("on", k >= lo && k <= hi));
+}
+function paCommit() {
+  UI.paSelRange = { a: PA_DRAG.a, b: PA_DRAG.b };
+  const a = (DB.patAccounts || []).find(x => x.id === UI.pgAcc), list = document.getElementById("pa-list"), sum = document.getElementById("pa-sum");
+  if (!a || !list || !sum) return;
+  sum.innerHTML = paSummary(a, paSelection([...list.querySelectorAll(".pa-row")].map(r => r.dataset.mk)));
+}
+document.addEventListener("mousedown", e => {
+  const r = e.target.closest && e.target.closest(".pg .pa-row"); if (!r || e.button !== 0) return;
+  e.preventDefault();
+  const cur = UI.paSelRange;
+  PA_DRAG.on = true;
+  PA_DRAG.a = e.shiftKey && cur ? cur.a : r.dataset.mk; PA_DRAG.b = r.dataset.mk;
+  paPaint();
+});
+document.addEventListener("mouseover", e => {
+  if (!PA_DRAG.on) return;
+  const r = e.target.closest && e.target.closest(".pg .pa-row"); if (!r || r.dataset.mk === PA_DRAG.b) return;
+  PA_DRAG.b = r.dataset.mk; paPaint();
+});
+document.addEventListener("mouseup", () => { if (!PA_DRAG.on) return; PA_DRAG.on = false; paCommit(); });
+document.addEventListener("keydown", e => {
+  const r = e.target.matches && e.target.matches(".pg .pa-row") ? e.target : null;
+  if (!r || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  const cur = UI.paSelRange;
+  PA_DRAG.a = e.shiftKey && cur ? cur.a : r.dataset.mk; PA_DRAG.b = r.dataset.mk; paPaint(); paCommit();
+});
 /* ---- Jalons ---------------------------------------------------------------
    Acquis en couleur, à venir en grisé, avec la distance qui reste. Un jalon barré sans
    contexte décourage ; le même avec « 62 990 sur 75 000 » donne une direction. */
@@ -10879,10 +11012,11 @@ document.addEventListener("click", e => {
        pour en montrer d'autres plutôt que de resservir les mêmes. */
     case "pgbilan": pgGlideTo("bilan"); break;
     case "pgtop": pgGlideTo("haut"); break;
-    case "pgacct": UI.pgAcc = el.dataset.id; UI.paSel = null; UI.view = "pgacct"; render(); window.scrollTo(0, 0); break;
+    case "pgacct": UI.pgAcc = el.dataset.id; UI.paSelRange = null; UI.paMore = 1; UI.view = "pgacct"; render(); window.scrollTo(0, 0); break;
     case "pgbacktop": UI.view = "patprogres"; render(); window.scrollTo(0, 0); break;
     case "parange": if (!el.disabled) { UI.paRange = el.dataset.v; render(); } break;
-    case "pasel": UI.paSel = el.dataset.v; render(); break;
+    case "pamore": UI.paMore = (UI.paMore || 1) + 1; render(); break;
+    case "paclear": UI.paSelRange = null; render(); break;
     case "pgdetail": UI.pgDetail = el.dataset.d; UI.view = "pgdetail"; render(); window.scrollTo(0, 0); break;
     case "pgback": UI.view = "patprogres"; render(); window.scrollTo(0, pgBilanTop()); break;
     case "pdqui": if (!el.disabled) { UI.pdQui = el.dataset.v; render(); } break;
