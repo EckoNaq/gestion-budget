@@ -1460,203 +1460,256 @@ html[data-theme="dark"] .v2{
 /* =========================================================================
    PROGRÈS — le nouvel accueil du Patrimoine, cloisonné sous .pg
    -------------------------------------------------------------------------
-   Même principe que .v2 : rien ne fuit vers le reste de l'application. Les
-   couleurs de fond et d'encre reprennent celles du thème, la typographie
-   reprend Archivo. Fonds blancs, une pastille de couleur par tuile, la
-   couleur dans les courbes et les barres (variante B des maquettes).
-   --up / --down portent la hausse et la baisse : le réglage daltonisme
-   n'aura qu'à les redéfinir.
+   Reprise fidèle de la maquette validée (page « Animations », v3), avec les
+   couleurs de la variante B : fonds blancs, une pastille de couleur par tuile,
+   la couleur dans les courbes et les barres. Sobre au repos, chaque tuile joue
+   sa fantaisie au survol. Rien ne fuit vers le reste de l'application.
    ========================================================================= */
 .pg{
-  --disp:"Archivo",system-ui,sans-serif;
-  --up:var(--pos); --down:var(--neg);
-  --tile:var(--surface); --tile-sh:0 1px 2px rgba(17,19,24,.05);
-  --hero:#14181F; --hero-ink:#FFFFFF; --hero-soft:rgba(255,255,255,.62);
-  --d-blue:#2A78D6; --d-violet:#5B4BC4; --d-amber:#C98A00; --d-gold:#E2A400; --d-grey:#9AA0AC;
-  font-family:var(--disp); font-variation-settings:"wght" 450,"wdth" 100;
+  --pg-bg:#EEF0F2; --pg-tile:#FFFFFF; --pg-ink:#111318; --pg-muted:#5B6170; --pg-faint:#8A8F9C;
+  --pg-line:#E3E5EA; --pg-trk:#E7E9ED; --pg-chev:#B8BCC6; --pg-sh:0 1px 2px rgba(17,19,24,.05);
+  --pg-hero:#14181F; --pg-grey:#9AA0AC;
+  --pg-orange:#E8743B; --pg-violet:#5B4BC4; --pg-blue:#2A78D6; --pg-amber:#C98A00;
+  --pg-pos:#13875E; --pg-star:#13955C; --pg-neg:#D0453C; --pg-goal:#0C6B42;
+  font-family:"Archivo",system-ui,sans-serif; font-variation-settings:"wdth" 100; color:var(--pg-ink);
+  margin:-22px -26px -60px; padding:22px 26px 60px; background:var(--pg-bg); min-height:100vh;
 }
-html[data-theme="dark"] .pg{ --tile-sh:0 0 0 1px var(--line); --hero:#1E2530; --d-blue:#6FA8F0; --d-violet:#9C8CF0; --d-amber:#E0B04A; }
+html[data-theme="dark"] .pg{
+  --pg-bg:#0E1116; --pg-tile:#171C24; --pg-ink:#E7EAF0; --pg-muted:#AEB5C2; --pg-faint:#7E8696;
+  --pg-line:#272D38; --pg-trk:#252B35; --pg-chev:#5A6170; --pg-sh:0 0 0 1px #232934;
+  --pg-hero:#1E2530; --pg-grey:#7E8696;
+  --pg-orange:#F08A55; --pg-violet:#9C8CF0; --pg-blue:#6FA8F0; --pg-amber:#E0B04A;
+  --pg-pos:#3FBF8F; --pg-star:#3FBF8F; --pg-neg:#F4726F; --pg-goal:#3FBF8F;
+}
 .pg *{box-sizing:border-box}
-.pg .num{font-family:var(--disp);font-variant-numeric:tabular-nums;letter-spacing:0}
-.pg .up{color:var(--up)} .pg .down{color:var(--down)}
-.pg .state{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-variation-settings:"wght" 600,"wdth" 100;color:var(--ink-2);cursor:pointer}
-.pg .state i{width:8px;height:8px;border-radius:50%;background:var(--up)}
-.pg .state.todo i{background:var(--warn)}
-.pg .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(150px,auto);gap:14px}
-.pg .bgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pg b{font-weight:700}
+.pg .state{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--pg-tile);box-shadow:var(--pg-sh);font:inherit;font-weight:600;font-size:15px;color:var(--pg-muted);cursor:pointer}
+.pg .state i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#13955C}
+.pg .state.todo i{background:#E59A3A}
+.pg .top{height:clamp(600px, calc(100vh - 140px), 760px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:16px}
+.pg .bil-h{display:flex;flex-direction:column;gap:6px;margin:44px 0 22px}
+.pg .bil-h h2{margin:0;font-weight:700;font-size:34px;letter-spacing:-.03em}
+.pg .bil-h span{font-weight:600;font-size:17px;color:var(--pg-muted)}
+.pg .bil{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(330px,auto);gap:16px}
+.pg .t{position:relative;display:flex;flex-direction:column;min-width:0;border-radius:24px;background:var(--pg-tile);color:var(--pg-ink);padding:22px 24px 18px;box-shadow:var(--pg-sh);border:0;font:inherit;text-align:left;text-decoration:none;transition:transform .25s ease, box-shadow .25s ease}
+.pg .t:hover{transform:translateY(-3px);box-shadow:0 14px 30px -14px rgba(17,19,24,.28)}
+.pg button.t,.pg a.t{cursor:pointer}
 .pg .w2{grid-column:span 2} .pg .h2{grid-row:span 2}
-.pg .t{position:relative;display:flex;flex-direction:column;min-width:0;border-radius:20px;background:var(--tile);box-shadow:var(--tile-sh);padding:18px 20px 16px;color:var(--ink);text-align:left;border:0;font:inherit;transition:transform .2s, box-shadow .2s}
-.pg button.t{cursor:pointer}
-.pg button.t:hover{transform:translateY(-2px);box-shadow:0 8px 24px -10px rgba(17,19,24,.25), var(--tile-sh)}
-.pg .tl{display:flex;align-items:center;gap:8px;font-size:14px;font-variation-settings:"wght" 620,"wdth" 100;color:var(--ink-2)}
-.pg .tl .dot{width:9px;height:9px;border-radius:3px;flex:none}
-.pg .tl .go{margin-left:auto;color:var(--ink-mute);font-size:17px}
-.pg .tag{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-variation-settings:"wght" 700,"wdth" 100;background:rgba(226,164,0,.16);color:#8A6200}
-html[data-theme="dark"] .pg .tag{color:var(--done-ink)}
-.pg .big{font-size:30px;line-height:1.05;letter-spacing:-.03em;font-variation-settings:"wght" 700,"wdth" 90;margin-top:8px}
-.pg .sub{font-size:13px;color:var(--ink-soft);margin-top:3px}
-.pg .head{font-size:21px;line-height:1.15;letter-spacing:-.02em;font-variation-settings:"wght" 700,"wdth" 92;margin-top:8px}
-.pg .foot{font-size:12px;color:var(--ink-mute);margin-top:auto;padding-top:10px}
+.pg .lbl{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;color:var(--pg-muted)}
+.pg .lbl::before{content:"";display:inline-block;flex:none;width:10px;height:10px;border-radius:3px;background:var(--dot)}
+.pg .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pg .chev{font-size:18px;color:var(--pg-chev)}
+.pg .ttl{margin-top:10px;font-weight:700;font-size:30px;line-height:1.05;letter-spacing:-.03em}
+.pg .sp{flex-grow:1}
+.pg .foot{margin-top:10px;font-size:13px;color:var(--pg-faint)}
 .pg svg{display:block;width:100%;height:auto;overflow:visible}
-.pg svg text{font-family:var(--disp)}
-/* La tuile du patrimoine, en sombre */
-.pg .hero{background:var(--hero);color:var(--hero-ink);padding:24px 26px 0;overflow:hidden}
-.pg .hero .tl{color:var(--hero-soft)}
-.pg .hero .amount{font-size:clamp(46px,6.2vw,84px);line-height:1;letter-spacing:-.045em;font-variation-settings:"wght" 720,"wdth" 86;margin-top:12px}
-.pg .hero .lines{display:flex;flex-direction:column;gap:3px;margin-top:12px;font-size:15px;font-variation-settings:"wght" 560,"wdth" 100}
-.pg .hero .lines span{color:var(--hero-soft)}
-.pg .hero .lines b{color:var(--hero-ink);font-variation-settings:"wght" 700,"wdth" 100}
-.pg .hero .chart{flex:1 1 150px;display:flex;min-height:150px;margin:0 -26px;padding-top:14px}
-.pg .hero .chart svg{height:100%;min-height:150px;align-self:stretch}
-.pg .hero .tag{background:rgba(255,229,138,.16);color:#FFE58A}
-/* Autres comptes */
-.pg .rows{display:flex;flex-direction:column;margin-top:8px}
-.pg .row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;padding:7px 8px;margin:0 -8px;border-radius:10px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
-.pg .row:hover{background:var(--surface-2)}
-.pg .row .n{display:flex;align-items:center;gap:7px;font-size:14px;font-variation-settings:"wght" 650,"wdth" 100;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pg .row .v{font-size:14px;font-variation-settings:"wght" 600,"wdth" 95;text-align:right}
-.pg .row .p{grid-column:1/-1;font-size:12px;color:var(--ink-mute);padding-left:16px}
-.pg .row .p b{font-variation-settings:"wght" 700,"wdth" 100}
-/* Rythme */
-.pg .cells{display:flex;gap:4px;margin-top:auto}
-.pg .cells i{flex:1 1 0;height:24px;border-radius:5px;background:var(--line)}
-.pg .cells i.on{background:var(--d-blue)}
-.pg .axis{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-mute);margin-top:5px}
-/* Bilan */
-.pg .sect{display:flex;align-items:baseline;gap:12px;margin:30px 0 12px}
-.pg .sect h2{font-size:20px;letter-spacing:-.02em;font-variation-settings:"wght" 700,"wdth" 92}
-.pg .yr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px 12px;padding:8px 0;border-top:1px solid var(--line-2)}
-.pg .yr:first-of-type{border-top:0}
-.pg .yr .y{font-size:15px;font-variation-settings:"wght" 700,"wdth" 100}
-.pg .yr .bar{height:8px;border-radius:4px;background:var(--line-2);overflow:hidden}
-.pg .yr .bar i{display:block;height:100%;border-radius:4px}
-.pg .yr .r{font-size:17px;font-variation-settings:"wght" 700,"wdth" 90;text-align:right}
-.pg .yr .s{grid-column:2/-1;font-size:12px;color:var(--ink-mute)}
-.pg .yr.best .r{color:var(--d-violet)}
-.pg .gauge{position:relative;height:16px;border-radius:8px;background:var(--line-2);margin:26px 0 6px}
-.pg .gauge .fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:var(--d-amber)}
-.pg .gauge .ghost{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:color-mix(in oklab, var(--d-amber) 30%, transparent)}
-.pg .gauge .mark{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink)}
-.pg .gauge .mark span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:11.5px;white-space:nowrap;font-variation-settings:"wght" 700,"wdth" 100}
-.pg .kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-top:1px solid var(--line-2)}
-.pg .kv b{font-variation-settings:"wght" 700,"wdth" 95}
-.pg .rank{display:grid;grid-template-columns:18px minmax(0,1fr) 72px 58px;align-items:center;gap:8px;padding:4px 0;font-size:13px}
-.pg .rank .i{color:var(--ink-mute);font-size:12px;font-variation-settings:"wght" 700,"wdth" 100}
-.pg .rank .k{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variation-settings:"wght" 620,"wdth" 100}
-.pg .rank .b{height:7px;border-radius:4px}
-.pg .rank .r{text-align:right;font-variation-settings:"wght" 700,"wdth" 95}
-.pg .rank.all .k{color:var(--d-blue)}
-.pg .legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:8px}
-.pg .legend2 i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
-/* ---------- Progrès : sobre au repos, fantaisie au survol ----------
-   Chaque tuile a son propre comportement, joué seulement quand le curseur la survole.
-   Tout est en CSS : le rendu refait le DOM à chaque clic sans rien casser. */
-@property --pgk{syntax:'<integer>';inherits:false;initial-value:0}
-@property --pgu{syntax:'<integer>';inherits:false;initial-value:0}
-@counter-style pgpad3{system:numeric;symbols:"0" "1" "2" "3" "4" "5" "6" "7" "8" "9";pad:3 "0"}
-.pg .flip{display:inline-flex;align-items:flex-start;line-height:1}
+.pg svg text{font-family:"Archivo",system-ui,sans-serif}
+.pg .t svg circle,.pg .t svg g,.pg .t svg line{transform-box:fill-box;transform-origin:center}
+/* Patrimoine */
+.pg .t-pat{background:var(--pg-hero);color:#FFFFFF;padding:30px 32px 0;overflow:hidden;border-radius:28px}
+.pg .t-pat .lbl{font-size:18px;color:rgba(255,255,255,.6)}
+.pg .t-pat .lbl::before{display:none}
+.pg .flip{margin-top:14px;font-weight:700;font-size:clamp(64px,7.4vw,104px);line-height:.9!important;letter-spacing:-.045em;display:inline-flex;align-items:flex-start}
 .pg .fd{display:inline-block;height:1em;overflow:hidden;vertical-align:top}
 .pg .fs{display:flex;flex-direction:column;transform:translateY(calc(var(--i) * -1em))}
 .pg .fs>span{display:block;height:1em;line-height:1}
 .pg .fx{display:inline-block;white-space:pre}
-.pg .cnt{--pgk:var(--k);--pgu:var(--u);counter-reset:pgk var(--pgk) pgu var(--pgu)}
-.pg .mring{opacity:0}
-.pg .cnt .ck::after{content:counter(pgk)}
-.pg .cnt .cu::after{content:counter(pgu,pgpad3)}
-.pg .cnt.small .cu::after{content:counter(pgu)}
-.pg .cells{position:relative}
-.pg .ball{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--d-amber);box-shadow:0 2px 6px rgba(0,0,0,.25);opacity:0;pointer-events:none;z-index:2}
-.pg .rw{position:absolute;top:-30px;width:0;height:0;pointer-events:none;z-index:3}
-.pg .rw b{position:absolute;left:0;top:0;width:7px;height:7px;border-radius:2px;opacity:0}
-.pg .rw .lbl{position:absolute;left:0;top:-26px;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-variation-settings:"wght" 800,"wdth" 100;color:var(--d-blue);opacity:0}
-.pg .rw8 .lbl{font-size:14px;color:var(--d-violet)} .pg .rw12 .lbl{font-size:17px;color:var(--d-gold)}
-.pg .burst{opacity:0}
-.pg .waouh{position:absolute;right:20px;top:54px;padding:4px 10px;border-radius:999px;background:var(--d-blue);color:#FFFFFF;font-size:12px;font-variation-settings:"wght" 800,"wdth" 100;opacity:0;pointer-events:none}
-.pg .yr{position:relative}
-.pg .crown{position:absolute;left:4px;top:10px;font-size:15px;color:var(--d-gold);opacity:0;pointer-events:none}
-.pg .gauge .glbl{position:absolute;top:22px;transform:translateX(-50%);font-size:11.5px;white-space:nowrap;color:var(--d-amber);font-variation-settings:"wght" 800,"wdth" 100;opacity:0}
-.pg .medal{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font-size:10.5px;color:#FFFFFF;font-variation-settings:"wght" 800,"wdth" 100}
-.pg .medal.m1{background:#D9A100}.pg .medal.m2{background:#9AA3B2}.pg .medal.m3{background:#C46E2F}
-@keyframes pgdraw{from{stroke-dasharray:100;stroke-dashoffset:100}to{stroke-dasharray:100;stroke-dashoffset:0}}
-@keyframes pgreveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-@keyframes pgfade{from{opacity:0}to{opacity:1}}
-@keyframes pgpop{0%{opacity:0;transform:scale(0)}70%{opacity:1;transform:scale(1.35)}100%{opacity:1;transform:scale(1)}}
-@keyframes pgbigpop{0%{opacity:0;transform:scale(0)}55%{opacity:1;transform:scale(1.9)}75%{transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
-@keyframes pgring{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(2.6)}}
-@keyframes pghalo{0%,100%{stroke-width:2.5;stroke-opacity:1}50%{stroke-width:9;stroke-opacity:.35}}
-@keyframes pgbreathe{0%,100%{opacity:1}50%{opacity:.55}}
-@keyframes pgflow{from{stroke-dasharray:1.6 2.2;stroke-dashoffset:0}to{stroke-dasharray:1.6 2.2;stroke-dashoffset:-7.6}}
-@keyframes pgroll{from{transform:translateY(0)}to{transform:translateY(calc(var(--i) * -1em))}}
-@keyframes pgcount{from{--pgk:0;--pgu:0}}
-@keyframes pgsheen{from{background-position:-150% 0}to{background-position:250% 0}}
-@keyframes pgsweep{0%{background-position:-60% 0}100%{background-position:160% 0}}
-@keyframes pgshake{0%,100%{transform:none}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
-@keyframes pgglow{0%,100%{text-shadow:none}50%{text-shadow:0 0 10px color-mix(in oklab, var(--down) 45%, transparent)}}
-@keyframes pgslide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
-@keyframes pgrise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
-@keyframes pggrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@keyframes pgdim{to{opacity:.38;filter:grayscale(1)}}
-@keyframes pgcrown{0%{opacity:0;transform:translateY(0) scale(.3) rotate(-30deg)}60%{opacity:1;transform:translateY(-20px) scale(1.3) rotate(8deg)}100%{opacity:1;transform:translateY(-16px) scale(1) rotate(0)}}
-@keyframes pgfloat{0%,100%{transform:translateY(-16px)}50%{transform:translateY(-21px)}}
-@keyframes pgmedal{0%{opacity:0;transform:scale(0) rotate(-180deg)}70%{opacity:1;transform:scale(1.3) rotate(10deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
-@keyframes pgrays{0%{opacity:0;transform:scale(.3)}30%{opacity:1}100%{opacity:0;transform:scale(1.5)}}
-@keyframes pgspark{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
-@keyframes pgwaouh{0%{opacity:0;transform:translateY(6px) scale(.7)}25%{opacity:1;transform:translateY(-2px) scale(1.15)}40%{transform:none}85%{opacity:1}100%{opacity:0}}
+.pg .chip-rec{position:relative;overflow:visible;display:inline-flex;align-items:center;gap:10px;padding:9px 16px;border-radius:999px;background:rgba(143,240,194,.14);color:#8FF0C2;font-weight:700;font-size:17px}
+.pg .chip-rec>i:not(.confetti){display:inline-block;width:9px;height:9px;border-radius:50%;background:#8FF0C2}
+.pg .confetti{position:absolute;inset:0;display:block;pointer-events:none}
+.pg .confetti b{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:2px;opacity:0}
+.pg .recap{margin-top:14px;font-weight:600;font-size:15px;color:#8FB3FF}
+.pg .rng{display:flex;gap:6px}
+.pg .rng button{padding:7px 13px;border-radius:999px;border:0;font:inherit;font-weight:600;font-size:13.5px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);cursor:pointer}
+.pg .rng button.on{background:#FFFFFF;color:#14181F}
+.pg .pat-chart{position:absolute;left:0;right:0;bottom:0}
+/* Plus gros compte */
+.pg .badge-rec{padding:4px 10px;border-radius:999px;background:#DFF3E7;color:#0C6B42;font-size:12.5px;font-weight:700;white-space:nowrap}
+html[data-theme="dark"] .pg .badge-rec{background:#12301F;color:#3FBF8F}
+.pg .pea-chart{position:relative}
+.pg .pea-gain{position:absolute;font-size:13px;font-weight:700;color:var(--pg-orange);white-space:nowrap;opacity:0;pointer-events:none;counter-reset:pgk var(--pgk) pgu var(--pgu)}
+.pg .pea-gain .ck::after{content:counter(pgk)}
+.pg .pea-gain .cu::after{content:counter(pgu,pgpad3)}
+.pg .pea-gain.small .cu::after{content:counter(pgu)}
+@property --pgk{syntax:'<integer>';inherits:false;initial-value:0}
+@property --pgu{syntax:'<integer>';inherits:false;initial-value:0}
+@counter-style pgpad3{system:numeric;symbols:"0" "1" "2" "3" "4" "5" "6" "7" "8" "9";pad:3 "0"}
+/* Autres comptes */
+.pg .row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:7px 0;border:0;border-top:1px solid var(--pg-line);border-radius:10px;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
+.pg .row:first-child{border-top-color:transparent}
+.pg .row .nm{display:flex;flex-direction:column;gap:1px;min-width:0}
+.pg .row .nm>span:first-child{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg .row .nm>span:last-child{font-size:13px;color:var(--pg-faint)}
+.pg .row .star{color:var(--pg-star);font-size:13px;display:inline-block}
+.pg .row>b{font-weight:700;font-size:16px}
+/* Rythme */
+.pg .cells{position:relative;display:flex;gap:4px}
+.pg .cell{display:block;flex:1 1 0;height:30px;border-radius:4px;background:var(--pg-trk)}
+.pg .cell.on{background:var(--pg-blue)}
+.pg .ball{position:absolute;width:12px;height:12px;border-radius:50%;background:#1F5FD1;left:0;top:-12px;opacity:0;box-shadow:inset -2px -3px 0 rgba(0,0,0,.18);pointer-events:none}
+.pg .rw{position:absolute;top:-34px;width:0;height:0;pointer-events:none}
+.pg .rw-parts b{position:absolute;left:0;top:0;width:7px;height:7px;border-radius:2px;opacity:0}
+.pg .rw8 .rw-parts b{width:8px;height:8px} .pg .rw12 .rw-parts b{width:9px;height:9px;border-radius:50%}
+.pg .rw-lbl{position:absolute;left:0;top:-30px;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:900;color:#1F5FD1;opacity:0}
+.pg .rw8 .rw-lbl{font-size:14px;color:#5B4BC4} .pg .rw12 .rw-lbl{font-size:17px;color:#B07D00}
+.pg .pause{padding:4px 10px;border-radius:999px;background:#FFE9D1;color:#9A4A00;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pg .pause.go{background:#E4EEFB;color:#1D5BA8}
+html[data-theme="dark"] .pg .pause{background:#33241A;color:#F2B27A}
+html[data-theme="dark"] .pg .pause.go{background:#1C2A40;color:#9CC4F5}
+/* Qui fait grossir */
+.pg .waouh{display:block;height:0;overflow:visible;opacity:0;font-size:13px;font-weight:800;color:#1F5FD1;pointer-events:none}
+.pg .burst{pointer-events:none}
+.pg .burst .ring{stroke:#1F5FD1;stroke-width:3;opacity:0}
+.pg .burst .rays line{stroke:#E2A400;stroke-width:3;stroke-linecap:round;opacity:0}
+.pg .burst .spark{fill:#1F5FD1;opacity:0}
+.pg .lgd{margin-top:8px;display:flex;gap:16px;font-size:13px;font-weight:600;color:var(--pg-muted)}
+.pg .lgd i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px}
+/* Années */
+.pg .cols{display:flex;gap:10px}
+.pg .col{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pg .col>b{font-size:16px}
+.pg .col .bx{width:46px;height:100px;display:flex;align-items:flex-end}
+.pg .col .bar{display:block;width:100%;border-radius:6px 6px 0 0}
+.pg .col .y{font-weight:600;font-size:14px}
+.pg .col .v{font-size:12.5px;color:var(--pg-faint)}
+.pg .crown{display:block;height:0;overflow:visible;opacity:0;font-size:22px;color:#E2A400;transform:translateY(-30px);pointer-events:none}
+/* Réserve */
+.pg .gz{position:relative;height:34px;margin-top:4px}
+.pg .gz>div{position:absolute;left:0;top:8px;height:14px;border-radius:7px}
+.pg .gz .gzgoal{top:2px;width:2px;height:26px;border-radius:0;background:var(--pg-goal)}
+.pg .ghost-lbl{position:absolute;top:-22px;margin-left:-26px;font-size:12px;font-weight:800;color:#8A4E00;opacity:0;white-space:nowrap;pointer-events:none}
+html[data-theme="dark"] .pg .ghost-lbl{color:#E0B04A}
+.pg .gzl{position:relative;height:18px;font-size:12.5px;font-weight:600;color:var(--pg-muted)}
+.pg .gzl span{position:absolute}
+.pg .kv{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.pg .kv span{font-weight:600;color:var(--pg-muted)}
+.pg .tip{margin-top:12px;padding:10px 12px;border-radius:12px;background:#FFE9D1;color:#6E3500;font-size:13.5px;font-weight:600}
+html[data-theme="dark"] .pg .tip{background:#33241A;color:#F2B27A}
+/* Où tu vas */
+.pg .mk{fill:var(--pg-tile);stroke:var(--pg-blue);stroke-width:2.5}
+.pg .mk.big{stroke-width:3}
+.pg .mring{stroke:var(--pg-blue);stroke-width:3;opacity:0}
+.pg .mlbl{font-size:12px;font-weight:800;fill:#1D5BA8}
+html[data-theme="dark"] .pg .mlbl{fill:#9CC4F5}
+/* Face aux marchés */
+.pg .mrow{position:relative;display:grid;grid-template-columns:108px minmax(0,1fr) 62px;gap:10px;align-items:center;height:22px}
+.pg .mrow>span{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg .mrow>b{text-align:right;font-size:13.5px}
+.pg .mrow .mbx{height:10px}
+.pg .mbar{display:block;height:100%;border-radius:3px;background:var(--pg-blue)}
+.pg .medal{position:absolute;left:-23px;top:50%;width:17px;height:17px;margin-top:-8.5px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;color:#fff;opacity:0;transform:scale(0);pointer-events:none}
+.pg .medal.gold{background:radial-gradient(circle at 35% 30%,#FFE58A,#E2A400 60%,#B07D00)}
+.pg .medal.silver{background:radial-gradient(circle at 35% 30%,#E6EAF0,#9AA3B2 60%,#6B7380)}
+.pg .medal.bronze{background:radial-gradient(circle at 35% 30%,#F3B98A,#C46E2F 60%,#8E4A1A)}
+.pg .medal::before{content:"";position:absolute;inset:-9px;border-radius:50%;opacity:.9;z-index:-1}
+.pg .medal.gold::before{background:repeating-conic-gradient(rgba(226,164,0,.55) 0 10deg,transparent 10deg 30deg)}
+.pg .medal.silver::before{background:repeating-conic-gradient(rgba(154,163,178,.5) 0 10deg,transparent 10deg 30deg)}
+.pg .medal.bronze::before{background:repeating-conic-gradient(rgba(196,110,47,.5) 0 10deg,transparent 10deg 30deg)}
+
+@keyframes pg-draw{from{stroke-dasharray:100;stroke-dashoffset:100}to{stroke-dasharray:100;stroke-dashoffset:0}}
+@keyframes pg-fade{from{opacity:0}to{opacity:1}}
+@keyframes pg-pop{0%{transform:scale(0)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes pg-popin{0%{opacity:0;transform:scale(0)}70%{opacity:1;transform:scale(1.35)}100%{opacity:1;transform:scale(1)}}
+@keyframes pg-bigpopin{0%{opacity:0;transform:scale(0)}55%{opacity:1;transform:scale(1.9)}75%{transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
+@keyframes pg-bigpop{0%{transform:scale(0)}55%{transform:scale(2.3)}75%{transform:scale(.85)}100%{transform:scale(1)}}
+@keyframes pg-rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes pg-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pg-slide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes pg-halo{0%,100%{stroke-width:2;stroke-opacity:1}50%{stroke-width:9;stroke-opacity:.35}}
+@keyframes pg-breathe{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes pg-flow{from{stroke-dasharray:1.6 2.2;stroke-dashoffset:0}to{stroke-dasharray:1.6 2.2;stroke-dashoffset:-7.6}}
+@keyframes pg-twinkle{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.4) rotate(18deg)}}
+@keyframes pg-glowtxt{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 10px rgba(19,135,94,.45),0 0 2px rgba(19,135,94,.45)}}
+@keyframes pg-glowneg{0%,100%{text-shadow:none}50%{text-shadow:0 0 10px rgba(208,69,60,.35)}}
+@keyframes pg-sheen{from{background-position:-150% 0}to{background-position:250% 0}}
+@keyframes pg-confetti{0%{opacity:1;transform:translate(-50%,-50%) rotate(0)}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r))}}
+@keyframes pg-ring{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(2.6)}}
+@keyframes pg-rays{0%{opacity:0;transform:scale(.3)}30%{opacity:1}100%{opacity:0;transform:scale(1.5)}}
+@keyframes pg-spark{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
+@keyframes pg-waouh{0%{opacity:0;transform:translateY(6px) scale(.7)}25%{opacity:1;transform:translateY(-2px) scale(1.15)}40%{transform:none}85%{opacity:1}100%{opacity:0}}
+@keyframes pg-crown{0%{opacity:0;transform:translateY(-10px) scale(.3) rotate(-30deg)}60%{opacity:1;transform:translateY(-36px) scale(1.3) rotate(8deg)}100%{opacity:1;transform:translateY(-30px) scale(1) rotate(0)}}
+@keyframes pg-floaty{0%,100%{transform:translateY(-30px)}50%{transform:translateY(-36px)}}
+@keyframes pg-dim{to{opacity:.32;filter:grayscale(1)}}
+@keyframes pg-lift{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.06)}}
+@keyframes pg-medal{0%{opacity:0;transform:scale(0) rotate(-180deg)}70%{opacity:1;transform:scale(1.3) rotate(10deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes pg-spin{to{transform:rotate(360deg)}}
+@keyframes pg-roll{from{transform:translateY(0)}to{transform:translateY(calc(var(--i) * -1em))}}
+@keyframes pg-sweep{0%{background-position:-60% 0}100%{background-position:160% 0}}
+@keyframes pg-shake{0%,100%{transform:none}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+@keyframes pg-count{from{--pgk:0;--pgu:0}to{--pgk:var(--k);--pgu:var(--u)}}
+
 @media (prefers-reduced-motion:no-preference){
-  /* Patrimoine : le compteur tourne pendant que la courbe se dévoile, au même rythme. */
-  .pg .t-pat:hover .fs{animation:pgroll 1.3s cubic-bezier(.3,.7,.2,1) both}
-  .pg .t-pat:hover .rv{animation:pgreveal 1.3s cubic-bezier(.3,.7,.2,1) both}
-  .pg .t:hover .tag{background-image:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);background-size:200% 100%;animation:pgsheen 1.6s .2s ease-in-out infinite}
-  /* Plus gros compte : les gains comptent pendant le tracé. */
-  .pg .t-top:hover .rv{animation:pgreveal 1.2s ease-out both}
-  .pg .t-top:hover .cnt{animation:pgcount 1.2s cubic-bezier(.2,.6,.3,1) both}
-  /* Autres comptes : un balayage pour les belles perfs, la baisse qui tremble. */
-  .pg .t-autres:hover .row{animation:pgslide .35s calc(var(--n) * 70ms) ease-out both}
-  .pg .t-autres:hover .row.sweep{background-image:linear-gradient(90deg,transparent 20%,color-mix(in oklab, var(--up) 22%, transparent) 45%,color-mix(in oklab, var(--up) 32%, transparent) 50%,color-mix(in oklab, var(--up) 22%, transparent) 55%,transparent 80%);background-size:60% 100%;background-repeat:no-repeat;animation:pgslide .35s calc(var(--n) * 70ms) ease-out both, pgsweep 1.6s .5s cubic-bezier(.6,0,.4,1) infinite}
-  .pg .t-autres:hover .row b.down{display:inline-block;animation:pgshake .4s .5s 2, pgglow 1.8s 1.3s ease-in-out infinite}
-  /* Rythme : les cases montent, la balle rebondit et tombe dans le premier trou. */
-  .pg .t-rythme:hover .cells i{transform-origin:bottom;animation:pgrise .3s calc(var(--n) * 45ms) ease-out both}
-  .pg .t-rythme:hover .cells i:not(.on){box-shadow:inset 0 3px 5px rgba(17,19,24,.22)}
-  /* Qui fait grossir : la courbe des placements rattrape celle des versements, et ça explose. */
-  .pg .t-qui:hover .ln-v{animation:pgdraw 1.1s ease-out both}
-  .pg .t-qui:hover .ln-g{animation:pgdraw 2.6s .3s linear both}
-  .pg .t-qui:hover .burst{opacity:1}
-  .pg .t-qui:hover .burst .dotx{transform-box:fill-box;transform-origin:center;animation:pgbigpop .7s var(--t) both, pghalo 1.8s calc(var(--t) + .8s) ease-in-out infinite}
-  .pg .t-qui:hover .burst .ringx{transform-box:fill-box;transform-origin:center;opacity:0;animation:pgring .9s var(--t) ease-out forwards}
-  .pg .t-qui:hover .burst .rays{transform-box:fill-box;transform-origin:center;opacity:0;animation:pgrays .8s var(--t) ease-out forwards}
-  .pg .t-qui:hover .burst .spark{opacity:0;animation:pgspark .9s var(--t) ease-out forwards}
-  .pg .t-qui:hover .waouh{animation:pgwaouh 2.6s var(--t) ease-out both}
-  /* Années : la meilleure brille et prend la couronne, les autres s'effacent. */
-  .pg .t-annees:hover .yr .bar i{transform-origin:left;animation:pggrow .55s calc(var(--n) * 120ms) cubic-bezier(.3,1.4,.5,1) both}
-  .pg .t-annees:hover .yr.dimmable{animation:pgdim .5s .7s both}
-  .pg .t-annees:hover .yr.best .bar i{background:linear-gradient(100deg,var(--d-violet) 30%,#B9AEFF 50%,var(--d-violet) 70%)!important;background-size:250% 100%!important;box-shadow:0 0 14px color-mix(in oklab, var(--d-violet) 50%, transparent);animation:pggrow .55s cubic-bezier(.3,1.4,.5,1) both, pgsheen 2s .8s linear infinite}
-  .pg .t-annees:hover .crown{animation:pgcrown .7s .7s cubic-bezier(.3,1.4,.5,1) both, pgfloat 2s 1.5s ease-in-out infinite}
-  .pg .t-annees:hover .yr.best .r{transform:scale(1.15);transform-origin:right;transition:transform .3s .6s}
-  /* Réserve : la jauge se remplit, puis ce que donnerait l'argent qui dort. */
+  /* 1 · Patrimoine : le compteur tourne pendant que la courbe se trace ; la boule respire, le record jette des confettis. */
+  .pg .t-pat:hover .fs{animation:pg-roll 1.3s cubic-bezier(.3,.7,.2,1) both}
+  .pg .t-pat:hover .ln{animation:pg-draw 1.3s cubic-bezier(.3,.7,.2,1) both}
+  .pg .t-pat:hover .ar{animation:pg-fade 1s .3s both, pg-breathe 3s 1.4s ease-in-out infinite}
+  .pg .t-pat:hover .dot{animation:pg-pop .45s 1.1s both, pg-halo 2s 1.6s ease-in-out infinite}
+  .pg .t-pat:hover .chip-rec{background-image:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);background-size:200% 100%;animation:pg-sheen 1.6s .2s ease-in-out infinite}
+  .pg .t-pat:hover .confetti b{animation:pg-confetti 1.1s var(--d) ease-out both}
+  /* 2 · Plus gros compte : la valeur se trace, l'écart respire, les gains comptent pendant le tracé. */
+  .pg .t-pea:hover .ln{animation:pg-draw 1.2s ease-out both}
+  .pg .t-pea:hover .ar{animation:pg-fade .8s .7s both, pg-breathe 2.6s 1.5s ease-in-out infinite}
+  .pg .t-pea:hover .dot{animation:pg-pop .4s 1s both, pg-halo 2s 1.4s ease-in-out infinite}
+  .pg .t-pea:hover .badge-rec{background-image:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.9) 50%,transparent 70%);background-size:200% 100%;animation:pg-sheen 1.4s ease-in-out infinite}
+  .pg .t-pea:hover .gain-svg{opacity:0}
+  .pg .t-pea:hover .pea-gain{animation:pg-fade .2s both, pg-count 1.2s cubic-bezier(.2,.6,.3,1) both}
+  /* 3 · Autres comptes : les lignes arrivent, les beaux rendements s'allument, un balayage pour les meilleurs, la baisse tremble. */
+  .pg .t-autres:hover .row{animation:pg-slide .35s calc(var(--n) * 70ms) ease-out both}
+  .pg .t-autres:hover .perf.good{color:var(--pg-pos);font-weight:800;transition:color .3s}
+  .pg .t-autres:hover .perf.best{font-size:14.5px;animation:pg-glowtxt 1.6s .5s ease-in-out infinite}
+  .pg .t-autres:hover .star{animation:pg-twinkle 1.6s ease-in-out infinite}
+  .pg .t-autres:hover .perf.dn{color:var(--pg-neg);font-weight:800;display:inline-block;animation:pg-shake .4s .5s 2, pg-glowneg 1.8s 1.3s ease-in-out infinite}
+  .pg .t-autres:hover .row.sweep{background-image:linear-gradient(90deg,transparent 0%,rgba(19,135,94,0) 20%,rgba(19,135,94,.22) 45%,rgba(19,135,94,.32) 50%,rgba(19,135,94,.22) 55%,transparent 80%);background-size:60% 100%;background-repeat:no-repeat;animation:pg-slide .35s calc(var(--n) * 70ms) ease-out both, pg-sweep 1.6s .5s cubic-bezier(.6,0,.4,1) infinite}
+  /* 4 · Rythme : les mois se remplissent, puis la balle rebondit de mois en mois jusqu'au premier trou. */
+  .pg .t-rythme:hover .cell{transform-origin:bottom;animation:pg-rise .3s calc(var(--n) * 45ms) ease-out both}
+  .pg .t-rythme:hover .cell:not(.on){background:#D9DCE2;box-shadow:inset 0 3px 5px rgba(17,19,24,.25)}
+  html[data-theme="dark"] .pg .t-rythme:hover .cell:not(.on){background:#1D222B}
+  .pg .t-rythme:hover .pause{display:inline-block;animation:pg-breathe 2.4s ease-in-out infinite}
+  /* 5 · Qui fait grossir : tes versements se tracent, tes placements les rattrapent au ralenti et explosent en passant devant. */
+  .pg .t-qui:hover .ln-vers{animation:pg-draw 1.1s ease-out both}
+  .pg .t-qui:hover .ln-plac{stroke-width:3.2;animation:pg-slow 3s .3s cubic-bezier(.4,0,.2,1) both}
+  .pg .t-qui:hover .dot.cross{animation:pg-bigpop .7s 2.35s both, pg-halo 1.8s 3.1s ease-in-out infinite}
+  .pg .t-qui:hover .burst .ring{animation:pg-ring .9s 2.35s ease-out forwards}
+  .pg .t-qui:hover .burst .rays line{animation:pg-rays .8s 2.4s ease-out forwards}
+  .pg .t-qui:hover .burst .spark{animation:pg-spark .9s 2.4s ease-out forwards}
+  .pg .t-qui:hover .cross-lbl{animation:pg-fade .3s 2.4s both}
+  .pg .t-qui:hover text:not(.cross-lbl){animation:pg-fade .4s 3s both}
+  .pg .t-qui:hover .waouh{animation:pg-waouh 2.6s 2.4s ease-out both}
+  /* 6 · Tes années : les barres poussent, les autres s'effacent, la meilleure s'élève, brille et reçoit sa couronne. */
+  .pg .t-annees:hover .bar{transform-origin:bottom;animation:pg-rise .55s calc(var(--n) * 120ms) cubic-bezier(.3,1.4,.5,1) both}
+  .pg .t-annees.crowned:hover .col:not(.best){animation:pg-dim .5s .7s both}
+  .pg .t-annees:hover .col.best .bar{background:linear-gradient(100deg,#5B4BC4 30%,#9C8CFF 50%,#5B4BC4 70%)!important;background-size:250% 100%!important;box-shadow:0 0 18px rgba(91,75,196,.45);animation:pg-rise .55s cubic-bezier(.3,1.4,.5,1) both, pg-sheen 2s .8s linear infinite, pg-lift 2.2s 1.2s ease-in-out infinite}
+  .pg .t-annees:hover .crown{animation:pg-crown .7s .7s cubic-bezier(.3,1.4,.5,1) both, pg-floaty 2s 1.5s ease-in-out infinite}
+  .pg .t-annees:hover .col.best>b{color:var(--pg-violet);transform:scale(1.15);transition:transform .3s .6s, color .3s .6s}
+  /* 7 · Réserve : la jauge se remplit jusqu'à aujourd'hui, puis s'étire vers ce que donnerait l'argent qui dort. */
   .pg .t-reserve:hover .fill,.pg .t-reserve:hover .ghost{transform-origin:left}
-  .pg .t-reserve:hover .fill{animation:pggrow .7s ease-out both}
-  .pg .t-reserve:hover .ghost{animation:pggrow .7s .7s ease-out both, pgbreathe 1.8s 1.5s ease-in-out infinite}
-  .pg .t-reserve:hover .glbl{animation:pgpop .4s 1.4s both}
-  .pg .t-reserve:hover .foot{animation:pgfade .4s 1.6s both}
-  /* Où vous allez : le passé à vitesse constante, l'avenir en accéléré, les paliers qui sautent. */
-  .pg .t-ouvas:hover .ln-past{animation:pgdraw 2.6s linear both}
-  .pg .t-ouvas:hover .ln-proj{animation:pgdraw 1.3s 2.6s cubic-bezier(.4,0,.9,1) both, pgflow 1.1s 4.2s linear infinite}
-  .pg .t-ouvas:hover .mk{transform-box:fill-box;transform-origin:center;animation:pgpop .45s var(--t) both}
-  .pg .t-ouvas:hover .mk.big{animation:pgbigpop .8s var(--t) both}
-  .pg .t-ouvas:hover .mk.end{animation:pgbigpop .7s var(--t) both, pghalo 2s calc(var(--t) + .8s) ease-in-out infinite}
-  .pg .t-ouvas:hover .mring{transform-box:fill-box;transform-origin:center;animation:pgring 1s var(--t) ease-out forwards}
-  .pg .t-ouvas:hover .mlbl{animation:pgfade .4s calc(var(--t) + .15s) both}
-  /* Face aux marchés : les barres partent, le podium reçoit ses médailles. */
-  .pg .t-marches:hover .rank .b{transform-origin:left;animation:pggrow .5s calc(var(--n) * 60ms) ease-out both}
-  .pg .t-marches:hover .medal{animation:pgmedal .7s .7s cubic-bezier(.3,1.4,.5,1) both}
-  .pg .t-marches:hover .rank.m1 .b{background:linear-gradient(100deg,#D9A100 30%,#FFE58A 50%,#D9A100 70%)!important;background-size:250% 100%!important;box-shadow:0 0 12px rgba(226,164,0,.5);animation:pggrow .5s both, pgsheen 1.8s .9s linear infinite}
+  .pg .t-reserve:hover .fill{animation:pg-grow .7s ease-out both}
+  .pg .t-reserve:hover .ghost{animation:pg-grow .7s .7s ease-out both, pg-breathe 1.8s 1.5s ease-in-out infinite}
+  .pg .t-reserve:hover .ghost-lbl{animation:pg-popin .4s 1.4s both}
+  .pg .t-reserve:hover .tip{animation:pg-fade .4s 1.6s both}
+  /* 8 · Où tu vas : le passé à vitesse constante, l'avenir en accéléré, chaque palier éclate, plus fort pour les gros. */
+  .pg .t-ouvas:hover .ln-past{animation:pg-draw var(--t) linear both}
+  .pg .t-ouvas:hover .ln-proj{animation:pg-draw var(--t) var(--t0) cubic-bezier(.4,0,.9,1) both, pg-flow 1.1s calc(var(--t0) + var(--t) + .3s) linear infinite}
+  .pg .t-ouvas:hover .mk{animation:pg-popin .45s var(--t) both}
+  .pg .t-ouvas:hover .mk.big{animation:pg-bigpopin .8s var(--t) both}
+  .pg .t-ouvas:hover .mk.end{animation:pg-bigpopin .7s var(--t) both, pg-halo 2s calc(var(--t) + .8s) ease-in-out infinite}
+  .pg .t-ouvas:hover .mring{animation:pg-ring 1s var(--t) ease-out forwards}
+  .pg .t-ouvas:hover .mlbl{animation:pg-fade .4s calc(var(--t) + .15s) both}
+  /* 9 · Face aux marchés : les barres s'allongent, le podium reçoit ses médailles qui rayonnent. */
+  .pg .t-marches:hover .mbar{transform-origin:left;animation:pg-grow .5s calc(var(--n) * 60ms) ease-out both}
+  .pg .t-marches:hover .medal{animation:pg-medal .7s .7s cubic-bezier(.3,1.4,.5,1) both}
+  .pg .t-marches:hover .medal::before{animation:pg-spin 6s linear infinite}
+  .pg .t-marches:hover .mrow.gold .mbar{background:linear-gradient(100deg,#E2A400 30%,#FFE58A 50%,#E2A400 70%)!important;background-size:250% 100%!important;box-shadow:0 0 12px rgba(226,164,0,.55);animation:pg-grow .5s both, pg-sheen 1.8s .9s linear infinite}
+  .pg .t-marches:hover .mrow.silver .mbar{background:linear-gradient(100deg,#9AA3B2 30%,#E6EAF0 50%,#9AA3B2 70%)!important;background-size:250% 100%!important;box-shadow:0 0 12px rgba(154,163,178,.5);animation:pg-grow .5s .06s both, pg-sheen 1.8s 1s linear infinite}
+  .pg .t-marches:hover .mrow.bronze .mbar{background:linear-gradient(100deg,#C46E2F 30%,#F3B98A 50%,#C46E2F 70%)!important;background-size:250% 100%!important;box-shadow:0 0 12px rgba(196,110,47,.5);animation:pg-grow .5s .12s both, pg-sheen 1.8s 1.1s linear infinite}
 }
 @media (max-width:1100px){
-  .pg .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .pg .bgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pg .top{height:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(320px,auto)}
+  .pg .t-pat{min-height:560px}
+  .pg .bil{height:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(330px,auto)}
 }
 @media (max-width:640px){
-  .pg .grid,.pg .bgrid{grid-template-columns:minmax(0,1fr)}
+  .pg .top,.pg .bil{grid-template-columns:minmax(0,1fr)}
   .pg .w2,.pg .h2{grid-column:auto;grid-row:auto}
 }
 </style>
@@ -6918,9 +6971,10 @@ function viewPatrimoineHome() {
 }
 
 /* ---- Progrès ---------------------------------------------------------------
-   Le nouvel accueil : d'abord ce qu'on a et comment ça bouge (patrimoine, plus gros
-   compte, autres comptes, rythme des versements), puis le bilan en faisant défiler.
-   Tout se calcule sur les données : aucun chiffre n'est propre à un utilisateur. */
+   Le nouvel accueil, reprise fidèle de la maquette validée : en haut ce qu'on a et comment
+   ça bouge (patrimoine, plus gros compte, autres comptes, rythme des versements), sur la
+   hauteur de l'écran ; le bilan vient en faisant défiler. Tout se calcule sur les données :
+   aucun chiffre n'est propre à un utilisateur. */
 const MOIS_COURTS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 function pgMonth(mk, withYear) { const [y, m] = mk.split("-"); return MOIS_COURTS[+m - 1] + (withYear ? " " + y : " " + y.slice(2)); }
 /* Performance enchaînée d'un compte, comparable d'un compte à l'autre et à un indice :
@@ -6936,32 +6990,32 @@ function pgAccountTWR(accountId, fromMk, toMk) {
 }
 function pgYearPerf(year, month) {
   const end = String(year) === month.slice(0, 4) ? month : year + "-12";
-  const from = (year - 1) + "-12";
-  const scope = patPerfAccounts().filter(a => patAccountValue(a.id, from) != null && patAccountValue(a.id, end) != null);
-  const twr = patTWR(from, end);
-  return { perf: twr ? twr.cumul : patScopedPerf(scope, from, end), end };
+  const twr = patTWR((year - 1) + "-12", end);
+  return twr ? twr.cumul : null;
 }
-function pgPath(vals, X, Y) { return vals.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" "); }
-function pgSigned(n) { return fmtEurShort(n).replace(/^-/, "−").replace(/^(?!−)/, n > 0.5 ? "+" : ""); }
+const pgF = n => n.toFixed(1);
+/* Courbe lissée, la même que dans les maquettes : chaque segment est une cubique dont les
+   points de contrôle sont à mi-chemin, ce qui arrondit sans dépasser les valeurs. */
+function pgCurve(pts) {
+  let d = "M" + pgF(pts[0][0]) + "," + pgF(pts[0][1]);
+  for (let i = 1; i < pts.length; i++) {
+    const cx = (pts[i - 1][0] + pts[i][0]) / 2;
+    d += " C" + pgF(cx) + "," + pgF(pts[i - 1][1]) + " " + pgF(cx) + "," + pgF(pts[i][1]) + " " + pgF(pts[i][0]) + "," + pgF(pts[i][1]);
+  }
+  return d;
+}
+function pgLine(pts) { return pts.map((p, i) => (i ? "L" : "M") + pgF(p[0]) + "," + pgF(p[1])).join(" "); }
+function pgSigned(n) { return (n < -0.5 ? "−" : n > 0.5 ? "+" : "") + fmtEurShort(Math.abs(n)); }
 function pgPct(n) { return n == null ? "—" : fmtPct(n); }
-
+function pgK(n) { return Math.round(n / 1000) + " k€"; }
 /* Un compteur à rouleaux : chaque chiffre est une bande de trente chiffres qui défile
    jusqu'au sien. Au repos la bande est déjà à sa place, seul le survol la fait tourner. */
 function pgFlip(text) {
-  return '<span class="flip">' + Array.from(text).map(ch => {
+  return Array.from(text).map(ch => {
     if (!/\d/.test(ch)) return '<span class="fx">' + esc(ch) + "</span>";
     let strip = ""; for (let i = 0; i < 30; i++) strip += "<span>" + (i % 10) + "</span>";
     return '<span class="fd"><span class="fs" style="--i:' + (20 + +ch) + '">' + strip + "</span></span>";
-  }).join("") + "</span>";
-}
-/* Un montant qui compte depuis zéro, en CSS : milliers et unités sont deux compteurs
-   entiers animés. Au-delà du million on renonce, le montant s'affiche tel quel. */
-function pgCount(n, cls, suffix) {
-  const g = Math.round(Math.abs(n)), sign = n < -0.5 ? "−" : n > 0.5 ? "+" : "";
-  if (g >= 1e6) return '<b class="' + cls + '">' + esc(pgSigned(n)) + "</b>" + suffix;
-  const k = Math.floor(g / 1000), u = g % 1000;
-  return '<b class="' + cls + " cnt" + (k ? "" : " small") + '" style="--k:' + k + ";--u:" + u + '">' + sign +
-    (k ? '<span class="ck"></span>\u202f' : "") + '<span class="cu"></span>\u00a0€</b>' + suffix;
+  }).join("");
 }
 /* La balle du rythme : elle rebondit de case en case tant que les versements se suivent
    depuis le début de la fenêtre, et tombe doucement dans le premier trou. Au quatrième,
@@ -6992,239 +7046,281 @@ function pgBall(paid) {
     k.push("100%{left:calc(50% - 6px);top:-86px;transform:scale(1.6);opacity:0}");
   }
   const cols = ["#2A78D6", "#E2A400", "#8FF0C2", "#E8743B", "#5B4BC4", "#FFE58A"];
-  let html = "", css = "@keyframes pgball{" + k.join("") + "}\n.pg .t-rythme:hover .ball{animation:pgball " + D.toFixed(2) + "s .7s linear infinite}\n";
+  let html = "", css = "@keyframes pg-ball{" + k.join("") + "}\n.pg .t-rythme:hover .ball{animation:pg-ball " + D.toFixed(2) + "s .7s linear infinite}\n";
   [4, 8, 12].filter(r => r <= n).forEach(r => {
     const t = r === 12 && hole < 0 ? start + 11 * P + 0.5 : start + (r - 1) * P + P / 2, at = t / D * 100;
     const x = r === 12 && hole < 0 ? 50 : cx(r - 1), w = Math.min(99, at + (r === 12 ? 22 : 12));
     const cnt = r === 4 ? 10 : r === 8 ? 16 : 26, dist = r === 4 ? 30 : r === 8 ? 46 : 70;
-    html += '<span class="rw rw' + r + '" style="left:' + x + '%">' + Array.from({ length: cnt }, (_, i) => {
+    html += '<span class="rw rw' + r + '" style="left:' + x + '%"><span class="rw-parts">' + Array.from({ length: cnt }, (_, i) => {
       const a = i / cnt * 2 * Math.PI, d = dist * (0.7 + (i % 3) * 0.15);
       return '<b style="background:' + cols[i % cols.length] + ";--dx:" + (Math.cos(a) * d).toFixed(0) + "px;--dy:" + (Math.sin(a) * d * 0.8).toFixed(0) + 'px"></b>';
-    }).join("") + '<span class="lbl">' + (r === 4 ? "4 mois !" : r === 8 ? "8 mois !!" : "12 mois sur 12 !") + "</span></span>";
-    const nm = "pgrw" + r;
+    }).join("") + '</span><span class="rw-lbl">' + (r === 4 ? "4 mois !" : r === 8 ? "8 mois !!" : "12 mois sur 12 !") + "</span></span>";
+    const nm = "pg-rw" + r;
     css += "@keyframes " + nm + "p{0%," + (at - 0.1).toFixed(2) + "%{opacity:0;transform:translate(0,0) scale(.4)}" + (at + 0.5).toFixed(2) + "%{opacity:1;transform:translate(0,0) scale(1)}" +
       w.toFixed(2) + "%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.6)}100%{opacity:0}}\n" +
       "@keyframes " + nm + "l{0%," + (at - 0.1).toFixed(2) + "%{opacity:0;transform:translate(-50%,0) scale(.4)}" + (at + 2).toFixed(2) + "%{opacity:1;transform:translate(-50%,-10px) scale(1.15)}" +
       (w - 2).toFixed(2) + "%{opacity:1;transform:translate(-50%,-14px) scale(1)}" + w.toFixed(2) + "%,100%{opacity:0}}\n" +
-      ".pg .t-rythme:hover .rw" + r + " b{animation:" + nm + "p " + D.toFixed(2) + "s .7s linear infinite}\n" +
-      ".pg .t-rythme:hover .rw" + r + " .lbl{animation:" + nm + "l " + D.toFixed(2) + "s .7s linear infinite}\n";
+      ".pg .t-rythme:hover .rw" + r + " .rw-parts b{animation:" + nm + "p " + D.toFixed(2) + "s .7s linear infinite}\n" +
+      ".pg .t-rythme:hover .rw" + r + " .rw-lbl{animation:" + nm + "l " + D.toFixed(2) + "s .7s linear infinite}\n";
   });
-  return { html: '<b class="ball"></b>' + html, css: "<style>@media (prefers-reduced-motion:no-preference){" + css + "}</style>" };
+  return { html: '<b class="ball"></b>' + html, css };
 }
+const PG_RANGES = [["3m", "3 mois", 3], ["1y", "1 an", 12], ["all", "Tout", 0]];
 
 function viewPatProgres() {
-  const month = UI.patMonth, year = +month.slice(0, 4);
+  const month = UI.patMonth, year = +month.slice(0, 4), mName = MONTHS[+month.slice(5) - 1];
   const accounts = DB.patAccounts || [];
-  let html = '<div class="pg">';
   /* L'état de la saisie : un chiffre du mois n'a de sens que si tous les comptes y sont. */
   const missing = patActiveAccounts().filter(a => (DB.patValues[a.id] || {})[month] == null).length;
-  html += patTopbar("Progrès", accounts.length ? '<button class="state' + (missing ? " todo" : "") + '" data-act="view" data-view="pat"><i></i>' +
-    (missing ? missing + (missing > 1 ? " comptes à saisir" : " compte à saisir") + " pour " + esc(pgMonth(month, true)) : "À jour") + "</button>" : "");
-  if (!accounts.length) return html + patNoAccounts("Ajoutez un compte dans l’onglet <b class='inl'>Comptes</b> pour voir vos progrès ici.") + "</div>";
+  const nextEnd = addMonth(month, 1), lastDay = new Date(+nextEnd.slice(0, 4), +nextEnd.slice(5), 0).getDate();
+  let html = '<div class="pg">' + patTopbar("Progrès", accounts.length ? '<button class="state' + (missing ? " todo" : "") + '" data-act="view" data-view="pat"><i></i>' +
+    (missing ? missing + (missing > 1 ? " comptes à saisir" : " compte à saisir") + " pour " + esc(mName)
+             : "À jour · prochaine saisie le " + lastDay + " " + esc(MOIS_COURTS[+nextEnd.slice(5) - 1])) + "</button>" : "");
+  if (!accounts.length) return html + patNoAccounts("Ajoute un compte dans l’onglet <b class='inl'>Comptes</b> pour voir tes progrès ici.") + "</div>";
 
   const months = allPatMonths(month), prevM = addMonth(month, -1), yAgo = addMonth(month, -12);
-  const net = patNetAt(month), netPrev = patNetAt(prevM);
-  const hasPrev = patHasHistoryAt(prevM), hasYear = patHasHistoryAt(yAgo);
+  const net = patNetAt(month), hasPrev = patHasHistoryAt(prevM), hasYear = patHasHistoryAt(yAgo);
   const perfM = patMonthlyPerf(null, month), ath = patATH(month);
   const twrYear = hasYear ? patTWR(yAgo, month) : null;
-  const twrAll = months.length > 1 ? patTWR(months[0], month) : null;
   const asm = patAssumptions(month);
+  html += '<div class="top">';
 
-  html += '<div class="grid">';
-  /* --- Le patrimoine --- */
-  const series = months.map(mk => patNetAt(mk));
-  const W = 600, H = 170, lo = Math.min(0, ...series), hi = Math.max(...series) * 1.08 || 1;
-  const X = i => series.length > 1 ? i * W / (series.length - 1) : W, Y = v => 8 + (1 - (v - lo) / (hi - lo)) * (H - 8);
-  const line = pgPath(series, X, Y);
-  html += '<div class="t hero w2 h2 t-pat"><div class="tl">' + (patHasDebt() ? "Votre patrimoine net" : "Votre patrimoine") +
-    (ath && ath.mk === month && net > 0 ? '<span class="tag">★ record</span>' : "") + "</div>" +
-    '<div class="amount num" aria-label="' + esc(fmtEurShort(net)) + '">' + pgFlip(fmtEurShort(net)) + "</div>" +
-    '<div class="lines">' +
-      (hasPrev ? "<span><b>" + esc(pgSigned(net - netPrev)) + "</b> en " + esc(MONTHS[+month.slice(5) - 1]) +
-        (perfM != null ? " · " + esc(pgPct(perfM)) + " de performance" : "") + "</span>" : "") +
-      (hasYear ? "<span><b>" + esc(pgSigned(net - patNetAt(yAgo))) + "</b> en un an" +
-        (twrYear ? " · " + esc(pgPct(twrYear.cumul)) : "") + "</span>" : "") +
-      (twrAll && twrAll.months >= 12 ? "<span><b>" + esc(fmtRate(twrAll.annualized)) + "</b> par an depuis " + esc(pgMonth(months[0], true)) + "</span>" : "") +
-    "</div>" +
-    (series.length > 1 ? '<div class="chart"><svg class="rv" viewBox="0 -4 ' + W + " " + (H + 4) + '" preserveAspectRatio="none" aria-hidden="true">' +
-      '<defs><linearGradient id="pgfill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8FB3FF" stop-opacity=".35"/><stop offset="1" stop-color="#8FB3FF" stop-opacity="0"/></linearGradient></defs>' +
-      '<path d="' + line + " L" + W + "," + H + " L0," + H + ' Z" fill="url(#pgfill)"/>' +
-      '<path d="' + line + '" fill="none" stroke="#8FB3FF" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></div>' : "") +
-    "</div>";
+  /* ======== 1 · Ton patrimoine ======== */
+  {
+    const rg = PG_RANGES.find(r => r[0] === (UI.pgRange || "1y")) || PG_RANGES[1];
+    const ser = (rg[2] ? months.slice(-(rg[2] + 1)) : months);
+    const vals = ser.map(mk => patNetAt(mk)), lo = Math.min(...vals), hi = Math.max(...vals);
+    const X = i => vals.length > 1 ? 20 + i * 536 / (vals.length - 1) : 556, Y = v => hi > lo ? 181 - (v - lo) / (hi - lo) * 146 : 108;
+    const pts = vals.map((v, i) => [X(i), Y(v)]), d = pgCurve(pts), last = pts[pts.length - 1];
+    const from = ser[0], twr = ser.length > 1 ? patTWR(from, month) : null, delta = net - patNetAt(from);
+    const rangeTxt = rg[0] === "3m" ? "en trois mois" : rg[0] === "1y" ? "en un an" : "depuis " + pgMonth(from, true);
+    const record = ath && ath.mk === month && net > 0;
+    const conf = Array.from({ length: 8 }, (_, i) => { const a = i * 45 * Math.PI / 180; return '<b style="background:' + ["#8FF0C2", "#FFE58A", "#8FB3FF", "#F3B98A"][i % 4] + ";--x:" + (Math.cos(a) * 70).toFixed(0) + "px;--y:" + (Math.sin(a) * 40 - 10).toFixed(0) + "px;--r:" + (i * 50) + "deg;--d:" + (300 + i * 25) + 'ms"></b>'; }).join("");
+    html += '<div class="t t-pat w2 h2"><span class="lbl">' + (patHasDebt() ? "Ton patrimoine net" : "Ton patrimoine") + "</span>" +
+      '<span class="flip" aria-label="' + esc(fmtEurShort(net)) + '">' + pgFlip(fmtEurShort(net)) + "</span>" +
+      '<div style="margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
+        (record ? '<span class="chip-rec"><i class="confetti">' + conf + "</i><i></i>Nouveau record</span>" : "") +
+        (hasPrev ? '<span style="font-weight:600;font-size:17px;color:rgba(255,255,255,.62)">' + esc(pgSigned(net - patNetAt(prevM))) + " en " + esc(mName) + (perfM != null ? " · " + esc(pgPct(perfM)) : "") + "</span>" : "") + "</div>" +
+      '<span class="recap">▶ Revoir le récap de ' + esc(mName) + "</span>" +
+      '<div style="margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:relative;z-index:1">' +
+        '<div class="rng">' + PG_RANGES.map(r => '<button class="' + (r === rg ? "on" : "") + '" data-act="pgrange" data-range="' + r[0] + '">' + r[1] + "</button>").join("") + "</div>" +
+        (ser.length > 1 ? '<span style="font-weight:700;font-size:20px">' + esc(pgSigned(delta)) + ' <span style="font-weight:600;font-size:15px;color:rgba(255,255,255,.55)">' + esc(rangeTxt) + (twr ? " · " + esc(pgPct(twr.cumul)) : "") + "</span></span>" : "") + "</div>" +
+      (vals.length > 1 ? '<div class="pat-chart"><svg viewBox="0 0 576 230" role="img" aria-label="Patrimoine ' + esc(rangeTxt) + '">' +
+        '<path class="ar" d="' + d + " L" + pgF(last[0]) + ",230 L20.0,230 Z" + '" fill="rgba(143,179,255,0.12)"/>' +
+        '<path class="ln" pathLength="100" d="' + d + '" fill="none" stroke="#8FB3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<circle class="dot" cx="' + pgF(last[0]) + '" cy="' + pgF(last[1]) + '" r="8" fill="#8FB3FF" stroke="#14181F" stroke-width="4"/></svg></div>' : "") +
+      "</div>";
+  }
 
-  /* --- Le plus gros compte, puis les autres --- */
+  /* ======== 2 · Le plus gros compte ======== */
   const ranked = patActiveAccounts().map(a => ({ a, v: patAccountValue(a.id, month) || 0, r: hasYear ? pgAccountTWR(a.id, yAgo, month) : null }))
     .filter(x => x.v > 0).sort((p, q) => q.v - p.v);
   const top = ranked[0];
   if (top) {
-    const hist = months.slice(-36).map(mk => patAccountValue(top.a.id, mk));
-    const firstI = hist.findIndex(v => v != null), vals = hist.slice(firstI).map(v => v || 0);
-    const inv = months.slice(-36).slice(firstI).map(mk => patInvested(top.a.id, mk));
-    const u = patUnrealized(top.a.id, month);
-    const accAth = Math.max(...vals) <= top.v + 0.5;
-    const w = 600, h = 120, hiA = Math.max(...vals, ...inv) * 1.08 || 1;
-    const xa = i => vals.length > 1 ? i * w / (vals.length - 1) : w, ya = v => 6 + (1 - v / hiA) * (h - 6);
-    html += '<button class="t w2 t-top" data-act="patopenacct" data-id="' + esc(top.a.id) + '"><div class="tl"><i class="dot" style="background:' + patAccountColor(top.a) + '"></i>' + esc(top.a.name) +
-      (accAth ? '<span class="tag">★ record</span>' : "") + '<span class="go">›</span></div>' +
-      '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="big num">' + esc(fmtEurShort(top.v)) + "</span>" +
-      (top.r != null ? '<span class="sub"><b class="' + (top.r >= 0 ? "up" : "down") + '">' + esc(pgPct(top.r)) + "</b> en un an</span>" : "") + "</div>" +
-      (vals.length > 1 ? '<svg class="rv" viewBox="0 0 ' + w + " " + (h + 4) + '" preserveAspectRatio="none" style="height:' + h + 'px;margin-top:auto" aria-hidden="true">' +
-        '<path d="' + pgPath(inv, xa, ya) + '" fill="none" stroke="var(--ink-mute)" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>' +
-        '<path d="' + pgPath(vals, xa, ya) + '" fill="none" stroke="' + patAccountColor(top.a) + '" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>' : "") +
-      '<div class="legend2"><span><i style="background:' + patAccountColor(top.a) + '"></i>valeur</span><span><i style="background:var(--ink-mute)"></i>versé</span>' +
-        (u ? '<span style="margin-left:auto">' + pgCount(u.gain, u.gain >= 0 ? "up" : "down", " " + (u.gain >= 0 ? "gagnés" : "perdus")) + "</span>" : "") + "</div></button>";
+    const ser = months.slice(-13).filter(mk => patAccountValue(top.a.id, mk) != null);
+    const vals = ser.map(mk => patAccountValue(top.a.id, mk)), inv = ser.map(mk => patInvested(top.a.id, mk));
+    const u = patUnrealized(top.a.id, month), accAth = vals.length && Math.max(...vals) <= top.v + 0.5 && vals.length > 1;
+    let chart = "";
+    if (vals.length > 1) {
+      const all = vals.concat(inv), lo = Math.min(...all), hi = Math.max(...all);
+      const X = i => 8 + i * 512 / (vals.length - 1), Y = v => hi > lo ? 127.5 - (v - lo) / (hi - lo) * 106 : 74;
+      const pv = vals.map((v, i) => [X(i), Y(v)]), pi = inv.map((v, i) => [X(i), Y(v)]), lv = pv[pv.length - 1], li = pi[pi.length - 1];
+      const area = pgCurve(pv) + " L" + pi.slice().reverse().map(p => pgF(p[0]) + "," + pgF(p[1])).join(" ") + " Z";
+      const gy = (lv[1] + li[1]) / 2 + 5;
+      chart = '<div class="pea-chart"><svg viewBox="0 0 528 150" role="img" aria-label="Valeur ' + esc(fmtEurShort(top.v)) + ", versé " + esc(fmtEurShort(inv[inv.length - 1])) + '">' +
+        '<path class="ar" d="' + area + '" fill="var(--pg-orange)" fill-opacity="0.1"/>' +
+        '<path class="ln" pathLength="100" d="' + pgCurve(pi) + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/>' +
+        '<path class="ln" pathLength="100" d="' + pgCurve(pv) + '" fill="none" stroke="var(--pg-orange)" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<circle class="dot" cx="' + pgF(lv[0]) + '" cy="' + pgF(lv[1]) + '" r="6" fill="var(--pg-orange)" stroke="var(--pg-tile)" stroke-width="2"/>' +
+        (u ? '<text class="gain-svg" x="' + pgF(lv[0] - 10) + '" y="' + pgF(gy) + '" text-anchor="end" font-size="13" font-weight="700" fill="var(--pg-orange)">' + esc(pgSigned(u.gain)) + (u.gain >= 0 ? " gagnés" : " perdus") + "</text>" : "") +
+        '<text x="' + pgF(li[0] - 10) + '" y="' + pgF(li[1] + 18) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--pg-faint)">versé</text></svg>';
+      if (u && Math.abs(u.gain) < 1e6) {
+        const g = Math.round(Math.abs(u.gain)), kk = Math.floor(g / 1000), uu = g % 1000;
+        chart += '<span class="pea-gain' + (kk ? "" : " small") + '" style="right:' + ((528 - (lv[0] - 10)) / 528 * 100).toFixed(2) + "%;top:" + ((gy - 14) / 150 * 100).toFixed(2) + "%;--k:" + kk + ";--u:" + uu + ";--pgk:" + kk + ";--pgu:" + uu + '">' +
+          (u.gain < 0 ? "−" : "+") + (kk ? '<span class="ck"></span> ' : "") + '<span class="cu"></span> € ' + (u.gain >= 0 ? "gagnés" : "perdus") + "</span>";
+      }
+      chart += "</div>";
+    }
+    html += '<button class="t t-pea w2" style="--dot:var(--pg-orange)" data-act="patopenacct" data-id="' + esc(top.a.id) + '">' +
+      '<div class="hd"><span class="lbl">' + esc(top.a.name) + (accAth ? '<span class="badge-rec">★ record</span>' : "") + '</span><span class="chev">›</span></div>' +
+      '<div style="margin-top:12px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap"><span style="font-weight:700;font-size:52px;line-height:.9;letter-spacing:-.045em">' + esc(fmtEurShort(top.v)) + "</span>" +
+        (top.r != null ? '<span style="padding-bottom:3px;font-weight:600;font-size:16px;color:var(--pg-muted)">' + esc(pgPct(top.r)) + " en un an</span>" : "") + "</div>" +
+      '<div class="sp"></div>' + chart + "</button>";
   }
-  const others = ranked.slice(1);
-  const bestOther = Math.max(...others.map(x => x.r == null ? -Infinity : x.r));
-  html += '<div class="t t-autres"><div class="tl">' + (top ? "Vos autres comptes" : "Vos comptes") + "</div>" +
-    (others.length ? '<div class="rows">' + others.slice(0, 6).map((x, i) =>
-      '<button class="row' + (x.r != null && (x.r >= 15 || (x.r > 0 && x.r === bestOther)) ? " sweep" : "") + '" style="--n:' + i + '" data-act="patopenacct" data-id="' + esc(x.a.id) + '"><span class="n">' + patSwatch(x.a, 9) + esc(x.a.name) + '</span><span class="v num">' + esc(fmtEurShort(x.v)) + "</span>" +
-        '<span class="p">' + (x.r == null ? "moins d’un an d’historique" : '<b class="' + (x.r >= 0 ? "up" : "down") + '">' + esc(pgPct(x.r)) + "</b> en un an") + "</span></button>").join("") + "</div>" +
-      (others.length > 6 ? '<div class="foot">et ' + (others.length - 6) + " autres dans Comptes</div>" : "")
-      : '<p class="foot">Un seul compte suivi pour l’instant.</p>') + "</div>";
 
-  /* --- Le rythme : les douze derniers mois, avec ou sans versement --- */
-  const last12 = Array.from({ length: 12 }, (_, i) => addMonth(month, i - 11));
-  const paid = last12.map(mk => patMovementsInMonth(null, mk) > 0.5);
-  let run = 0; for (let i = 11; i >= 0 && paid[i]; i--) run++;
-  let gap = 0; for (let i = 11; i >= 0 && !paid[i]; i--) gap++;
-  const lastPaid = paid.lastIndexOf(true);
-  const ball = pgBall(paid);
-  html += '<div class="t t-rythme"><div class="tl">Votre rythme</div>' + ball.css +
-    '<div class="big num">' + paid.filter(Boolean).length + ' mois</div><div class="sub">sur 12, avec un versement</div>' +
-    '<div class="cells" style="margin-top:16px">' + paid.map((p, i) => '<i class="' + (p ? "on" : "") + '" style="--n:' + i + '" title="' + esc(pgMonth(last12[i], true)) + '"></i>').join("") + ball.html + "</div>" +
-    '<div class="axis"><span>' + esc(MOIS_COURTS[+last12[0].slice(5) - 1]) + "</span><span>" + esc(MOIS_COURTS[+month.slice(5) - 1]) + "</span></div>" +
-    '<div class="foot" style="padding-top:8px">' + (run >= 2 ? run + " mois de suite" : run === 1 ? "Un versement ce mois-ci" :
-      lastPaid >= 0 ? "Pause depuis " + esc(MONTHS[+last12[lastPaid].slice(5) - 1]) : "Aucun versement sur un an") + "</div></div>";
+  /* ======== 3 · Tes autres comptes ======== */
+  {
+    const others = ranked.slice(1).slice(0, 5), best = Math.max(...others.map(x => x.r == null ? -Infinity : x.r));
+    html += '<div class="t t-autres" style="--dot:var(--pg-violet);padding-bottom:10px"><div class="hd"><span class="lbl">' + (top ? "Tes autres comptes" : "Tes comptes") + '</span><span class="chev">›</span></div>' +
+      '<div style="margin-top:8px">' + (others.length ? others.map((x, i) => {
+        const good = x.r != null && x.r >= 10, isBest = x.r != null && x.r > 0 && x.r === best;
+        return '<button class="row' + (isBest || (x.r != null && x.r >= 15) ? " sweep" : "") + '" style="--n:' + i + '" data-act="patopenacct" data-id="' + esc(x.a.id) + '">' +
+          '<span class="nm"><span>' + esc(x.a.name) + (good ? ' <span class="star">★</span>' : "") + "</span>" +
+          "<span>" + (x.r == null ? "moins d’un an d’historique" : '<b class="perf' + (good ? " good" : "") + (isBest ? " best" : "") + (x.r < 0 ? " dn" : "") + '">' + esc(pgPct(x.r)) + "</b> en un an") + "</span></span>" +
+          "<b>" + esc(fmtEurShort(x.v)) + "</b></button>";
+      }).join("") : '<p class="foot">Un seul compte suivi pour l’instant.</p>') + "</div></div>";
+  }
+
+  /* ======== 4 · Ton rythme ======== */
+  {
+    const last12 = Array.from({ length: 12 }, (_, i) => addMonth(month, i - 11));
+    const paid = last12.map(mk => patMovementsInMonth(null, mk) > 0.5);
+    let run = 0; for (let i = 11; i >= 0 && paid[i]; i--) run++;
+    const lastPaid = paid.lastIndexOf(true), ball = pgBall(paid);
+    html += '<div class="t t-rythme" style="--dot:var(--pg-blue)"><style>@media (prefers-reduced-motion:no-preference){' + ball.css + "}</style>" +
+      '<div class="hd"><span class="lbl">Ton rythme</span><span class="chev">›</span></div>' +
+      '<span style="margin-top:12px;font-weight:700;font-size:44px;line-height:.9;letter-spacing:-.045em">' + paid.filter(Boolean).length + " mois</span>" +
+      '<span style="margin-top:8px;font-weight:600;font-size:16px;color:var(--pg-muted)">sur 12, avec un versement</span>' +
+      /* Assez de hauteur libre au-dessus des cases pour que la balle ne passe jamais devant le texte. */
+      '<div class="sp" style="min-height:96px"></div>' +
+      '<div class="cells">' + ball.html + paid.map((p, i) => '<i class="cell' + (p ? " on" : "") + '" style="--n:' + i + '" title="' + esc(pgMonth(last12[i], true)) + '"></i>').join("") + "</div>" +
+      '<div style="margin-top:6px;display:flex;justify-content:space-between;font-size:12px;font-weight:500;color:var(--pg-faint)"><span>' + esc(MOIS_COURTS[+last12[0].slice(5) - 1]) + "</span><span>" + esc(MOIS_COURTS[+month.slice(5) - 1]) + "</span></div>" +
+      '<div style="margin-top:12px">' + (run >= 2 ? '<span class="pause go">' + run + " mois de suite</span>" : run === 1 ? '<span class="pause go">Un versement ce mois-ci</span>' :
+        '<span class="pause">' + (lastPaid >= 0 ? "Pause depuis " + esc(MONTHS[+last12[lastPaid].slice(5) - 1]) : "Aucun versement sur un an") + "</span>") + "</div></div>";
+  }
   html += "</div>";
 
-  /* ======================= Le bilan ======================= */
-  html += '<div class="sect"><h2>Votre bilan</h2><span class="tiny muted">à fin ' + esc(monthLabel(month)) + "</span></div>";
-  html += '<div class="bgrid">';
+  /* ======================= Ton bilan, en faisant défiler ======================= */
+  html += '<div class="bil-h"><h2>Ton bilan</h2><span>Ce qu’on regarde quand une question se pose.</span></div><div class="bil">';
 
-  /* --- Qui fait grossir le patrimoine : douze mois de versements contre douze mois de gains --- */
+  /* ======== 5 · Qui fait grossir ton patrimoine ======== */
   if (hasYear) {
-    let cv = 0, cg = 0;
-    const cumV = [0], cumG = [0];
-    last12.forEach(mk => {
-      const s = patSplit(addMonth(mk, -1), mk);
-      cv += s.versements; cg += s.perf; cumV.push(cv); cumG.push(cg);
-    });
-    const ws = 300, hs = 110, all = cumV.concat(cumG), lo2 = Math.min(0, ...all), hi2 = Math.max(...all, 1) * 1.1;
-    const xs = i => i * ws / 12, ys = v => 6 + (1 - (v - lo2) / (hi2 - lo2)) * (hs - 6);
-    const ahead = cg > cv;
-    /* Le moment où les placements passent devant : c'est là que la courbe explose. */
-    let burst = "", waouh = "";
+    const last12 = Array.from({ length: 12 }, (_, i) => addMonth(month, i - 11));
+    let cv = 0, cg = 0; const cumV = [0], cumG = [0];
+    last12.forEach(mk => { const s = patSplit(addMonth(mk, -1), mk); cv += s.versements; cg += s.perf; cumV.push(cv); cumG.push(cg); });
+    const all = cumV.concat(cumG), mx = Math.max(...all, 1), mn = Math.min(...all, 0);
+    const k = Math.min(85 / mx, mn < 0 ? 22 / -mn : Infinity), X = i => 6 + i * 250 / 12, Y = v => 103.2 - v * k;
+    const pV = cumV.map((v, i) => [X(i), Y(v)]), pG = cumG.map((v, i) => [X(i), Y(v)]);
+    /* Le moment où les placements passent devant : le dernier croisement franc. */
+    let cross = null;
     for (let i = 12; i >= 1; i--) {
       const d0 = cumG[i - 1] - cumV[i - 1], d1 = cumG[i] - cumV[i];
-      if (d0 < 0 && d1 > 0) {
-        const f = d0 / (d0 - d1), bx = xs(i - 1 + f), by = ys(cumV[i - 1] + f * (cumV[i] - cumV[i - 1]));
-        const t = (0.3 + 2.6 * (i - 1 + f) / 12).toFixed(2) + "s";
-        burst = '<g class="burst" style="--t:' + t + '">' +
-          '<circle class="ringx" cx="' + bx.toFixed(1) + '" cy="' + by.toFixed(1) + '" r="12" fill="none" stroke="var(--d-blue)" stroke-width="2.5"/>' +
-          '<g class="rays">' + Array.from({ length: 8 }, (_, j) => { const a = j * Math.PI / 4; return '<line x1="' + (bx + Math.cos(a) * 10).toFixed(1) + '" y1="' + (by + Math.sin(a) * 10).toFixed(1) + '" x2="' + (bx + Math.cos(a) * 22).toFixed(1) + '" y2="' + (by + Math.sin(a) * 22).toFixed(1) + '" stroke="var(--d-gold)" stroke-width="2.5" stroke-linecap="round"/>'; }).join("") + "</g>" +
-          Array.from({ length: 10 }, (_, j) => { const a = j / 10 * 2 * Math.PI; return '<circle class="spark" cx="' + bx.toFixed(1) + '" cy="' + by.toFixed(1) + '" r="2.4" fill="' + ["var(--d-blue)", "var(--d-gold)", "var(--up)"][j % 3] + '" style="--dx:' + (Math.cos(a) * 30).toFixed(0) + "px;--dy:" + (Math.sin(a) * 24).toFixed(0) + 'px"/>'; }).join("") +
-          '<circle class="dotx" cx="' + bx.toFixed(1) + '" cy="' + by.toFixed(1) + '" r="5.5" fill="var(--d-blue)" stroke="var(--surface)" stroke-width="2.5"/></g>';
-        waouh = '<span class="waouh" style="--t:' + t + '">Vos placements vous dépassent !</span>';
-        break;
-      }
+      if (d0 < 0 && d1 > 0) { const f = d0 / (d0 - d1); cross = { x: X(i - 1 + f), y: Y(cumV[i - 1] + f * (cumV[i] - cumV[i - 1])), mk: last12[i - 1] }; break; }
     }
-    html += '<div class="t t-qui">' + waouh + '<div class="tl"><i class="dot" style="background:var(--d-blue)"></i>Qui fait grossir votre patrimoine ?</div>' +
-      '<div class="head">' + (cg <= 0 ? "Vos versements portent tout" : ahead ? "Vos placements, plus que vous" : "Vous, plus que vos placements") + "</div>" +
-      '<svg viewBox="0 0 ' + ws + " " + (hs + 4) + '" style="margin-top:12px" aria-hidden="true">' +
-        (lo2 < 0 ? '<line x1="0" x2="' + ws + '" y1="' + ys(0).toFixed(1) + '" y2="' + ys(0).toFixed(1) + '" stroke="var(--line)"/>' : "") +
-        '<path class="ln-v" pathLength="100" d="' + pgPath(cumV, xs, ys) + '" fill="none" stroke="var(--d-grey)" stroke-width="2.5" stroke-linejoin="round"/>' +
-        '<path class="ln-g" pathLength="100" d="' + pgPath(cumG, xs, ys) + '" fill="none" stroke="var(--d-blue)" stroke-width="3" stroke-linejoin="round"/>' + burst + "</svg>" +
-      '<div class="legend2"><span><i style="background:var(--d-blue)"></i>vos placements <b>' + esc(pgSigned(cg)) + '</b></span><span><i style="background:var(--d-grey)"></i>vos versements <b>' + esc(fmtEurShort(cv)) + "</b></span></div>" +
-      '<div class="foot">cumulé sur les douze derniers mois</div></div>';
+    let svg = '<svg viewBox="0 0 320 140" role="img" aria-label="Sur douze mois : ' + esc(fmtEurShort(cv)) + " versés, " + esc(pgSigned(cg)) + ' grâce à tes placements">' +
+      '<line x1="6" x2="256" y1="103.2" y2="103.2" stroke="var(--pg-line)" stroke-width="1"/>' +
+      '<path class="ln ln-vers" pathLength="100" d="' + pgCurve(pV) + '" fill="none" stroke="var(--pg-grey)" stroke-width="2.5" stroke-linecap="round"/>' +
+      '<path class="ln ln-plac" pathLength="100" d="' + pgCurve(pG) + '" fill="none" stroke="var(--pg-blue)" stroke-width="2.5" stroke-linecap="round"/>';
+    let slow = "";
+    if (cross) {
+      /* Tracé au ralenti autour du croisement : la courbe y arrive vers 2,4 s, quel que soit
+         l'endroit où il tombe, pour que l'explosion parte au bon moment. */
+      const f = (cross.x - 6) / 250, o1 = Math.max(0, 100 - 87 * f), o2 = Math.max(0, 100 - 105 * f);
+      slow = "<style>@keyframes pg-slow{0%{stroke-dasharray:100;stroke-dashoffset:100}40%{stroke-dasharray:100;stroke-dashoffset:" + o1.toFixed(1) + "}82%{stroke-dasharray:100;stroke-dashoffset:" + o2.toFixed(1) + "}100%{stroke-dasharray:100;stroke-dashoffset:0}}</style>";
+      const cx = pgF(cross.x), cy = pgF(cross.y);
+      svg += '<g class="burst"><circle class="ring" cx="' + cx + '" cy="' + cy + '" r="20" fill="none"/><g class="rays">' +
+        Array.from({ length: 10 }, (_, j) => { const a = j * Math.PI / 5; return '<line x1="' + pgF(cross.x + Math.cos(a) * 9) + '" y1="' + pgF(cross.y + Math.sin(a) * 9) + '" x2="' + pgF(cross.x + Math.cos(a) * 24) + '" y2="' + pgF(cross.y + Math.sin(a) * 24) + '"/>'; }).join("") + "</g>" +
+        Array.from({ length: 8 }, (_, j) => { const a = (j * 45 + 20) * Math.PI / 180; return '<circle class="spark" cx="' + cx + '" cy="' + cy + '" r="2.5" style="--dx:' + pgF(Math.cos(a) * 34) + "px;--dy:" + pgF(Math.sin(a) * 34) + 'px"/>'; }).join("") + "</g>" +
+        '<circle class="dot cross" cx="' + cx + '" cy="' + cy + '" r="5" fill="var(--pg-tile)" stroke="var(--pg-blue)" stroke-width="2"/>' +
+        '<text class="cross-lbl" x="' + cx + '" y="' + pgF(cross.y - 12) + '" text-anchor="middle" font-size="12" font-weight="700" fill="var(--pg-blue)">devant en ' + esc(MONTHS[+cross.mk.slice(5) - 1]) + "</text>";
+    } else {
+      slow = "<style>@keyframes pg-slow{from{stroke-dasharray:100;stroke-dashoffset:100}to{stroke-dasharray:100;stroke-dashoffset:0}}</style>";
+    }
+    let yG = pG[12][1] + 4, yV = pV[12][1] + 4;
+    if (Math.abs(yG - yV) < 15) { const m = (yG + yV) / 2, s = yG <= yV ? -1 : 1; yG = m + s * 7.5; yV = m - s * 7.5; }
+    svg += '<text x="262" y="' + pgF(yG) + '" font-size="12.5" font-weight="700" fill="var(--pg-blue)">' + esc(pgK(cg)) + "</text>" +
+      '<text x="262" y="' + pgF(yV) + '" font-size="12.5" font-weight="700" fill="var(--pg-grey)">' + esc(pgK(cv)) + "</text>" +
+      '<text x="6" y="136" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(MOIS_COURTS[+last12[0].slice(5) - 1]) + "</text>" +
+      '<text x="256" y="136" text-anchor="end" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(MOIS_COURTS[+month.slice(5) - 1]) + "</text></svg>";
+    html += '<div class="t t-qui" style="--dot:var(--pg-blue)">' + slow + '<span class="lbl">Qui fait grossir ton patrimoine ?</span>' +
+      '<span class="ttl">' + (cg <= 0 ? "Tes versements portent tout" : cg > cv ? "Tes placements, plus que toi" : "Toi, plus que tes placements") + "</span>" +
+      (cross ? '<span class="waouh">Tes placements te dépassent !</span>' : "") + '<div class="sp"></div>' + svg +
+      '<div class="lgd"><span><i style="background:var(--pg-blue)"></i>tes placements</span><span><i style="background:var(--pg-grey)"></i>tes versements</span></div>' +
+      '<span class="foot">cumulé sur les douze derniers mois</span></div>';
   }
 
-  /* --- Vos années --- */
-  const yrs = [year - 2, year - 1, year].filter(y => patHasHistoryAt(y + "-12") || String(y) === month.slice(0, 4))
-    .filter(y => patHasHistoryAt((y - 1) + "-12")).map(y => {
-      const p = pgYearPerf(y, month);
-      return { y, perf: p.perf, vers: patContributionsOfYear(y), cur: String(y) === month.slice(0, 4) && month.slice(5) !== "12" };
-    }).filter(x => x.perf != null);
-  if (yrs.length) {
-    const done = yrs.filter(x => !x.cur), best = done.length ? done.reduce((a, b) => b.perf > a.perf ? b : a) : null;
-    const mx = Math.max(...yrs.map(x => Math.abs(x.perf)), 1);
-    const crowned = best && done.length > 1;
-    html += '<div class="t t-annees"><div class="tl"><i class="dot" style="background:var(--d-violet)"></i>Vos années</div>' +
-      (best && done.length > 1 ? '<div class="head">' + best.y + ", la meilleure</div>" : "") + '<div style="margin-top:8px">' +
-      yrs.map((x, i) => '<div class="yr' + (crowned ? (x.y === best.y ? " best" : " dimmable") : "") + '" style="--n:' + i + '">' + (crowned && x.y === best.y ? '<span class="crown" aria-hidden="true">★</span>' : "") + '<span class="y num">' + x.y + "</span>" +
-        '<span class="bar"><i style="width:' + (Math.abs(x.perf) / mx * 100).toFixed(1) + "%;background:" + (x.perf < 0 ? "var(--down)" : best && x.y === best.y ? "var(--d-violet)" : "color-mix(in oklab, var(--d-violet) 45%, var(--surface))") + '"></i></span>' +
-        '<span class="r num' + (x.perf < 0 ? " down" : "") + '">' + esc(pgPct(x.perf)) + "</span>" +
-        '<span class="s">' + esc(fmtEurShort(x.vers)) + " versés" + (x.cur ? " · en cours" : "") + "</span></div>").join("") + "</div></div>";
-  }
-
-  /* --- Réserve et argent qui dort --- */
-  const safety = patSafetyMonths(month), goalM = Number(DB.settings.patSafetyTarget) || 3;
-  const eff = patSavingsEffort(year), sleeping = eff.hasBudget && eff.balance > eff.versements ? eff.balance - eff.versements : 0;
-  html += '<div class="t t-reserve"><div class="tl"><i class="dot" style="background:var(--d-amber)"></i>Votre réserve et votre argent qui dort</div>';
-  if (!safety) {
-    html += '<p class="sub" style="margin-top:10px">Elle se mesure en mois de dépenses : importez des relevés dans <b class="inl">Mois</b> pour que vos dépenses moyennes soient connues.</p>';
-  } else {
-    const scale = goalM * 2, withS = safety.months + sleeping / safety.avg, pc = m => Math.min(100, m / scale * 100).toFixed(1) + "%";
-    const ok = safety.months >= goalM;
-    html += '<div class="head">' + (ok ? "Réserve solide : " : "Réserve courte : ") + esc(trim1(safety.months)) + " mois</div>" +
-      '<div class="gauge">' + (sleeping ? '<i class="ghost" style="width:' + pc(withS) + '"></i>' : "") + '<i class="fill" style="width:' + pc(safety.months) + '"></i>' +
-        '<i class="mark" style="left:' + pc(goalM) + '"><span>objectif ' + goalM + " mois</span></i>" +
-        (sleeping ? '<span class="glbl" style="left:' + pc(withS) + '">' + esc(trim1(withS)) + " mois</span>" : "") + "</div>" +
-      '<div class="axis"><span>0</span><span>' + scale + " mois</span></div>" +
-      '<div style="margin-top:10px"><div class="kv"><span>Dépenses moyennes</span><b class="num">' + esc(fmtEurShort(safety.avg)) + " / mois</b></div>" +
-      '<div class="kv"><span>Sur vos livrets et comptes courants</span><b class="num">' + esc(fmtEurShort(safety.liquid)) + "</b></div>" +
-      (eff.hasBudget ? '<div class="kv"><span>Budget non investi en ' + year + '</span><b class="num">' + esc(fmtEurShort(sleeping)) + "</b></div>" : "") + "</div>" +
-      (sleeping ? '<div class="foot">Placés sur vos livrets, ces ' + esc(fmtEurShort(sleeping)) + " porteraient votre réserve à " + esc(trim1(withS)) + " mois.</div>" : "");
-  }
-  html += "</div>";
-
-  /* --- Où vous allez : trois ans de passé, cinq ans de projection --- */
+  /* ======== 6 · Tes années ======== */
   {
-    const past = months.slice(-37).map(mk => patNetAt(mk)), r = Math.pow(1 + Math.max(asm.rate, -99) / 100, 1 / 12) - 1;
+    const yrs = [year - 2, year - 1, year].filter(y => patHasHistoryAt((y - 1) + "-12"))
+      .map(y => ({ y, perf: pgYearPerf(y, month), vers: patContributionsOfYear(y), cur: y === year && month.slice(5) !== "12" }))
+      .filter(x => x.perf != null);
+    if (yrs.length) {
+      const done = yrs.filter(x => !x.cur), best = done.length ? done.reduce((a, b) => b.perf > a.perf ? b : a) : null;
+      const crowned = !!best && done.length > 1 && best.perf > 0, mx = Math.max(...yrs.map(x => Math.abs(x.perf)), 0.1);
+      html += '<div class="t t-annees' + (crowned ? " crowned" : "") + '" style="--dot:var(--pg-violet)"><span class="lbl">Tes années</span>' +
+        '<span class="ttl">' + (crowned ? best.y + ", la meilleure" : yrs.length === 1 ? "Ta première année" : "Année après année") + "</span>" +
+        '<div class="sp"></div><div class="cols">' + yrs.map((x, i) => {
+          const isBest = crowned && x.y === best.y;
+          return '<div class="col' + (isBest ? " best" : "") + '">' + (isBest ? '<span class="crown">★</span>' : "") +
+            "<b" + (x.perf < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.perf)) + "</b>" +
+            '<div class="bx"><i class="bar" style="--n:' + i + ";height:" + Math.max(3, Math.round(Math.abs(x.perf) / mx * 100)) + "px;background:" +
+              (x.perf < 0 ? "var(--pg-neg)" : x.cur ? "var(--pg-grey)" : "var(--pg-violet)") + '"></i></div>' +
+            '<span class="y">' + x.y + (x.cur ? ' <span style="color:var(--pg-faint);font-weight:500">en cours</span>' : "") + "</span>" +
+            '<span class="v">' + esc(fmtEurShort(x.vers)) + " versés</span></div>";
+        }).join("") + "</div></div>";
+    }
+  }
+
+  /* ======== 7 · Ta réserve et ton argent qui dort ======== */
+  {
+    const safety = patSafetyMonths(month), goalM = Number(DB.settings.patSafetyTarget) || 3;
+    const eff = patSavingsEffort(year), sleeping = eff.hasBudget && eff.balance > eff.versements ? eff.balance - eff.versements : 0;
+    html += '<div class="t t-reserve" style="--dot:var(--pg-amber)"><span class="lbl">Ta réserve et ton argent qui dort</span>';
+    if (!safety) {
+      html += '<span class="ttl">Réserve à calculer</span><div class="sp"></div>' +
+        '<span class="foot" style="font-size:14px">Elle se mesure en mois de dépenses : importe des relevés dans <b>Mois</b> pour que tes dépenses moyennes soient connues.</span>';
+    } else {
+      const scale = goalM * 2, withS = safety.months + sleeping / safety.avg, pc = m => Math.min(100, m / scale * 100).toFixed(1) + "%";
+      html += '<span class="ttl">' + (safety.months >= goalM ? "Réserve solide : " : "Réserve courte : ") + esc(trim1(safety.months)) + " mois</span>" +
+        '<div class="sp"></div><div class="gz"><div style="right:0;background:var(--pg-trk)"></div>' +
+        (sleeping ? '<div class="ghost" style="width:' + pc(withS) + ';background:rgba(17,19,24,.22)"></div><span class="ghost-lbl" style="left:' + pc(withS) + '">' + esc(trim1(withS)) + " mois</span>" : "") +
+        '<div class="fill" style="width:' + pc(safety.months) + ';background:var(--pg-amber)"></div><div class="gzgoal" style="left:' + pc(goalM) + '"></div></div>' +
+        '<div class="gzl"><span style="left:0">0</span><span style="left:' + pc(goalM) + ';transform:translateX(-50%);color:var(--pg-goal)">objectif ' + goalM + ' mois</span><span style="right:0">' + scale + " mois</span></div>" +
+        '<div style="margin-top:12px;display:flex;flex-direction:column;gap:5px"><div class="kv"><span>Dépenses moyennes</span><b>' + esc(fmtEurShort(safety.avg)) + " / mois</b></div>" +
+        (eff.hasBudget ? '<div class="kv"><span>Budget non investi en ' + year + "</span><b>" + esc(fmtEurShort(sleeping)) + "</b></div>" : "") + "</div>" +
+        (sleeping ? '<div class="tip">Sur tes livrets, ces ' + esc(fmtEurShort(sleeping)) + " porteraient ta réserve à " + esc(trim1(withS)) + " mois.</div>" : "");
+    }
+    html += "</div>";
+  }
+
+  /* ======== 8 · Où tu vas ======== */
+  {
+    const pastM = months.slice(-37), past = pastM.map(mk => patNetAt(mk)), r = Math.pow(1 + Math.max(asm.rate, -99) / 100, 1 / 12) - 1;
     const fut = [net]; for (let i = 0; i < 60; i++) fut.push(fut[i] * (1 + r) + asm.contrib);
     const m1 = patNextMilestone(net), m2 = Math.floor(m1 / 100000) * 100000 + 100000;
     const when = t => { const i = fut.findIndex(v => v >= t); return i < 0 ? null : i; };
-    const all = past.concat(fut.slice(1)), n = all.length - 1, nowI = past.length - 1, wo = 640, ho = 190;
-    const hiO = Math.max(...all) * 1.12 || 1, xo = i => 10 + i * (wo - 20) / n, yo = v => 22 + (1 - v / hiO) * (ho - 46);
-    let s = '<svg viewBox="0 0 ' + wo + " " + ho + '" style="margin-top:10px" aria-label="Trois ans de patrimoine, puis cinq ans de projection">' +
-      '<rect x="' + xo(nowI).toFixed(1) + '" y="0" width="' + (wo - xo(nowI)).toFixed(1) + '" height="' + (ho - 24) + '" fill="var(--surface-2)"/>' +
-      '<path class="ln-past" pathLength="100" d="' + pgPath(past, xo, yo) + '" fill="none" stroke="var(--d-blue)" stroke-width="2.5" stroke-linejoin="round"/>' +
-      '<path class="ln-proj" pathLength="100" d="' + pgPath(fut, i => xo(i + nowI), yo) + '" fill="none" stroke="var(--d-grey)" stroke-width="2.5" stroke-linejoin="round"/>';
-    /* Le passé se trace en 2,6 s à vitesse constante, l'avenir en 1,3 s : chaque palier
-       saute au moment où la courbe l'atteint. */
-    const tAt = i => (2.6 + i / 60 * 1.3).toFixed(2) + "s";
+    const all = past.concat(fut.slice(1)), n = all.length - 1, nowI = past.length - 1, hiO = Math.max(...all) * 1.12 || 1;
+    const X = i => 12 + i * 616 / n, Y = v => 10 + (1 - v / hiO) * 174;
+    const PAST = 2.6, FUT = 1.3, tAt = i => (PAST + i / 60 * FUT).toFixed(2) + "s";
+    let s = '<svg viewBox="0 0 640 210" role="img" aria-label="Trois ans de patrimoine, puis cinq ans de projection">' +
+      '<rect x="' + pgF(X(nowI)) + '" y="0" width="' + pgF(640 - X(nowI)) + '" height="184" fill="var(--pg-bg)"/>' +
+      '<path class="ln ln-past" pathLength="100" d="' + pgLine(past.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="var(--pg-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="--t:' + PAST + 's"/>' +
+      '<path class="ln ln-proj" pathLength="100" d="' + pgLine(fut.map((v, i) => [X(i + nowI), Y(v)])) + '" fill="none" stroke="var(--pg-grey)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="--t0:' + PAST + "s;--t:" + FUT + 's"/>';
     [m1, m2].filter((t, i, arr) => arr.indexOf(t) === i).forEach(t => {
-      const i = when(t); if (i == null || i === 60) return;
-      const cx = xo(i + nowI), cy = yo(fut[i]);
-      const big = t % 100000 === 0;
-      s += (big ? '<circle class="mring" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="16" fill="none" stroke="var(--d-blue)" stroke-width="3" style="--t:' + tAt(i) + '"/>' : "") +
-        '<circle class="mk' + (big ? " big" : "") + '" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="var(--surface)" stroke="var(--d-blue)" stroke-width="2.5" style="--t:' + tAt(i) + '"/>' +
-        '<text class="mlbl" style="--t:' + tAt(i) + '" x="' + cx.toFixed(1) + '" y="' + (cy - 12).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="800" fill="var(--d-blue)">' + esc(Math.round(t / 1000) + " k€ · " + pgMonth(addMonth(month, i))) + "</text>";
+      const i = when(t); if (i == null || i >= 58) return;
+      const cx = pgF(X(i + nowI)), cy = Y(fut[i]), big = t % 100000 === 0;
+      s += (big ? '<circle class="mring" cx="' + cx + '" cy="' + pgF(cy) + '" r="16" fill="none" style="--t:' + tAt(i) + '"/>' : "") +
+        '<circle class="mk' + (big ? " big" : "") + '" cx="' + cx + '" cy="' + pgF(cy) + '" r="5" style="--t:' + tAt(i) + '"/>' +
+        '<text class="mlbl" x="' + cx + '" y="' + pgF(cy - 14) + '" text-anchor="middle" style="--t:' + tAt(i) + '">' + esc(pgK(t) + " · " + pgMonth(addMonth(month, i))) + "</text>";
     });
-    s += '<circle class="mk end" cx="' + xo(n).toFixed(1) + '" cy="' + yo(fut[60]).toFixed(1) + '" r="6" fill="var(--surface)" stroke="var(--d-blue)" stroke-width="2.5" style="--t:3.9s"/>' +
-      '<text class="mlbl" style="--t:3.9s" x="' + (xo(n) - 4).toFixed(1) + '" y="' + (yo(fut[60]) - 13).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="800" fill="var(--d-blue)">' + esc(Math.round(fut[60] / 1000) + " k€ · " + pgMonth(addMonth(month, 60))) + "</text>" +
-      '<circle cx="' + xo(nowI).toFixed(1) + '" cy="' + yo(net).toFixed(1) + '" r="6" fill="var(--d-blue)" stroke="var(--surface)" stroke-width="2"/>' +
-      '<text x="10" y="' + (ho - 6) + '" font-size="12" fill="var(--ink-mute)">' + esc(pgMonth(months.slice(-37)[0])) + "</text>" +
-      '<text x="' + (xo(nowI) + 8).toFixed(1) + '" y="' + (ho - 6) + '" font-size="12" font-weight="600" fill="var(--ink-soft)">aujourd’hui → si rien ne change</text></svg>';
-    const i1 = when(m1);
-    html += '<div class="t w2 t-ouvas"><div class="tl"><i class="dot" style="background:var(--d-blue)"></i>Où vous allez</div>' +
-      '<div class="head">' + (i1 != null ? esc(fmtEurShort(m1)) + " en " + esc(pgMonth(addMonth(month, i1), true)) + ", " : "") + esc(fmtEurShort(Math.round(fut[60] / 1000) * 1000)) + " dans cinq ans</div>" + s +
-      '<div class="foot">Votre performance actuelle (' + esc(fmtRate(asm.rate)) + " par an) et votre versement moyen (" + esc(fmtEurShort(asm.contrib)) + " par mois), prolongés tels quels. Une extrapolation, pas une prévision.</div></div>";
+    s += '<circle class="mk end" cx="' + pgF(X(n)) + '" cy="' + pgF(Y(fut[60])) + '" r="6" style="--t:' + (PAST + FUT).toFixed(2) + 's"/>' +
+      '<text class="mlbl" x="' + pgF(X(n) - 4) + '" y="' + pgF(Y(fut[60]) - 14) + '" text-anchor="end" style="--t:' + (PAST + FUT).toFixed(2) + 's">' + esc(pgK(fut[60]) + " · " + pgMonth(addMonth(month, 60))) + "</text>" +
+      '<circle class="dot p-now" cx="' + pgF(X(nowI)) + '" cy="' + pgF(Y(net)) + '" r="6" fill="var(--pg-blue)" stroke="var(--pg-tile)" stroke-width="2"/>' +
+      '<text x="12" y="204" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(pgMonth(pastM[0])) + "</text>" +
+      '<text x="' + pgF(X(nowI) + 8) + '" y="204" font-size="12" font-weight="600" fill="var(--pg-muted)">aujourd’hui → si rien ne change</text></svg>';
+    const i1 = when(m1), whenTxt = i => i < 12 ? MOIS_COURTS[+addMonth(month, i).slice(5) - 1] : pgMonth(addMonth(month, i), true);
+    html += '<div class="t t-ouvas w2" style="--dot:var(--pg-blue)"><span class="lbl">Où tu vas</span>' +
+      '<span class="ttl">' + (i1 != null ? esc(fmtEurShort(m1)) + " en " + esc(whenTxt(i1)) + ", " : "") + esc(fmtEurShort(Math.round(fut[60] / 1000) * 1000)) + " dans cinq ans</span>" +
+      '<div class="sp"></div>' + s +
+      '<span class="foot">ta performance actuelle (' + esc(fmtRate(asm.rate)) + " par an) et ton versement moyen (" + esc(fmtEurShort(asm.contrib)) + " par mois), prolongés tels quels</span></div>";
   }
 
-  /* --- Face aux marchés : vos comptes classés sur un an. Les indices viendront s'y ajouter
-     dès que leur fichier mensuel existera ; d'ici là, aucun chiffre inventé. --- */
+  /* ======== 9 · Face aux marchés : tes comptes classés sur un an. Les indices viendront
+     s'y ajouter dès que leur fichier mensuel existera ; d'ici là, aucun chiffre inventé. ======== */
   if (hasYear) {
-    const list = ranked.filter(x => x.r != null).map(x => ({ k: x.a.name, r: x.r, c: patAccountColor(x.a) }));
-    if (twrYear) list.push({ k: "Votre patrimoine", r: twrYear.cumul, c: "var(--d-blue)", all: true });
+    const list = ranked.filter(x => x.r != null).map(x => ({ k: x.a.name, r: x.r }));
+    if (twrYear) list.push({ k: "Ton patrimoine", r: twrYear.cumul });
     list.sort((p, q) => q.r - p.r);
-    const mx = Math.max(...list.map(x => Math.abs(x.r)), 1);
-    html += '<div class="t t-marches"><div class="tl"><i class="dot" style="background:var(--d-gold)"></i>Face aux marchés</div>' +
-      '<div style="margin-top:10px">' + list.map((x, i) => '<div class="rank' + (x.all ? " all" : "") + (i < 3 && x.r > 0 ? " m" + (i + 1) : "") + '" style="--n:' + i + '">' +
-        (i < 3 && x.r > 0 ? '<span class="medal m' + (i + 1) + '">' + (i + 1) + "</span>" : '<span class="i num">' + (i + 1) + "</span>") + '<span class="k">' + esc(x.k) + "</span>" +
-        '<i class="b" style="width:' + (Math.abs(x.r) / mx * 100).toFixed(1) + "%;background:" + (x.r < 0 ? "var(--down)" : x.c) + '"></i>' +
-        '<span class="r num' + (x.r < 0 ? " down" : "") + '">' + esc(pgPct(x.r)) + "</span></div>").join("") + "</div>" +
-      '<div class="foot">sur un an · la comparaison aux grands indices arrivera avec leur mise à jour mensuelle</div></div>';
+    const mx = Math.max(...list.map(x => Math.abs(x.r)), 0.1), med = ["gold", "silver", "bronze"];
+    html += '<div class="t t-marches" style="--dot:var(--pg-blue)"><span class="lbl">Face aux marchés</span>' +
+      '<span class="ttl">' + (list.length ? esc(list[0].k) + " en tête" : "Pas encore d’année complète") + "</span>" +
+      '<div class="sp"></div><div style="display:flex;flex-direction:column;padding-left:2px">' + list.slice(0, 8).map((x, i) => {
+        const m = i < 3 && x.r > 0 ? med[i] : "";
+        return '<div class="mrow' + (m ? " " + m : "") + '">' + (m ? '<span class="medal ' + m + '">' + (i + 1) + "</span>" : "") +
+          "<span>" + esc(x.k) + '</span><div class="mbx"><i class="mbar" style="--n:' + i + ";width:" + (Math.abs(x.r) / mx * 100).toFixed(1) + "%" + (x.r < 0 ? ";background:var(--pg-neg)" : "") + '"></i></div>' +
+          "<b" + (x.r < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.r)) + "</b></div>";
+      }).join("") + "</div>" +
+      '<span class="foot">sur un an, en euros · les indices arriveront avec leur mise à jour mensuelle</span></div>';
   }
   html += "</div></div>";
   return html;
@@ -10012,6 +10108,7 @@ document.addEventListener("click", e => {
     }
     /* Changer de période retire aussi les repères : la fenêtre change, autant en profiter
        pour en montrer d'autres plutôt que de resservir les mêmes. */
+    case "pgrange": UI.pgRange = el.dataset.range; render(); break;
     case "patrange": UI.patRange = el.dataset.range; UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
     case "pathlshuffle": UI.patHlSeed = (UI.patHlSeed || 0) + 1; render(); break;
     case "patyearunit": UI.patYearUnit = el.dataset.unit; render(); break;
