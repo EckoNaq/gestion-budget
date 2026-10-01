@@ -8099,25 +8099,7 @@ function pdStock(val, inv, labels, showPeak) {
     '<path d="' + vv + '" fill="none" stroke="var(--pg-chev)" stroke-width="2" stroke-linecap="round"/><path d="' + t + '" fill="none" stroke="var(--pg-ink)" stroke-width="2.5" stroke-linecap="round"/>';
   if (showPeak) { const pk = Math.max(...val); s += '<line x1="' + padX + '" x2="' + (W - padX) + '" y1="' + pgF(Y(pk)) + '" y2="' + pgF(Y(pk)) + '" stroke="var(--pg-line)"/><text x="' + padX + '" y="' + pgF(Y(pk) - 6) + '" font-size="12" font-weight="600" fill="var(--pg-faint)">plus haut ' + esc(fmtEurShort(pk)) + "</text>"; }
   s += '<circle cx="' + pgF(X(m)) + '" cy="' + pgF(Y(val[m])) + '" r="6" fill="var(--pg-ink)" stroke="var(--pg-tile)" stroke-width="2"/>';
-  /* L'étiquette des gains se pose entre les deux courbes, dans la zone de son signe, là où
-     elle a la place ; sinon nulle part, le chiffre est déjà au-dessus. */
-  {
-    const label = pgSigned(g) + (g >= 0 ? " gagnés au total" : " perdus au total"), tw = label.length * 7.6 + 6;
-    const PV = val.map((v, i) => [X(i), Y(v)]), PI = inv.map((v, i) => [X(i), Y(v)]);
-    const at = (P, x) => { for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const f = (x - P[i - 1][0]) / (P[i][0] - P[i - 1][0] || 1); return P[i - 1][1] + f * (P[i][1] - P[i - 1][1]); } return P[P.length - 1][1]; };
-    let best = null;
-    for (let xr = X(m) - 14; xr - tw >= padX; xr -= 4) {
-      let top = -Infinity, bot = Infinity, ok = true;
-      for (let x = xr - tw - 8; x <= xr + 8; x += 2) {
-        const a1 = at(PV, x), a2 = at(PI, x);
-        if (g >= 0 ? a1 > a2 : a1 < a2) { ok = false; break; }
-        top = Math.max(top, Math.min(a1, a2)); bot = Math.min(bot, Math.max(a1, a2));
-      }
-      if (ok && bot - top >= 30) { best = { xr, y: (top + bot) / 2 }; break; }
-    }
-    if (best) s += '<text x="' + pgF(best.xr) + '" y="' + pgF(best.y) + '" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="' + (g >= 0 ? "var(--pg-pos)" : "var(--pg-neg)") + '">' + esc(label) + "</text>";
-  }
-  if (Y(inv[m]) + 18 < H - padB) s += '<text x="' + pgF(X(m) - 10) + '" y="' + pgF(Y(inv[m]) + 18) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--pg-faint)">versé</text>';
+  /* Ni étiquette de gains ni « versé » dans le dessin : la période et la légende le disent. */
   labels.forEach((lab, i) => { if (lab) s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? "start" : i === m ? "end" : "middle") + '" font-size="12" font-weight="500" fill="var(--pg-faint)">' + esc(lab) + "</text>"; });
   return s + "</svg>";
 }
