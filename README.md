@@ -9,8 +9,22 @@ Ouvrir `index.html` dans un navigateur — aucune installation ni dépendance n�
 ## Structure
 
 - `index.html` — application complète (interface, styles, logique)
+- `indices.js` — cours mensuels des indices de marché, lus par « Face aux marchés »
+- `scripts/fetch-indices.mjs` et `.github/workflows/indices.yml` — la mise à jour de `indices.js`, lancée le 1er et le 3 de chaque mois
+- `TODO.md` — où en est la refonte du Patrimoine, et ce qu’il en reste à faire
 
 ## Journal des modifications
+
+### 2026-10-11 — un revenu compté deux fois
+
+Correction : un mois affichait le double de ses revenus dès que le salaire, déjà saisi dans **Réglages › Revenus**, arrivait aussi par un import. Les deux sources s’additionnent depuis le premier jour — `monthStats` fait la somme de `manualIncome` et des opérations classées en revenu — en supposant qu’elles ne disent jamais la même chose : Réglages affirmait même que « les revenus ne figurent pas dans le relevé importé ». C’était vrai de la reprise d’historique, pas d’un relevé bancaire, où le virement de l’employeur se classe tout seul en Salaire. L’épargne du mois, son taux et le cumul depuis janvier s’en trouvaient gonflés d’un salaire entier, sans un mot.
+
+- **L’application signale, elle ne tranche pas.** Faire primer le relevé aurait supprimé le doublon d’office, mais les deux montants peuvent différer — et l’écart être un vrai revenu, reçu ailleurs, que la règle aurait effacé en silence. Le calcul reste donc additif ; ce qui change, c’est que le recouvrement se voit.
+- **Deux endroits le disent.** Sous la fiche du mois, là où le chiffre faussé s’affiche, et non en bas de page avec ce qui reste à classer ; et sous le tableau de **Réglages › Revenus**, pour chaque mois concerné de l’année. Les deux donnent le montant saisi, le montant lu et un bouton **Retirer la saisie** ; la case reste modifiable à la main pour qui ne veut en garder qu’une partie.
+- **Case par case.** Salaire face à « Salaire », Bonus face à « Bonus », Divers face à « Revenus divers ». Les remboursements n’ont pas de case en face et ne déclenchent rien ; une saisie négative — une correction — non plus.
+- **Le trophée suivait le doublon.** Un mois au revenu doublé décrochait un trophée d’épargne qu’il ne méritait pas, et celui-ci restait à l’écran une fois la saisie retirée : le résumé mensuel que se partagent les trophées se mémorise derrière une empreinte qui ignorait les revenus saisis. Elle les compte désormais.
+- **Limite connue.** La même empreinte ignore encore le reclassement d’une opération et le changement de montant d’un objectif : trophées et verdicts de plafond attendent alors le rechargement de la page.
+- Vérifié dans le navigateur sur une sauvegarde complète : le seul mois de l’historique à porter les deux sources est signalé aux deux endroits, ses voisins ne le sont pas ; après le clic, revenus, épargne, taux et cumul retombent sur le relevé seul, le trophée disparaît, et la console reste vide.
 
 ### 2026-08-22 — un troisième écran annuel
 
