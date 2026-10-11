@@ -834,6 +834,7 @@ html[data-theme="dark"] .v2{
 .v2 .todo{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
 /* Rien à signaler ne mérite pas d'être peint : la coche suffit. */
 .v2 .todo.clean{background:var(--surface);border-color:var(--line)}
+.v2 .todo.dbl{margin-bottom:12px;border-color:var(--hot-line)}
 .v2 .todo .n{font-size:23px;font-variation-settings:"wght" 700,"wdth" 84;letter-spacing:-.02em;color:var(--hot-ink)}
 .v2 .todo .ic{width:24px;height:24px;color:var(--win);flex:none}
 .v2 .todo .ic svg{width:24px;height:24px;display:block}
@@ -3012,6 +3013,20 @@ const isTodo = t => t.status === ST_OK && !t.cat;
 function opsOfMonth(key) { return DB.tx.filter(t => monthKey(t.date) === key); }
 function manualIncome(key) { const a = DB.income[key]; return a ? (a[0] || 0) + (a[1] || 0) + (a[2] || 0) : 0; }
 function statementIncome(key) { return opsOfMonth(key).filter(isIncomeOp).reduce((s, t) => s + t.amount, 0); }
+/* La saisie et le relevé s'additionnent, ce qui suppose qu'ils ne disent pas la même
+   chose. Un salaire tapé dans Réglages puis apporté par un import se comptait donc deux
+   fois, sans un mot. On ne tranche pas à la place de l'utilisateur — les deux montants
+   peuvent différer, et l'écart être un vrai revenu — mais on le signale, case par case. */
+const INCOME_SLOTS = [["Salaire", "c_salary"], ["Bonus", "c_bonus"], ["Divers", "c_incmisc"]];
+function incomeOverlaps(key) {
+  const a = DB.income[key];
+  if (!a) return [];
+  const ops = opsOfMonth(key).filter(isIncomeOp);
+  return INCOME_SLOTS.map(([name, cat], slot) => ({
+    key, slot, name, manual: a[slot] || 0,
+    stmt: ops.filter(t => t.cat === cat).reduce((s, t) => s + t.amount, 0),
+  })).filter(o => o.manual > 0 && o.stmt > 0);
+}
 
 /* Spending per group. Refunds (positive amounts on an expense category) lower it. */
 function groupTotals(ops) {
@@ -3862,6 +3877,15 @@ function v2Month(c) {
       : "il manque " + v2Pts(goal - rate) + (c.running ? ", et il reste " + (c.days - c.day) + " jours" : "")) +
     "</div></div></div>";
 
+  /* Un revenu compté deux fois fausse la fiche juste au-dessus : il se dit ici, pas
+     en bas de page avec ce qui reste à classer. */
+  html += incomeOverlaps(c.key).map(o =>
+    '<div class="todo dbl"><div class="tx"><b>' + o.name + " compté deux fois ?</b> " +
+    esc(fmtEur(o.manual)) + " saisis dans Réglages et " + esc(fmtEur(o.stmt)) +
+    " lus dans le relevé s’additionnent dans les revenus.</div>" +
+    '<button class="act" data-act="incdrop" data-key="' + o.key + '" data-slot="' + o.slot +
+    '" title="Ne garde que le montant du relevé">Retirer la saisie</button></div>').join("");
+
   /* --- objectifs --- */
   const ids = Object.keys(DB.goals).filter(id => (DB.goals[id].m || 0) > 0);
   const fixedBy = v2FixedByGroup();
@@ -4646,8 +4670,10 @@ const V2_TRO_DEBUT = "2023-10";
 
 let V2_MS_CACHE = null, V2_MS_STAMP = "";
 function v2MonthSeries() {
+  /* Les revenus saisis en font partie : sans eux, corriger un salaire laissait à
+     l'écran le trophée qu'il avait fait décrocher. */
   const stamp = DB.tx.length + "|" + Object.keys(DB.goals).join() + "|" +
-    (DB.settings.savingsGoal || 0) + "|" + monthKey(todayISO());
+    (DB.settings.savingsGoal || 0) + "|" + monthKey(todayISO()) + "|" + JSON.stringify(DB.income);
   if (V2_MS_CACHE && V2_MS_STAMP === stamp) return V2_MS_CACHE;
   /* Seuls les mois clos comptent. Un mois en cours porte un salaire entier et
      des dépenses partielles : son taux d'épargne est flatteur et son total
@@ -10917,17 +10943,26 @@ function viewSettings() {
   html += '<div class="card"><div class="chead"><h2>Revenus ' + year + "</h2><div class=\"spacer\"></div>" +
     '<div class="periodnav"><button data-act="prevyear">' + icon("left") + '</button><span class="label">' + year +
     '</span><button data-act="nextyear">' + icon("right") + "</button></div></div>" +
-    '<p class="tiny muted" style="margin:0 0 10px">Les revenus ne figurent pas dans le relevé importé : ils se saisissent ici, mois par mois.</p>' +
+    '<p class="tiny muted" style="margin:0 0 10px">Les revenus absents du relevé importé se saisissent ici, mois par mois. Ceux que le relevé porte déjà s’y ajoutent : inutile de les ressaisir.</p>' +
     '<table class="incgrid"><thead><tr><th>Mois</th><th>Salaire</th><th>Bonus</th><th>Divers</th><th>Depuis le relevé</th><th>Total</th></tr></thead><tbody>';
+  const dbl = [];
   for (let m = 1; m <= 12; m++) {
     const key = year + "-" + pad2(m), a = DB.income[key] || [0, 0, 0], fromStmt = statementIncome(key);
+    incomeOverlaps(key).forEach(o => dbl.push(o));
     html += "<tr><td>" + MONTHS[m - 1] + "</td>" +
       [0, 1, 2].map(i => '<td style="text-align:right"><input type="number" step="0.01" value="' + (a[i] || "") +
         '" data-chg="income" data-key="' + key + '" data-slot="' + i + '"></td>').join("") +
       '<td class="num muted" style="text-align:right">' + (fromStmt ? esc(fmtEur(fromStmt)) : "—") + "</td>" +
       '<td class="num" style="text-align:right">' + esc(fmtEur(manualIncome(key) + fromStmt)) + "</td></tr>";
   }
-  html += '</tbody></table><div style="margin-top:10px"><button class="btn sm" data-act="fillyear">' + icon("down") +
+  html += "</tbody></table>" + dbl.map(o =>
+    '<div class="note warn" style="margin-top:10px">' + icon("warn") + " <b>" + o.name +
+    (/^[ao]/.test(MONTHS[+o.key.slice(5) - 1]) ? " d’" : " de ") + MONTHS[+o.key.slice(5) - 1] +
+    " compté deux fois ?</b> " + esc(fmtEur(o.manual)) + " saisis ici et " +
+    esc(fmtEur(o.stmt)) + " lus dans le relevé s’additionnent. Corrigez la case, ou " +
+    '<button class="btn sm" data-act="incdrop" data-key="' + o.key + '" data-slot="' + o.slot +
+    '">Retirer la saisie</button></div>').join("") +
+    '<div style="margin-top:10px"><button class="btn sm" data-act="fillyear">' + icon("down") +
     "Recopier janvier sur toute l\u2019année</button></div></div>";
 
   /* --- savings rate --- */
@@ -11955,6 +11990,16 @@ document.addEventListener("click", e => {
     case "wizclose": closeModal(); break;
     case "wizfill": fillYear(el.dataset.year, WIZ); break;
     case "fillyear": fillYear(String(UI.year)); break;
+    case "incdrop": {
+      const key = el.dataset.key, slot = +el.dataset.slot, a = DB.income[key];
+      if (!a || !a[slot]) break;
+      const was = a[slot];
+      a[slot] = 0;
+      if (!(a[0] || a[1] || a[2])) delete DB.income[key];
+      saveDB(); render();
+      toast("Saisie de " + fmtEur(was) + " retirée : seul le relevé compte pour ce revenu.");
+      break;
+    }
     case "newcat": UI.small = newCatModal; renderSmall(); break;
     case "closesmall": UI.small = null; renderSmall(); break;
     case "createcat": {
