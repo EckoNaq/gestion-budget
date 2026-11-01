@@ -37,12 +37,14 @@ async function fetchMonthly(ticker) {
   const adj = r.indicators?.adjclose?.[0]?.adjclose, close = r.indicators?.quote?.[0]?.close;
   // Seuls les mois terminés : celui en cours n'a pas encore son cours de fin de mois.
   const current = monthKey(new Date());
-  // Chaque barre mensuelle est horodatée à minuit, heure de la bourse (Paris) : lue en temps
-  // universel, elle tomberait la veille, donc le mois précédent. On la recale sur la bourse.
-  const off = r.meta?.gmtoffset || 0;
+  // Chaque barre mensuelle est horodatée à minuit, heure de Paris, le 1er du mois : lue en
+  // temps universel, elle tomberait la veille (22 h ou 23 h), donc le mois précédent. Le
+  // décalage meta.gmtoffset ne convient pas : c'est celui du jour de l'appel, si bien qu'un
+  // appel en hiver renvoyait tous les mois d'été un mois trop tôt. Douze heures de marge
+  // ramènent chaque barre au milieu de son premier jour, quelle que soit la saison.
   const months = {};
   r.timestamp.forEach((t, i) => {
-    const k = monthKey(new Date((t + off) * 1000)), v = (adj && adj[i]) ?? (close && close[i]);
+    const k = monthKey(new Date((t + 12 * 3600) * 1000)), v = (adj && adj[i]) ?? (close && close[i]);
     if (k < current && v != null && isFinite(v)) months[k] = Math.round(v * 10000) / 10000;
   });
   return months;
