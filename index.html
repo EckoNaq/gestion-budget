@@ -1923,7 +1923,7 @@ html[data-theme="dark"] .pg .pd-tbl>div.done b,html[data-theme="dark"] .pg .pd-m
 .pg .pd-tbl>div.th{padding:12px 0 4px;border-top:2px solid var(--pg-ink);font-size:12.5px;font-weight:600;color:var(--pg-faint)}
 /* Face aux marchés */
 .pg .pd-rank{display:flex;flex-direction:column;gap:1px}
-.pg .pd-rank .rk{display:grid;grid-template-columns:20px minmax(0,140px) minmax(0,1fr) 64px;gap:8px;align-items:center;padding:6px;border-radius:8px;cursor:default;transition:background .15s}
+.pg .pd-rank .rk{display:grid;grid-template-columns:20px minmax(0,140px) minmax(0,1fr) 64px;gap:8px;align-items:center;padding:6px;border-radius:8px;cursor:pointer;transition:background .15s, box-shadow .15s}
 .pg .pd-rank .rk:hover{background:var(--pg-bg)}
 .pg .pd-rank .i{font-size:12.5px;font-weight:700;color:var(--pg-faint)}
 .pg .pd-rank .nm{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1931,7 +1931,12 @@ html[data-theme="dark"] .pg .pd-tbl>div.done b,html[data-theme="dark"] .pg .pd-m
 .pg .pd-rank .all .nm{color:var(--pg-blue)}
 .pg .pd-rank .b{display:block;height:8px;border-radius:4px}
 .pg .pd-rank b{text-align:right;font-size:14px}
-.pg .pd .cv,.pg .pd .cl{transition:opacity .2s, stroke-width .2s}
+.pg .pd .cv,.pg .pd .cl{transition:opacity .2s, stroke-width .2s, stroke-opacity .2s}
+/* Face aux marchés : les courbes hors repères en filigrane, allumées depuis le classement. */
+.pg .pd .cv.gh{stroke:var(--pg-grey);stroke-opacity:.38;stroke-width:1.3}
+.pg .pd:has(.rk:hover) .gh,.pg .pd:has(.rk.pin) .gh{stroke-opacity:.2}
+.pg .pd .cl.opt{opacity:0}
+.pg .pd-rank .rk.pin{background:var(--pg-bg);box-shadow:inset 3px 0 0 var(--pg-ink)}
 /* Les tuiles du bilan s'ouvrent au clic. */
 .pg .bil .t[data-act]{cursor:pointer}
 .pg .bil .t[data-act]:focus-visible{outline:2px solid var(--pg-blue);outline-offset:3px}
@@ -7771,6 +7776,15 @@ function pgRowCount(row, on) {
   row._fin = setTimeout(() => { cancelAnimationFrame(row._raf); amt.textContent = fmtEurShort(to); if (gain) gain.textContent = pgSigned(g); }, D + 150);
 }
 document.addEventListener("mouseenter", e => { if (e.target.matches && e.target.matches(".pg .t-autres .row")) pgRowCount(e.target, true); }, true);
+/* Face aux marchés : un clic, ou Entrée, sur une ligne du classement épingle sa courbe. */
+function pgPin(e) {
+  const r = e.target.closest && e.target.closest(".pg .pd-rank .rk");
+  if (!r || (e.type === "keydown" && e.key !== "Enter")) return;
+  e.preventDefault();
+  r.setAttribute("aria-pressed", r.classList.toggle("pin"));
+}
+document.addEventListener("click", pgPin);
+document.addEventListener("keydown", pgPin);
 function pgGainCount(tile) {
   const t = tile.querySelector(".pea-gtxt");
   if (!t || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -8439,25 +8453,60 @@ function pdMarches(month, months) {
   ixRows.forEach(x => { for (let i = 1; i < x.v.length; i++) if (x.v[i] == null) x.v[i] = x.v[i - 1]; });
   const rows = list.concat(pat ? [{ k: "Ton patrimoine", v: pat, c: "var(--pg-blue)", id: "pat", all: true }] : []).concat(ixRows).sort((p, q) => q.v[n] - p.v[n]);
   if (!rows.length) return pdPage("marches", "Face aux marchés", '<h1 class="pd-h1">Pas encore assez d’historique</h1>', "");
-  const vals = rows.flatMap(x => x.v), lo = Math.min(...vals, 0) - 3, hi = Math.max(...vals, 0) + 3, W = 680, H = 360, st = pdStep(hi - lo, 5);
+  /* Au repos, deux courbes seulement sont tracées en clair : ton patrimoine et le MSCI World,
+     la référence. Les autres restent en filigrane ; le classement les allume, au survol ou
+     d'un clic, qui les épingle pour en comparer plusieurs. */
+  const ref = x => x.all || x.id === "ix-msci";
+  /* L'échelle se cale sur le gros des courbes : celle qui l'élargirait de plus de moitié à
+     elle seule (une crypto à −45 % quand le reste tient entre −15 et +25 %) est coupée au
+     bord du graphique, avec sa valeur finale et une flèche. Deux au plus, jamais les repères. */
+  const amp = r => Math.max(...r.flatMap(x => x.v), 0) - Math.min(...r.flatMap(x => x.v), 0);
+  let core = rows.slice();
+  for (let k = 0; k < 2; k++) {
+    const whole = amp(core), cand = core.filter(x => !ref(x)).map(x => ({ x, a: amp(core.filter(y => y !== x)) })).sort((p, q) => p.a - q.a)[0];
+    if (!cand || core.length < 4 || cand.a * 1.5 > whole) break;
+    core = core.filter(y => y !== cand.x);
+  }
+  const vals = core.flatMap(x => x.v), lo = Math.min(...vals, 0) - 3, hi = Math.max(...vals, 0) + 3, W = 680, H = 360, st = pdStep(hi - lo, 5);
   const X = i => 34 + i * (W - 150) / n, Y = v => 10 + (1 - (v - lo) / (hi - lo)) * (H - 40);
-  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Tes comptes classés">';
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMinYMax meet" role="img" aria-label="Tes comptes face aux marchés">' +
+    '<clipPath id="pd-mk-clip"><rect x="0" y="' + pgF(Y(hi)) + '" width="' + W + '" height="' + pgF(Y(lo) - Y(hi)) + '"/></clipPath>';
   for (let t = Math.ceil(lo / st) * st; t <= hi; t += st) s += '<line x1="34" x2="' + (W - 116) + '" y1="' + pgF(Y(t)) + '" y2="' + pgF(Y(t)) + '" stroke="' + (Math.abs(t) < 1e-9 ? "var(--pg-grey)" : "var(--pg-line)") + '"/><text x="26" y="' + pgF(Y(t) + 4) + '" text-anchor="end" font-size="11.5" fill="var(--pg-faint)">' + (Math.abs(t) < 1e-9 ? "0" : esc(fmtRate(t).replace(/^(\d)/, "+$1"))) + "</text>";
-  rows.filter(x => x.idx).concat(rows.filter(x => !x.all && !x.idx), rows.filter(x => x.all)).forEach(x => s += '<path class="cv c-' + x.id + '" d="' + pgCurve(x.v.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="' + x.c + '" stroke-width="' + (x.all ? 3.5 : x.idx ? 1.6 : 2.4) + '" stroke-linecap="round"' + (x.idx ? ' stroke-dasharray="' + (x.id === "ix-msci" ? "0" : "4 3") + '"' : "") + "/>");
-  let last = -99; rows.slice().sort((p, q) => q.v[n] - p.v[n]).forEach(x => { let yy = Y(x.v[n]); if (yy - last < 14) yy = last + 14; last = yy; s += '<text class="cl l-' + x.id + '" x="' + (W - 110) + '" y="' + pgF(yy + 4) + '" font-size="12" font-weight="800" fill="' + x.c + '">' + esc(x.k) + "</text>"; });
+  rows.filter(x => !ref(x)).concat(rows.filter(x => x.idx && ref(x)), rows.filter(x => x.all)).forEach(x => s += '<path class="cv c-' + x.id + (ref(x) ? "" : " gh") + '" d="' + pgCurve(x.v.map((v, i) => [X(i), Y(v)])) + '" fill="none" stroke="' + x.c + '" stroke-width="' + (x.all ? 3.5 : x.idx ? 2 : 2.4) + '" stroke-linecap="round"' + (x.idx && !ref(x) ? ' stroke-dasharray="4 3"' : "") + (core.includes(x) ? "" : ' clip-path="url(#pd-mk-clip)"') + "/>");
+  /* Étiquettes en bout de courbe : celles des deux repères toujours, sans se chevaucher ; les
+     autres n'apparaissent qu'allumées, écartées des repères. Une courbe coupée garde la sienne,
+     posée au bord, pour qu'on sache qu'elle existe. */
+  const lblY = x => Math.min(Y(lo) - 4, Math.max(Y(hi) + 4, Y(x.v[n]))), fixed = [];
+  rows.filter(ref).sort((p, q) => q.v[n] - p.v[n]).forEach(x => { let y = lblY(x); fixed.forEach(f => { if (Math.abs(y - f) < 14) y = f + 14; }); fixed.push(y); x.ly = y; });
+  rows.filter(x => !ref(x)).forEach(x => { let y = lblY(x); fixed.forEach(f => { if (Math.abs(y - f) < 14) y = y < f ? f - 14 : f + 14; }); x.ly = y; });
+  rows.forEach(x => {
+    const cut = x.v[n] < lo ? " ↓" : x.v[n] > hi ? " ↑" : "";
+    s += '<text class="cl l-' + x.id + (ref(x) || cut ? "" : " opt") + '" x="' + (W - 110) + '" y="' + pgF(x.ly + 4) + '" font-size="12" font-weight="800" fill="' + (x.idx ? "var(--pg-muted)" : x.c) + '">' + esc(x.k + (cut ? " " + pgPct(x.v[n]) + cut : "")) + "</text>";
+  });
   const tick = [0, Math.round(n / 3), Math.round(2 * n / 3), n].filter((v, i, a) => a.indexOf(v) === i);
   tick.forEach(i => s += '<text x="' + pgF(X(i)) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="12" fill="var(--pg-faint)">' + esc(pgMonth(addMonth(from, i))) + "</text>");
   s += "</svg>";
   const mx = Math.max(...rows.map(x => Math.abs(x.v[n])), 0.1);
-  const listHtml = '<div class="pd-rank">' + rows.map((x, i) => '<div class="rk rk-' + x.id + (x.all ? " all" : "") + (x.idx ? " ix" : "") + '"><span class="i">' + (i + 1) + '</span><span class="nm"><i style="background:' + x.c + '"></i>' + esc(x.k) + "</span>" +
+  const listHtml = '<div class="pd-rank">' + rows.map((x, i) => '<div class="rk rk-' + x.id + (x.all ? " all" : "") + (x.idx ? " ix" : "") + '" role="button" tabindex="0" aria-pressed="false"><span class="i">' + (i + 1) + '</span><span class="nm"><i style="background:' + x.c + '"></i>' + esc(x.k) + "</span>" +
     '<i class="b" style="width:' + pgF(Math.abs(x.v[n]) / mx * 100) + "%;background:" + (x.v[n] < 0 ? "var(--pg-neg)" : x.c) + '"></i><b' + (x.v[n] < 0 ? ' style="color:var(--pg-neg)"' : "") + ">" + esc(pgPct(x.v[n])) + "</b></div>").join("") + "</div>";
-  const css = "<style>" + rows.map(x => ".pd:has(.rk-" + x.id + ":hover) .cv:not(.c-" + x.id + "),.pd:has(.rk-" + x.id + ":hover) .cl:not(.l-" + x.id + "){opacity:.12}.pd:has(.rk-" + x.id + ":hover) .c-" + x.id + "{stroke-width:4}").join("") + "</style>";
+  const lit = (id, t) => ".pg .pd:has(.rk-" + id + ":hover) " + t + ",.pg .pd:has(.rk-" + id + ".pin) " + t;
+  const css = "<style>" + rows.map(x => lit(x.id, ".cv.c-" + x.id) + "{stroke:" + (x.idx ? "var(--pg-muted)" : x.c) + ";stroke-opacity:1;stroke-width:" + (x.all ? 4.5 : 3) + "}" +
+    lit(x.id, ".l-" + x.id) + "{opacity:1}").join("") + "</style>";
   const perLbl = key === "3m" ? "sur 3 mois glissants" : key === "1y" ? "sur 12 mois glissants" : "sur 3 ans glissants";
   const accs = rows.filter(x => !x.all && !x.idx), up = accs.filter(x => x.v[n] > 0).length, first = accs[0], patR = rows.find(x => x.all);
-  const left = css + '<h1 class="pd-h1">' + esc(first ? first.k + " en tête " + perLbl : "Ton patrimoine " + perLbl) + "</h1>" +
-    '<div class="pd-stats">' + (first ? pdStat(esc(pgPct(first.v[n])), esc(first.k), "var(--pg-blue)") : "") + (patR ? pdStat(esc(pgPct(patR.v[n])), "ton patrimoine") : "") + pdStat(up + " / " + accs.length, "comptes en hausse", "var(--pg-muted)") + "</div>" +
-    '<div class="pd-keys">' + rows.map(x => pdKey(x.c, esc(x.k))).join("") + '</div><div class="fig">' + s + "</div>";
-  const right = pdPanel("Le classement", listHtml + '<span class="pd-note">Survole une ligne pour suivre sa courbe. ' + (ixRows.length ? "Indices : ETF en euros, dividendes réinvestis, mis à jour chaque mois." : "La comparaison aux grands indices arrivera avec leur mise à jour mensuelle.") + '</span>', esc(perLbl));
+  /* Le titre répond à la question du bloc : fais-tu mieux que le marché ? L'écart se lit en
+     points, différence de deux performances cumulées sur la même fenêtre. */
+  const ms = rows.find(x => x.id === "ix-msci"), gap = patR && ms ? patR.v[n] - ms.v[n] : null;
+  const perShort = key === "3m" ? "sur 3 mois" : key === "1y" ? "sur 12 mois" : "sur 3 ans";
+  const title = gap == null ? (first ? first.k + " en tête " + perLbl : "Ton patrimoine " + perLbl)
+    : Math.abs(gap) < 0.05 ? "Ton patrimoine au niveau du MSCI World " + perShort
+    : "Ton patrimoine " + Math.abs(gap).toFixed(1).replace(".", ",") + " pt" + (Math.abs(gap) >= 2 ? "s" : "") + (gap > 0 ? " au-dessus du" : " sous le") + " MSCI World " + perShort;
+  const left = css + '<h1 class="pd-h1">' + esc(title) + "</h1>" +
+    '<div class="pd-stats">' + (patR ? pdStat(esc(pgPct(patR.v[n])), "ton patrimoine", "var(--pg-blue)") : "") +
+    (ms ? pdStat(esc(pgPct(ms.v[n])), "MSCI World") : first ? pdStat(esc(pgPct(first.v[n])), esc(first.k)) : "") +
+    pdStat(up + " / " + accs.length, "comptes en hausse", "var(--pg-muted)") + "</div>" +
+    '<div class="fig">' + s + "</div>";
+  const right = pdPanel("Le classement", listHtml + '<span class="pd-note">Survole une ligne pour allumer sa courbe, clique pour la garder. ' + (ixRows.length ? "Indices : ETF en euros, dividendes réinvestis, mis à jour chaque mois." : "La comparaison aux grands indices arrivera avec leur mise à jour mensuelle.") + '</span>', esc(perLbl));
   const enough = k => months.length > R[k];
   return pdPage("marches", "Face aux marchés", left, right, pdChips([{ v: "3m", t: "3 mois" }, { v: "1y", t: "1 an" }, { v: "3y", t: "3 ans" }].map(c => ({ ...c, off: !enough(c.v) })), key, "pdmk"));
 }
